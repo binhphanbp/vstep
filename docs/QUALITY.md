@@ -21,6 +21,7 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - IndexedDB báo lỗi khi giao dịch bị hủy/kho bị khóa; không để lời hứa lưu treo vô hạn trong các trường hợp đó.
 - AudioPlayer chỉ dừng bản đọc do chính nó phát khi unmount; hủy/interruption đưa nút phát về trạng thái đúng.
 - CI và lệnh `test:production` chạy trình duyệt trên `next start` cổng riêng để kiểm chứng bản build thực tế.
+- Hệ màu dusty rose dùng nền blush, chữ mận nâu và viền hồng xám; vẫn giữ màu phụ riêng cho bốn kỹ năng. Focus, trạng thái chọn, con trỏ và favicon dùng cùng bảng màu.
 
 ## Bằng chứng kiểm tra
 
@@ -32,4 +33,4 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Giới hạn còn mở
 
-Chưa có Supabase thật, môi trường HTTPS công khai, thử micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Bộ kiểm thử dùng Chromium; chưa xác minh Safari/iOS thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.
+Chưa có môi trường HTTPS công khai, thử micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Supabase thật đã được cấu hình và kiểm thử riêng theo `STATUS.md`. Bộ kiểm thử dùng Chromium; chưa xác minh Safari/iOS thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.
