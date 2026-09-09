@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { StudyProvider } from "@/components/study-provider";
 import { Shell } from "@/components/shell";
+import { CustomCursor } from "@/components/custom-cursor";
 
 const font = Be_Vietnam_Pro({
   variable: "--font-main",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <StudyProvider>
           <Shell>{children}</Shell>
         </StudyProvider>
+        <CustomCursor />
       </body>
     </html>
   );

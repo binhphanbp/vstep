@@ -8,7 +8,7 @@ Code đã được lưu trong workspace sau các lần gián đoạn. Không d�
 - Hai chế độ luyện có giờ: 51 phút và 172 phút đủ cấu trúc. Đề đầy đủ có 35 câu Nghe, 40 câu Đọc, hai bài Viết lưu riêng, ba phần Nói ghi âm riêng.
 - Bảo toàn nháp/đáp án khi tải lại; deadline tuyệt đối; chuyển phần tự động; không nhân đôi lượt nộp; lưu bản ghi khi chuyển phần trong ứng dụng.
 - SQL Supabase Auth/RLS, RPC snapshot có revision, nhập/xuất JSON, giữ dữ liệu hỏng để phục hồi.
-- Sau đợt rà soát bổ sung: 44 kiểm thử Vitest và 21 kiểm thử Playwright trên `next start` đều đạt; ESLint, TypeScript, production build thành công. Axe kiểm tra 13 màn và màn kết quả thi mở đáp án trên điện thoại. Chi tiết lỗi đã sửa trong QUALITY.md.
+- Sau đợt rà soát bổ sung: 44 kiểm thử Vitest và 23 kiểm thử Playwright trên `next start` đều đạt; ESLint, TypeScript, production build thành công. Axe kiểm tra 13 màn, con trỏ tùy biến và màn kết quả thi mở đáp án trên điện thoại. Chi tiết lỗi đã sửa trong QUALITY.md.
 - Đã sửa nháp bị ghi đè giữa hai tab, form hồ sơ đang nhập bị reset bởi cập nhật không liên quan, ghi đè dữ liệu hỏng phát sinh giữa phiên, timestamp phục hồi bản sao và nộp nhầm phần thi từ tab cũ. Thêm kiểm tra file sao lưu có điểm bất khả thi/mã lượt học trùng.
 - Đã xem ảnh giao diện desktop/mobile thực tế. Ảnh QA trong `.qa/` không đưa vào Git.
 

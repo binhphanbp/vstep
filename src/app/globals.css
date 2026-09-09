@@ -89,6 +89,74 @@ textarea:focus-visible {
 ::selection {
   background: #c7e7dc;
 }
+.custom-cursor {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.custom-cursor-active,
+  html.custom-cursor-active body,
+  html.custom-cursor-active body * {
+    cursor: none !important;
+  }
+  .custom-cursor {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    pointer-events: none;
+  }
+  .custom-cursor-dot,
+  .custom-cursor-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .custom-cursor-dot {
+    width: 7px;
+    height: 7px;
+    background: #f47742;
+    box-shadow: 0 0 0 3px rgb(244 119 66 / 8%);
+    transition:
+      opacity 120ms ease,
+      background-color 160ms ease;
+  }
+  .custom-cursor-ring {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgb(244 119 66 / 82%);
+    background: rgb(255 255 255 / 10%);
+    box-shadow: 0 3px 16px rgb(244 119 66 / 10%);
+    transition:
+      width 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      height 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 180ms ease,
+      background-color 180ms ease,
+      opacity 120ms ease;
+  }
+  .custom-cursor-dot.is-visible,
+  .custom-cursor-ring.is-visible {
+    opacity: 1;
+  }
+  .custom-cursor-ring.is-interactive {
+    width: 48px;
+    height: 48px;
+    border-color: rgb(35 135 118 / 72%);
+    background: rgb(35 135 118 / 8%);
+  }
+  .custom-cursor-ring.is-disabled {
+    width: 32px;
+    height: 32px;
+    border-color: rgb(94 112 114 / 45%);
+    background: transparent;
+  }
+  .custom-cursor-dot.is-pressed {
+    background: #238776;
+  }
+}
 .skip-link {
   position: fixed;
   left: 20px;
