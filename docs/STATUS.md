@@ -22,4 +22,4 @@ Code đã được lưu trong workspace sau các lần gián đoạn. Không d�
 - Micro thật, giọng đọc của điện thoại người học và quy trình sao lưu vận hành cần thử trên thiết bị thực tế. JSON/đám mây không chứa audio; bản ghi tải riêng.
 - Hồ sơ cá nhân cấu hình được, chưa nhận tên/mục tiêu/ngày thi thực từ người dùng. Không tự đặt thông tin cá nhân thay họ.
 
-Các giới hạn này được ghi trong giao diện, README và PRODUCT.md; không mô tả chúng như tính năng đã hoàn tất. Thay đổi hiện ở working tree, chưa tạo commit hay gửi lên remote.
+Các giới hạn này được ghi trong giao diện, README và PRODUCT.md; không mô tả chúng như tính năng đã hoàn tất. Mã nguồn được quản lý trên nhánh `main` và kiểm tra tự động bằng GitHub Actions.
