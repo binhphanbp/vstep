@@ -1,5 +1,10 @@
 "use client";
-import { freshState, stateSchema, type StudyState } from "./learning";
+import {
+  freshState,
+  personalizeLegacyState,
+  stateSchema,
+  type StudyState,
+} from "./learning";
 const KEY = "may-study-v1";
 const unreadableMessage =
   "Không đọc được dữ liệu thiết bị. Bản gốc chưa bị ghi đè; vào Cài đặt để xuất bản gốc hoặc nhập bản sao hợp lệ.";
@@ -23,7 +28,7 @@ function readInitial() {
     if (raw) {
       const parsed = stateSchema.safeParse(JSON.parse(raw));
       if (!parsed.success) throw Error("invalid");
-      state = parsed.data;
+      state = personalizeLegacyState(parsed.data);
     }
   } catch {
     storageError = unreadableMessage;
@@ -34,7 +39,9 @@ function readInitial() {
 function onStorage(event: StorageEvent) {
   if (event.key !== KEY || !event.newValue || snapshot.storageError) return;
   try {
-    const next = stateSchema.parse(JSON.parse(event.newValue));
+    const next = personalizeLegacyState(
+      stateSchema.parse(JSON.parse(event.newValue)),
+    );
     if (next.updatedAt > snapshot.state.updatedAt) {
       snapshot = { ...snapshot, state: next };
       emit();
@@ -62,7 +69,9 @@ export function updateStudy(fn: (state: StudyState) => StudyState) {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
-        const latest = stateSchema.parse(JSON.parse(raw));
+        const latest = personalizeLegacyState(
+          stateSchema.parse(JSON.parse(raw)),
+        );
         if (latest.updatedAt > snapshot.state.updatedAt)
           snapshot = { ...snapshot, state: latest };
       }
@@ -93,7 +102,7 @@ export function updateStudy(fn: (state: StudyState) => StudyState) {
 }
 export function replaceStudy(input: unknown) {
   if (!initialized) readInitial();
-  const parsed = stateSchema.parse(input);
+  const parsed = personalizeLegacyState(stateSchema.parse(input));
   let previousTime = Date.parse(snapshot.state.updatedAt);
   try {
     const raw = localStorage.getItem(KEY);

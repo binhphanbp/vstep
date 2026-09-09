@@ -73,7 +73,7 @@ export function Dashboard() {
             <div className="welcome-content">
               <span className="capsule">
                 <Sparkles size={14} />
-                MỖI NGÀY MỘT CHÚT TỰ TIN
+                DÀNH RIÊNG CHO GÙA
               </span>
               <h2>
                 Không cần hoàn hảo.
@@ -82,10 +82,10 @@ export function Dashboard() {
               </h2>
               <p>
                 {!nextLesson
-                  ? "Bạn đã hoàn thành kế hoạch nhỏ hôm nay. Nghỉ một chút và tự hào về mình nhé."
+                  ? `${state.profile.name} đã hoàn thành kế hoạch nhỏ hôm nay. Nghỉ một chút và tự hào về mình nhé.`
                   : state.profile.onboarded
-                    ? `Buổi học ${plan.budget} phút đã được gợi ý theo mục tiêu của bạn. Một bài nhỏ cũng là một bước tiến.`
-                    : "Góc học này dành riêng cho bạn. Chọn mục tiêu, tìm nhịp học vừa sức và bắt đầu từ một bài nhỏ."}
+                    ? `Buổi học ${plan.budget} phút đã được gợi ý theo mục tiêu của ${state.profile.name}. Một bài nhỏ cũng là một bước tiến.`
+                    : `Góc học này được làm riêng cho ${state.profile.name}. Chọn mục tiêu, tìm nhịp học vừa sức và bắt đầu từ một bài nhỏ.`}
               </p>
               <Link
                 href={
@@ -106,7 +106,7 @@ export function Dashboard() {
               </Link>
               <span className="welcome-foot">
                 <Heart size={13} />
-                Không áp lực. Mình luôn có thể thử lại.
+                Chậm mà chắc. {state.profile.name} luôn có thể thử lại.
               </span>
             </div>
             <div
@@ -119,7 +119,7 @@ export function Dashboard() {
                 <Sparkles size={15} />a little every day
               </div>
               <div className="orbit-center">
-                <span>MY NEXT CHAPTER</span>
+                <span>GÙA · NEXT CHAPTER</span>
                 <strong>{state.profile.target}</strong>
                 <span>I can. I will.</span>
               </div>
@@ -141,7 +141,9 @@ export function Dashboard() {
             <div>
               <Coffee size={21} />
               <div>
-                <strong id="mood-title">Hôm nay bạn thấy thế nào?</strong>
+                <strong id="mood-title">
+                  Hôm nay {state.profile.name} thấy thế nào?
+                </strong>
                 <span>Mình sẽ điều chỉnh nhịp học cho vừa sức.</span>
               </div>
             </div>
@@ -338,7 +340,7 @@ export function Dashboard() {
             </div>
             <p className="small-note">
               {todayAttempts.length
-                ? "Bạn đã dành thời gian cho mình hôm nay. Tốt lắm!"
+                ? `${state.profile.name} đã dành thời gian cho mình hôm nay. Tốt lắm!`
                 : "Bắt đầu chuỗi ngày của mình từ hôm nay nhé."}
             </p>
           </section>
@@ -357,8 +359,8 @@ export function Dashboard() {
             <p>
               <strong>{due} từ</strong>{" "}
               {due === vocabulary.length
-                ? "sẵn sàng để bạn khám phá."
-                : "đang chờ bạn ôn lại."}
+                ? `sẵn sàng để ${state.profile.name} khám phá.`
+                : `đang chờ ${state.profile.name} ôn lại.`}
               <br />
               Thử nhớ trước khi lật thẻ nhé.
             </p>
@@ -384,7 +386,7 @@ export function Dashboard() {
               <span className="status-dot" />
               {completed.size
                 ? `${completed.size} bài học đã được khám phá`
-                : "Trang đầu tiên đang chờ bạn"}
+                : `Trang đầu tiên đang chờ ${state.profile.name}`}
             </div>
           </section>
         </aside>

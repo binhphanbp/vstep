@@ -37,8 +37,8 @@ export function ProgressPage() {
           </div>
           <h1>Tiến bộ đôi khi rất khẽ.</h1>
           <p>
-            Nhìn lại những lần bạn đã dành thời gian cho mình. Mọi số liệu đều
-            từ buổi học đã lưu.
+            Nhìn lại từng lần {state.profile.name} đã dành thời gian cho mình.
+            Mọi số liệu đều từ buổi học đã lưu.
           </p>
         </div>
       </div>

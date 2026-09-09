@@ -313,7 +313,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       ...s,
       drafts: { ...s.drafts, [`quiz:${lesson.id}`]: "" },
     }));
-    toast("Đã lưu buổi học. Một bước tiến nhỏ của bạn!");
+    toast(`Đã lưu buổi học. Một bước tiến nhỏ của ${state.profile.name}!`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function retry() {
@@ -365,7 +365,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                 ? result.correct === result.total
                   ? "Một bài luyện thật vững vàng!"
                   : "Mỗi lỗi sai là một điều mình vừa học."
-                : "Bạn đã dành thời gian để luyện tập."}
+                : `${state.profile.name} đã dành thời gian để luyện tập.`}
             </h2>
             <p>
               {result.total

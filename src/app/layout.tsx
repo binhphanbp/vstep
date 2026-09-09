@@ -14,11 +14,11 @@ const font = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mây · Góc học VSTEP của mình",
+    default: "Mây · Góc học VSTEP của Gùa",
     template: "%s · Mây VSTEP",
   },
   description:
-    "Không gian luyện VSTEP cá nhân: lộ trình vừa sức, bốn kỹ năng, ôn từ vựng và hiểu lỗi sai. Mỗi ngày một chút tự tin.",
+    "Góc luyện VSTEP được làm riêng cho Gùa: lộ trình vừa sức, bốn kỹ năng, ôn từ vựng và hiểu lỗi sai.",
   robots: { index: false, follow: false },
 };
 

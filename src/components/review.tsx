@@ -295,7 +295,7 @@ export function MistakesPage() {
     }));
     toast(
       correct
-        ? "Bạn đã hiểu lại câu này. Hẹn lần ôn tiếp theo!"
+        ? `${state.profile.name} đã hiểu lại câu này. Hẹn lần ôn tiếp theo!`
         : "Đọc giải thích rồi thử lại sau 10 phút nhé.",
     );
   }

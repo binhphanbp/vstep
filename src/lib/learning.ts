@@ -77,11 +77,22 @@ export type Attempt = z.infer<typeof attemptSchema>;
 export type Review = z.infer<typeof reviewSchema>;
 export type StudyState = z.infer<typeof stateSchema>;
 export type ExamSession = z.infer<typeof examSchema>;
+
+export const DEFAULT_LEARNER_NAME = "Gùa";
+
+export function personalizeLegacyState(state: StudyState): StudyState {
+  if (state.profile.name !== "bạn" || state.profile.onboarded) return state;
+  return {
+    ...state,
+    profile: { ...state.profile, name: DEFAULT_LEARNER_NAME },
+  };
+}
+
 export function freshState(): StudyState {
   return {
     version: 1,
     profile: {
-      name: "bạn",
+      name: DEFAULT_LEARNER_NAME,
       target: "B2",
       level: "starting",
       examDate: "",

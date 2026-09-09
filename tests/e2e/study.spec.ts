@@ -7,6 +7,10 @@ test("dashboard is honest, responsive, and energy changes the plan", async ({
   await expect(
     page.getByRole("heading", { name: "Một ngày mới, một bước tiến." }),
   ).toBeVisible();
+  await expect(page.getByText("Chào Gùa,", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("Rùa nhỏ vẫn đang tiến về phía trước."),
+  ).toBeVisible();
   await expect(page.locator(".streak-pill")).toHaveText("0 ngày");
   await page.getByRole("button", { name: "Hơi mệt" }).click();
   await expect(page.getByRole("button", { name: "Hơi mệt" })).toHaveAttribute(
@@ -39,15 +43,13 @@ test("dashboard is honest, responsive, and energy changes the plan", async ({
 });
 test("personalisation persists through reload", async ({ page }) => {
   await page.goto("/settings");
-  await page.getByPlaceholder("Tên hoặc biệt danh của bạn").fill("Linh");
+  await page.getByPlaceholder("Tên hoặc biệt danh").fill("Linh");
   await page.getByLabel("Mục tiêu VSTEP").selectOption("B1");
   await page.getByLabel("Số phút học mỗi ngày").fill("20");
   await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
   await expect(page.getByRole("status")).toContainText("Đã lưu");
   await page.reload();
-  await expect(page.getByPlaceholder("Tên hoặc biệt danh của bạn")).toHaveValue(
-    "Linh",
-  );
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue("Linh");
   await page.goto("/");
   await expect(page.getByText("Chào Linh,", { exact: false })).toBeVisible();
   await expect(page.locator(".target-pill")).toContainText("B1");
@@ -198,9 +200,7 @@ test("backup export/import and invalid data protection", async ({ page }) => {
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(s)),
   });
-  await expect(page.getByPlaceholder("Tên hoặc biệt danh của bạn")).toHaveValue(
-    "Mai",
-  );
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue("Mai");
   await page.locator('input[type="file"]').setInputFiles({
     name: "invalid.json",
     mimeType: "application/json",
@@ -209,9 +209,7 @@ test("backup export/import and invalid data protection", async ({ page }) => {
   await expect(page.locator("main [role=alert]")).toContainText(
     "Không nhập được",
   );
-  await expect(page.getByPlaceholder("Tên hoặc biệt danh của bạn")).toHaveValue(
-    "Mai",
-  );
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue("Mai");
 });
 test("corrupt local state is preserved instead of overwritten", async ({
   page,
@@ -255,7 +253,7 @@ test("recording uses a real MediaRecorder and survives reload", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(
-    page.getByRole("heading", { name: "Bạn đã dành thời gian để luyện tập." }),
+    page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
   ).toBeVisible();
   await context.close();
 });

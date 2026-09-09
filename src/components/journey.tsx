@@ -56,10 +56,13 @@ export function JourneyPage() {
             <Route size={15} />
             YOUR OWN PACE
           </div>
-          <h1>Đường đến {state.profile.target}, theo nhịp của mình.</h1>
+          <h1>
+            Đường đến {state.profile.target}, theo nhịp của {state.profile.name}
+            .
+          </h1>
           <p>
-            Lộ trình linh hoạt theo kết quả và thời gian bạn có. Không có ngày
-            nào bị bỏ lại phía sau.
+            Lộ trình linh hoạt theo kết quả và thời gian {state.profile.name}
+            có. Không có ngày nào bị bỏ lại phía sau.
           </p>
         </div>
         <Link className="button secondary small" href="/settings">

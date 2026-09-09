@@ -16,7 +16,7 @@ test("custom cursor follows the mouse and preserves native text editing", async 
   );
 
   await page.goto("/settings");
-  const nameField = page.getByLabel("Mây nên gọi bạn là gì?");
+  const nameField = page.getByLabel("Tên thân mật trong góc học");
   await expect(nameField).toBeVisible();
   await nameField.hover();
   await expect(page.locator("html")).not.toHaveClass(/custom-cursor-active/);

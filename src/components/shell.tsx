@@ -91,7 +91,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </span>
           <span>
             mây<span className="brand-dot">.</span>
-            <small>YOUR LITTLE VSTEP SPACE</small>
+            <small>A LITTLE SPACE FOR GÙA</small>
           </span>
         </Link>
         <button
@@ -102,7 +102,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <X />
         </button>
         <div className="workspace-label">
-          KHÔNG GIAN CỦA MÌNH <Sparkles size={13} />
+          GÓC HỌC CỦA GÙA <Sparkles size={13} />
         </div>
         <nav aria-label="Điều hướng chính">
           {nav.map((item) => (
@@ -123,11 +123,11 @@ export function Shell({ children }: { children: ReactNode }) {
           <div className="love-note">
             <Heart size={19} />
             <p>
-              Mỗi bước nhỏ hôm nay,
+              Gùa cứ đi theo nhịp của mình,
               <br />
-              một chút tự tin ngày mai.
+              chậm mà chắc là được.
             </p>
-            <span>Mình cứ từ từ mà tiến nhé.</span>
+            <span>Rùa nhỏ vẫn đang tiến về phía trước.</span>
           </div>
           <Link
             className={`nav-item ${pathname === "/guide" ? "active" : ""}`}
@@ -151,17 +151,14 @@ export function Shell({ children }: { children: ReactNode }) {
             onClick={() => setMobile(false)}
           >
             <span className="avatar">
-              {state.profile.name === "bạn"
-                ? "M"
-                : state.profile.name[0].toUpperCase()}
+              {state.profile.name[0].toUpperCase()}
             </span>
             <span>
-              <strong>
-                {state.profile.onboarded
-                  ? state.profile.name
-                  : "Góc nhỏ của bạn"}
-              </strong>
-              <small>Hành trình đến {state.profile.target}</small>
+              <strong>{state.profile.name}</strong>
+              <small>
+                {state.profile.name === "Gùa" ? "Rùa nhỏ · " : ""}Hành trình đến{" "}
+                {state.profile.target}
+              </small>
             </span>
             <ChevronRight size={16} />
           </Link>
@@ -216,13 +213,13 @@ export function Shell({ children }: { children: ReactNode }) {
           ) : (
             <div className="loading-state">
               <Cloud size={36} />
-              <p>Đang mở góc học của bạn…</p>
+              <p>Đang mở góc học của {state.profile.name}…</p>
             </div>
           )}
         </main>
         <footer className="app-footer">
           <span>
-            Made with a little love <Heart size={12} />
+            Made with a little love for Gùa <Heart size={12} />
           </span>
           <span>Đi một chút. Tiến một chút.</span>
         </footer>

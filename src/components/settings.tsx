@@ -12,6 +12,7 @@ import {
 import { useStudy } from "./study-provider";
 import {
   localDay,
+  personalizeLegacyState,
   profileSchema,
   stateSchema,
   type Profile,
@@ -59,7 +60,9 @@ export function SettingsPage() {
     }
     setError("");
     update((s) => ({ ...s, profile: parsed.data }));
-    toast("Đã lưu. Kế hoạch hôm nay đã được điều chỉnh cho bạn.");
+    toast(
+      `Đã lưu. Kế hoạch hôm nay đã được điều chỉnh cho ${parsed.data.name}.`,
+    );
   }
   async function importFile(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
@@ -70,7 +73,9 @@ export function SettingsPage() {
       return;
     }
     try {
-      const parsed = stateSchema.parse(JSON.parse(await selected.text()));
+      const parsed = personalizeLegacyState(
+        stateSchema.parse(JSON.parse(await selected.text())),
+      );
       if (
         !window.confirm(
           `Nhập bản sao của ${parsed.profile.name} với ${parsed.attempts.length} lượt học? Bản hiện tại sẽ được tải xuống trước khi thay thế.`,
@@ -93,10 +98,13 @@ export function SettingsPage() {
         <div>
           <div className="eyebrow">
             <Heart size={15} />
-            MADE FOR YOU
+            MADE FOR {profile.name.toLocaleUpperCase("vi")}
           </div>
-          <h1>Góc học, theo cách của bạn.</h1>
-          <p>Không có một nhịp học đúng cho tất cả. Mình tìm nhịp riêng nhé.</p>
+          <h1>Góc học, theo cách của {profile.name}.</h1>
+          <p>
+            Một hành trình được làm riêng, để {profile.name} học đúng nhịp và
+            vẫn thấy vui mỗi ngày.
+          </p>
         </div>
       </div>
       <div className="settings-layout">
@@ -107,20 +115,23 @@ export function SettingsPage() {
           </div>
           <div className="form-grid">
             <label className="field full">
-              <span>Mây nên gọi bạn là gì?</span>
+              <span>Tên thân mật trong góc học</span>
               <input
                 value={
                   profile.name === "bạn" && !profile.onboarded
                     ? ""
                     : profile.name
                 }
-                placeholder="Tên hoặc biệt danh của bạn"
+                placeholder="Tên hoặc biệt danh"
                 required
                 maxLength={40}
                 onChange={(e) =>
                   setProfile((p) => ({ ...p, name: e.target.value }))
                 }
               />
+              <small>
+                “Gùa” là cách gọi riêng được dùng trong lời động viên.
+              </small>
             </label>
             <label className="field">
               <span>Mục tiêu VSTEP</span>
@@ -163,7 +174,7 @@ export function SettingsPage() {
                   setProfile((p) => ({ ...p, examDate: e.target.value }))
                 }
               />
-              <small>Để trống nếu bạn chưa chốt lịch.</small>
+              <small>Để trống nếu {profile.name} chưa chốt lịch.</small>
             </label>
             <label className="field">
               <span>Số phút học mỗi ngày</span>
@@ -198,7 +209,7 @@ export function SettingsPage() {
               </select>
             </label>
             <div className="field full">
-              <span>Những chủ đề bạn thích</span>
+              <span>Những chủ đề {profile.name} thích</span>
               <div className="tag-list">
                 {topics.map((topic) => (
                   <button

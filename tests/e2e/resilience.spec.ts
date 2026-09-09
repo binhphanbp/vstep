@@ -147,15 +147,13 @@ test("profile fields remain editable when another tab saves vocabulary progress"
   page,
 }) => {
   await page.goto("/settings");
-  await page
-    .getByPlaceholder("Tên hoặc biệt danh của bạn")
-    .fill("Unsaved name");
+  await page.getByPlaceholder("Tên hoặc biệt danh").fill("Unsaved name");
   const second = await context.newPage();
   await second.goto("/vocabulary");
   await second.getByRole("button", { name: "Lật thẻ để xem nghĩa" }).click();
   await second.getByRole("button", { name: "Nhớ rồi", exact: false }).click();
   await page.bringToFront();
-  await expect(page.getByPlaceholder("Tên hoặc biệt danh của bạn")).toHaveValue(
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue(
     "Unsaved name",
   );
 });

@@ -11,6 +11,21 @@ beforeEach(() => {
   vi.stubGlobal("window", new EventTarget());
 });
 afterEach(() => vi.unstubAllGlobals());
+it("personalizes an untouched legacy profile without replacing a chosen name", async () => {
+  const legacy = freshState();
+  legacy.profile = { ...legacy.profile, name: "bạn", onboarded: false };
+  values.set("may-study-v1", JSON.stringify(legacy));
+  const store = await import("../../src/lib/study-store");
+  const stop = store.subscribe(() => {});
+  expect(store.getSnapshot().state.profile.name).toBe("Gùa");
+
+  store.replaceStudy({
+    ...legacy,
+    profile: { ...legacy.profile, name: "Mai", onboarded: true },
+  });
+  expect(store.getSnapshot().state.profile.name).toBe("Mai");
+  stop();
+});
 it("preserves data that becomes corrupt while the app is open", async () => {
   const store = await import("../../src/lib/study-store");
   const stop = store.subscribe(() => {});
