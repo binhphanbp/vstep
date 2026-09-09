@@ -1,15 +1,15 @@
 @import "tailwindcss";
 @theme inline {
   --font-sans: var(--font-main);
-  --color-background: #fff8fb;
-  --color-foreground: #49353d;
+  --color-background: #fff6fa;
+  --color-foreground: #3f3a42;
 }
 :root {
-  --bg: #fff8fb;
-  --ink: #49353d;
-  --muted: #75636a;
-  --line: #f1e3e9;
-  --rose: #b44f74;
+  --bg: #fff6fa;
+  --ink: #3f3a42;
+  --muted: #716b74;
+  --line: #f1dfe8;
+  --rose: #c24178;
 }
 * {
   box-sizing: border-box;
@@ -83,7 +83,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid #c06d8c;
+  outline: 3px solid #d06b99;
   outline-offset: 4px;
 }
 ::selection {
@@ -154,7 +154,7 @@ textarea:focus-visible {
     background: transparent;
   }
   .custom-cursor-dot.is-pressed {
-    background: #b44f74;
+    background: #c24178;
   }
 }
 .skip-link {
@@ -200,14 +200,14 @@ textarea:focus-visible {
   font-size: 8px;
   letter-spacing: 1.9px;
   margin-top: 8px;
-  color: #785e67;
+  color: #736a76;
   font-weight: 500;
 }
 .brand-dot {
-  color: #894a5f;
+  color: #993f6c;
 }
 .brand-mark {
-  color: #83475b;
+  color: #933c68;
   display: flex;
   background: #f5eef1;
   width: 48px;
@@ -231,7 +231,7 @@ textarea:focus-visible {
   padding: 12px 14px;
   border-radius: 10px;
   margin: 3px 0;
-  color: #785e67;
+  color: #736a76;
   font-size: 13px;
   transition:
     background 0.2s,
@@ -243,7 +243,7 @@ textarea:focus-visible {
 }
 .nav-item.active {
   background: #f4eef0;
-  color: #9d4564;
+  color: #ad3d6c;
   font-weight: 600;
 }
 .nav-item.active:before {
@@ -252,7 +252,7 @@ textarea:focus-visible {
   left: 0;
   width: 3px;
   height: 23px;
-  background: #c26b8a;
+  background: #d66796;
   border-radius: 0 3px 3px 0;
 }
 .nav-dot {
@@ -274,18 +274,18 @@ textarea:focus-visible {
   border-radius: 13px;
 }
 .love-note > svg {
-  color: #8f4d63;
+  color: #a04171;
   fill: #efe5e8;
 }
 .love-note p {
   font-size: 12px;
   font-weight: 500;
-  color: #914e64;
+  color: #a24272;
   margin: 8px 0 5px;
 }
 .love-note > span {
   font-size: 10px;
-  color: #755a63;
+  color: #6f6772;
 }
 .profile-link {
   display: flex;
@@ -341,7 +341,7 @@ textarea:focus-visible {
 }
 .breadcrumb strong {
   font-weight: 500;
-  color: #71565f;
+  color: #6b636e;
 }
 .topbar-right {
   display: flex;
@@ -369,14 +369,14 @@ textarea:focus-visible {
   border: 1px solid #efe6e9;
   padding: 6px 10px;
   border-radius: 7px;
-  color: #955067;
+  color: #a64475;
 }
 .status-dot {
   display: inline-block;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #c1849c;
+  background: #d38da9;
 }
 .page {
   max-width: 1440px;
@@ -400,7 +400,7 @@ textarea:focus-visible {
   gap: 7px;
   align-items: center;
   font-size: 11px;
-  color: #785e67;
+  color: #736a76;
   margin-bottom: 10px;
 }
 .eyebrow svg {
@@ -429,17 +429,17 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 .button.primary {
-  background: #b24f72;
+  background: #c24178;
   color: white;
-  box-shadow: 0 3px 7px #923d5e12;
+  box-shadow: 0 3px 7px #a0346a12;
 }
 .button.primary:hover {
-  background: #923d5e;
+  background: #9f2f63;
 }
 .button.secondary {
   background: white;
   border-color: #ece2e5;
-  color: #795964;
+  color: #716974;
 }
 .button.secondary:hover {
   background: #faf7f8;
@@ -505,7 +505,7 @@ textarea:focus-visible {
   font-size: 9px;
   letter-spacing: 0.9px;
   font-weight: 600;
-  color: #945066;
+  color: #a64475;
 }
 .welcome-content .capsule {
   background: #fff9;
@@ -520,17 +520,17 @@ textarea:focus-visible {
   font-weight: 600;
   letter-spacing: -0.9px;
   margin: 14px 0 12px;
-  color: #6f3c4d;
+  color: #7d3358;
 }
 .welcome-content p {
   font-size: 13px;
-  color: #7a5863;
+  color: #716974;
   max-width: 345px;
   margin-bottom: 18px;
 }
 .welcome-foot {
   font-size: 10px;
-  color: #795964;
+  color: #716974;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -570,7 +570,7 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 5px 25px #a85d7612;
+  box-shadow: 0 5px 25px #b8528512;
   border: 5px solid #faf5f780;
   background-clip: padding-box;
 }
@@ -579,17 +579,17 @@ textarea:focus-visible {
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -3px;
-  color: #8e4c62;
+  color: #9e4170;
 }
 .orbit-center > span:first-child {
   font-size: 7px;
   letter-spacing: 1.8px;
-  color: #785b65;
+  color: #716974;
 }
 .orbit-center > span:last-child {
   font-family: Georgia, serif;
   font-style: italic;
-  color: #785b65;
+  color: #716974;
   font-size: 14px;
 }
 .orbit-label {
@@ -599,7 +599,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 5px;
   z-index: 1;
-  color: #7a5763;
+  color: #706873;
 }
 .orbit-label.top {
   top: 8px;
@@ -618,7 +618,7 @@ textarea:focus-visible {
   border-radius: 13px;
   display: grid;
   place-items: center;
-  box-shadow: 0 3px 9px #a75b7510;
+  box-shadow: 0 3px 9px #b7508410;
 }
 .orbit-badge.headphones {
   left: 14px;
@@ -631,14 +631,14 @@ textarea:focus-visible {
   right: 16px;
   bottom: 46px;
   background: #fff;
-  color: #924f65;
+  color: #a34373;
   transform: rotate(15deg);
 }
 .orbit-star {
   position: absolute;
   bottom: 33px;
   left: 38px;
-  color: #8d4c61;
+  color: #9e406f;
   transform: rotate(15deg);
 }
 .mood-bar {
@@ -666,7 +666,7 @@ textarea:focus-visible {
 }
 .mood-bar span:not(.mood-button span) {
   font-size: 10px;
-  color: #785e67;
+  color: #736a76;
 }
 .mood-options {
   display: flex;
@@ -680,7 +680,7 @@ textarea:focus-visible {
   display: flex;
   gap: 4px;
   align-items: center;
-  color: #775c65;
+  color: #716974;
   white-space: nowrap;
   background: #fff;
 }
@@ -690,7 +690,7 @@ textarea:focus-visible {
 .mood-button.selected {
   background: #f6eef1;
   border-color: #d5bcc4;
-  color: #8a4a60;
+  color: #9a3f6d;
 }
 .section-heading {
   display: flex;
@@ -707,7 +707,7 @@ textarea:focus-visible {
 }
 .section-heading p {
   font-size: 12px;
-  color: #785e67;
+  color: #736a76;
   margin-top: 3px;
 }
 .soft-badge {
@@ -715,7 +715,7 @@ textarea:focus-visible {
   border: 1px solid #f0eaec;
   border-radius: 5px;
   padding: 2px 6px;
-  color: #785e67;
+  color: #736a76;
   font-weight: 400;
 }
 .text-link {
@@ -723,11 +723,11 @@ textarea:focus-visible {
   gap: 6px;
   align-items: center;
   font-size: 12px;
-  color: #914e64;
+  color: #a24272;
   white-space: nowrap;
 }
 .text-link:hover {
-  color: #7c3c52;
+  color: #89345f;
 }
 .plan-list {
   background: white;
@@ -751,7 +751,7 @@ textarea:focus-visible {
 }
 .step-number {
   font-size: 11px;
-  color: #7a6069;
+  color: #756c78;
   width: 17px;
 }
 .step-number.done {
@@ -772,7 +772,7 @@ textarea:focus-visible {
 }
 .skill-icon.reading {
   background: #f3edef;
-  color: #945067;
+  color: #a64475;
 }
 .skill-icon.writing {
   background: #fbefdc;
@@ -791,7 +791,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 7px;
   font-size: 10px;
-  color: #785e67;
+  color: #736a76;
   margin-bottom: 3px;
 }
 .lesson-kicker > span:first-child {
@@ -802,7 +802,7 @@ textarea:focus-visible {
   border-radius: 4px;
   padding: 0 5px;
   font-size: 9px;
-  color: #785e67;
+  color: #736a76;
 }
 .plan-row h3 {
   font-size: 14px;
@@ -810,7 +810,7 @@ textarea:focus-visible {
 }
 .plan-row p {
   font-size: 12px;
-  color: #795f68;
+  color: #746b77;
   margin-top: 4px;
 }
 .plan-row-end {
@@ -823,7 +823,7 @@ textarea:focus-visible {
   display: flex;
   gap: 4px;
   align-items: center;
-  color: #785e67;
+  color: #736a76;
   font-size: 11px;
 }
 .row-action {
@@ -831,10 +831,10 @@ textarea:focus-visible {
   gap: 6px;
   align-items: center;
   font-size: 11px;
-  color: #904d64;
+  color: #a14271;
 }
 .row-action.finished {
-  color: #795662;
+  color: #6f6772;
 }
 .skills-grid {
   display: grid;
@@ -852,7 +852,7 @@ textarea:focus-visible {
 }
 .skill-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 16px #79546109;
+  box-shadow: 0 6px 16px #6e667109;
 }
 .skill-card-top {
   display: flex;
@@ -874,7 +874,7 @@ textarea:focus-visible {
 }
 .skill-card p {
   font-size: 11px;
-  color: #785e67;
+  color: #736a76;
   margin-top: 4px;
 }
 .skill-progress-track {
@@ -904,11 +904,11 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 4px;
   font-size: 9px;
-  color: #785e67;
+  color: #736a76;
 }
 .skill-card-foot strong {
   font-weight: 500;
-  color: #785b65;
+  color: #716974;
 }
 .panel {
   background: #fff;
@@ -961,12 +961,12 @@ textarea:focus-visible {
 }
 .progress-ring strong span {
   font-size: 14px;
-  color: #785e67;
+  color: #736a76;
   letter-spacing: 0;
 }
 .progress-ring small {
   font-size: 11px;
-  color: #795f68;
+  color: #746b77;
 }
 .week-days {
   display: flex;
@@ -979,7 +979,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 7px;
   font-size: 10px;
-  color: #795f68;
+  color: #746b77;
 }
 .day-dot {
   width: 23px;
@@ -1005,7 +1005,7 @@ textarea:focus-visible {
 }
 .small-note {
   font-size: 11px;
-  color: #785e67;
+  color: #736a76;
   text-align: center;
   margin: 16px 0 0;
 }
@@ -1017,33 +1017,33 @@ textarea:focus-visible {
 }
 .vocab-teaser .capsule {
   font-size: 8px;
-  color: #904e64;
+  color: #a14272;
   letter-spacing: 0.8px;
 }
 .vocab-teaser .icon-soft {
-  color: #8f4d63;
+  color: #a04171;
 }
 .vocab-teaser h2 {
   font-size: 23px;
-  color: #8d4c62;
+  color: #9e406f;
   font-weight: 500;
   line-height: 1.5;
   margin: 17px 0 11px;
 }
 .vocab-teaser p {
   font-size: 12px;
-  color: #76525e;
+  color: #6c646e;
   line-height: 1.9;
 }
 .vocab-teaser p strong {
   font-weight: 500;
-  color: #8d4c62;
+  color: #9e406f;
 }
 .vocab-teaser .button {
   width: 100%;
   background: #fff9;
   border-color: #e7d9de;
-  color: #8b4b60;
+  color: #9c406e;
   margin-top: 20px;
   font-size: 12px;
   padding: 10px;
@@ -1056,13 +1056,13 @@ textarea:focus-visible {
   font-style: italic;
   font-size: 18px;
   line-height: 1.6;
-  color: #785863;
+  color: #706873;
   margin: 17px 0 10px;
 }
 .small-win p {
   font-size: 12px;
   line-height: 1.9;
-  color: #765b64;
+  color: #706873;
 }
 .small-win-footer {
   border-top: 1px solid #f3ecee;
@@ -1072,7 +1072,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #765b64;
+  color: #706873;
 }
 .app-footer {
   max-width: 1440px;
@@ -1080,7 +1080,7 @@ textarea:focus-visible {
   padding: 6px 38px 22px;
   display: flex;
   justify-content: space-between;
-  color: #785e67;
+  color: #736a76;
   font-size: 10px;
 }
 .app-footer span:first-child {
@@ -1109,11 +1109,11 @@ textarea:focus-visible {
   bottom: 26px;
   left: 50%;
   transform: translateX(-50%);
-  background: #573341;
+  background: #482f3d;
   color: #fff;
   border-radius: 12px;
   padding: 13px 22px;
-  box-shadow: 0 8px 30px #57334126;
+  box-shadow: 0 8px 30px #66294826;
   z-index: 100;
   max-width: 90vw;
 }
@@ -1134,7 +1134,7 @@ textarea:focus-visible {
 .notice.success {
   background: #f5eef1;
   border-color: #e7d9de;
-  color: #934f66;
+  color: #a44374;
 }
 .notice a {
   text-decoration: underline;
@@ -1175,7 +1175,7 @@ textarea:focus-visible {
 .filter.active {
   background: #f3ecee;
   border-color: #d7c0c8;
-  color: #844359;
+  color: #923b66;
 }
 .search-input,
 .field input,
@@ -1231,7 +1231,7 @@ textarea:focus-visible {
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #775e66;
+  color: #726a75;
 }
 .pill {
   display: inline-flex;
@@ -1239,7 +1239,7 @@ textarea:focus-visible {
   background: #fbf9fa;
   padding: 3px 8px;
   font-size: 11px;
-  color: #765d65;
+  color: #716974;
 }
 .empty-state {
   padding: 55px 25px;
@@ -1253,7 +1253,7 @@ textarea:focus-visible {
   gap: 14px;
 }
 .empty-state svg {
-  color: #795964;
+  color: #716974;
 }
 .empty-state p {
   max-width: 510px;
@@ -1318,12 +1318,12 @@ textarea:focus-visible {
   white-space: pre-line;
   font-size: 16px;
   line-height: 1.95;
-  color: #73535e;
+  color: #6b636d;
 }
 .panel-label {
   font-size: 11px;
   letter-spacing: 1.4px;
-  color: #775d66;
+  color: #726a75;
   margin-bottom: 12px;
   font-weight: 600;
 }
@@ -1385,7 +1385,7 @@ textarea:focus-visible {
   background: #f9f6f7;
   border-radius: 7px;
   margin-top: 12px;
-  color: #795461;
+  color: #6e6671;
 }
 .answer-submit {
   display: flex;
@@ -1425,7 +1425,7 @@ textarea:focus-visible {
 .tips-list {
   padding-left: 20px;
   margin: 12px 0;
-  color: #785b65;
+  color: #716974;
   font-size: 14px;
 }
 .tips-list li {
@@ -1448,7 +1448,7 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 12px;
   font-size: 12px;
-  color: #775c65;
+  color: #716974;
   margin-top: 8px;
 }
 .checklist label {
@@ -1476,14 +1476,14 @@ textarea:focus-visible {
 .result-score {
   font-size: 32px;
   font-weight: 600;
-  color: #8b4b60;
+  color: #9c406e;
 }
 .result-banner h2 {
   font-size: 18px;
 }
 .result-banner p {
   font-size: 13px;
-  color: #7b5562;
+  color: #706873;
   margin-top: 4px;
 }
 .result-actions {
@@ -1519,7 +1519,7 @@ details {
 }
 summary {
   cursor: pointer;
-  color: #785e67;
+  color: #736a76;
   font-size: 14px;
 }
 details .passage {
@@ -1555,7 +1555,7 @@ details .passage {
   margin-bottom: 20px;
 }
 .section-title svg {
-  color: #7a5863;
+  color: #716974;
 }
 .settings-layout {
   display: grid;
@@ -1595,7 +1595,7 @@ details .passage {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  color: #78535f;
+  color: #6d6570;
 }
 .timeline-card p {
   color: var(--muted);
@@ -1626,7 +1626,7 @@ details .passage {
 }
 .stat-card small {
   font-size: 12px;
-  color: #795c66;
+  color: #726a75;
 }
 .activity-chart {
   height: 180px;
@@ -1644,7 +1644,7 @@ details .passage {
   height: 100%;
   gap: 6px;
   font-size: 11px;
-  color: #785d66;
+  color: #726a75;
 }
 .activity-bar {
   background: #ceb3bc;
@@ -1692,27 +1692,27 @@ details .passage {
 }
 .flashcard h2 {
   font-size: 38px;
-  color: #8f4d63;
+  color: #a04171;
   letter-spacing: -1.5px;
 }
 .flashcard .ipa {
-  color: #77535f;
+  color: #6d656f;
   font-size: 15px;
 }
 .flashcard .meaning {
   font-size: 24px;
-  color: #914e64;
+  color: #a24272;
 }
 .flashcard .example {
   font-family: Georgia, serif;
   font-style: italic;
   font-size: 19px;
   max-width: 550px;
-  color: #904e64;
+  color: #a14272;
 }
 .flashcard small {
   font-size: 12px;
-  color: #795460;
+  color: #6e6671;
 }
 .review-buttons {
   display: grid;
@@ -1784,7 +1784,7 @@ details .passage {
   gap: 10px;
   padding: 17px 0;
   border-bottom: 1px solid var(--line);
-  color: #795461;
+  color: #6e6671;
   font-size: 14px;
 }
 .source-link:last-child {
@@ -1805,12 +1805,12 @@ details .passage {
   gap: 10px;
   align-items: center;
   font-size: 13px;
-  color: #785b65;
+  color: #716974;
 }
 .exam-stage.current {
   background: #f4edef;
   border-color: #cdb0ba;
-  color: #8f4d63;
+  color: #a04171;
 }
 .exam-stage.complete {
   background: #f7f3f4;
@@ -2045,7 +2045,7 @@ details .passage {
     display: block;
     position: fixed;
     inset: 0;
-    background: #4f2b3755;
+    background: #5a254055;
     z-index: 29;
   }
   .main-shell {
