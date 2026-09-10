@@ -4,13 +4,14 @@
 **Mốc nền tảng được đánh giá:** `9f4d8eaa42e1c93a12b08d96bc6aed7466fad6cf`
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
+**Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
 **Đối tượng sử dụng:** một người học VSTEP tại TP.HCM, tên thân mật “Rùa”, được gọi là “Gùa” trong website
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build production và GitHub Actions đã đạt; chưa có nghiệm thu trên iOS/Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
 
-Sản phẩm đủ để Gùa pilot hằng ngày trên môi trường local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc sẵn sàng production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Website cũng chưa được triển khai lên tên miền HTTPS công khai và chưa được nghiệm thu trên thiết bị thật của người học.
+Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập/sync bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
 Không có task dở dang trong milestone nền tảng tại mốc bàn giao. Các milestone về học liệu, đánh giá đầu vào, phản hồi Viết/Nói và vận hành production vẫn đang mở và được liệt kê tại Mục 12.
 
@@ -184,7 +185,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                        |
 | Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                            |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                            |
-| GitHub Actions        | Đạt                | Run 34435381574 cho commit triển khai `13e6683`                                                   |
+| GitHub Actions        | Đạt                | Run 34435602731 cho commit `32697bf`; run triển khai `34435381574` cũng đạt                       |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -196,7 +197,8 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 
 | Hạng mục                               | Trạng thái hiện tại       | Ảnh hưởng                                                                      |
 | -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
-| Deploy production HTTPS và tên miền    | Chưa làm                  | Chưa có URL cho người học dùng bên ngoài máy local                             |
+| Hosting HTTPS pilot                    | Đã có                     | `vstep-turtle.vercel.app`; 10 route 200, 404 và headers đã smoke test          |
+| Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production           |
 | Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt         |
 | Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                           |
 | Ngân hàng đề độc lập                   | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói                                |
@@ -278,7 +280,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ### P0 Trước khi dùng như một sản phẩm production
 
-1. **Triển khai HTTPS.** Chọn nền tảng hỗ trợ Next.js, cấu hình biến môi trường, kiểm tra headers, 404, font và Supabase Auth trên URL thật. Tiêu chí đạt: CI xanh, URL ổn định, login/sync/micro hoạt động và không có secret trong bundle ngoài publishable key.
+1. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404 và font đã kiểm tra. Còn đăng nhập/sync bằng tài khoản thật, micro và kiểm tra không có secret trong bundle ngoài publishable key.
 2. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone/Safari hoặc Android/Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt: hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
 3. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
 4. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
@@ -340,8 +342,8 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 - [ ] Người nhận xác nhận có quyền quản trị repository GitHub.
 - [ ] Người nhận xác nhận có quyền truy cập dự án Supabase.
 - [ ] Người nhận lưu thông tin tài khoản học ở trình quản lý mật khẩu an toàn.
-- [ ] Tạo và bàn giao dự án hosting production.
-- [ ] Cấu hình domain, HTTPS và biến môi trường production.
+- [x] Tạo bản hosting HTTPS pilot trên Vercel và cấu hình biến môi trường Supabase.
+- [ ] Bàn giao quyền truy cập dự án Vercel và chốt tên miền riêng nếu cần.
 - [ ] Nghiệm thu trên thiết bị thật của Gùa.
 - [ ] Chốt người chịu trách nhiệm nội dung VSTEP và lịch cập nhật học liệu.
 
@@ -356,15 +358,16 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 
-Milestone nền tảng được xem là hoàn tất vì các route chính hoạt động, state được bảo toàn, hai chế độ thi chạy hết luồng, Supabase thật đã xác nhận, test production và CI đều đạt, giao diện đã được kiểm tra ở viewport đại diện và tài liệu vận hành đã có. Giai đoạn production chỉ được xem là hoàn tất sau khi có URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và có người chịu trách nhiệm xác nhận chất lượng học liệu.
+Milestone nền tảng và hosting kỹ thuật được xem là hoàn tất vì các route chính hoạt động, state được bảo toàn, hai chế độ thi chạy hết luồng, Supabase thật đã xác nhận, URL HTTPS trả đúng status/headers, test production và CI đều đạt. Giai đoạn production vận hành chỉ được xem là hoàn tất sau khi nghiệm thu đăng nhập/sync, micro, thiết bị thật, thử đồng bộ hai thiết bị và có người chịu trách nhiệm xác nhận chất lượng học liệu.
 
-| Nhóm tiêu chí       | Kết luận hiện tại | Bằng chứng hoặc bước còn thiếu                                                   |
-| ------------------- | ----------------- | -------------------------------------------------------------------------------- |
-| Nền tảng kỹ thuật   | Đạt milestone     | Build, unit, E2E, accessibility, Supabase Auth/RLS và backup đã kiểm tra         |
-| Cá nhân hóa         | Đạt vòng v2 đầu   | Có confidence, due review, weakness, recency, exam urgency và lý do chọn bài     |
-| Hiệu quả học tập    | Chưa kết luận     | Cần 5–7 ngày pilot và checkpoint bằng ngữ liệu chưa từng học                     |
-| Chất lượng học liệu | Chưa kiểm định    | Cần giáo viên VSTEP review và version hóa content                                |
-| Production          | Chưa đạt          | Cần URL HTTPS, biến môi trường host, kiểm tra hai thiết bị và quy trình vận hành |
+| Nhóm tiêu chí       | Kết luận hiện tại | Bằng chứng hoặc bước còn thiếu                                               |
+| ------------------- | ----------------- | ---------------------------------------------------------------------------- |
+| Nền tảng kỹ thuật   | Đạt milestone     | Build, unit, E2E, accessibility, Supabase Auth/RLS và backup đã kiểm tra     |
+| Cá nhân hóa         | Đạt vòng v2 đầu   | Có confidence, due review, weakness, recency, exam urgency và lý do chọn bài |
+| Hiệu quả học tập    | Chưa kết luận     | Cần 5–7 ngày pilot và checkpoint bằng ngữ liệu chưa từng học                 |
+| Chất lượng học liệu | Chưa kiểm định    | Cần giáo viên VSTEP review và version hóa content                            |
+| Hosting production  | Đạt kỹ thuật      | URL HTTPS, biến môi trường, route/status/header đã kiểm tra                  |
+| Production UAT      | Chưa đạt          | Cần login/sync thật, micro, hai thiết bị và quy trình vận hành               |
 
 Người tiếp tục dự án nên dùng `docs/REVIEW-RESPONSE.md` làm quyết định ưu tiên, `docs/QUALITY.md` làm bằng chứng kỹ thuật và báo cáo này làm tài liệu bàn giao phạm vi. Không dùng số câu đã học hoặc chuỗi ngày như bằng chứng người học đã đạt bậc VSTEP.
 

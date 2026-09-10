@@ -269,7 +269,7 @@ def add_cover(doc):
     run = p.add_run("Trạng thái sản phẩm, kiến trúc, vận hành và lộ trình phát triển")
     set_run_font(run, size=13, color=MUTED)
 
-    table = doc.add_table(rows=6, cols=2)
+    table = doc.add_table(rows=7, cols=2)
     table.alignment = WD_TABLE_ALIGNMENT.LEFT
     table.autofit = False
     set_table_borders(table, color="E6DDE1")
@@ -285,6 +285,7 @@ def add_cover(doc):
         ("Mốc đánh giá", "9f4d8ea + vòng cải tiến learning loop 10/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
+        ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
         ("Người học", "Gùa, tên ở nhà Rùa"),
     ]
     for i, (label, value) in enumerate(metadata, start=1):
@@ -305,7 +306,7 @@ def add_cover(doc):
         right_p = right.paragraphs[0]
         right_p.paragraph_format.space_after = Pt(0)
         if value.startswith("http"):
-            add_hyperlink(right_p, "github.com/binhphanbp/vstep", value)
+            add_hyperlink(right_p, value.removeprefix("https://").rstrip("/"), value)
         else:
             add_inline(right_p, value, 9, INK)
 
@@ -318,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên local, Supabase thật đã kết nối và kiểm thử, toàn bộ pipeline kiểm tra đang đạt. Daily Mission đã giải thích lý do chọn bài và ưu tiên lỗi đến hạn hoặc sai với mức tự tin cao. Các điều kiện còn thiếu để gọi là production hoàn chỉnh là URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Daily Mission đã giải thích lý do chọn bài và ưu tiên lỗi đến hạn hoặc sai với mức tự tin cao. Các điều kiện còn thiếu để nghiệm thu production là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )

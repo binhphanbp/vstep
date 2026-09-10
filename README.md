@@ -2,6 +2,8 @@
 
 Ứng dụng tiếng Việt cho một người học tại TP.HCM, dùng Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 và Supabase tùy chọn. Chạy được ngay trên thiết bị khi chưa cấu hình dịch vụ đám mây.
 
+**Bản HTTPS pilot:** [vstep-turtle.vercel.app](https://vstep-turtle.vercel.app). Ngày 10/09/2026 đã xác nhận 10 route chính trả HTTP 200, trang không tồn tại trả 404, security headers hoạt động và cấu hình Supabase production đã có. Đăng nhập/đồng bộ bằng tài khoản thật, micro và thiết bị iOS/Android vẫn cần nghiệm thu trực tiếp.
+
 ## Chạy trên máy
 
 Yêu cầu Node.js 24 và npm:
@@ -15,10 +17,10 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 
 ## Có thể sử dụng
 
-- Kế hoạch ngày cá nhân hóa theo năng lượng và kết quả; hành trình, thống kê theo giờ Việt Nam.
+- Kế hoạch ngày giải thích lý do chọn bài theo năng lượng, lỗi đến hạn, mức chắc chắn, kết quả, recency và ngày thi; hành trình, thống kê theo giờ Việt Nam.
 - 14 bài luyện ngắn bốn kỹ năng, giải thích câu hỏi, nháp Viết tự lưu, bài mẫu và tiêu chí tự kiểm tra.
 - Buổi rút gọn 51 phút và đề tự biên soạn đủ cấu trúc 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
-- Sổ câu sai có luyện nhớ lại và lịch ôn; 20 thẻ từ có ví dụ, phiên âm và phát âm.
+- Sổ câu sai ưu tiên lỗi “sai nhưng rất chắc”, số lần sai, subskill, luyện nhớ lại và lịch ôn; 20 thẻ từ có ví dụ, phiên âm và phát âm.
 - Ghi âm, nghe lại, tải âm thanh; bản Nói đã hoàn thành có bản lưu riêng trong lịch sử.
 - Sao lưu/nhập JSON có kiểm tra; dữ liệu hỏng được giữ để phục hồi. Snapshot Supabase thủ công có kiểm tra phiên bản.
 - Giao diện máy tính/điện thoại, bàn phím, reduced motion, trạng thái lỗi và trang 404.
@@ -61,7 +63,7 @@ npm run test:production
 
 `check` chạy ESLint, typecheck, Vitest và production build. `test:production` build rồi chạy toàn bộ Playwright trên `next start` ở cổng 3100; không dùng lại dev server cổng 3000. CI chạy bộ trình duyệt trên bản production đã build. Kiểm thử gồm chấm câu hỏi, lịch ôn, kế hoạch ngày, khôi phục deadline, cả hai bài Viết, RLS/xung đột SQL, nhiều tab cùng bài, lỗi lưu dữ liệu, từ chối micro, responsive và axe. MediaRecorder dùng nguồn micro giả lập Chromium; cần thử micro thật trên thiết bị người học. CI nằm trong `.github/workflows/check.yml`. Kết quả rà soát: [docs/QUALITY.md](docs/QUALITY.md).
 
-Chạy bản build bằng `npm run build` rồi `npm start`. Dùng dịch vụ hỗ trợ Next.js/Node.js và HTTPS; cấu hình hai biến môi trường trước khi build nếu dùng Supabase. Build cần mạng để lấy Be Vietnam Pro qua `next/font/google`. Repo chưa triển khai lên tên miền công khai.
+Chạy bản build bằng `npm run build` rồi `npm start`. Bản pilot đã deploy trên Vercel với HTTPS và hai biến Supabase ở thời điểm build. Build cần mạng để lấy Be Vietnam Pro qua `next/font/google`. Chưa có tên miền riêng, monitoring hoặc quy trình vận hành production.
 
 Trước khi dùng bản host với dữ liệu thật: thử đăng nhập/đồng bộ giữa hai thiết bị, xuất/khôi phục bản sao, nghe và ghi âm trên đúng điện thoại người học. Có thể dùng chế độ lưu trên thiết bị mà không bật Supabase.
 

@@ -4,13 +4,13 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 
 ## Lỗi dữ liệu đã tái hiện và sửa
 
-| Tình huống | Trước khi sửa | Kết quả sau sửa |
-| --- | --- | --- |
-| Cùng bài trắc nghiệm mở ở hai tab | Mỗi tab giữ đáp án riêng; bộ lưu theo đồng hồ có thể ghi lại nháp cũ | Đáp án và thời gian dùng cùng bản nháp trong store; thay đổi một câu giữ các câu mới nhất |
-| Đang nhập tên, tab khác ôn từ | Snapshot mới tạo object hồ sơ mới, reset tên chưa lưu | Chỉ cập nhật form khi nội dung hồ sơ thực sự đổi |
-| localStorage hỏng giữa phiên | Lần ghi tiếp theo bỏ qua lỗi đọc và ghi đè bản hỏng | Hiển thị lỗi, giữ nguyên bản gốc, giữ thay đổi mới trong RAM để xuất |
-| Khôi phục backup cũ | Timestamp có thể thấp hơn phiên hiện hành, tab khác bỏ qua | Timestamp phục hồi luôn tăng so với bản hiện hành trên máy |
-| Tab cũ đang xác nhận nộp, tab khác chuyển phần | Lệnh nộp có thể áp dụng cho phần tiếp theo | Chỉ nộp nếu mã phiên và phần thi vẫn đúng với phần đã xác nhận |
+| Tình huống                                     | Trước khi sửa                                                        | Kết quả sau sửa                                                                           |
+| ---------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Cùng bài trắc nghiệm mở ở hai tab              | Mỗi tab giữ đáp án riêng; bộ lưu theo đồng hồ có thể ghi lại nháp cũ | Đáp án và thời gian dùng cùng bản nháp trong store; thay đổi một câu giữ các câu mới nhất |
+| Đang nhập tên, tab khác ôn từ                  | Snapshot mới tạo object hồ sơ mới, reset tên chưa lưu                | Chỉ cập nhật form khi nội dung hồ sơ thực sự đổi                                          |
+| localStorage hỏng giữa phiên                   | Lần ghi tiếp theo bỏ qua lỗi đọc và ghi đè bản hỏng                  | Hiển thị lỗi, giữ nguyên bản gốc, giữ thay đổi mới trong RAM để xuất                      |
+| Khôi phục backup cũ                            | Timestamp có thể thấp hơn phiên hiện hành, tab khác bỏ qua           | Timestamp phục hồi luôn tăng so với bản hiện hành trên máy                                |
+| Tab cũ đang xác nhận nộp, tab khác chuyển phần | Lệnh nộp có thể áp dụng cho phần tiếp theo                           | Chỉ nộp nếu mã phiên và phần thi vẫn đúng với phần đã xác nhận                            |
 
 Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và form hồ sơ đã thất bại trên code cũ, rồi đạt sau bản sửa. Ca nộp thi từ tab cũ được bổ sung để kiểm tra điều kiện bảo vệ phần đã chuyển.
 
@@ -25,12 +25,14 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Bằng chứng kiểm tra
 
-- 45 kiểm thử Vitest: logic học, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
+- 46 kiểm thử Vitest: logic học, confidence và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
 - 23 kiểm thử Playwright trên bản production, gồm phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng tại thời điểm chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
+- GitHub Actions run `34435602731` đạt cho commit `32697bf`; run triển khai chức năng `34435381574` đạt cho commit `13e6683`.
+- Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 10/09/2026: 10 route chính HTTP 200, route giả HTTP 404, HSTS, CSP liên quan và các header bảo vệ hiện diện; learning loop mới tải được, không có lỗi console.
 
 ## Giới hạn còn mở
 
-Chưa có môi trường HTTPS công khai, thử micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Supabase thật đã được cấu hình và kiểm thử riêng theo `STATUS.md`. Bộ kiểm thử dùng Chromium; chưa xác minh Safari/iOS thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.
+Đã có môi trường HTTPS pilot nhưng chưa thử đăng nhập/sync bằng tài khoản thật trên host, micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Supabase thật đã được cấu hình và kiểm thử riêng theo `STATUS.md`. Bộ kiểm thử dùng Chromium; chưa xác minh Safari/iOS thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.

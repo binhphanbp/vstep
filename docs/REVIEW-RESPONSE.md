@@ -21,7 +21,7 @@ Báo cáo hợp lý, thẳng thắn và bám đúng codebase. Kết luận quan 
 | Writing/Speaking mới ở mức tự luyện                              | Đúng. Chưa có rubric feedback hoặc STT                                                  | Đưa vào milestone sau content QA                           |
 | Đã chạy hoàn chỉnh trên điện thoại                               | Chưa đủ bằng chứng. Playwright mới kiểm tra viewport responsive                         | Sửa lại câu chữ; cần UAT thiết bị thật                     |
 | Không có hạng mục code dở dang                                   | Dễ gây hiểu nhầm                                                                        | Thu hẹp thành “không có task dở trong milestone nền tảng”  |
-| URL Vercel trong GitHub About trả 404                            | Đúng khi kiểm tra ngày 10/09/2026                                                       | Gỡ URL cũ cho đến khi có deployment thật                   |
+| URL Vercel cũ trong GitHub About trả 404                         | Đúng với URL `vstep-livid`; URL mới `vstep-turtle` đã trả HTTP 200 ngày 10/09/2026      | Đã thay bằng deployment HTTPS hoạt động                    |
 
 ## Thay đổi đã triển khai từ báo cáo
 
@@ -30,7 +30,7 @@ Báo cáo hợp lý, thẳng thắn và bám đúng codebase. Kết luận quan 
 3. Daily Mission chấm ưu tiên theo lỗi đến hạn, lỗi tự tin cao, accuracy gần đây, recency gap, ngày thi, focus, sở thích, level, mood và diversity guard.
 4. Mỗi bài trong kế hoạch hôm nay hiển thị tối đa hai lý do ngắn để Gùa hiểu vì sao hệ thống chọn bài.
 5. Báo cáo bàn giao đã bỏ các câu khẳng định quá mức về điện thoại, mức sẵn sàng dùng hằng ngày và phạm vi “không còn code dở”.
-6. URL production 404 được gỡ khỏi GitHub About; chỉ thêm lại sau khi deployment HTTPS đã được kiểm tra.
+6. URL production cũ 404 đã được thay bằng `https://vstep-turtle.vercel.app`; smoke test xác nhận route chính, 404 và security headers.
 
 ## Việc chưa thể hoàn tất chỉ bằng sửa code
 
@@ -41,12 +41,12 @@ Báo cáo hợp lý, thẳng thắn và bám đúng codebase. Kết luận quan 
 | Listening audio người thật   | File audio có quyền sử dụng, transcript và timecode         | Nghe rõ trên thiết bị thật, đúng nhịp từng phần thi        |
 | Writing feedback             | Rubric đã chốt và bộ bài mẫu/feedback để hiệu chỉnh         | Feedback có evidence, top issues và vòng rewrite           |
 | Speaking feedback            | STT phù hợp tiếng Anh của người học, rubric và consent      | Có pause/repetition/timing và vòng ghi lại                 |
-| Production                   | Tài khoản hosting, biến môi trường production và URL HTTPS  | Login/sync/micro/404/headers đều đạt trên URL thật         |
+| Production UAT               | Tài khoản học và thiết bị thật                              | Login/sync/micro/restore đạt trên URL HTTPS đã có          |
 | Real-device UAT              | Điện thoại và máy tính Gùa thực sự dùng                     | Hoàn thành Nghe, Đọc, ghi âm, mini exam, reload và restore |
 
 ## Thứ tự tiếp theo
 
-1. Deploy HTTPS và nghiệm thu hai thiết bị.
+1. Nghiệm thu đăng nhập/sync trên bản HTTPS và hai thiết bị thật.
 2. Cho Gùa dùng 5–7 ngày; thu các chỗ khó hiểu, bài bỏ cuộc, thời lượng thực và mức chắc chắn.
 3. Nhờ giáo viên review content hiện có và xây bank unseen.
 4. Hiệu chỉnh trọng số Daily Mission từ dữ liệu pilot.
