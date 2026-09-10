@@ -60,6 +60,7 @@ export function PracticeLibrary() {
         {(["all", "listening", "reading", "writing", "speaking"] as const).map(
           (s) => (
             <button
+              type="button"
               className={`filter ${skill === s ? "active" : ""}`}
               onClick={() => setSkill(s)}
               key={s}
@@ -134,6 +135,7 @@ export function PracticeLibrary() {
           <h2>Chưa có bài phù hợp</h2>
           <p>Thử một từ khóa ngắn hơn hoặc đổi bộ lọc nhé.</p>
           <button
+            type="button"
             className="button secondary"
             onClick={() => {
               setQuery("");
@@ -193,7 +195,11 @@ export function QuestionCard({
         </label>
       ))}
       {onConfidence && chosen !== undefined && !submitted && (
-        <div className="confidence-check" aria-label="Mức độ chắc chắn">
+        <div
+          className="confidence-check"
+          role="group"
+          aria-label={`Mức độ chắc chắn cho câu ${index + 1}`}
+        >
           <span>Bạn chắc đến đâu?</span>
           <div>
             {(
@@ -385,7 +391,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           <h1>{lesson.title}</h1>
           <p>{lesson.subtitle}</p>
         </div>
-        <span className="timer">
+        <span className="timer" role="timer" aria-live="off">
           <Clock3 size={16} />
           {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
           <span className="muted" style={{ fontSize: 11 }}>
@@ -417,7 +423,11 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                 : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm của giáo viên hoặc AI."}
             </p>
             <div className="result-actions">
-              <button className="button secondary small" onClick={retry}>
+              <button
+                type="button"
+                className="button secondary small"
+                onClick={retry}
+              >
                 Luyện lại
               </button>
               <Link
@@ -604,12 +614,12 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           )}
           {!result && (
             <div className="answer-submit">
-              <p>
+              <p role="status" aria-live="polite">
                 {lesson.questions.length
                   ? `${Object.keys(answers).length}/${lesson.questions.length} câu đã trả lời · ${Object.keys(confidence).length}/${lesson.questions.length} mức chắc chắn`
                   : "Một lần thực hành là một lần tiến bộ."}
               </p>
-              <button className="button primary" onClick={submit}>
+              <button type="button" className="button primary" onClick={submit}>
                 {lesson.questions.length
                   ? "Xem kết quả"
                   : "Hoàn thành buổi luyện"}

@@ -104,6 +104,7 @@ export function ExamPage() {
           <section className="panel">
             <div className="filters">
               <button
+                type="button"
                 className={`filter ${!full ? "active" : ""}`}
                 onClick={() => setMode("mini")}
                 aria-pressed={!full}
@@ -111,6 +112,7 @@ export function ExamPage() {
                 Rút gọn · 51 phút
               </button>
               <button
+                type="button"
                 className={`filter ${full ? "active" : ""}`}
                 onClick={() => setMode("full")}
                 aria-pressed={full}
@@ -186,6 +188,7 @@ export function ExamPage() {
               </span>
             </label>
             <button
+              type="button"
               className="button primary"
               style={{ marginTop: 22 }}
               disabled={!ready}
@@ -273,6 +276,7 @@ export function ExamPage() {
             Lịch sử bài làm
           </Link>
           <button
+            type="button"
             className="button secondary"
             onClick={() => {
               update((s) => ({ ...s, exam: null }));
@@ -538,6 +542,7 @@ export function ExamPage() {
           <p>Phần đã nộp sẽ khoá đáp án.</p>
           {activeIndex < currentLessons.length - 1 && (
             <button
+              type="button"
               className="button secondary"
               onClick={() => {
                 setSections((s) => ({ ...s, [exam.stage]: activeIndex + 1 }));
@@ -549,7 +554,7 @@ export function ExamPage() {
             </button>
           )}
         </div>
-        <button className="button primary" onClick={finishStage}>
+        <button type="button" className="button primary" onClick={finishStage}>
           {exam.stage === 3 ? "Kết thúc buổi luyện" : "Nộp phần này & tiếp tục"}
           <ArrowRight size={16} />
         </button>

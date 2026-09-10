@@ -79,6 +79,7 @@ export function Shell({ children }: { children: ReactNode }) {
       </a>
       {mobile && (
         <button
+          type="button"
           className="sidebar-scrim"
           aria-label="Đóng menu"
           onClick={() => setMobile(false)}
@@ -95,6 +96,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </span>
         </Link>
         <button
+          type="button"
           className="mobile-close icon-button"
           aria-label="Đóng menu"
           onClick={() => setMobile(false)}
@@ -168,6 +170,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <header className="topbar">
           <div className="breadcrumb">
             <button
+              type="button"
               className="mobile-menu icon-button"
               ref={menuButton}
               aria-expanded={mobile}

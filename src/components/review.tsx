@@ -79,14 +79,18 @@ export function VocabularyPage() {
       </div>
       <div className="filters">
         <button
+          type="button"
           className={`filter ${mode === "review" ? "active" : ""}`}
           onClick={() => setMode("review")}
+          aria-pressed={mode === "review"}
         >
           Ôn hôm nay · {due.length}
         </button>
         <button
+          type="button"
           className={`filter ${mode === "all" ? "active" : ""}`}
           onClick={() => setMode("all")}
+          aria-pressed={mode === "all"}
         >
           Tất cả từ vựng
         </button>
@@ -99,6 +103,7 @@ export function VocabularyPage() {
                 <div className="vocab-toolbar">
                   <span className="pill">{card.topic}</span>
                   <button
+                    type="button"
                     className="icon-button"
                     aria-label={`Nghe phát âm ${card.word}`}
                     onClick={() => speak(card.word)}
@@ -107,6 +112,7 @@ export function VocabularyPage() {
                   </button>
                 </div>
                 <button
+                  type="button"
                   className="flashcard"
                   onClick={() => setFlipped((f) => !f)}
                   aria-label={
@@ -147,7 +153,11 @@ export function VocabularyPage() {
                         new Date(now),
                       );
                       return (
-                        <button key={r.key} onClick={() => rate(r.key)}>
+                        <button
+                          type="button"
+                          key={r.key}
+                          onClick={() => rate(r.key)}
+                        >
                           {r.label}
                           <small>
                             {next.interval < 1
@@ -238,6 +248,7 @@ export function VocabularyPage() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     className="icon-button"
                     aria-label={`Nghe phát âm ${v.word}`}
                     onClick={() => speak(v.word)}
@@ -314,14 +325,18 @@ export function MistakesPage() {
       </div>
       <div className="filters">
         <button
+          type="button"
           className={`filter ${filter === "due" ? "active" : ""}`}
           onClick={() => setFilter("due")}
+          aria-pressed={filter === "due"}
         >
           Đến lúc ôn
         </button>
         <button
+          type="button"
           className={`filter ${filter === "all" ? "active" : ""}`}
           onClick={() => setFilter("all")}
+          aria-pressed={filter === "all"}
         >
           Tất cả câu từng sai
         </button>
@@ -393,6 +408,7 @@ export function MistakesPage() {
                 </div>
                 {!seen ? (
                   <button
+                    type="button"
                     className="button primary small"
                     onClick={() =>
                       review(item.question.id, item.question.answer)

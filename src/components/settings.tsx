@@ -262,6 +262,7 @@ export function SettingsPage() {
             </p>
             <div className="button-row">
               <button
+                type="button"
                 className="button secondary"
                 onClick={() =>
                   downloadJson(state, `may-backup-${localDay()}.json`)
@@ -271,6 +272,7 @@ export function SettingsPage() {
                 Xuất bản sao
               </button>
               <button
+                type="button"
                 className="button secondary"
                 onClick={() => file.current?.click()}
               >
@@ -293,6 +295,7 @@ export function SettingsPage() {
                 lệ.
               </p>
               <button
+                type="button"
                 className="button secondary small"
                 style={{ marginTop: 10 }}
                 onClick={() => {
@@ -440,6 +443,7 @@ function CloudSettings() {
           </p>
           <div className="button-row">
             <button
+              type="button"
               className="button primary small"
               disabled={busy}
               onClick={() => sync("push")}
@@ -448,6 +452,7 @@ function CloudSettings() {
               Lưu lên đám mây
             </button>
             <button
+              type="button"
               className="button secondary small"
               disabled={busy}
               onClick={() => sync("pull")}
@@ -457,6 +462,7 @@ function CloudSettings() {
             </button>
           </div>
           <button
+            type="button"
             className="text-link"
             style={{ marginTop: 18 }}
             disabled={busy}
@@ -497,7 +503,7 @@ function CloudSettings() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          <button className="button primary" disabled={busy}>
+          <button type="submit" className="button primary" disabled={busy}>
             {busy ? "Đang kết nối…" : "Đăng nhập"}
           </button>
         </form>

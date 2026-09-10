@@ -99,7 +99,11 @@ export function AudioPlayer({
         </h2>
       </div>
       <div className="audio-controls">
-        <button className="button primary" onClick={playing ? stop : play}>
+        <button
+          type="button"
+          className="button primary"
+          onClick={playing ? stop : play}
+        >
           {playing ? <Square size={15} /> : <Play size={15} />}{" "}
           {playing ? "Dừng" : "Phát bài nghe"}
         </button>
@@ -296,6 +300,7 @@ export function Recorder({
       {!readOnly && (
         <div className="record-controls">
           <button
+            type="button"
             disabled={busy}
             className={`button ${recording ? "danger" : "primary"}`}
             onClick={() =>

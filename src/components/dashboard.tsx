@@ -156,6 +156,7 @@ export function Dashboard() {
                 ] as const
               ).map((m) => (
                 <button
+                  type="button"
                   key={m.key}
                   aria-pressed={state.mood[today] === m.key}
                   className={`mood-button ${state.mood[today] === m.key ? "selected" : ""}`}
