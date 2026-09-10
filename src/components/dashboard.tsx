@@ -220,6 +220,14 @@ export function Dashboard() {
                       </div>
                       <h3>{lesson.title}</h3>
                       <p>{lesson.subtitle}</p>
+                      <div className="plan-reasons" aria-label="Lý do chọn bài">
+                        {(plan.reasons[lesson.id] ?? []).map((reason) => (
+                          <span key={reason}>
+                            <Sparkles size={11} />
+                            {reason}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                     <div className="plan-row-end">
                       <span>

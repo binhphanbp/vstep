@@ -122,6 +122,23 @@ describe("adaptive plan and memory scheduling", () => {
     s.profile.focus = "speaking";
     expect(todayPlan(s, now).lessons[0].skill).toBe("speaking");
   });
+  it("explains due misconceptions and prioritises confident mistakes", () => {
+    const s = freshState();
+    s.attempts = [
+      attempt("2026-09-07T10:00:00+07:00", {
+        answers: { rc1: 0, rc2: 0, rc3: 0, rc4: 3, rc5: 1 },
+        correct: 3,
+        confidence: { rc1: "sure", rc2: "guess" },
+      }),
+    ];
+    const errors = mistakes(s, now);
+    expect(errors[0].question.id).toBe("rc1");
+    expect(errors[0]).toMatchObject({ confidence: "sure", due: true });
+    const plan = todayPlan(s, now);
+    expect(plan.reasons["reading-cafe"]).toContain(
+      "1 câu sai dù đã chọn “Rất chắc” cần sửa ngay",
+    );
+  });
   it("delays well-recalled cards and brings failed cards back in 10 minutes", () => {
     const good = scheduleReview(undefined, "good", now);
     expect(good.interval).toBe(1);

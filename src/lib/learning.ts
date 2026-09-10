@@ -2,6 +2,7 @@ import { z } from "zod";
 import { lessons, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
 const skillSchema = z.enum(["listening", "reading", "writing", "speaking"]);
+export const confidenceSchema = z.enum(["guess", "unsure", "sure"]);
 export const profileSchema = z.object({
   name: z.string().trim().min(1).max(40),
   target: z.enum(["B1", "B2", "C1"]),
@@ -19,6 +20,7 @@ export const attemptSchema = z
     skill: skillSchema,
     date: z.string().datetime(),
     answers: z.record(z.string(), z.number().int().min(0).max(3)),
+    confidence: z.record(z.string(), confidenceSchema).optional(),
     correct: z.number().int().min(0).max(100),
     total: z.number().int().min(0).max(100),
     seconds: z.number().min(0).max(18000),
@@ -74,6 +76,7 @@ export const stateSchema = z
   });
 export type Profile = z.infer<typeof profileSchema>;
 export type Attempt = z.infer<typeof attemptSchema>;
+export type Confidence = z.infer<typeof confidenceSchema>;
 export type Review = z.infer<typeof reviewSchema>;
 export type StudyState = z.infer<typeof stateSchema>;
 export type ExamSession = z.infer<typeof examSchema>;
@@ -225,42 +228,99 @@ export function todayPlan(state: StudyState, now = new Date()) {
     mood === "low"
       ? Math.min(15, state.profile.dailyMinutes)
       : state.profile.dailyMinutes;
+  const examDays = daysUntil(state.profile.examDate, now);
+  const dueMistakes = mistakes(history, now).filter((item) => item.due);
   const ranked = lessons
     .map((lesson) => {
       const done = history.attempts.filter((a) => a.lessonId === lesson.id);
       const stat = skillStats(history, lesson.skill);
+      const lastAttempt = done.at(-1);
+      const recencyGap = lastAttempt
+        ? Math.max(
+            0,
+            Math.floor(
+              (Date.parse(`${today}T12:00:00+07:00`) -
+                Date.parse(`${localDay(lastAttempt.date)}T12:00:00+07:00`)) /
+                86400000,
+            ),
+          )
+        : null;
+      const dueForLesson = dueMistakes.filter(
+        (item) => item.lesson.id === lesson.id,
+      );
+      const confidentErrors = dueForLesson.filter(
+        (item) => item.confidence === "sure",
+      ).length;
+      const examUrgent = examDays !== null && examDays >= 0 && examDays <= 30;
       const score =
         (done.length === 0 ? 60 : 0) +
         (lesson.skill === state.profile.focus ? 20 : 0) +
         (state.profile.interests.includes(lesson.topic) ? 8 : 0) +
         (stat.accuracy !== null && stat.accuracy < 65 ? 15 : 0) +
+        Math.min(100, dueForLesson.length * 45) +
+        confidentErrors * 30 +
+        (recencyGap !== null ? Math.min(12, Math.floor(recencyGap / 3)) : 0) +
+        (examUrgent && lesson.level === "B2" ? 12 : 0) +
         (state.profile.level === "starting" && lesson.level === "B1" ? 10 : 0) -
         done.length * 4;
-      return { lesson, score };
+      const reasons: string[] = [];
+      if (confidentErrors)
+        reasons.push(
+          `${confidentErrors} câu sai dù đã chọn “Rất chắc” cần sửa ngay`,
+        );
+      else if (dueForLesson.length)
+        reasons.push(`${dueForLesson.length} lỗi đã đến lịch ôn`);
+      if (stat.accuracy !== null && stat.accuracy < 65)
+        reasons.push(`Độ chính xác ${stat.accuracy}% đang cần củng cố`);
+      if (lesson.skill === state.profile.focus)
+        reasons.push(`Đúng kỹ năng ${state.profile.name} đang ưu tiên`);
+      if (examUrgent && lesson.level === "B2")
+        reasons.push(`Còn ${examDays} ngày đến ngày thi, ưu tiên mức B2`);
+      if (reasons.length < 2 && state.profile.interests.includes(lesson.topic))
+        reasons.push(`Chủ đề hợp sở thích: ${lesson.topic}`);
+      if (reasons.length < 2 && recencyGap !== null && recencyGap >= 7)
+        reasons.push(`Đã ${recencyGap} ngày chưa quay lại bài này`);
+      if (reasons.length < 2 && done.length === 0)
+        reasons.push("Bài mới để mở rộng kỹ năng");
+      if (mood === "low" && reasons.length < 2)
+        reasons.push(`Vừa nhịp học nhẹ ${budget} phút hôm nay`);
+      return { lesson, score, reasons: reasons.slice(0, 2) };
     })
     .sort((a, b) => b.score - a.score);
-  const picked: typeof lessons = [];
+  const picked: typeof ranked = [];
   let remaining = budget;
-  for (const { lesson } of ranked) {
+  for (const item of ranked) {
+    const { lesson } = item;
     if (
       lesson.minutes <= remaining &&
       picked.length < 3 &&
-      !picked.some((l) => l.skill === lesson.skill)
+      !picked.some((entry) => entry.lesson.skill === lesson.skill)
     ) {
-      picked.push(lesson);
+      picked.push(item);
       remaining -= lesson.minutes;
     }
   }
-  if (!picked.length) picked.push(ranked[0].lesson);
-  return { lessons: picked, budget, mood };
+  if (!picked.length) picked.push(ranked[0]);
+  return {
+    lessons: picked.map((item) => item.lesson),
+    reasons: Object.fromEntries(
+      picked.map((item) => [item.lesson.id, item.reasons]),
+    ) as Record<string, string[]>,
+    budget,
+    mood,
+    examDays,
+  };
 }
-export function mistakes(state: StudyState) {
+export function mistakes(state: StudyState, now = new Date()) {
   const result = new Map<
     string,
     {
       question: (typeof lessons)[number]["questions"][number];
       lesson: (typeof lessons)[number];
       chosen: number | undefined;
+      confidence: Confidence | undefined;
+      wrongCount: number;
+      due: boolean;
       date: string;
     }
   >();
@@ -268,16 +328,34 @@ export function mistakes(state: StudyState) {
     const lesson = allLessons.find((l) => l.id === a.lessonId);
     if (!lesson) continue;
     for (const question of lesson.questions) {
-      if (a.answers[question.id] !== question.answer)
+      if (a.answers[question.id] !== question.answer) {
+        const previous = result.get(question.id);
+        const review = state.mistakeReviews[question.id];
         result.set(question.id, {
           question,
           lesson,
           chosen: a.answers[question.id],
+          confidence: a.confidence?.[question.id],
+          wrongCount: (previous?.wrongCount ?? 0) + 1,
+          due: !review || Date.parse(review.due) <= now.getTime(),
           date: a.date,
         });
+      }
     }
   }
-  return [...result.values()];
+  const confidenceWeight: Record<Confidence, number> = {
+    guess: 0,
+    unsure: 10,
+    sure: 25,
+  };
+  return [...result.values()].sort(
+    (a, b) =>
+      Number(b.due) - Number(a.due) ||
+      confidenceWeight[b.confidence ?? "guess"] +
+        b.wrongCount * 4 -
+        (confidenceWeight[a.confidence ?? "guess"] + a.wrongCount * 4) ||
+      Date.parse(b.date) - Date.parse(a.date),
+  );
 }
 export function scoreAnswers(
   lessonId: string,

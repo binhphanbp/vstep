@@ -1,8 +1,13 @@
 import type { Lesson } from "./content";
+import type { Confidence } from "./learning";
 export function readQuizDraft(
   raw: string | undefined,
   lesson: Lesson,
-): { answers: Record<string, number>; seconds: number } {
+): {
+  answers: Record<string, number>;
+  confidence: Record<string, Confidence>;
+  seconds: number;
+} {
   try {
     const value = JSON.parse(raw ?? "{}");
     if (value && typeof value === "object")
@@ -19,6 +24,16 @@ export function readQuizDraft(
                 ),
               ) as Record<string, number>)
             : {},
+        confidence:
+          value.confidence && typeof value.confidence === "object"
+            ? (Object.fromEntries(
+                Object.entries(value.confidence).filter(
+                  ([id, confidence]) =>
+                    lesson.questions.some((q) => q.id === id) &&
+                    ["guess", "unsure", "sure"].includes(String(confidence)),
+                ),
+              ) as Record<string, Confidence>)
+            : {},
         seconds:
           typeof value.seconds === "number" && Number.isFinite(value.seconds)
             ? Math.max(0, Math.min(18000, value.seconds))
@@ -27,5 +42,5 @@ export function readQuizDraft(
   } catch {
     /* Old or malformed drafts start empty without affecting history. */
   }
-  return { answers: {}, seconds: 0 };
+  return { answers: {}, confidence: {}, seconds: 0 };
 }

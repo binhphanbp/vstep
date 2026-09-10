@@ -267,7 +267,7 @@ export function MistakesPage() {
   const [now, setNow] = useState(() => Date.now());
   const [chosen, setChosen] = useState<Record<string, number>>({});
   const [revealed, setRevealed] = useState<string[]>([]);
-  const all = mistakes(state);
+  const all = mistakes(state, new Date(now));
   const filtered = all.filter(
     (m) =>
       filter === "all" ||
@@ -334,7 +334,25 @@ export function MistakesPage() {
               <section className="panel" key={item.question.id}>
                 <div className="section-heading">
                   <div>
-                    <span className="pill">{item.question.tag}</span>
+                    <div className="mistake-signals">
+                      <span className="pill">{item.question.tag}</span>
+                      {item.confidence && (
+                        <span
+                          className={`confidence-pill ${item.confidence === "sure" ? "priority" : ""}`}
+                        >
+                          {item.confidence === "sure"
+                            ? "Ưu tiên · Đã rất chắc"
+                            : item.confidence === "unsure"
+                              ? "Đã chưa chắc"
+                              : "Đã đoán"}
+                        </span>
+                      )}
+                      {item.wrongCount > 1 && (
+                        <span className="confidence-pill">
+                          Sai {item.wrongCount} lần
+                        </span>
+                      )}
+                    </div>
                     <p>
                       {item.lesson.title} ·{" "}
                       {new Date(item.date).toLocaleDateString("vi-VN")}

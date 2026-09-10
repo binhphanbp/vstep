@@ -1,18 +1,18 @@
 # Báo cáo bàn giao website Mây VSTEP
 
 **Ngày chốt báo cáo:** 10/09/2026  
-**Phiên bản bàn giao:** `ed9007fe033a8c25086a81b732c25444d9b43f78`  
+**Mốc nền tảng được đánh giá:** `9f4d8eaa42e1c93a12b08d96bc6aed7466fad6cf`
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Đối tượng sử dụng:** một người học VSTEP tại TP.HCM, tên thân mật “Rùa”, được gọi là “Gùa” trong website
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân chạy hoàn chỉnh trên máy tính và điện thoại, có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Code trên nhánh `main` đang sạch, bản build production thành công và GitHub Actions đã đạt.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build production và GitHub Actions đã đạt; chưa có nghiệm thu trên iOS/Android thật.
 
-Sản phẩm đã đủ để Gùa sử dụng hằng ngày trong phạm vi cá nhân. Tuy nhiên, chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Website cũng chưa được triển khai lên tên miền HTTPS công khai và chưa được nghiệm thu trên thiết bị thật của người học.
+Sản phẩm đủ để Gùa pilot hằng ngày trên môi trường local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc sẵn sàng production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Website cũng chưa được triển khai lên tên miền HTTPS công khai và chưa được nghiệm thu trên thiết bị thật của người học.
 
-Tại thời điểm bàn giao không có hạng mục code dở dang trên nhánh chính. Những việc tiếp theo là các hạng mục nâng cấp sản phẩm, kiểm định chuyên môn và vận hành production được liệt kê tại Mục 12.
+Không có task dở dang trong milestone nền tảng tại mốc bàn giao. Các milestone về học liệu, đánh giá đầu vào, phản hồi Viết/Nói và vận hành production vẫn đang mở và được liệt kê tại Mục 12.
 
 ## 2. Mục tiêu sản phẩm và hướng đi
 
@@ -21,24 +21,24 @@ Website được xây cho một người học cụ thể, không phải nền t
 Ba nguyên tắc đang chi phối thiết kế sản phẩm:
 
 1. **Giảm áp lực bắt đầu.** Mỗi ngày chỉ gợi ý tối đa ba hoạt động phù hợp quỹ thời gian. Khi chọn trạng thái “Hơi mệt”, ngân sách học giảm xuống tối đa 15 phút.
-2. **Cá nhân hóa bằng dữ liệu thật.** Kế hoạch dựa trên mục tiêu, trình độ tự đánh giá, kỹ năng ưu tiên, chủ đề yêu thích, lịch sử học và mức năng lượng trong ngày. Hệ thống không tạo điểm khởi đầu hoặc thành tích giả.
+2. **Cá nhân hóa bằng dữ liệu thật.** Kế hoạch dựa trên lỗi đến hạn, lỗi sai với mức tự tin cao, độ chính xác gần đây, độ lâu chưa luyện, ngày thi, kỹ năng ưu tiên, chủ đề yêu thích và mức năng lượng. Mỗi bài gợi ý hiển thị lý do được chọn. Hệ thống không tạo điểm khởi đầu hoặc thành tích giả.
 3. **Trung thực về năng lực sản phẩm.** Trắc nghiệm có thể chấm tự động; bài Viết và Nói chỉ lưu bài, hỗ trợ tự kiểm tra và đưa bài mẫu. Website không tự quy đổi kết quả sang bậc B1, B2 hoặc C1.
 
 Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học liệu, phản hồi Viết/Nói và trải nghiệm trên thiết bị thật trước khi mở rộng thêm tính năng trang trí hoặc cơ chế trò chơi.
 
 ## 3. Nỗi đau người học và cách website giải quyết
 
-| Nỗi đau | Giải pháp đã triển khai | Trạng thái |
-| --- | --- | --- |
-| Không biết hôm nay học gì | Kế hoạch ngày tự chọn tối đa ba bài theo thời gian, kỹ năng ưu tiên, sở thích và kết quả gần đây | Hoàn thành |
-| Khó duy trì khi mệt hoặc bận | Chọn mức năng lượng; ngày mệt tự giảm quỹ học; chuỗi ngày tính theo giờ Việt Nam và không phạt ngày hiện tại chưa kết thúc | Hoàn thành |
-| Làm sai lặp lại nhưng không biết ôn gì | Câu sai được gom vào sổ tay, yêu cầu làm lại trước khi xem giải thích và có lịch ôn | Hoàn thành |
-| Học từ rồi quên | 20 thẻ từ có phiên âm, nghĩa, ví dụ, phát âm và lịch ôn theo mức nhớ | Hoàn thành ở quy mô ban đầu |
-| Ngại luyện Viết và Nói | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài mẫu; Nói có ghi âm, nghe lại và tải file | Hoàn thành phần tự luyện |
-| Lo áp lực thời gian và chuyển phần | Có buổi rút gọn 51 phút và đề đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối, phục hồi sau tải lại | Hoàn thành |
-| Sợ mất bài khi tab treo hoặc trình duyệt crash | Tự lưu localStorage, IndexedDB cho audio, JSON backup, bảo vệ dữ liệu hỏng và xử lý nhiều tab | Hoàn thành trong giới hạn trình duyệt |
-| Không nhìn thấy tiến bộ | Thống kê phút học, số lượt, chuỗi ngày, độ chính xác Nghe/Đọc và lịch sử bài | Hoàn thành |
-| Học một mình dễ nhàm chán | Giao diện hồng pastel, microcopy nhẹ nhàng, mood check-in, con trỏ riêng và cá nhân hóa “Gùa/Rùa” | Hoàn thành |
+| Nỗi đau                                        | Giải pháp đã triển khai                                                                                                                                                                     | Trạng thái                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Không biết hôm nay học gì                      | Kế hoạch ngày tự chọn tối đa ba bài theo thời gian, lỗi đến hạn, mức chắc chắn, độ chính xác, độ lâu chưa luyện, ngày thi, kỹ năng ưu tiên và sở thích; từng bài giải thích lý do được chọn | Hoàn thành bản cá nhân hóa v2 đầu tiên |
+| Khó duy trì khi mệt hoặc bận                   | Chọn mức năng lượng; ngày mệt tự giảm quỹ học; chuỗi ngày tính theo giờ Việt Nam và không phạt ngày hiện tại chưa kết thúc                                                                  | Hoàn thành                             |
+| Làm sai lặp lại nhưng không biết ôn gì         | Câu sai được gom theo subskill, số lần sai và mức chắc chắn; lỗi “sai nhưng rất chắc” được ưu tiên, yêu cầu làm lại trước khi xem giải thích và có lịch ôn                                  | Hoàn thành bản taxonomy đầu tiên       |
+| Học từ rồi quên                                | 20 thẻ từ có phiên âm, nghĩa, ví dụ, phát âm và lịch ôn theo mức nhớ                                                                                                                        | Hoàn thành ở quy mô ban đầu            |
+| Ngại luyện Viết và Nói                         | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài mẫu; Nói có ghi âm, nghe lại và tải file                                                                                                     | Hoàn thành phần tự luyện               |
+| Lo áp lực thời gian và chuyển phần             | Có buổi rút gọn 51 phút và đề đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối, phục hồi sau tải lại                                                                                   | Hoàn thành                             |
+| Sợ mất bài khi tab treo hoặc trình duyệt crash | Tự lưu localStorage, IndexedDB cho audio, JSON backup, bảo vệ dữ liệu hỏng và xử lý nhiều tab                                                                                               | Hoàn thành trong giới hạn trình duyệt  |
+| Không nhìn thấy tiến bộ                        | Thống kê phút học, số lượt, chuỗi ngày, độ chính xác Nghe/Đọc và lịch sử bài                                                                                                                | Hoàn thành                             |
+| Học một mình dễ nhàm chán                      | Giao diện hồng pastel, microcopy nhẹ nhàng, mood check-in, con trỏ riêng và cá nhân hóa “Gùa/Rùa”                                                                                           | Hoàn thành                             |
 
 ## 4. Phạm vi chức năng đã hoàn thành
 
@@ -116,17 +116,17 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 
 ### 6.1 Tech stack
 
-| Thành phần | Công nghệ | Vai trò |
-| --- | --- | --- |
-| Web framework | Next.js 16.3.4 App Router | Routing, metadata, SSG và production build |
-| UI runtime | React 19.2.8, TypeScript | Component và trạng thái giao diện |
-| Styling | Tailwind CSS 4, CSS variables và component classes | Theme, responsive và trạng thái tương tác |
-| Icon | Lucide React | Hệ icon nhất quán |
-| Validation | Zod 4.5.4 | Kiểm tra profile, state, backup và payload cloud |
-| Cloud | Supabase JS 2.116 | Auth và snapshot đồng bộ thủ công |
-| Browser storage | localStorage, IndexedDB | State học tập và Blob ghi âm |
-| Testing | Vitest, Playwright, axe-core, PGlite | Unit, database, E2E, accessibility và production QA |
-| CI | GitHub Actions, Node.js 24 | Cài sạch, kiểm tra, build và chạy trình duyệt production |
+| Thành phần      | Công nghệ                                          | Vai trò                                                  |
+| --------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| Web framework   | Next.js 16.3.4 App Router                          | Routing, metadata, SSG và production build               |
+| UI runtime      | React 19.2.8, TypeScript                           | Component và trạng thái giao diện                        |
+| Styling         | Tailwind CSS 4, CSS variables và component classes | Theme, responsive và trạng thái tương tác                |
+| Icon            | Lucide React                                       | Hệ icon nhất quán                                        |
+| Validation      | Zod 4.5.4                                          | Kiểm tra profile, state, backup và payload cloud         |
+| Cloud           | Supabase JS 2.116                                  | Auth và snapshot đồng bộ thủ công                        |
+| Browser storage | localStorage, IndexedDB                            | State học tập và Blob ghi âm                             |
+| Testing         | Vitest, Playwright, axe-core, PGlite               | Unit, database, E2E, accessibility và production QA      |
+| CI              | GitHub Actions, Node.js 24                         | Cài sạch, kiểm tra, build và chạy trình duyệt production |
 
 ### 6.2 Luồng dữ liệu
 
@@ -173,18 +173,18 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Trạng thái tại commit bàn giao:
+Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 
-| Nhóm kiểm tra | Kết quả | Phạm vi chính |
-| --- | --- | --- |
-| ESLint | Đạt | Quy tắc code Next.js và TypeScript |
-| TypeScript | Đạt | Type generation và `tsc --noEmit` |
-| Vitest | 45/45 đạt | Logic học, lịch ôn, chấm điểm, timer, store, speech, cấu trúc đề và migration SQL/RLS |
-| Playwright production | 23/23 đạt | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu |
-| axe WCAG A/AA | Đạt trên 13 màn | Lỗi accessibility có thể tự động phát hiện |
-| Production build | Đạt | 44 trang tĩnh/SSG được sinh thành công |
-| Dependency audit | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026 |
-| GitHub Actions | Đạt | Run 34380020622 cho commit `ed9007f` |
+| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                     |
+| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
+| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                |
+| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                 |
+| Vitest                | 46/46 đạt          | Logic học, confidence, planner, lịch ôn, chấm điểm, timer, store, speech, đề và migration SQL/RLS |
+| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu  |
+| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                        |
+| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                            |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                            |
+| GitHub Actions        | Mốc trước đạt      | Run 34419561349 cho commit `9f4d8ea`; vòng hiện tại được xác nhận lại sau khi push                |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -194,21 +194,21 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 
 ## 9. Những việc chưa làm và giới hạn hiện tại
 
-| Hạng mục | Trạng thái hiện tại | Ảnh hưởng |
-| --- | --- | --- |
-| Deploy production HTTPS và tên miền | Chưa làm | Chưa có URL cho người học dùng bên ngoài máy local |
-| Nghiệm thu thiết bị thật | Chưa làm | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt |
-| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm | Không thể khẳng định độ khó hoặc khả năng dự báo bậc |
-| Ngân hàng đề độc lập | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói |
-| Bản thu người nói cho Nghe | Chưa làm | Speech synthesis khác điều kiện thi và chất lượng phụ thuộc thiết bị |
-| Chấm và phản hồi Viết/Nói | Chưa làm | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu |
-| Đồng bộ audio | Chưa làm | Bản ghi chỉ ở thiết bị và phải tải riêng |
-| Tự động đồng bộ nhiều thiết bị | Chưa làm | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict |
-| Hợp nhất chỉnh sửa đồng thời | Chưa làm | Hai nhánh lịch sử không tự merge |
-| PWA/offline đầy đủ | Chưa làm | Không có service worker; chỉ dữ liệu đã tải có thể còn trong cache trình duyệt |
-| Monitoring và báo lỗi production | Chưa làm | Chưa có dashboard lỗi hoặc cảnh báo vận hành |
-| C1 toàn diện | Chưa làm | Kho nội dung hiện tập trung B1-B2 |
-| Đa người dùng, quản trị, thanh toán | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại |
+| Hạng mục                               | Trạng thái hiện tại       | Ảnh hưởng                                                                      |
+| -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
+| Deploy production HTTPS và tên miền    | Chưa làm                  | Chưa có URL cho người học dùng bên ngoài máy local                             |
+| Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt         |
+| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                           |
+| Ngân hàng đề độc lập                   | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói                                |
+| Bản thu người nói cho Nghe             | Chưa làm                  | Speech synthesis khác điều kiện thi và chất lượng phụ thuộc thiết bị           |
+| Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu             |
+| Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                       |
+| Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                    |
+| Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                               |
+| PWA/offline đầy đủ                     | Chưa làm                  | Không có service worker; chỉ dữ liệu đã tải có thể còn trong cache trình duyệt |
+| Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                   |
+| C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                              |
+| Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại                                          |
 
 ## 10. Hướng dẫn chạy và vận hành
 
@@ -293,7 +293,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ### P2 Tăng chiều sâu cá nhân hóa và vận hành
 
-1. Điều chỉnh kế hoạch theo ngày thi, thời lượng thực tế, lỗi lặp và mức nhớ từ thay vì chỉ dùng ưu tiên tĩnh.
+1. Đã triển khai vòng đầu của kế hoạch theo ngày thi, lỗi đến hạn, lỗi tự tin cao, độ chính xác, recency và diversity guard; cần hiệu chỉnh trọng số sau 5–7 ngày dữ liệu thật.
 2. Mở rộng từ vựng theo lỗi trong bài và theo chủ đề người học quan tâm.
 3. Cân nhắc PWA/offline nếu người học thường mất mạng.
 4. Cân nhắc lưu audio có kiểm soát trên Supabase Storage nếu thật sự cần dùng nhiều thiết bị.
@@ -301,24 +301,24 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 13. Cấu trúc mã nguồn cần biết
 
-| Đường dẫn | Nội dung |
-| --- | --- |
-| `src/app` | Route, metadata, layout, error và not-found |
-| `src/components/dashboard.tsx` | Góc học hôm nay và kế hoạch ngày |
-| `src/components/practice.tsx` | Thư viện và phiên luyện kỹ năng |
-| `src/components/exam.tsx` | Luồng mini/full exam và điều phối phần thi |
-| `src/components/audio-tools.tsx` | Speech synthesis, ghi âm, phát và tải audio |
-| `src/components/review.tsx` | Từ vựng và sổ lỗi sai |
-| `src/components/settings.tsx` | Hồ sơ, backup, Auth và cloud sync |
-| `src/lib/content.ts` | 14 bài ngắn, 20 từ và nguồn tham khảo |
-| `src/lib/full-exam-content.ts` | Ngữ liệu đề đủ cấu trúc |
-| `src/lib/learning.ts` | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
-| `src/lib/study-store.ts` | Store, localStorage, nhiều tab và phục hồi |
-| `src/lib/recordings.ts` | IndexedDB cho bản ghi |
-| `supabase/migrations/001_personal_study.sql` | Bảng, RLS và RPC snapshot |
-| `tests/unit` | Logic và database tests |
-| `tests/e2e` | E2E, accessibility, resilience và full exam |
-| `.github/workflows/check.yml` | Pipeline CI |
+| Đường dẫn                                    | Nội dung                                                     |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| `src/app`                                    | Route, metadata, layout, error và not-found                  |
+| `src/components/dashboard.tsx`               | Góc học hôm nay và kế hoạch ngày                             |
+| `src/components/practice.tsx`                | Thư viện và phiên luyện kỹ năng                              |
+| `src/components/exam.tsx`                    | Luồng mini/full exam và điều phối phần thi                   |
+| `src/components/audio-tools.tsx`             | Speech synthesis, ghi âm, phát và tải audio                  |
+| `src/components/review.tsx`                  | Từ vựng và sổ lỗi sai                                        |
+| `src/components/settings.tsx`                | Hồ sơ, backup, Auth và cloud sync                            |
+| `src/lib/content.ts`                         | 14 bài ngắn, 20 từ và nguồn tham khảo                        |
+| `src/lib/full-exam-content.ts`               | Ngữ liệu đề đủ cấu trúc                                      |
+| `src/lib/learning.ts`                        | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
+| `src/lib/study-store.ts`                     | Store, localStorage, nhiều tab và phục hồi                   |
+| `src/lib/recordings.ts`                      | IndexedDB cho bản ghi                                        |
+| `supabase/migrations/001_personal_study.sql` | Bảng, RLS và RPC snapshot                                    |
+| `tests/unit`                                 | Logic và database tests                                      |
+| `tests/e2e`                                  | E2E, accessibility, resilience và full exam                  |
+| `.github/workflows/check.yml`                | Pipeline CI                                                  |
 
 ## 14. Các quyết định quan trọng cần giữ
 
@@ -347,18 +347,25 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 16. Lịch sử phát triển chính
 
-| Commit | Nội dung |
-| --- | --- |
+| Commit    | Nội dung                                                                           |
+| --------- | ---------------------------------------------------------------------------------- |
 | `96d1a61` | Xây trải nghiệm luyện VSTEP cá nhân, nội dung, thi có giờ, lưu dữ liệu và Supabase |
-| `b320a3d` | Sửa quy trình cài dependency có thể tái lập |
-| `21e1abd` | Cập nhật runtime GitHub Actions |
-| `7e3ab8e` | Thêm custom cursor responsive và accessible |
-| `8b843f4` | Chuyển giao diện sang pastel rose |
-| `026a290` | Tinh chỉnh bảng màu hồng pastel |
-| `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa |
+| `7e3ab8e` | Thêm custom cursor responsive và accessible                                        |
+| `026a290` | Tinh chỉnh bảng màu hồng pastel                                                    |
+| `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa                                      |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 
-Giai đoạn code nền tảng được xem là hoàn tất vì các route chính hoạt động, state được bảo toàn, hai chế độ thi chạy hết luồng, Supabase thật đã xác nhận, test production và CI đều đạt, giao diện đã được nghiệm thu trực quan và tài liệu vận hành đã có. Giai đoạn production chỉ được xem là hoàn tất sau khi có URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và có người chịu trách nhiệm xác nhận chất lượng học liệu.
+Milestone nền tảng được xem là hoàn tất vì các route chính hoạt động, state được bảo toàn, hai chế độ thi chạy hết luồng, Supabase thật đã xác nhận, test production và CI đều đạt, giao diện đã được kiểm tra ở viewport đại diện và tài liệu vận hành đã có. Giai đoạn production chỉ được xem là hoàn tất sau khi có URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và có người chịu trách nhiệm xác nhận chất lượng học liệu.
 
-Tài liệu liên quan: `README.md`, `docs/PRODUCT.md`, `docs/QUALITY.md`, `docs/STATUS.md` và migration tại `supabase/migrations/001_personal_study.sql`.
+| Nhóm tiêu chí       | Kết luận hiện tại | Bằng chứng hoặc bước còn thiếu                                                   |
+| ------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| Nền tảng kỹ thuật   | Đạt milestone     | Build, unit, E2E, accessibility, Supabase Auth/RLS và backup đã kiểm tra         |
+| Cá nhân hóa         | Đạt vòng v2 đầu   | Có confidence, due review, weakness, recency, exam urgency và lý do chọn bài     |
+| Hiệu quả học tập    | Chưa kết luận     | Cần 5–7 ngày pilot và checkpoint bằng ngữ liệu chưa từng học                     |
+| Chất lượng học liệu | Chưa kiểm định    | Cần giáo viên VSTEP review và version hóa content                                |
+| Production          | Chưa đạt          | Cần URL HTTPS, biến môi trường host, kiểm tra hai thiết bị và quy trình vận hành |
+
+Người tiếp tục dự án nên dùng `docs/REVIEW-RESPONSE.md` làm quyết định ưu tiên, `docs/QUALITY.md` làm bằng chứng kỹ thuật và báo cáo này làm tài liệu bàn giao phạm vi. Không dùng số câu đã học hoặc chuỗi ngày như bằng chứng người học đã đạt bậc VSTEP.
+
+Tài liệu liên quan: `README.md`, `docs/PRODUCT.md`, `docs/QUALITY.md`, `docs/STATUS.md`, `docs/REVIEW-RESPONSE.md` và migration tại `supabase/migrations/001_personal_study.sql`.

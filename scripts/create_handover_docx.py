@@ -282,7 +282,7 @@ def add_cover(doc):
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
     metadata = [
         ("Ngày chốt", "10/09/2026"),
-        ("Phiên bản", "ed9007fe033a8c25086a81b732c25444d9b43f78"),
+        ("Mốc đánh giá", "9f4d8ea + vòng cải tiến learning loop 10/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("Người học", "Gùa, tên ở nhà Rùa"),
@@ -318,7 +318,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để sử dụng cá nhân trên local, Supabase thật đã kết nối và kiểm thử, toàn bộ pipeline kiểm tra đang đạt. Các điều kiện còn thiếu để gọi là production hoàn chỉnh là URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên local, Supabase thật đã kết nối và kiểm thử, toàn bộ pipeline kiểm tra đang đạt. Daily Mission đã giải thích lý do chọn bài và ưu tiên lỗi đến hạn hoặc sai với mức tự tin cao. Các điều kiện còn thiếu để gọi là production hoàn chỉnh là URL HTTPS, nghiệm thu thiết bị thật, thử đồng bộ hai thiết bị và thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )
@@ -453,6 +453,8 @@ def parse_markdown(doc, lines):
             continue
         if line.startswith("## "):
             title = line[3:]
+            if title.startswith("17. "):
+                doc.add_page_break()
             p = doc.add_paragraph(style="Heading 1")
             add_inline(p, title, 17, "000000")
             i += 1

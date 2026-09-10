@@ -786,6 +786,24 @@ textarea:focus-visible {
   flex: 1;
   min-width: 0;
 }
+.plan-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.plan-reasons span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #fff2f7;
+  color: #914064;
+  font-size: 10px;
+  line-height: 1.4;
+}
 .lesson-kicker {
   display: flex;
   align-items: center;
@@ -1377,6 +1395,56 @@ textarea:focus-visible {
 .option.wrong {
   background: #fff0ed;
   border-color: #dfb5ac;
+}
+.confidence-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #fff8fb;
+  color: #70666f;
+  font-size: 12px;
+}
+.confidence-check > div,
+.mistake-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.confidence-check button {
+  min-height: 34px;
+  border: 1px solid #ead8df;
+  border-radius: 999px;
+  background: #fff;
+  color: #735f69;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.confidence-check button:hover,
+.confidence-check button.selected {
+  border-color: #cc829f;
+  background: #f8e6ee;
+  color: #8e335d;
+}
+.confidence-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #eadde2;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #756771;
+  background: #faf7f8;
+  font-size: 10px;
+}
+.confidence-pill.priority {
+  border-color: #e2a7b8;
+  background: #fff0f5;
+  color: #9d315f;
+  font-weight: 600;
 }
 .explanation {
   font-size: 13px;
@@ -2528,6 +2596,18 @@ details .passage {
   letter-spacing: 1.2px;
 }
 @media (max-width: 550px) {
+  .confidence-check {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .confidence-check > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .confidence-check button {
+    padding-inline: 5px;
+    white-space: nowrap;
+  }
   .welcome-content {
     max-width: 100%;
   }

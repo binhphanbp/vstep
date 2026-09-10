@@ -59,13 +59,35 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
 }) => {
   await page.goto("/practice/reading-cafe");
   await page.locator('input[name="rc1"][value="0"]').check();
+  await page
+    .locator(".question")
+    .filter({ has: page.locator('input[name="rc1"]') })
+    .getByRole("button", { name: "Rất chắc" })
+    .click();
   await expect
     .poll(async () => page.evaluate(() => localStorage.getItem("may-study-v1")))
     .toContain("rc1");
   await page.reload();
   await expect(page.locator('input[name="rc1"][value="0"]')).toBeChecked();
-  for (const [id, value] of Object.entries({ rc2: 2, rc3: 0, rc4: 3, rc5: 1 }))
+  await expect(
+    page
+      .locator(".question")
+      .filter({ has: page.locator('input[name="rc1"]') })
+      .getByRole("button", { name: "Rất chắc" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  for (const [id, value] of Object.entries({
+    rc2: 2,
+    rc3: 0,
+    rc4: 3,
+    rc5: 1,
+  })) {
     await page.locator(`input[name="${id}"][value="${value}"]`).check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
   await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
   await expect(page.locator(".result-score")).toHaveText("4/5");
   await expect(
@@ -73,6 +95,7 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   ).toBeVisible();
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();
   await expect(page.getByText("1 câu đã ghi lại")).toBeVisible();
+  await expect(page.getByText("Ưu tiên · Đã rất chắc")).toBeVisible();
   await page.locator('input[name="rc1"][value="1"]').check();
   await page.getByRole("button", { name: "Kiểm tra lại", exact: true }).click();
   await expect(

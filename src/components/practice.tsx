@@ -13,7 +13,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { lessons, skillNames, type Lesson, type Question } from "@/lib/content";
-import { scoreAnswers, wordCount, type Attempt } from "@/lib/learning";
+import {
+  scoreAnswers,
+  wordCount,
+  type Attempt,
+  type Confidence,
+} from "@/lib/learning";
 import { useStudy } from "./study-provider";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
@@ -153,12 +158,16 @@ export function QuestionCard({
   chosen,
   submitted,
   onChoose,
+  confidence,
+  onConfidence,
 }: {
   question: Question;
   index: number;
   chosen?: number;
   submitted: boolean;
   onChoose: (value: number) => void;
+  confidence?: Confidence;
+  onConfidence?: (value: Confidence) => void;
 }) {
   return (
     <fieldset className="question">
@@ -183,6 +192,30 @@ export function QuestionCard({
           </span>
         </label>
       ))}
+      {onConfidence && chosen !== undefined && !submitted && (
+        <div className="confidence-check" aria-label="Mức độ chắc chắn">
+          <span>Bạn chắc đến đâu?</span>
+          <div>
+            {(
+              [
+                ["guess", "Đoán"],
+                ["unsure", "Chưa chắc"],
+                ["sure", "Rất chắc"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                className={confidence === value ? "selected" : ""}
+                aria-pressed={confidence === value}
+                onClick={() => onConfidence(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {submitted && (
         <div className="explanation">
           <strong>
@@ -203,6 +236,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const [result, setResult] = useState<Attempt | null>(null);
   const draft = readQuizDraft(state.drafts[`quiz:${lesson.id}`], lesson);
   const answers = result?.answers ?? draft.answers;
+  const confidence = result?.confidence ?? draft.confidence;
   const seconds = result?.seconds ?? draft.seconds;
   const [checks, setChecks] = useState<string[]>([]);
   const [hasRecording, setHasRecording] = useState(false);
@@ -271,6 +305,15 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       );
       return;
     }
+    if (
+      lesson.questions.length &&
+      lesson.questions.some((q) => confidence[q.id] === undefined)
+    ) {
+      setError(
+        "Chọn mức độ chắc chắn cho từng câu để Mây nhận ra phần Gùa đang hiểu nhầm và xếp lịch ôn đúng hơn.",
+      );
+      return;
+    }
     if (lesson.skill === "writing" && wordCount(text) < 10) {
       setError("Hãy viết ít nhất một đoạn ngắn (10 từ) trước khi hoàn thành.");
       return;
@@ -287,6 +330,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       skill: lesson.skill,
       date: new Date().toISOString(),
       answers,
+      confidence,
       ...scoreAnswers(lesson.id, answers),
       seconds,
       text: lesson.skill === "writing" ? text : undefined,
@@ -448,6 +492,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               index={i}
               chosen={answers[q.id]}
               submitted={Boolean(result)}
+              confidence={confidence[q.id]}
               onChoose={(value) => {
                 update((s) => {
                   const current = readQuizDraft(
@@ -460,6 +505,26 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                       ...s.drafts,
                       [`quiz:${lesson.id}`]: JSON.stringify({
                         answers: { ...current.answers, [q.id]: value },
+                        confidence: current.confidence,
+                        seconds: current.seconds,
+                      }),
+                    },
+                  };
+                });
+              }}
+              onConfidence={(value) => {
+                update((s) => {
+                  const current = readQuizDraft(
+                    s.drafts[`quiz:${lesson.id}`],
+                    lesson,
+                  );
+                  return {
+                    ...s,
+                    drafts: {
+                      ...s.drafts,
+                      [`quiz:${lesson.id}`]: JSON.stringify({
+                        answers: current.answers,
+                        confidence: { ...current.confidence, [q.id]: value },
                         seconds: current.seconds,
                       }),
                     },
@@ -541,7 +606,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
             <div className="answer-submit">
               <p>
                 {lesson.questions.length
-                  ? `${Object.keys(answers).length}/${lesson.questions.length} câu đã trả lời`
+                  ? `${Object.keys(answers).length}/${lesson.questions.length} câu đã trả lời · ${Object.keys(confidence).length}/${lesson.questions.length} mức chắc chắn`
                   : "Một lần thực hành là một lần tiến bộ."}
               </p>
               <button className="button primary" onClick={submit}>
