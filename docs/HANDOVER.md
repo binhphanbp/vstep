@@ -184,7 +184,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                        |
 | Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                            |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                            |
-| GitHub Actions        | Mốc trước đạt      | Run 34419561349 cho commit `9f4d8ea`; vòng hiện tại được xác nhận lại sau khi push                |
+| GitHub Actions        | Đạt                | Run 34435381574 cho commit triển khai `13e6683`                                                   |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
