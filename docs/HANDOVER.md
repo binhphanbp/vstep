@@ -1,7 +1,7 @@
 # Báo cáo bàn giao website Mây VSTEP
 
 **Ngày chốt báo cáo:** 10/09/2026  
-**Mốc nền tảng được đánh giá:** `9f4d8eaa42e1c93a12b08d96bc6aed7466fad6cf`
+**Mốc nền tảng được đánh giá:** `4e0ed589e3fe667a1dc1045144a8fdbedaac48ba`
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -9,7 +9,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập/sync bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -185,7 +185,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                        |
 | Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                            |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                            |
-| GitHub Actions        | Đạt                | Run 34435602731 cho commit `32697bf`; run triển khai `34435381574` cũng đạt                       |
+| GitHub Actions        | Đạt                | Run `34446938974` cho commit `4e0ed58`; các run `34443900365`, `34439806721`, `34435602731` cũng đạt |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -305,7 +305,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 | Đường dẫn                                    | Nội dung                                                     |
 | -------------------------------------------- | ------------------------------------------------------------ |
-| `src/app`                                    | Route, metadata, layout, error và not-found                  |
+| `src/app`                                    | Route, metadata, layout, error, global-error và not-found    |
 | `src/components/dashboard.tsx`               | Góc học hôm nay và kế hoạch ngày                             |
 | `src/components/practice.tsx`                | Thư viện và phiên luyện kỹ năng                              |
 | `src/components/exam.tsx`                    | Luồng mini/full exam và điều phối phần thi                   |
@@ -355,6 +355,10 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `7e3ab8e` | Thêm custom cursor responsive và accessible                                        |
 | `026a290` | Tinh chỉnh bảng màu hồng pastel                                                    |
 | `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa                                      |
+| `13e6683` | Thêm mức tự tin, ưu tiên lỗi sai và Daily Mission v2                               |
+| `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                                |
+| `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                      |
+| `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng              |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 

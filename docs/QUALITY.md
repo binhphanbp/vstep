@@ -1,4 +1,4 @@
-# Rà soát chất lượng — 09/09/2026
+# Rà soát chất lượng — 10/09/2026
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
@@ -22,6 +22,7 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - AudioPlayer chỉ dừng bản đọc do chính nó phát khi unmount; hủy/interruption đưa nút phát về trạng thái đúng.
 - CI và lệnh `test:production` chạy trình duyệt trên `next start` cổng riêng để kiểm chứng bản build thực tế.
 - Hệ màu pastel pink dùng nền blush sáng, chữ charcoal/lavender-gray trung tính và điểm nhấn rose rõ nét; vẫn giữ màu phụ riêng cho bốn kỹ năng. Focus, trạng thái chọn, con trỏ và favicon dùng cùng bảng màu.
+- Bổ sung `global-error.tsx` để người học vẫn có nút thử lại và đường vào phần xuất bản sao khi lỗi xảy ra ở root layout. Chuẩn hóa `type` cho toàn bộ nút, trạng thái `aria-pressed` của các bộ lọc, nhóm confidence, timer và tiến độ trả lời.
 
 ## Bằng chứng kiểm tra
 
@@ -30,7 +31,7 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng tại thời điểm chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
-- GitHub Actions run `34435602731` đạt cho commit `32697bf`; run triển khai chức năng `34435381574` đạt cho commit `13e6683`.
+- GitHub Actions run `34446938974` đạt cho commit `4e0ed58`; các run `34443900365`, `34439806721`, `34435602731` và run triển khai chức năng `34435381574` đều đạt.
 - Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 10/09/2026: 10 route chính HTTP 200, route giả HTTP 404, HSTS, CSP liên quan và các header bảo vệ hiện diện; learning loop mới tải được, không có lỗi console.
 
 ## Giới hạn còn mở
