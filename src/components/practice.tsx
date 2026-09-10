@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { lessons, skillNames, type Lesson, type Question } from "@/lib/content";
 import {
+  objectiveInsights,
   scoreAnswers,
   wordCount,
   type Attempt,
@@ -250,6 +251,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const started = useRef(0);
   const lock = useRef(false);
   const [error, setError] = useState("");
+  const insights = result?.total
+    ? objectiveInsights(lesson.questions, result.answers, result.confidence)
+    : null;
   useEffect(() => {
     started.current = Date.now();
     const activity = () => {
@@ -440,6 +444,55 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
             </div>
           </div>
         </div>
+      )}
+      {insights && (
+        <section className="panel learning-insights" aria-labelledby="insight-title">
+          <div className="panel-heading">
+            <div>
+              <span className="panel-label">PHẢN HỒI CÁ NHÂN</span>
+              <h2 id="insight-title">Mình vừa học được gì?</h2>
+            </div>
+            <span className="pill">Theo dạng câu & độ chắc chắn</span>
+          </div>
+          <div className="insight-summary">
+            <div>
+              <strong>{insights.secureCorrect}</strong>
+              <span>Đúng và rất chắc</span>
+            </div>
+            <div>
+              <strong>{insights.fragileCorrect}</strong>
+              <span>Đúng nhưng còn phân vân</span>
+            </div>
+            <div className={insights.confidentErrors ? "needs-attention" : ""}>
+              <strong>{insights.confidentErrors}</strong>
+              <span>Sai dù đã rất chắc</span>
+            </div>
+          </div>
+          <div className="tag-breakdown" aria-label="Kết quả theo dạng câu hỏi">
+            {insights.byTag.map((item) => (
+              <div key={item.tag}>
+                <span>{item.tag}</span>
+                <strong>
+                  {item.correct}/{item.total}
+                </strong>
+                <span
+                  className="tag-meter"
+                  aria-hidden="true"
+                  style={{
+                    "--score": `${Math.round((item.correct / item.total) * 100)}%`,
+                  } as React.CSSProperties}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="help-copy">
+            {insights.confidentErrors
+              ? "Ưu tiên xem lại câu sai dù đã rất chắc: đây thường là chỗ mình đang hiểu nhầm, không chỉ là thiếu tập trung."
+              : insights.fragileCorrect
+                ? "Các câu đúng nhưng còn phân vân vẫn đáng xem lại bằng chứng để lần sau trả lời chắc hơn."
+                : "Đáp án và độ chắc chắn đang khớp nhau rất tốt. Hãy giữ cách tìm bằng chứng này ở bài tiếp theo."}
+          </p>
+        </section>
       )}
       <div className="practice-layout">
         <div

@@ -46,6 +46,15 @@ test("full exam navigates all materials and restores both writing tasks", async 
   await expect(
     page.getByRole("heading", { name: "Buổi luyện đã khép lại." }),
   ).toBeVisible();
+  const firstListeningReview = page
+    .getByText("Xem đáp án và giải thích", { exact: false })
+    .first();
+  await firstListeningReview.click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Bản chép lời để đối chiếu sau khi nộp",
+    }),
+  ).toBeVisible();
   const attempts = await page.evaluate(
     () => JSON.parse(localStorage.getItem("may-study-v1")!).attempts,
   );

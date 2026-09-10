@@ -880,6 +880,10 @@ export const vocabulary: Vocabulary[] = [
 ];
 export const sources = [
   {
+    title: "VSTEP Test format · Trường ĐH Ngoại ngữ, ĐHQGHN",
+    url: "https://vstep.vnu.edu.vn/test-format/",
+  },
+  {
     title: "Định dạng VSTEP bậc 3–5 · ĐH Sư phạm TP.HCM",
     url: "https://vstep.hcmue.edu.vn/index.php/gioi-thieu/dinh-dang-de-thi/bac-345",
   },

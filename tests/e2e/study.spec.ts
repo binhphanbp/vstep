@@ -91,6 +91,15 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
   await expect(page.locator(".result-score")).toHaveText("4/5");
   await expect(
+    page.getByRole("heading", { name: "Mình vừa học được gì?" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Sai dù đã rất chắc", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Ưu tiên xem lại câu sai", { exact: false }),
+  ).toBeVisible();
+  await expect(
     page.getByText("Cả bài kể quá trình Linh", { exact: false }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();

@@ -70,11 +70,21 @@ export function ExamPage() {
   function finishStage() {
     const submitting = exam;
     if (!submitting || submitting.finished) return;
+    const currentStage = examStages[submitting.stage];
+    const stageQuestions = currentStage.lessonIds.flatMap(
+      (id) => lessons.find((lesson) => lesson.id === id)?.questions ?? [],
+    );
+    const unanswered = stageQuestions.filter(
+      (question) => submitting.answers[question.id] === undefined,
+    ).length;
+    const unansweredNotice = unanswered
+      ? `Còn ${unanswered}/${stageQuestions.length} câu chưa trả lời. `
+      : "";
     if (
       !window.confirm(
         exam?.stage === 3
           ? "Kết thúc buổi luyện và lưu kết quả hiện có?"
-          : "Nộp phần này và chuyển tiếp? Bạn sẽ không quay lại sửa phần đã nộp.",
+          : `${unansweredNotice}Nộp phần này và chuyển tiếp? Bạn sẽ không quay lại sửa phần đã nộp.`,
       )
     )
       return;
@@ -329,6 +339,14 @@ export function ExamPage() {
             return (
               <details key={id}>
                 <summary>{lesson.title} · Xem đáp án và giải thích</summary>
+                {lesson.skill === "listening" && (
+                  <section className="exam-transcript" aria-label="Bản chép lời">
+                    <h3>Bản chép lời để đối chiếu sau khi nộp</h3>
+                    <div className="passage" lang="en">
+                      {lesson.text}
+                    </div>
+                  </section>
+                )}
                 {lesson.questions.map((q, i) => (
                   <QuestionCard
                     key={q.id}

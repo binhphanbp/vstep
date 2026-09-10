@@ -8,7 +8,7 @@ Một người học tại TP.HCM, cần một chứng chỉ nhưng cũng cần 
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | Không biết hôm nay học gì    | Chọn tối đa 3 bài vừa quỹ thời gian; ưu tiên kỹ năng, sở thích, bài chưa học và kết quả các ngày trước          | Kế hoạch giữ ổn định trong ngày; bài hoàn thành có dấu kiểm                 |
 | Áp lực, học đứt nhịp         | Chọn mức năng lượng; ngày mệt giảm ngân sách xuống tối đa 15 phút                                               | Chuỗi ngày không phạt trước khi ngày hiện tại kết thúc, theo giờ Việt Nam   |
-| Làm nhiều mà lặp lỗi         | Câu sai vào sổ tay, làm lại trước khi xem giải thích, xếp lịch ôn                                               | Một câu sai được lưu một lần; nếu sai lại trong bài luyện thì đến hạn ngay  |
+| Làm nhiều mà lặp lỗi         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai vào sổ tay, làm lại trước khi xem giải thích, xếp lịch ôn   | Ưu tiên lỗi sai dù rất chắc; chỉ ra câu đúng nhưng còn phân vân             |
 | Học từ rồi quên              | 20 thẻ có phiên âm, nghĩa, ví dụ, giọng đọc; lịch ôn theo mức nhớ                                               | Chưa nhớ: 10 phút; khó: một ngày; nhớ: tăng khoảng cách; đây là tự đánh giá |
 | Ngại viết và nói             | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài viết mẫu; ghi âm, nghe lại, tải bản ghi                          | Không tự tạo điểm chấm cho văn bản hay bản ghi                              |
 | Lo thao tác và thời gian thi | Buổi rút gọn 51 phút hoặc đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối; lưu và chuyển phần khi hết giờ | Tách rõ hai chế độ, không quy đổi điểm sang chứng chỉ                       |
@@ -27,9 +27,9 @@ Giao diện làm việc với thanh điều hướng, kế hoạch ngày và cô
 
 Buổi mô phỏng dùng lại 2 bài Nghe, 2 Đọc, 1 email và phần Nói tương tác xã hội. Tổng 51 phút = 10 + 15 + 20 + 6. Đây là luyện thao tác và thời gian, không phải kiểm tra đầu vào vì bài đã có thể được học trước.
 
-Đề đủ cấu trúc số 01: 35 câu Nghe (8 thông báo, 3 hội thoại x 4 câu, 3 bài nói x 5 câu), 4 bài Đọc mở rộng x 10 câu tổng 1.900–2.050 từ, email và essay, ba phần Nói. Tổng 172 phút = 40 + 60 + 60 + 12. Chuyển ngữ liệu trong từng kỹ năng, lưu hai bài Viết riêng và bản ghi riêng cho từng phần Nói. Hội thoại giữ giọng nhất quán theo nhân vật khi thiết bị có nhiều giọng tiếng Anh. Cho phép nghe lại, chưa phải điều kiện thi chính thức. Viết/Nói dùng bài đã có trong thư viện; cần ngân hàng độc lập nếu muốn kiểm tra đầu vào.
+Đề đủ cấu trúc số 01: 35 câu Nghe (8 thông báo, 3 hội thoại x 4 câu, 3 bài nói x 5 câu), 4 bài Đọc mở rộng x 10 câu tổng 1.900–2.050 từ, email và essay, ba phần Nói. Tổng 172 phút = 40 + 60 + 60 + 12. Chuyển ngữ liệu trong từng kỹ năng, lưu hai bài Viết riêng và bản ghi riêng cho từng phần Nói. Khi nộp Nghe/Đọc, hệ thống báo rõ số câu bỏ trống; transcript Nghe chỉ hiện trong phần đối chiếu sau khi hoàn thành. Hội thoại giữ giọng nhất quán theo nhân vật khi thiết bị có nhiều giọng tiếng Anh. Cho phép nghe lại, chưa phải điều kiện thi chính thức. Viết/Nói dùng bài đã có trong thư viện; cần ngân hàng độc lập nếu muốn kiểm tra đầu vào.
 
-Nguồn định dạng đối chiếu: [ĐH Sư phạm TP.HCM](https://vstep.hcmue.edu.vn/index.php/gioi-thieu/dinh-dang-de-thi/bac-345), ngày 08/09/2026. Cẩm nang dẫn nguồn chính thức để người học tự kiểm tra lịch thi, hồ sơ và phí mới nhất.
+Nguồn định dạng đối chiếu: [ULIS VSTEP Test format](https://vstep.vnu.edu.vn/test-format/) và [ĐH Sư phạm TP.HCM](https://vstep.hcmue.edu.vn/index.php/gioi-thieu/dinh-dang-de-thi/bac-345), ngày 10/09/2026. Phạm vi Reading chính thức được ULIS công bố là 1.900–2.500 từ; độ dài 1.900–2.050 ở trên là của đề Mây hiện có. Cẩm nang dẫn nguồn chính thức để người học tự kiểm tra lịch thi, hồ sơ và phí mới nhất.
 
 ## Dữ liệu và kiến trúc
 

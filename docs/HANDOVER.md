@@ -1,7 +1,7 @@
 # Báo cáo bàn giao website Mây VSTEP
 
 **Ngày chốt báo cáo:** 10/09/2026  
-**Mốc nền tảng được đánh giá:** `4e0ed589e3fe667a1dc1045144a8fdbedaac48ba`
+**Mốc nền tảng được đánh giá:** vòng hoàn thiện Reading và Listening ngày 10/09/2026
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -9,7 +9,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading/Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập/sync bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -33,7 +33,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | Không biết hôm nay học gì                      | Kế hoạch ngày tự chọn tối đa ba bài theo thời gian, lỗi đến hạn, mức chắc chắn, độ chính xác, độ lâu chưa luyện, ngày thi, kỹ năng ưu tiên và sở thích; từng bài giải thích lý do được chọn | Hoàn thành bản cá nhân hóa v2 đầu tiên |
 | Khó duy trì khi mệt hoặc bận                   | Chọn mức năng lượng; ngày mệt tự giảm quỹ học; chuỗi ngày tính theo giờ Việt Nam và không phạt ngày hiện tại chưa kết thúc                                                                  | Hoàn thành                             |
-| Làm sai lặp lại nhưng không biết ôn gì         | Câu sai được gom theo subskill, số lần sai và mức chắc chắn; lỗi “sai nhưng rất chắc” được ưu tiên, yêu cầu làm lại trước khi xem giải thích và có lịch ôn                                  | Hoàn thành bản taxonomy đầu tiên       |
+| Làm sai lặp lại nhưng không biết ôn gì         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai được gom theo subskill, số lần sai; lỗi “sai nhưng rất chắc” được ưu tiên, yêu cầu làm lại và có lịch ôn                           | Hoàn thành vòng phản hồi đầu tiên      |
 | Học từ rồi quên                                | 20 thẻ từ có phiên âm, nghĩa, ví dụ, phát âm và lịch ôn theo mức nhớ                                                                                                                        | Hoàn thành ở quy mô ban đầu            |
 | Ngại luyện Viết và Nói                         | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài mẫu; Nói có ghi âm, nghe lại và tải file                                                                                                     | Hoàn thành phần tự luyện               |
 | Lo áp lực thời gian và chuyển phần             | Có buổi rút gọn 51 phút và đề đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối, phục hồi sau tải lại                                                                                   | Hoàn thành                             |
@@ -67,7 +67,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 ### 4.4 Thư viện luyện bốn kỹ năng
 
 - 14 bài luyện ngắn gồm 4 bài Đọc, 4 bài Nghe, 3 bài Viết và 3 bài Nói.
-- Bài Đọc/Nghe có câu hỏi, đáp án, giải thích và chấm điểm chính xác.
+- Bài Đọc/Nghe có câu hỏi, đáp án, giải thích, chấm điểm chính xác và chẩn đoán theo dạng câu cùng mức chắc chắn.
 - Bài Viết có đề, giới hạn thời gian gợi ý, đếm từ, nháp tự lưu, checklist tự đánh giá và bài mẫu.
 - Bài Nói có đề, gợi ý cấu trúc, ghi âm qua MediaRecorder, nghe lại, tải file và lưu bản ghi theo lượt học.
 - Bộ lọc theo kỹ năng, tìm kiếm và trạng thái đã khám phá.
@@ -78,6 +78,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - **Chế độ đủ cấu trúc 172 phút:** Nghe 40 phút với 35 câu, Đọc 60 phút với 40 câu, Viết 60 phút với email và essay, Nói 12 phút với ba phần.
 - Đồng hồ dùng deadline tuyệt đối nên tiếp tục đúng sau khi reload, chuyển tab hoặc để máy ngủ.
 - Tự lưu đáp án, hai bài Viết và bản ghi từng phần Nói.
+- Báo rõ số câu Nghe/Đọc còn bỏ trống trước khi nộp; transcript Nghe chỉ xuất hiện trong phần đối chiếu sau khi hoàn thành.
 - Tự chuyển phần khi hết giờ; có điều kiện chống tab cũ nộp nhầm phần mới và chống tạo lượt nộp trùng.
 - Kết quả tách rõ điểm câu hỏi khách quan với phần Viết/Nói chưa được chấm.
 
@@ -180,7 +181,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | --------------------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
 | ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                   |
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                    |
-| Vitest                | 46/46 đạt          | Logic học, confidence, planner, lịch ôn, chấm điểm, timer, store, speech, đề và migration SQL/RLS    |
+| Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS     |
 | Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu     |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                           |
 | Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                               |
@@ -189,7 +190,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
-Các kiểm thử đáng chú ý bao gồm: khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
+Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng câu và confidence, transcript Listening sau khi nộp, khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
 
 Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, Android/Chrome, micro thật, loa/tai nghe thật hoặc đánh giá chuyên môn của giáo viên.
 

@@ -86,7 +86,16 @@ export function AudioPlayer({
           );
         }
       };
-      window.speechSynthesis.speak(utterance);
+      try {
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        run.current++;
+        if (speechOwner === owner.current) speechOwner = null;
+        setPlaying(false);
+        setError(
+          "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
+        );
+      }
     };
     next();
   }
@@ -103,6 +112,7 @@ export function AudioPlayer({
           type="button"
           className="button primary"
           onClick={playing ? stop : play}
+          aria-label={playing ? "Dừng bài nghe" : "Phát bài nghe"}
         >
           {playing ? <Square size={15} /> : <Play size={15} />}{" "}
           {playing ? "Dừng" : "Phát bài nghe"}

@@ -282,7 +282,7 @@ def add_cover(doc):
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
     metadata = [
         ("Ngày chốt", "10/09/2026"),
-        ("Mốc đánh giá", "4e0ed58 + vòng polish accessibility 10/09/2026"),
+        ("Mốc đánh giá", "Hoàn thiện Reading và Listening 10/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
@@ -319,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Daily Mission đã giải thích lý do chọn bài và ưu tiên lỗi đến hạn hoặc sai với mức tự tin cao. Các điều kiện còn thiếu để nghiệm thu production là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Các điều kiện còn thiếu để nghiệm thu production là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )

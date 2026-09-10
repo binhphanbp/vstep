@@ -7,6 +7,7 @@ import {
   freshState,
   localDay,
   mistakes,
+  objectiveInsights,
   profileSchema,
   scheduleReview,
   scoreAnswers,
@@ -86,6 +87,30 @@ describe("scoring and honest progress", () => {
       attempt(`2026-09-0${i + 1}T10:00:00Z`, { correct: i === 0 ? 0 : 5 }),
     );
     expect(skillStats(s, "reading").accuracy).toBe(100);
+  });
+  it("separates misconceptions from uncertain correct answers by question type", () => {
+    const questions = lessons.find((lesson) => lesson.id === "reading-cafe")!
+      .questions;
+    const insight = objectiveInsights(
+      questions,
+      { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
+      {
+        rc1: "sure",
+        rc2: "unsure",
+        rc3: "sure",
+        rc4: "sure",
+        rc5: "guess",
+      },
+    );
+    expect(insight.confidentErrors).toBe(1);
+    expect(insight.fragileCorrect).toBe(2);
+    expect(insight.secureCorrect).toBe(2);
+    expect(insight.byTag.reduce((sum, item) => sum + item.total, 0)).toBe(5);
+    expect(insight.byTag.find((item) => item.tag === "Ý chính")).toEqual({
+      tag: "Ý chính",
+      correct: 0,
+      total: 1,
+    });
   });
   it("stores a mistake only once even across repeated errors", () => {
     const s = freshState();

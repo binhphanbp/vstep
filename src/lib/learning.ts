@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { lessons, type Skill } from "./content";
+import { lessons, type Question, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
 const skillSchema = z.enum(["listening", "reading", "writing", "speaking"]);
 export const confidenceSchema = z.enum(["guess", "unsure", "sure"]);
@@ -366,6 +366,36 @@ export function scoreAnswers(
   return {
     correct: lesson.questions.filter((q) => answers[q.id] === q.answer).length,
     total: lesson.questions.length,
+  };
+}
+
+export function objectiveInsights(
+  questions: Question[],
+  answers: Record<string, number>,
+  confidence: Record<string, Confidence> = {},
+) {
+  const tags = new Map<string, { correct: number; total: number }>();
+  let confidentErrors = 0;
+  let fragileCorrect = 0;
+  let secureCorrect = 0;
+
+  for (const question of questions) {
+    const isCorrect = answers[question.id] === question.answer;
+    const current = tags.get(question.tag) ?? { correct: 0, total: 0 };
+    current.total += 1;
+    if (isCorrect) current.correct += 1;
+    tags.set(question.tag, current);
+
+    if (!isCorrect && confidence[question.id] === "sure") confidentErrors += 1;
+    if (isCorrect && confidence[question.id] !== "sure") fragileCorrect += 1;
+    if (isCorrect && confidence[question.id] === "sure") secureCorrect += 1;
+  }
+
+  return {
+    byTag: [...tags].map(([tag, score]) => ({ tag, ...score })),
+    confidentErrors,
+    fragileCorrect,
+    secureCorrect,
   };
 }
 
