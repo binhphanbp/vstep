@@ -176,15 +176,15 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 
-| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                     |
-| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
-| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                |
-| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                 |
-| Vitest                | 46/46 đạt          | Logic học, confidence, planner, lịch ôn, chấm điểm, timer, store, speech, đề và migration SQL/RLS |
-| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu  |
-| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                        |
-| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                            |
-| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                            |
+| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                        |
+| --------------------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
+| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                   |
+| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                    |
+| Vitest                | 46/46 đạt          | Logic học, confidence, planner, lịch ôn, chấm điểm, timer, store, speech, đề và migration SQL/RLS    |
+| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu     |
+| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                           |
+| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                               |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                               |
 | GitHub Actions        | Đạt                | Run `34446938974` cho commit `4e0ed58`; các run `34443900365`, `34439806721`, `34435602731` cũng đạt |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
@@ -356,9 +356,9 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `026a290` | Tinh chỉnh bảng màu hồng pastel                                                    |
 | `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa                                      |
 | `13e6683` | Thêm mức tự tin, ưu tiên lỗi sai và Daily Mission v2                               |
-| `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                                |
-| `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                      |
-| `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng              |
+| `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                               |
+| `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                     |
+| `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng             |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 
