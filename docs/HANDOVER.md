@@ -171,7 +171,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 - RPC `save_study_snapshot` kiểm tra revision và dùng advisory lock trong transaction để tránh một phiên cũ ghi đè bản mới.
 - Payload bị giới hạn 10 MB và phải là object state version 1.
 - Website không có analytics, quảng cáo hoặc luồng tự gửi bài viết/bản ghi sang dịch vụ AI.
-- Header production gồm `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` và `Permissions-Policy` giới hạn camera, micro và vị trí.
+- Header production gồm Content Security Policy, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` và `Permissions-Policy` giới hạn camera, micro và vị trí.
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 

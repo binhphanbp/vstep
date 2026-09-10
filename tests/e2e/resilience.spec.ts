@@ -139,6 +139,12 @@ test("server serves security headers and a real 404 status", async ({
   expect(response.status()).toBe(200);
   expect(response.headers()["x-content-type-options"]).toBe("nosniff");
   expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect(response.headers()["content-security-policy"]).toContain(
+    "frame-ancestors 'none'",
+  );
+  expect(response.headers()["content-security-policy"]).toContain(
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  );
   expect(response.headers()["x-powered-by"]).toBeUndefined();
   expect((await request.get("/not-a-real-route")).status()).toBe(404);
 });
