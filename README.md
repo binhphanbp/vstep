@@ -24,6 +24,7 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 - Giao diện máy tính/điện thoại, bàn phím, reduced motion, trạng thái lỗi và trang 404.
 
 Phân tích nỗi đau, UX và ranh giới sản phẩm: [docs/PRODUCT.md](docs/PRODUCT.md).
+Báo cáo bàn giao đầy đủ: [docs/HANDOVER.md](docs/HANDOVER.md).
 
 ## Kết nối Supabase cho tài khoản riêng
 
@@ -39,7 +40,7 @@ insert into public.allowed_learners(user_id) values ('YOUR_AUTH_USER_UUID');
 5. Khởi động lại ứng dụng (production phải build lại). Vào **Cài đặt → Đồng bộ**, đăng nhập tài khoản vừa cấp.
 6. Thiết bị đầu tiên lưu lên đám mây. Thiết bị mới đăng nhập rồi tải bản đám mây về trước khi học. Khi tải về, ứng dụng xuất bản thiết bị hiện tại trước khi thay thế. Nếu xung đột phiên bản, xuất bản cục bộ rồi tải bản mới; không tự gộp hai nhánh lịch sử.
 
-Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot của mình. RPC kiểm tra revision trong giao dịch để tránh phiên cũ ghi đè qua luồng đồng bộ. Hiện chưa có dự án Supabase thật kết nối; kiểm thử SQL dùng PostgreSQL qua PGlite, chưa thay thế kiểm thử Auth trực tiếp.
+Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot của mình. RPC kiểm tra revision trong giao dịch để tránh phiên cũ ghi đè qua luồng đồng bộ. Dự án Supabase thật đã được cấu hình và luồng đăng nhập, lưu, tải snapshot đã kiểm thử trên máy local; CI tiếp tục kiểm tra SQL/RLS độc lập bằng PostgreSQL qua PGlite. Chưa nghiệm thu đồng bộ trên thiết bị thứ hai.
 
 ## Dữ liệu và âm thanh
 

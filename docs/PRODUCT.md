@@ -17,7 +17,7 @@ Một người học tại TP.HCM, cần một chứng chỉ nhưng cũng cần 
 
 ## Hướng giao diện
 
-Giao diện làm việc với thanh điều hướng, kế hoạch ngày và công cụ học ngay ở trang chính. Xanh ngọc cho hành động, màu riêng cho từng kỹ năng, font Be Vietnam Pro có tiếng Việt. Trên điện thoại dùng menu thu gọn và xếp một cột. Không dùng bảng xếp hạng, cơ chế trả thưởng gây áp lực hay popup thúc ép.
+Giao diện làm việc với thanh điều hướng, kế hoạch ngày và công cụ học ngay ở trang chính. Hồng pastel cho hành động, màu riêng cho từng kỹ năng, font Be Vietnam Pro có tiếng Việt. Trên điện thoại dùng menu thu gọn và xếp một cột. Không dùng bảng xếp hạng, cơ chế trả thưởng gây áp lực hay popup thúc ép.
 
 Đã kiểm tra tương phản WCAG A/AA bằng axe trên các màn chính và hỗ trợ bàn phím, nhãn form, vùng đọc cuộn, menu Escape/Tab, reduced motion. Kiểm tra tự động không thay thế đánh giá thủ công toàn bộ khả năng tiếp cận.
 
@@ -42,10 +42,10 @@ Nguồn định dạng đối chiếu: [ĐH Sư phạm TP.HCM](https://vstep.hcm
 
 ## Ranh giới cần hoàn thành trước khi gọi là hệ luyện thi toàn diện
 
-1. Kết nối một dự án Supabase thật, chạy migration, cấp tài khoản và kiểm tra đăng nhập/đồng bộ trên hai thiết bị. Hiện mới kiểm tra SQL/RLS bằng PostgreSQL trong PGlite.
+1. Nghiệm thu đồng bộ Supabase trên hai thiết bị thật. Dự án, migration, tài khoản, RLS và luồng lưu/tải trên một thiết bị local đã kiểm tra; CI kiểm tra SQL/RLS bằng PostgreSQL trong PGlite.
 2. Giáo viên thẩm định bộ đề đủ cấu trúc đã có; mở rộng ngân hàng độc lập có quyền sử dụng, thay giọng tổng hợp bằng bản thu người nói và hiệu chuẩn độ khó. Một đề tự biên soạn chưa đủ cho chương trình luyện dài hạn.
 3. Tích hợp phản hồi Viết/Nói từ giáo viên hoặc AI được hiệu chuẩn theo rubric, luôn hiển thị giới hạn độ tin cậy. Chưa triển khai chấm AI tự động.
 4. Triển khai lên môi trường HTTPS, thử micro/giọng đọc trên đúng điện thoại và máy tính người học sử dụng, kiểm tra khôi phục dữ liệu thật và sao lưu vận hành.
-5. Cá nhân hoá nội dung sâu hơn khi biết tên gọi, trình độ, mục tiêu, ngày thi và sở thích thực của người học. Hiện các mục này cấu hình được, không tự bịa thông tin.
+5. Cá nhân hoá nội dung sâu hơn khi có trình độ, mục tiêu, ngày thi và sở thích thực của người học. Tên thân mật hiện là “Gùa/Rùa”; các mục còn lại cấu hình được và không tự bịa thông tin.
 
 Các điểm trên là phần công việc thật còn lại, không phải tính năng đã hoàn tất hoặc lời cam kết đạt chứng chỉ.

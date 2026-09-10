@@ -25,7 +25,7 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Bằng chứng kiểm tra
 
-- 44 kiểm thử Vitest: logic học, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
+- 45 kiểm thử Vitest: logic học, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
 - 23 kiểm thử Playwright trên bản production, gồm phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
