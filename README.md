@@ -24,6 +24,7 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 - Ghi âm, nghe lại, tải âm thanh; bản Nói đã hoàn thành có bản lưu riêng trong lịch sử.
 - Sao lưu/nhập JSON có kiểm tra; dữ liệu hỏng được giữ để phục hồi. Snapshot Supabase thủ công có kiểm tra phiên bản.
 - Giao diện máy tính/điện thoại, bàn phím, reduced motion, trạng thái lỗi và trang 404.
+- Web app manifest và metadata cho màn hình chính; CSP nghiêm ngặt tương thích Chromium, Firefox và WebKit.
 
 Phân tích nỗi đau, UX và ranh giới sản phẩm: [docs/PRODUCT.md](docs/PRODUCT.md).
 Báo cáo bàn giao đầy đủ: [docs/HANDOVER.md](docs/HANDOVER.md).
@@ -56,12 +57,12 @@ Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot
 
 ```sh
 npm run check
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
 npm run test:production
 ```
 
-`check` chạy ESLint, typecheck, Vitest và production build. `test:production` build rồi chạy toàn bộ Playwright trên `next start` ở cổng 3100; không dùng lại dev server cổng 3000. CI chạy bộ trình duyệt trên bản production đã build. Kiểm thử gồm chấm câu hỏi, lịch ôn, kế hoạch ngày, khôi phục deadline, cả hai bài Viết, RLS/xung đột SQL, nhiều tab cùng bài, lỗi lưu dữ liệu, từ chối micro, responsive và axe. MediaRecorder dùng nguồn micro giả lập Chromium; cần thử micro thật trên thiết bị người học. CI nằm trong `.github/workflows/check.yml`. Kết quả rà soát: [docs/QUALITY.md](docs/QUALITY.md).
+`check` chạy ESLint, typecheck, Vitest và production build. `test:production` build rồi chạy toàn bộ Playwright trên `next start` ở cổng 3100; không dùng lại dev server cổng 3000. CI chạy bộ trình duyệt trên bản production đã build: toàn bộ suite ở Chromium và luồng Reading/Listening trọng yếu ở Firefox cùng WebKit. Kiểm thử gồm chấm câu hỏi, lịch ôn, kế hoạch ngày, khôi phục deadline, cả hai bài Viết, RLS/xung đột SQL, nhiều tab cùng bài, lỗi lưu dữ liệu, từ chối micro, responsive, CSP và axe. MediaRecorder dùng nguồn micro giả lập Chromium; cần thử micro thật trên thiết bị người học. CI nằm trong `.github/workflows/check.yml`. Kết quả rà soát: [docs/QUALITY.md](docs/QUALITY.md).
 
 Chạy bản build bằng `npm run build` rồi `npm start`. Bản pilot đã deploy trên Vercel với HTTPS và hai biến Supabase ở thời điểm build. Build cần mạng để lấy Be Vietnam Pro qua `next/font/google`. Chưa có tên miền riêng, monitoring hoặc quy trình vận hành production.
 

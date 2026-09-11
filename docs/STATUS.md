@@ -8,11 +8,12 @@ Code đã được lưu trong workspace sau các lần gián đoạn. Không d�
 - Hai chế độ luyện có giờ: 51 phút và 172 phút đủ cấu trúc. Đề đầy đủ có 35 câu Nghe, 40 câu Đọc, hai bài Viết lưu riêng, ba phần Nói ghi âm riêng.
 - Bảo toàn nháp/đáp án khi tải lại; deadline tuyệt đối; chuyển phần tự động; không nhân đôi lượt nộp; lưu bản ghi khi chuyển phần trong ứng dụng.
 - SQL Supabase Auth/RLS, RPC snapshot có revision, nhập/xuất JSON, giữ dữ liệu hỏng để phục hồi.
-- Sau đợt rà soát Reading/Listening: 47 kiểm thử Vitest và 23 kiểm thử Playwright trên `next start` đều đạt; ESLint, TypeScript, production build thành công. Axe kiểm tra 13 màn, con trỏ tùy biến và màn kết quả thi mở đáp án trên viewport điện thoại. Chưa nghiệm thu thiết bị iOS/Android thật. Chi tiết lỗi đã sửa trong QUALITY.md.
+- Sau đợt rà soát Reading/Listening: 47 kiểm thử Vitest và 27 kiểm thử Playwright trên `next start` đều đạt; suite đầy đủ chạy Chromium, luồng trọng yếu chạy thêm Firefox và WebKit. ESLint, TypeScript, production build 45 route và axe trên 13 màn đều đạt. Chưa nghiệm thu thiết bị iOS/Android thật. Chi tiết lỗi đã sửa trong QUALITY.md.
 - Đã sửa nháp bị ghi đè giữa hai tab, form hồ sơ đang nhập bị reset bởi cập nhật không liên quan, ghi đè dữ liệu hỏng phát sinh giữa phiên, timestamp phục hồi bản sao và nộp nhầm phần thi từ tab cũ. Thêm kiểm tra file sao lưu có điểm bất khả thi/mã lượt học trùng.
 - Đã xem ảnh giao diện desktop/mobile thực tế. Ảnh QA trong `.qa/` không đưa vào Git.
 - Daily Mission đã dùng lỗi đến hạn, lỗi tự tin cao, độ chính xác, recency, ngày thi, mood, focus và diversity guard; từng bài hiển thị lý do được chọn. Bài luyện khách quan lưu “Đoán/Chưa chắc/Rất chắc”; Sổ lỗi ưu tiên misconception sai nhưng rất chắc.
 - Kết quả Reading/Listening ngắn hiển thị độ vững theo confidence và kết quả theo dạng câu. Đề có giờ cảnh báo số câu bỏ trống trước khi nộp; transcript Listening chỉ mở ở màn đối chiếu sau khi hoàn thành.
+- Đã thêm web app manifest và metadata màn hình chính; CSP production không cần `unsafe-eval` và đã kiểm thử bằng listener vi phạm bảo mật. Tối ưu prefetch cùng schema client làm payload ban đầu giảm khoảng 140 KiB và JavaScript giảm khoảng 136 KiB trong phép đo Lighthouse local.
 
 ## Cần tài khoản/môi trường thật hoặc thẩm định chuyên môn
 

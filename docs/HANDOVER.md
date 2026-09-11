@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading/Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; chưa có nghiệm thu trên iOS/Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading/Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; luồng Reading/Listening trọng yếu cũng đạt trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS/Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập/sync bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -114,6 +114,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Con trỏ tùy biến dùng chấm và vòng hồng, chỉ bật với thiết bị chuột chính xác. Nó tự tắt trong ô nhập liệu, trên thiết bị cảm ứng và khi người dùng bật reduced motion.
 - Animation tuân theo `prefers-reduced-motion`.
 - Microcopy được viết theo hướng nhẹ nhàng, không dùng bảng xếp hạng, popup gây áp lực hoặc thành tích ảo.
+- Có web app manifest, màu theme và metadata cho màn hình chính; chưa có service worker nên không cam kết offline đầy đủ.
 
 ## 6. Kiến trúc kỹ thuật
 
@@ -125,7 +126,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 | UI runtime      | React 19.2.8, TypeScript                           | Component và trạng thái giao diện                        |
 | Styling         | Tailwind CSS 4, CSS variables và component classes | Theme, responsive và trạng thái tương tác                |
 | Icon            | Lucide React                                       | Hệ icon nhất quán                                        |
-| Validation      | Zod 4.5.4                                          | Kiểm tra profile, state, backup và payload cloud         |
+| Validation      | Zod Mini 4.5.4                                     | Kiểm tra profile, state, backup và payload cloud         |
 | Cloud           | Supabase JS 2.116                                  | Auth và snapshot đồng bộ thủ công                        |
 | Browser storage | localStorage, IndexedDB                            | State học tập và Blob ghi âm                             |
 | Testing         | Vitest, Playwright, axe-core, PGlite               | Unit, database, E2E, accessibility và production QA      |
@@ -183,15 +184,17 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
 | Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
-| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu |
+| Playwright production | 27/27 đạt          | 25 ca Chromium; smoke Reading/Listening trên Firefox và WebKit, CSP, manifest và responsive      |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
-| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                           |
+| Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 11/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34462704547` cho commit `ddf3eb7`; run `34462044646` cho commit `80e6672` cũng đạt          |
+| GitHub Actions        | Đạt                | Run `34604727728` cho commit `7b78df6`; pipeline hiện cài Chromium, Firefox và WebKit            |
 
-GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
+GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
-Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng câu và confidence, transcript Listening sau khi nộp, khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
+Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng câu và confidence, transcript Listening sau khi nộp, khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, CSP không dùng eval, web app manifest, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
+
+Sau khi tắt prefetch ở menu cố định và chuyển schema client sang `zod/mini`, ba phép đo Lighthouse mobile trên production local cho thấy payload ban đầu giảm khoảng 516 xuống 376 KiB, JavaScript giảm 354 xuống 218 KiB và JavaScript chưa dùng giảm 169 xuống 26 KiB. Accessibility và Best Practices đạt 100; điểm Performance dao động 73–84 theo mô phỏng CPU. SEO 60 là chủ đích vì ứng dụng cá nhân đặt `noindex`.
 
 Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, Android/Chrome, micro thật, loa/tai nghe thật hoặc đánh giá chuyên môn của giáo viên.
 
@@ -245,7 +248,7 @@ Không chép mật khẩu, service role key hoặc nội dung `.env.local` vào 
 
 ```bash
 npm run check
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
 npm run test:production
 npm audit --omit=dev
@@ -363,6 +366,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng             |
 | `80e6672` | Thêm phản hồi sâu cho Reading/Listening và hoàn thiện luồng đối chiếu sau khi nộp  |
 | `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                 |
+| `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                 |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 

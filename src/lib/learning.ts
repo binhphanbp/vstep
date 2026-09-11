@@ -1,79 +1,94 @@
-import { z } from "zod";
+import * as z from "zod/mini";
 import { lessons, type Question, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
+
+// The production CSP intentionally disallows eval. Configure Zod before any
+// schema is created so its optional JIT probe does not trigger a violation.
+z.config({ jitless: true });
+
 const skillSchema = z.enum(["listening", "reading", "writing", "speaking"]);
 export const confidenceSchema = z.enum(["guess", "unsure", "sure"]);
+const limitedString = (max: number) => z.string().check(z.maxLength(max));
+const boundedNumber = (minimum: number, maximum: number) =>
+  z.number().check(z.minimum(minimum), z.maximum(maximum));
+const boundedInteger = (minimum: number, maximum: number) =>
+  z.number().check(z.int(), z.minimum(minimum), z.maximum(maximum));
+
 export const profileSchema = z.object({
-  name: z.string().trim().min(1).max(40),
+  name: z.string().check(z.trim(), z.minLength(1), z.maxLength(40)),
   target: z.enum(["B1", "B2", "C1"]),
   level: z.enum(["starting", "B1", "B2"]),
   examDate: z.union([z.literal(""), z.iso.date()]),
-  dailyMinutes: z.number().int().min(10).max(120),
-  interests: z.array(z.string().max(50)).max(10),
+  dailyMinutes: boundedInteger(10, 120),
+  interests: z.array(limitedString(50)).check(z.maxLength(10)),
   focus: skillSchema,
   onboarded: z.boolean(),
 });
 export const attemptSchema = z
   .object({
-    id: z.string().max(100),
-    lessonId: z.string().max(100),
+    id: limitedString(100),
+    lessonId: limitedString(100),
     skill: skillSchema,
-    date: z.string().datetime(),
-    answers: z.record(z.string(), z.number().int().min(0).max(3)),
-    confidence: z.record(z.string(), confidenceSchema).optional(),
-    correct: z.number().int().min(0).max(100),
-    total: z.number().int().min(0).max(100),
-    seconds: z.number().min(0).max(18000),
-    text: z.string().max(30000).optional(),
-    reflection: z.array(z.string().max(200)).max(20).optional(),
-    recordingId: z.string().max(100).optional(),
+    date: z.iso.datetime(),
+    answers: z.record(z.string(), boundedInteger(0, 3)),
+    confidence: z.optional(z.record(z.string(), confidenceSchema)),
+    correct: boundedInteger(0, 100),
+    total: boundedInteger(0, 100),
+    seconds: boundedNumber(0, 18000),
+    text: z.optional(limitedString(30000)),
+    reflection: z.optional(z.array(limitedString(200)).check(z.maxLength(20))),
+    recordingId: z.optional(limitedString(100)),
   })
-  .refine((attempt) => attempt.correct <= attempt.total, {
-    message: "Số câu đúng không thể lớn hơn tổng số câu.",
-    path: ["correct"],
-  });
+  .check(
+    z.refine((attempt) => attempt.correct <= attempt.total, {
+      error: "Số câu đúng không thể lớn hơn tổng số câu.",
+      path: ["correct"],
+    }),
+  );
 const reviewSchema = z.object({
-  due: z.string().datetime(),
-  interval: z.number().min(0).max(365),
-  ease: z.number().min(1.3).max(3),
-  repetitions: z.number().int().min(0),
+  due: z.iso.datetime(),
+  interval: boundedNumber(0, 365),
+  ease: boundedNumber(1.3, 3),
+  repetitions: z.number().check(z.int(), z.minimum(0)),
   lastDate: z.string(),
 });
 export const examSchema = z.object({
   id: z.string(),
-  mode: z.enum(["mini", "full"]).optional(),
+  mode: z.optional(z.enum(["mini", "full"])),
   startedAt: z.number(),
-  stage: z.number().int().min(0).max(3),
+  stage: boundedInteger(0, 3),
   deadline: z.number(),
-  answers: z.record(z.string(), z.number().int().min(0).max(3)),
-  writing: z.string().max(30000),
-  writingTask2: z.string().max(30000).optional(),
+  answers: z.record(z.string(), boundedInteger(0, 3)),
+  writing: limitedString(30000),
+  writingTask2: z.optional(limitedString(30000)),
   finished: z.boolean(),
 });
 export const stateSchema = z
   .object({
     version: z.literal(1),
     profile: profileSchema,
-    attempts: z.array(attemptSchema).max(10000),
+    attempts: z.array(attemptSchema).check(z.maxLength(10000)),
     reviews: z.record(z.string(), reviewSchema),
     mistakeReviews: z.record(z.string(), reviewSchema),
-    drafts: z.record(z.string(), z.string().max(30000)),
+    drafts: z.record(z.string(), limitedString(30000)),
     mood: z.record(z.string(), z.enum(["low", "okay", "great"])),
-    exam: examSchema.nullable(),
-    updatedAt: z.string().datetime(),
+    exam: z.nullable(examSchema),
+    updatedAt: z.iso.datetime(),
   })
-  .superRefine((state, ctx) => {
-    const seen = new Set<string>();
-    state.attempts.forEach((attempt, index) => {
-      if (seen.has(attempt.id))
-        ctx.addIssue({
-          code: "custom",
-          path: ["attempts", index, "id"],
-          message: "Mỗi lượt học phải có mã riêng.",
-        });
-      seen.add(attempt.id);
-    });
-  });
+  .check(
+    z.superRefine((state, ctx) => {
+      const seen = new Set<string>();
+      state.attempts.forEach((attempt, index) => {
+        if (seen.has(attempt.id))
+          ctx.addIssue({
+            code: "custom",
+            path: ["attempts", index, "id"],
+            message: "Mỗi lượt học phải có mã riêng.",
+          });
+        seen.add(attempt.id);
+      });
+    }),
+  );
 export type Profile = z.infer<typeof profileSchema>;
 export type Attempt = z.infer<typeof attemptSchema>;
 export type Confidence = z.infer<typeof confidenceSchema>;

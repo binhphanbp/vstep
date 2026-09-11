@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { StudyProvider } from "@/components/study-provider";
@@ -20,6 +20,17 @@ export const metadata: Metadata = {
   description:
     "Góc luyện VSTEP được làm riêng cho Gùa: lộ trình vừa sức, bốn kỹ năng, ôn từ vựng và hiểu lỗi sai.",
   robots: { index: false, follow: false },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Mây VSTEP",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fff8fb",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -319,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Các điều kiện còn thiếu để nghiệm thu production là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Bộ kiểm thử production gồm 47 unit test và 27 E2E trên Chromium, Firefox, WebKit. Các điều kiện còn thiếu để nghiệm thu vận hành là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )
@@ -454,8 +454,6 @@ def parse_markdown(doc, lines):
             continue
         if line.startswith("## "):
             title = line[3:]
-            if title.startswith("17. "):
-                doc.add_page_break()
             p = doc.add_paragraph(style="Heading 1")
             add_inline(p, title, 17, "000000")
             i += 1

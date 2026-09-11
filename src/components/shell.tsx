@@ -86,7 +86,12 @@ export function Shell({ children }: { children: ReactNode }) {
         />
       )}
       <aside ref={sidebar} className={`sidebar ${mobile ? "open" : ""}`}>
-        <Link className="brand" href="/" onClick={() => setMobile(false)}>
+        <Link
+          className="brand"
+          href="/"
+          prefetch={false}
+          onClick={() => setMobile(false)}
+        >
           <span className="brand-mark">
             <Cloud size={30} fill="currentColor" />
           </span>
@@ -111,6 +116,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               onClick={() => setMobile(false)}
               className={`nav-item ${current?.href === item.href ? "active" : ""}`}
               aria-current={current?.href === item.href ? "page" : undefined}
@@ -134,6 +140,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link
             className={`nav-item ${pathname === "/guide" ? "active" : ""}`}
             href="/guide"
+            prefetch={false}
             onClick={() => setMobile(false)}
           >
             <CircleHelp size={19} />
@@ -142,6 +149,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link
             className={`nav-item ${pathname === "/settings" ? "active" : ""}`}
             href="/settings"
+            prefetch={false}
             onClick={() => setMobile(false)}
           >
             <Settings size={19} />
@@ -150,6 +158,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link
             href="/settings"
             className="profile-link"
+            prefetch={false}
             onClick={() => setMobile(false)}
           >
             <span className="avatar">
@@ -193,7 +202,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Flame size={16} />
               {streak(state.attempts)} ngày
             </span>
-            <Link className="target-pill" href="/settings">
+            <Link className="target-pill" href="/settings" prefetch={false}>
               <span className="status-dot" />
               Mục tiêu {state.profile.target}
               {days !== null && (

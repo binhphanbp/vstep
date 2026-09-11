@@ -11,16 +11,33 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL,
-    launchOptions: {
-      args: [
-        "--use-fake-device-for-media-stream",
-        "--use-fake-ui-for-media-stream",
-      ],
-    },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          args: [
+            "--use-fake-device-for-media-stream",
+            "--use-fake-ui-for-media-stream",
+          ],
+        },
+      },
+    },
+    {
+      name: "firefox-smoke",
+      testMatch: "**/cross-browser.spec.ts",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit-smoke",
+      testMatch: "**/cross-browser.spec.ts",
+      use: { ...devices["Desktop Safari"] },
+    },
+  ],
   webServer: {
     command: production
       ? `npm run start -- --hostname 127.0.0.1 --port ${port}`

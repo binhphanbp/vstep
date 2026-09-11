@@ -147,6 +147,47 @@ test("server serves security headers and a real 404 status", async ({
   );
   expect(response.headers()["x-powered-by"]).toBeUndefined();
   expect((await request.get("/not-a-real-route")).status()).toBe(404);
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.status()).toBe(200);
+  await expect(manifest).toBeOK();
+  expect(await manifest.json()).toMatchObject({
+    name: "Mây VSTEP · Góc học của Gùa",
+    display: "standalone",
+    start_url: "/",
+    theme_color: "#fff8fb",
+  });
+});
+
+test("strict production CSP does not trigger an eval violation", async ({
+  page,
+}) => {
+  const initial = freshState();
+  await page.addInitScript((state) => {
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+    const violations: string[] = [];
+    Object.defineProperty(window, "__mayCspViolations", {
+      value: violations,
+      configurable: true,
+    });
+    document.addEventListener("securitypolicyviolation", (event) => {
+      violations.push(`${event.violatedDirective}:${event.blockedURI}`);
+    });
+  }, initial);
+  await page.goto("/settings");
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue(
+    initial.profile.name,
+  );
+  const violations = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __mayCspViolations?: string[];
+        }
+      ).__mayCspViolations ?? [],
+  );
+  expect(violations.filter((item) => item.startsWith("script-src"))).toEqual(
+    [],
+  );
 });
 test("profile fields remain editable when another tab saves vocabulary progress", async ({
   context,

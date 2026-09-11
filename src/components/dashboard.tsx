@@ -61,7 +61,11 @@ export function Dashboard() {
             mình nhé.
           </p>
         </div>
-        <Link href="/settings" className="button secondary small">
+        <Link
+          href="/settings"
+          prefetch={false}
+          className="button secondary small"
+        >
           <Target size={16} />
           Mục tiêu của mình
           <ArrowUpRight size={15} />
@@ -95,6 +99,7 @@ export function Dashboard() {
                       : "/progress"
                     : "/settings"
                 }
+                prefetch={false}
                 className="button primary"
               >
                 {state.profile.onboarded
