@@ -1,7 +1,8 @@
 # Báo cáo bàn giao website Mây VSTEP
 
-**Ngày chốt báo cáo:** 10/09/2026  
-**Mốc nền tảng được đánh giá:** vòng hoàn thiện Reading và Listening ngày 10/09/2026
+**Ngày chốt báo cáo:** 11/09/2026
+
+**Mốc nền tảng được đánh giá:** vòng kiểm định production Reading và Listening ngày 11/09/2026
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -33,7 +34,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | Không biết hôm nay học gì                      | Kế hoạch ngày tự chọn tối đa ba bài theo thời gian, lỗi đến hạn, mức chắc chắn, độ chính xác, độ lâu chưa luyện, ngày thi, kỹ năng ưu tiên và sở thích; từng bài giải thích lý do được chọn | Hoàn thành bản cá nhân hóa v2 đầu tiên |
 | Khó duy trì khi mệt hoặc bận                   | Chọn mức năng lượng; ngày mệt tự giảm quỹ học; chuỗi ngày tính theo giờ Việt Nam và không phạt ngày hiện tại chưa kết thúc                                                                  | Hoàn thành                             |
-| Làm sai lặp lại nhưng không biết ôn gì         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai được gom theo subskill, số lần sai; lỗi “sai nhưng rất chắc” được ưu tiên, yêu cầu làm lại và có lịch ôn                           | Hoàn thành vòng phản hồi đầu tiên      |
+| Làm sai lặp lại nhưng không biết ôn gì         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai được gom theo subskill, số lần sai; lỗi “sai nhưng rất chắc” được ưu tiên, yêu cầu làm lại và có lịch ôn                                | Hoàn thành vòng phản hồi đầu tiên      |
 | Học từ rồi quên                                | 20 thẻ từ có phiên âm, nghĩa, ví dụ, phát âm và lịch ôn theo mức nhớ                                                                                                                        | Hoàn thành ở quy mô ban đầu            |
 | Ngại luyện Viết và Nói                         | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài mẫu; Nói có ghi âm, nghe lại và tải file                                                                                                     | Hoàn thành phần tự luyện               |
 | Lo áp lực thời gian và chuyển phần             | Có buổi rút gọn 51 phút và đề đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối, phục hồi sau tải lại                                                                                   | Hoàn thành                             |
@@ -177,16 +178,16 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 
-| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                        |
-| --------------------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
-| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                   |
-| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                    |
-| Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS     |
-| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu     |
-| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                           |
-| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                               |
-| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 10/09/2026                                                               |
-| GitHub Actions        | Đạt                | Run `34446938974` cho commit `4e0ed58`; các run `34443900365`, `34439806721`, `34435602731` cũng đạt |
+| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                    |
+| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------ |
+| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
+| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
+| Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
+| Playwright production | 23/23 đạt          | Các route chính, reload, nhiều tab, thi đủ cấu trúc, import/export, micro, responsive và lỗi lưu |
+| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
+| Production build      | Đạt                | 44 trang tĩnh/SSG được sinh thành công                                                           |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 11/09/2026                                                           |
+| GitHub Actions        | Đạt                | Run `34462704547` cho commit `ddf3eb7`; run `34462044646` cho commit `80e6672` cũng đạt          |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -196,22 +197,22 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 
 ## 9. Những việc chưa làm và giới hạn hiện tại
 
-| Hạng mục                               | Trạng thái hiện tại       | Ảnh hưởng                                                                      |
-| -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
-| Hosting HTTPS pilot                    | Đã có                     | `vstep-turtle.vercel.app`; 10 route 200, 404 và headers đã smoke test          |
-| Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production           |
-| Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt         |
-| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                           |
-| Ngân hàng đề độc lập                   | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói                                |
-| Bản thu người nói cho Nghe             | Chưa làm                  | Speech synthesis khác điều kiện thi và chất lượng phụ thuộc thiết bị           |
-| Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu             |
-| Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                       |
-| Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                    |
-| Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                               |
-| PWA/offline đầy đủ                     | Chưa làm                  | Không có service worker; chỉ dữ liệu đã tải có thể còn trong cache trình duyệt |
-| Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                   |
-| C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                              |
-| Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại                                          |
+| Hạng mục                               | Trạng thái hiện tại       | Ảnh hưởng                                                                        |
+| -------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| Hosting HTTPS pilot                    | Đã có                     | `vstep-turtle.vercel.app`; 9 màn chính, 14 bài luyện, 404 và headers đã kiểm tra |
+| Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production             |
+| Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt           |
+| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                             |
+| Ngân hàng đề độc lập                   | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói                                  |
+| Bản thu người nói cho Nghe             | Chưa làm                  | Speech synthesis khác điều kiện thi và chất lượng phụ thuộc thiết bị             |
+| Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu               |
+| Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
+| Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                      |
+| Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                                 |
+| PWA/offline đầy đủ                     | Chưa làm                  | Không có service worker; chỉ dữ liệu đã tải có thể còn trong cache trình duyệt   |
+| Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                     |
+| C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                                |
+| Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại                                            |
 
 ## 10. Hướng dẫn chạy và vận hành
 
@@ -360,6 +361,8 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                               |
 | `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                     |
 | `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng             |
+| `80e6672` | Thêm phản hồi sâu cho Reading/Listening và hoàn thiện luồng đối chiếu sau khi nộp  |
+| `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                 |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 

@@ -281,8 +281,8 @@ def add_cover(doc):
     header_run = header_p.add_run("THÔNG TIN BÀN GIAO")
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
     metadata = [
-        ("Ngày chốt", "10/09/2026"),
-        ("Mốc đánh giá", "Hoàn thiện Reading và Listening 10/09/2026"),
+        ("Ngày chốt", "11/09/2026"),
+        ("Mốc đánh giá", "Kiểm định production Reading và Listening 11/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),

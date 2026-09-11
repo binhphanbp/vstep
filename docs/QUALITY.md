@@ -1,4 +1,4 @@
-# Rà soát chất lượng — 10/09/2026
+# Rà soát chất lượng — 11/09/2026
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
@@ -34,9 +34,10 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - 23 kiểm thử Playwright trên bản production, gồm phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
-- `npm audit --omit=dev`: không báo lỗ hổng tại thời điểm chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
-- GitHub Actions run `34446938974` đạt cho commit `4e0ed58`; các run `34443900365`, `34439806721`, `34435602731` và run triển khai chức năng `34435381574` đều đạt.
-- Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 10/09/2026: 10 route chính HTTP 200, route giả HTTP 404, HSTS, CSP liên quan và các header bảo vệ hiện diện; learning loop mới tải được, không có lỗi console.
+- `npm audit --omit=dev`: không báo lỗ hổng ngày 11/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
+- GitHub Actions run `34462704547` đạt cho commit `ddf3eb7`; run chức năng Reading/Listening `34462044646` cho commit `80e6672` cũng đạt.
+- Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 11/09/2026: 9 màn chính và 14 bài luyện tải đúng, route giả HTTP 404, HSTS/CSP và các header bảo vệ hiện diện. Toàn bộ Reading/Listening không tràn ngang ở 1.440 px và 390 px; luồng Listening phát/dừng, chấm điểm, phân tích và mở transcript sau khi nộp không có lỗi runtime.
+- Supabase production trả HTTP 200 ở Auth settings; ba thao tác ẩn danh gồm đọc snapshot, đọc membership và gọi RPC lưu đều bị RLS chặn bằng mã `42501`.
 
 ## Giới hạn còn mở
 

@@ -2,7 +2,7 @@
 
 Ứng dụng tiếng Việt cho một người học tại TP.HCM, dùng Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 và Supabase tùy chọn. Chạy được ngay trên thiết bị khi chưa cấu hình dịch vụ đám mây.
 
-**Bản HTTPS pilot:** [vstep-turtle.vercel.app](https://vstep-turtle.vercel.app). Ngày 10/09/2026 đã xác nhận 10 route chính trả HTTP 200, trang không tồn tại trả 404, security headers hoạt động và cấu hình Supabase production đã có. Đăng nhập/đồng bộ bằng tài khoản thật, micro và thiết bị iOS/Android vẫn cần nghiệm thu trực tiếp.
+**Bản HTTPS pilot:** [vstep-turtle.vercel.app](https://vstep-turtle.vercel.app). Ngày 11/09/2026 đã xác nhận 9 màn chính và toàn bộ 14 bài luyện tải đúng, trang không tồn tại trả 404, security headers hoạt động và cấu hình Supabase production đã có. Đăng nhập/đồng bộ bằng tài khoản thật, micro và thiết bị iOS/Android vẫn cần nghiệm thu trực tiếp.
 
 ## Chạy trên máy
 
