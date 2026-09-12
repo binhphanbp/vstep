@@ -319,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Bộ kiểm thử production gồm 47 unit test và 30 E2E trên Chromium, Firefox, WebKit. Các điều kiện còn thiếu để nghiệm thu vận hành là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Lịch sử và đề đang làm được khóa theo đúng phiên bản học liệu. Bộ kiểm thử production gồm 53 unit test và 40 E2E trên Chromium, Firefox và WebKit. Migration gia cố quyền ghi cloud đã qua preflight nhưng còn chờ áp dụng trên production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )

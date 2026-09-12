@@ -10,11 +10,11 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading/Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, chuyển sang tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Mọi nút tương tác khai báo ngữ nghĩa rõ ràng, bộ lọc có trạng thái đọc được và ứng dụng có màn hình phục hồi cả khi lỗi ở root layout. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; luồng Reading/Listening trọng yếu cũng đạt trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS/Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; luồng Reading và Listening trọng yếu cũng đạt trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
-Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu production. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết/Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập/sync bằng tài khoản thật, micro hoặc thiết bị thật của người học.
+Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
-Không có task dở dang trong milestone nền tảng tại mốc bàn giao. Các milestone về học liệu, đánh giá đầu vào, phản hồi Viết/Nói và vận hành production vẫn đang mở và được liệt kê tại Mục 12.
+Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã qua kiểm thử và preflight dữ liệu thật nhưng còn chờ chạy trên production. Nghiệm thu thiết bị thật, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
 
 ## 2. Mục tiêu sản phẩm và hướng đi
 
@@ -96,6 +96,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Tổng phút luyện, số lượt, số bài khác nhau, chuỗi ngày và biểu đồ bảy ngày.
 - Thống kê riêng cho bốn kỹ năng; độ chính xác chỉ hiển thị cho bài có câu hỏi khách quan.
 - Lưu nội dung bài Viết, phần tự đánh giá và bản ghi Nói đã hoàn thành.
+- Lượt học mới lưu bản chụp tiêu đề, câu hỏi, đáp án và giải thích của đúng phiên bản học liệu đã làm; sổ lỗi và lịch sử ưu tiên bản chụp này thay vì nội dung hiện tại.
 
 ### 4.8 Sao lưu và khôi phục
 
@@ -104,6 +105,8 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Trước khi nhập hoặc tải từ cloud, hệ thống tự tải bản thiết bị hiện tại làm bản dự phòng.
 - Khi localStorage hỏng, ứng dụng không ghi đè bản gốc và báo lỗi để người dùng xử lý.
 - Audio không nằm trong JSON; từng bản ghi phải tải riêng.
+- Auth và các lệnh đồng bộ cloud tự dừng sau 20 giây nếu mạng hoặc dịch vụ không phản hồi.
+- Nếu cloud đã nhận dữ liệu nhưng trình duyệt không lưu được revision mới, ứng dụng tự tải backup và cảnh báo nguy cơ xung đột ở lần lưu sau.
 
 ## 5. UX UI và nhận diện hiện tại
 
@@ -150,7 +153,7 @@ flowchart LR
 
 ### 6.3 Mô hình state
 
-State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy và thời điểm cập nhật. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
+State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy và thời điểm cập nhật. Lượt học và phiên thi mới kèm snapshot học liệu có `version`; dữ liệu cũ không có snapshot vẫn đọc được bằng nội dung phiên bản 1 để giữ tương thích. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
 
 Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp để nhét vào localStorage hoặc snapshot JSON. Vì vậy, đồng bộ Supabase và file backup chỉ đồng bộ dữ liệu học dạng JSON, không đồng bộ audio.
 
@@ -164,14 +167,16 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 - Đăng ký công khai đã tắt; một tài khoản Auth đã được tạo, xác nhận email và thêm UUID vào `allowed_learners`.
 - Đã kiểm thử thực tế tạo snapshot revision 1, cập nhật revision 2, đọc lại và từ chối revision cũ. Dữ liệu QA trong transaction đã rollback.
 - Đã đăng nhập từ giao diện local, lưu snapshot revision 1 và tải lại snapshot về thiết bị thành công.
+- Preflight production cho migration gia cố xác nhận 1/1 snapshot hiện có đúng contract và snapshot lớn nhất là 350 byte.
+- Migration `supabase/migrations/002_harden_snapshots.sql` cùng rollback đã sẵn sàng và đạt kiểm thử PGlite; chưa chạy trên dự án production tại thời điểm chốt báo cáo.
 - Chưa nghiệm thu đồng bộ trên thiết bị hoặc trình duyệt thứ hai.
 
 ### 7.2 Cơ chế bảo vệ
 
 - Client chỉ dùng publishable key. Không được đưa service role key vào `NEXT_PUBLIC_*` hoặc repository.
-- RLS chỉ cho tài khoản đã đăng nhập và có tên trong `allowed_learners` đọc/ghi snapshot của chính mình.
-- RPC `save_study_snapshot` kiểm tra revision và dùng advisory lock trong transaction để tránh một phiên cũ ghi đè bản mới.
-- Payload bị giới hạn 10 MB và phải là object state version 1.
+- RLS chỉ cho tài khoản đã đăng nhập và có tên trong `allowed_learners` đọc snapshot của chính mình. Sau khi migration 002 được áp dụng, client không còn quyền `insert`, `update` hoặc `delete` trực tiếp.
+- RPC `save_study_snapshot` kiểm tra quyền trong `allowed_learners`, kiểm tra revision và dùng advisory lock trong transaction để tránh một phiên cũ ghi đè bản mới.
+- Payload bị giới hạn 10 MB và phải là object state version 1 với đúng kiểu dữ liệu ở các trường cấp cao.
 - Website không có analytics, quảng cáo hoặc luồng tự gửi bài viết/bản ghi sang dịch vụ AI.
 - Header production gồm Content Security Policy, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` và `Permissions-Policy` giới hạn camera, micro và vị trí.
 
@@ -183,16 +188,16 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | --------------------- | ------------------ | ------------------------------------------------------------------------------------------------ |
 | ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
-| Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
-| Playwright production | 30/30 đạt          | 26 ca Chromium; 2 Firefox; 2 WebKit; crawl 8 bài ưu tiên, backup, CSP và responsive              |
+| Vitest                | 53/53 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
+| Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 12/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34666370380` cho commit `f89387d`; đã chạy Chromium, Firefox và WebKit                      |
+| GitHub Actions        | Đạt                | Run `34687798626` cho commit `f43fc23`; đã chạy Chromium, Firefox và WebKit                      |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
-Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng câu và confidence, transcript Listening sau khi nộp, khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, CSP không dùng eval, web app manifest, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
+Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng câu và confidence, transcript Listening sau khi nộp, giữ nguyên kết quả cũ khi học liệu thay đổi, bỏ draft sai phiên bản, chấm đề đang làm theo snapshot đã khóa, timeout đăng nhập cloud, lỗi lưu revision, khôi phục deadline sau reload, lưu hai bài Viết riêng, lưu bản ghi Nói khi chuyển phần, chống mất đáp án giữa hai tab, giữ localStorage hỏng, từ chối micro, backup không hợp lệ, bảo vệ HTTP headers, CSP không dùng eval, web app manifest, 404 thật, custom cursor, mobile 390 px và trang kết quả đề đủ cấu trúc.
 
 Sau khi tắt prefetch ở menu cố định và chuyển schema client sang `zod/mini`, ba phép đo Lighthouse mobile trên production local cho thấy payload ban đầu giảm khoảng 516 xuống 376 KiB, JavaScript giảm 354 xuống 218 KiB và JavaScript chưa dùng giảm 169 xuống 26 KiB. Accessibility và Best Practices đạt 100; điểm Performance dao động 73–84 theo mô phỏng CPU. SEO 60 là chủ đích vì ứng dụng cá nhân đặt `noindex`.
 
@@ -236,7 +241,7 @@ Mở `http://127.0.0.1:3000`. Nên dùng nhất quán địa chỉ này; `localh
 
 1. Sao chép `.env.example` thành `.env.local`.
 2. Điền `NEXT_PUBLIC_SUPABASE_URL` và `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-3. Chạy `supabase/migrations/001_personal_study.sql` trong SQL Editor của dự án mới nếu cần dựng lại.
+3. Chạy `supabase/migrations/001_personal_study.sql`, sau đó `supabase/migrations/002_harden_snapshots.sql` trong SQL Editor của dự án mới nếu cần dựng lại.
 4. Tắt public signup trong Auth.
 5. Tạo user email/mật khẩu, sau đó thêm UUID vào `allowed_learners`.
 6. Khởi động lại dev server hoặc build lại production.
@@ -285,10 +290,11 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ### P0 Trước khi dùng như một sản phẩm production
 
-1. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404 và font đã kiểm tra. Còn đăng nhập/sync bằng tài khoản thật, micro và kiểm tra không có secret trong bundle ngoài publishable key.
-2. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone/Safari hoặc Android/Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt: hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
-3. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
-4. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
+1. **Áp dụng migration gia cố Supabase.** Chạy migration 002 đã preflight, sau đó kiểm tra đọc snapshot, lưu revision mới và từ chối ghi trực tiếp.
+2. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404, font và smoke tự động đã kiểm tra. Còn đăng nhập và đồng bộ bằng tài khoản thật, micro và kiểm tra bundle không chứa secret ngoài publishable key.
+3. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone hoặc Safari hay Android hoặc Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt là hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
+4. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
+5. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
 
 ### P1 Nâng chất lượng học tập
 
@@ -322,7 +328,9 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `src/lib/learning.ts`                        | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
 | `src/lib/study-store.ts`                     | Store, localStorage, nhiều tab và phục hồi                   |
 | `src/lib/recordings.ts`                      | IndexedDB cho bản ghi                                        |
-| `supabase/migrations/001_personal_study.sql` | Bảng, RLS và RPC snapshot                                    |
+| `supabase/migrations/001_personal_study.sql` | Bảng, RLS và RPC snapshot nền tảng                            |
+| `supabase/migrations/002_harden_snapshots.sql` | Contract payload, thu hồi direct DML và RPC khóa revision   |
+| `supabase/rollback/002_harden_snapshots.sql` | Rollback khẩn cấp có chủ đích cho migration 002               |
 | `tests/unit`                                 | Logic và database tests                                      |
 | `tests/e2e`                                  | E2E, accessibility, resilience và full exam                  |
 | `.github/workflows/check.yml`                | Pipeline CI                                                  |
@@ -344,6 +352,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 - [x] Commit bàn giao đã qua GitHub Actions.
 - [x] `.env.local` được bỏ qua bởi Git.
 - [x] Supabase migration, RLS, Auth và đồng bộ một thiết bị đã kiểm tra.
+- [ ] Migration gia cố 002 đã preflight nhưng chưa áp dụng trên production.
 - [ ] Người nhận xác nhận có quyền quản trị repository GitHub.
 - [ ] Người nhận xác nhận có quyền truy cập dự án Supabase.
 - [ ] Người nhận lưu thông tin tài khoản học ở trình quản lý mật khẩu an toàn.
@@ -369,6 +378,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                 |
 | `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                  |
 | `f89387d` | Kiểm tra tám bài ưu tiên và tải backup trên cả ba browser engine                   |
+| `f43fc23` | Version hóa lịch sử học, gia cố cloud và thêm smoke test sau deployment             |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 
@@ -379,10 +389,8 @@ Milestone nền tảng và hosting kỹ thuật được xem là hoàn tất vì
 | Nền tảng kỹ thuật   | Đạt milestone     | Build, unit, E2E, accessibility, Supabase Auth/RLS và backup đã kiểm tra     |
 | Cá nhân hóa         | Đạt vòng v2 đầu   | Có confidence, due review, weakness, recency, exam urgency và lý do chọn bài |
 | Hiệu quả học tập    | Chưa kết luận     | Cần 5–7 ngày pilot và checkpoint bằng ngữ liệu chưa từng học                 |
-| Chất lượng học liệu | Chưa kiểm định    | Cần giáo viên VSTEP review và version hóa content                            |
+| Chất lượng học liệu | Chưa kiểm định    | Đã version hóa dữ liệu; cần giáo viên VSTEP review nội dung                   |
 | Hosting production  | Đạt kỹ thuật      | URL HTTPS, biến môi trường, route/status/header đã kiểm tra                  |
 | Production UAT      | Chưa đạt          | Cần login/sync thật, micro, hai thiết bị và quy trình vận hành               |
 
 Người tiếp tục dự án nên dùng `docs/REVIEW-RESPONSE.md` làm quyết định ưu tiên, `docs/QUALITY.md` làm bằng chứng kỹ thuật và báo cáo này làm tài liệu bàn giao phạm vi. Không dùng số câu đã học hoặc chuỗi ngày như bằng chứng người học đã đạt bậc VSTEP.
-
-Tài liệu liên quan: `README.md`, `docs/PRODUCT.md`, `docs/QUALITY.md`, `docs/STATUS.md`, `docs/REVIEW-RESPONSE.md` và migration tại `supabase/migrations/001_personal_study.sql`.

@@ -20,7 +20,9 @@ jobs:
       group: production-smoke-${{ github.event.deployment.id || github.run_id }}
       cancel-in-progress: true
     env:
-      MAY_PRODUCTION_URL: ${{ inputs.url || github.event.deployment_status.environment_url }}
+      # Vercel's deployment_status URL can point at a protected deployment URL.
+      # The stable production alias is public and is the URL learners actually use.
+      MAY_PRODUCTION_URL: ${{ inputs.url || 'https://vstep-turtle.vercel.app' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

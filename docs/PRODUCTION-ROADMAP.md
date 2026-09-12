@@ -1,6 +1,6 @@
 # Mây VSTEP — rà soát còn thiếu và kế hoạch hoàn thiện
 
-Ngày rà soát: **12/09/2026**. Mã nguồn làm cơ sở: **`5303d15`**, nhánh `main`.
+Ngày rà soát: **12/09/2026**. Baseline ban đầu: **`5303d15`**. Release kỹ thuật mới nhất: **`f43fc23`**, nhánh `main`.
 
 Đối tượng: một người học là Gùa/Rùa. Ưu tiên **Reading và Listening**. Không mở rộng thành nền tảng thương mại hoặc hệ đa người dùng.
 
@@ -16,19 +16,19 @@ Kế hoạch đã bắt đầu được thực thi. Trạng thái phải dựa t
 
 | Hạng mục | Trạng thái hiện tại |
 | --- | --- |
-| P0-01 phiên bản học liệu | Đã triển khai trong code; unit/E2E production đạt; chờ CI/deploy |
+| P0-01 phiên bản học liệu | Hoàn thành trong release `f43fc23`; unit, E2E và CI đạt |
 | P0-02 siết snapshot | Migration và rollback đã kiểm thử bằng PGlite; preflight Supabase thật xác nhận 1/1 snapshot tương thích; chờ chạy migration production |
 | P0-03 Auth | Đã thêm timeout mạng và hướng dẫn quên mật khẩu cho mô hình một người; test đăng nhập treo đạt; chờ UAT tài khoản thật |
 | P0-04 backup | Đã xử lý lỗi lưu revision sau cloud và tự xuất backup; test đạt; restore drill thiết bị thật còn mở |
 | P0-05 UAT | Chờ thiết bị và thời gian của Gùa |
-| P0-06 phát hành | Đã thêm dependency audit, workflow smoke sau Vercel deployment và runbook; chờ xác nhận workflow của release mới |
-| P0-07 tài liệu | Markdown đang cập nhật; báo cáo Word chỉ chốt sau release/CI và migration |
+| P0-06 phát hành | Dependency audit, runbook và workflow smoke đã có; đã sửa workflow để kiểm tra alias production công khai và còn chờ run xác nhận của commit tài liệu |
+| P0-07 tài liệu | README, STATUS, QUALITY, HANDOVER và báo cáo Word đã đồng bộ; Word đã render và xem đủ từng trang |
 
 ## 2. Bằng chứng và phạm vi kiểm tra
 
 - Đọc luồng Auth/cloud/backup, schema state, cách dựng Sổ lỗi và kết quả, AudioPlayer/Recorder, SQL grants/RLS/RPC, CI và tài liệu bàn giao.
-- Xác nhận [CI của commit 5303d15](https://github.com/binhphanbp/vstep/actions/runs/34679353365) đã thành công; trạng thái deployment Vercel của chính commit này thành công.
-- Baseline đã đạt ở release đó: **48 unit tests, 38 E2E trên production build**, lint, TypeScript và build 45 route; tám ca cloud giả lập cũng đã chạy đạt trên HTTPS. Không chạy lại toàn bộ suite chỉ để thay đổi tài liệu.
+- Xác nhận [CI của commit f43fc23](https://github.com/binhphanbp/vstep/actions/runs/34687798626) đã thành công; trạng thái deployment Vercel của chính commit này thành công.
+- Release mới đạt **53 unit tests, 40 E2E trên production build**, lint, TypeScript, audit dependency và build 45 route. Mười ca cloud giả lập cùng các ca snapshot học liệu mới đều đạt.
 - Đếm trực tiếp từ content: Reading ngắn 4 bài/20 câu; Listening ngắn 4 bài/16 câu; đề đầy đủ có Reading 4 đoạn/40 câu và Listening 14 ngữ liệu/35 câu. Tổng **111 câu Reading/Listening**, trong đó **75 câu thuộc cùng một đề đầy đủ**. Không được gọi 14 ngữ liệu Listening của đề này là 14 đề thi.
 - Nội dung dạng câu đã có ý chính, chi tiết, quan điểm, từ vựng và suy luận trong ngân hàng tổng. Không đồng nghĩa từng dạng đã có đủ bài để luyện nhiều tuần.
 - Đối chiếu lại [định dạng VSTEP.3-5 của ULIS](https://vstep.vnu.edu.vn/test-format/): Reading 4 đoạn/40 câu, 60 phút, 1.900–2.500 từ; Listening 3 phần/35 câu, khoảng 40 phút. Cấu trúc hiện có đáp ứng số lượng cơ bản; số câu và thời lượng không chứng minh độ khó hoặc chất lượng đề.
@@ -38,15 +38,15 @@ Kế hoạch đã bắt đầu được thực thi. Trạng thái phải dựa t
 
 | Mã | Trạng thái bằng chứng | Phát hiện và ảnh hưởng | Ưu tiên |
 | --- | --- | --- | --- |
-| F01 | Đã sửa trong code, chờ release | Attempt mới lưu snapshot có version; đề đang làm giữ bank đã mở; draft lệch version bị tách; lịch sử và Sổ lỗi dùng snapshot. Backup v1 vẫn đọc được. | P0-01 |
+| F01 | Đã phát hành | Attempt mới lưu snapshot có version; đề đang làm giữ bank đã mở; draft lệch version bị tách; lịch sử và Sổ lỗi dùng snapshot. Backup v1 vẫn đọc được. | P0-01 |
 | F02 | Migration đã kiểm thử, chờ production | Migration 002 thu hồi direct DML, dùng RPC security definer có kiểm tra UID/membership/revision và thêm contract payload. Direct owner update và payload thiếu cấu trúc bị từ chối trong PGlite. | P0-02 |
 | F03 | Đã gia cố, chờ UAT thật | Mọi fetch Supabase có timeout 20 giây; sync vẫn có controller riêng; test đăng nhập/sync treo đạt. UI hướng dẫn chủ website reset tài khoản thay vì mở signup. UAT recovery thật còn mở. | P0-03 |
 | F04 | Đã gia cố, restore drill còn mở | Khi cloud đã lưu nhưng local revision thất bại, app tự xuất backup và hướng dẫn đối chiếu; test đạt. Cloud vẫn chỉ có một snapshot, JSON vẫn không chứa audio theo thiết kế. | P0-04 |
 | F05 | Xác nhận từ code | Listening dùng speech synthesis, đọc theo câu, phụ thuộc voice của hệ điều hành. Có phát/dừng/tốc độ; chưa có audio cố định, pause/resume/seek/timeline và transcript có timecode. Chế độ thi cho nghe lại. | P1, chặn nghiệm thu Listening chân thực |
-| F06 | Xác nhận từ content/schema | Chưa có `contentVersion`, trạng thái biên tập, người duyệt, nguồn/quyền sử dụng, bằng chứng đáp án có cấu trúc hoặc nhóm bài học/bài checkpoint riêng. Một đề đầy đủ và 8 bài ngắn không đủ làm ngân hàng luyện dài hạn. | P1; phụ thuộc F01 |
+| F06 | Đã version hóa kỹ thuật, còn thiếu biên tập | Đã có version và snapshot lịch sử. Chưa có trạng thái biên tập, người duyệt, nguồn hoặc quyền sử dụng, bằng chứng đáp án có cấu trúc hay nhóm bài học và checkpoint riêng. Một đề đầy đủ và 8 bài ngắn không đủ làm ngân hàng luyện dài hạn. | P1 |
 | F07 | Xác nhận từ logic/tài liệu | Có cá nhân hóa và thống kê, nhưng chưa có diagnostic/checkpoint bằng bài chưa từng học. Độ chính xác 5 lượt gần nhất có thể gồm bài làm lại; chưa đo được mức tiến bộ độc lập. | P1 |
-| F08 | Xác nhận trong repository | Có CI nhưng chưa có quy trình publish production bắt buộc chờ CI được mô tả/thiết lập trong repo; chưa có smoke test HTTPS và audit dependency trong workflow hiện tại. Chưa có cấu hình tiếp nhận lỗi production/uptime trong repo hoặc runbook rollback đã diễn tập. Thiết lập ngoài repo cần kiểm tra riêng. | P0 tối thiểu, P2 mở rộng |
-| F09 | Xác nhận từ tài liệu | `HANDOVER.md` và script tạo Word vẫn dùng baseline 47/30, trong khi `QUALITY.md`/`STATUS.md` là 48/38. Word đã được ghi rõ là bản lịch sử nhưng bộ bàn giao chưa đồng nhất. | P0 khi chốt release |
+| F08 | Đã hoàn thành phần trong repository | CI có audit dependency; workflow smoke HTTPS chạy sau deployment và runbook release hoặc rollback đã có. Quy tắc bảo vệ branch, kênh nhận lỗi và uptime bên ngoài repository vẫn cần chủ website xác nhận. | P0/P2 vận hành |
+| F09 | Đã sửa | HANDOVER, script Word, STATUS và QUALITY dùng cùng số liệu release 53 unit và 40 E2E. DOCX đã được render và xem đủ từng trang. | P0-07 |
 | F10 | Xác nhận từ code/tài liệu | Chưa có offline đầy đủ, đồng bộ audio, xóa/quản lý kho bản ghi trong UI, hoặc chấm Writing/Speaking. Đây là phần chưa xây có chủ đích, không phải lỗi của nút hiện tại. | P2/P3 |
 
 **Giới hạn của F02:** RLS vẫn giới hạn tài khoản/row; chưa phát hiện lộ dữ liệu chéo người dùng. UI hiện tại dùng RPC đúng. Vấn đề là đường cập nhật trực tiếp của chính tài khoản được phép có thể bỏ qua quy tắc revision và kiểm tra payload, không phải bằng chứng đã có người khai thác hoặc dữ liệu thật bị hỏng.
