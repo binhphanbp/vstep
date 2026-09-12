@@ -1,6 +1,40 @@
 import { test, expect } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
 
+const priorityLessonRoutes = [
+  "/practice/reading-cafe",
+  "/practice/reading-commute",
+  "/practice/reading-memory",
+  "/practice/reading-garden",
+  "/practice/listening-weekend",
+  "/practice/listening-library",
+  "/practice/listening-repair",
+  "/practice/listening-flexible",
+];
+
+test("every Reading and Listening lesson loads cleanly on mobile", async ({
+  page,
+}) => {
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of priorityLessonRoutes) {
+    const response = await page.goto(route, { waitUntil: "networkidle" });
+    expect(response?.status(), route).toBe(200);
+    await expect(page.locator("main h1"), route).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+      route,
+    ).toBe(true);
+  }
+
+  expect(runtimeErrors).toEqual([]);
+});
+
 test("core Reading and Listening loop works across browser engines", async ({
   page,
 }) => {
@@ -83,6 +117,11 @@ test("core Reading and Listening loop works across browser engines", async ({
     page.getByRole("heading", { name: "Mình vừa học được gì?" }),
   ).toBeVisible();
   await expect(page.getByText("Bản chép lời", { exact: false })).toBeVisible();
+
+  await page.goto("/settings");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
+  expect((await download).suggestedFilename()).toMatch(/may-backup.*\.json/);
 
   const cspViolations = await page.evaluate(
     () =>
