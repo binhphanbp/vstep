@@ -36,7 +36,7 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 11/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
-- GitHub Actions run `34604727728` đạt cho commit tài liệu `7b78df6`; các run chức năng trước đó cũng đạt. Pipeline hiện cài Chromium, Firefox và WebKit.
+- GitHub Actions run `34620804070` đạt cho commit release `df8e6b6`; pipeline đã cài và chạy Chromium, Firefox cùng WebKit.
 - Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 11/09/2026: 9 màn chính và 14 bài luyện tải đúng, route giả HTTP 404, HSTS/CSP và các header bảo vệ hiện diện. Toàn bộ Reading/Listening không tràn ngang ở 1.440 px và 390 px; luồng Listening phát/dừng, chấm điểm, phân tích và mở transcript sau khi nộp không có lỗi runtime.
 - Supabase production trả HTTP 200 ở Auth settings; ba thao tác ẩn danh gồm đọc snapshot, đọc membership và gọi RPC lưu đều bị RLS chặn bằng mã `42501`.
 - Lighthouse mobile chạy ba lần trên bản production local sau tối ưu: tổng payload giảm từ khoảng 516 KiB xuống 376 KiB, JavaScript từ 354 KiB xuống 218 KiB và phần JavaScript chưa dùng từ 169 KiB xuống 26 KiB. Accessibility và Best Practices đạt 100; Performance dao động 73–84 do mô phỏng CPU. SEO 60 là hệ quả chủ đích của `noindex` cho ứng dụng cá nhân.

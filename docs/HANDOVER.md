@@ -188,7 +188,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 11/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34604727728` cho commit `7b78df6`; pipeline hiện cài Chromium, Firefox và WebKit            |
+| GitHub Actions        | Đạt                | Run `34620804070` cho commit `df8e6b6`; đã chạy Chromium, Firefox và WebKit                      |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -367,6 +367,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `80e6672` | Thêm phản hồi sâu cho Reading/Listening và hoàn thiện luồng đối chiếu sau khi nộp  |
 | `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                 |
 | `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                 |
+| `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                  |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 
