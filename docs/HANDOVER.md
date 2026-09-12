@@ -1,8 +1,8 @@
 # Báo cáo bàn giao website Mây VSTEP
 
-**Ngày chốt báo cáo:** 11/09/2026
+**Ngày chốt báo cáo:** 12/09/2026
 
-**Mốc nền tảng được đánh giá:** vòng kiểm định production Reading và Listening ngày 11/09/2026
+**Mốc nền tảng được đánh giá:** vòng kiểm định production Reading và Listening ngày 12/09/2026
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -184,11 +184,11 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
 | Vitest                | 47/47 đạt          | Logic học, confidence, chẩn đoán dạng câu, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
-| Playwright production | 27/27 đạt          | 25 ca Chromium; smoke Reading/Listening trên Firefox và WebKit, CSP, manifest và responsive      |
+| Playwright production | 30/30 đạt          | 26 ca Chromium; 2 Firefox; 2 WebKit; crawl 8 bài ưu tiên, backup, CSP và responsive              |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
-| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 11/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34620804070` cho commit `df8e6b6`; đã chạy Chromium, Firefox và WebKit                      |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 12/09/2026                                                           |
+| GitHub Actions        | Đạt                | Run `34666370380` cho commit `f89387d`; đã chạy Chromium, Firefox và WebKit                      |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -368,6 +368,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                 |
 | `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                 |
 | `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                  |
+| `f89387d` | Kiểm tra tám bài ưu tiên và tải backup trên cả ba browser engine                   |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 

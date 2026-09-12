@@ -281,8 +281,8 @@ def add_cover(doc):
     header_run = header_p.add_run("THÔNG TIN BÀN GIAO")
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
     metadata = [
-        ("Ngày chốt", "11/09/2026"),
-        ("Mốc đánh giá", "Kiểm định production Reading và Listening 11/09/2026"),
+        ("Ngày chốt", "12/09/2026"),
+        ("Mốc đánh giá", "Kiểm định production Reading và Listening 12/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
@@ -319,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Bộ kiểm thử production gồm 47 unit test và 27 E2E trên Chromium, Firefox, WebKit. Các điều kiện còn thiếu để nghiệm thu vận hành là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Bộ kiểm thử production gồm 47 unit test và 30 E2E trên Chromium, Firefox, WebKit. Các điều kiện còn thiếu để nghiệm thu vận hành là login/sync trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )
