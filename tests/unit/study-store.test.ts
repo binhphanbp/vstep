@@ -11,6 +11,19 @@ beforeEach(() => {
   vi.stubGlobal("window", new EventTarget());
 });
 afterEach(() => vi.unstubAllGlobals());
+it("backs up a newer tab update even before its storage event arrives", async () => {
+  const store = await import("../../src/lib/study-store");
+  const stop = store.subscribe(() => {});
+  const newer = freshState();
+  newer.updatedAt = "2030-01-01T00:00:00.000Z";
+  newer.drafts["writing-email"] =
+    "Work saved while the cloud request was pending";
+  values.set("may-study-v1", JSON.stringify(newer));
+  expect(store.currentBackupState().drafts["writing-email"]).toBe(
+    newer.drafts["writing-email"],
+  );
+  stop();
+});
 it("personalizes an untouched legacy profile without replacing a chosen name", async () => {
   const legacy = freshState();
   legacy.profile = { ...legacy.profile, name: "bạn", onboarded: false };

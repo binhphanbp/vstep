@@ -62,6 +62,12 @@ export function subscribe(listener: () => void) {
 }
 export const getSnapshot = () => snapshot;
 export const getServerSnapshot = () => serverSnapshot;
+export function currentBackupState(): StudyState {
+  // Refresh from another tab before an asynchronous import replaces local data.
+  // updateStudy also preserves unsaved RAM state when storage is unavailable.
+  updateStudy((state) => state);
+  return snapshot.state;
+}
 export function updateStudy(fn: (state: StudyState) => StudyState) {
   if (!initialized) readInitial();
   // Read a more recent snapshot before applying a mutation from another tab.

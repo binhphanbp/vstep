@@ -19,6 +19,7 @@ import {
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
 import { supabase } from "@/lib/supabase";
+import { currentBackupState } from "@/lib/study-store";
 export function downloadJson(data: unknown, name: string) {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
@@ -85,7 +86,10 @@ export function SettingsPage() {
         )
       )
         return;
-      downloadJson(state, `may-before-import-${localDay()}.json`);
+      downloadJson(
+        currentBackupState(),
+        `may-before-import-${localDay()}.json`,
+      );
       replace({ ...parsed, updatedAt: new Date().toISOString() });
       setProfile(parsed.profile);
       toast("Đã khôi phục bản sao học tập.");
@@ -387,7 +391,10 @@ function CloudSettings() {
           )
         )
           return;
-        downloadJson(state, `may-before-cloud-${localDay()}.json`);
+        downloadJson(
+          currentBackupState(),
+          `may-before-cloud-${localDay()}.json`,
+        );
         replace({ ...parsed, updatedAt: new Date().toISOString() });
         localStorage.setItem(`may-revision:${user.id}`, String(data.revision));
         setLast("Đã tải bản sao và cập nhật hồ sơ trên thiết bị.");

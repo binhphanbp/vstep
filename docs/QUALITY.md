@@ -4,6 +4,8 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 
 ## Lỗi dữ liệu đã tái hiện và sửa
 
+Bổ sung sau release `ac80772`: bản dự phòng trước khi nhập JSON hoặc tải cloud nay đọc lại state mới nhất, thay vì dùng snapshot từ lúc bắt đầu chờ file/mạng. Kiểm thử hồi quy bao phủ cập nhật từ tab khác khi sự kiện storage chưa được xử lý. Báo cáo Word của release trước chưa bao gồm thay đổi bổ sung này.
+
 | Tình huống                                     | Trước khi sửa                                                        | Kết quả sau sửa                                                                           |
 | ---------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Cùng bài trắc nghiệm mở ở hai tab              | Mỗi tab giữ đáp án riêng; bộ lưu theo đồng hồ có thể ghi lại nháp cũ | Đáp án và thời gian dùng cùng bản nháp trong store; thay đổi một câu giữ các câu mới nhất |
