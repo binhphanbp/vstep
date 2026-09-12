@@ -326,7 +326,7 @@ export function SettingsPage() {
   );
 }
 function CloudSettings() {
-  const { state, replace, toast } = useStudy();
+  const { replace, toast } = useStudy();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -367,6 +367,7 @@ function CloudSettings() {
     if (!supabase || !user) return;
     setBusy(true);
     setError("");
+    setLast("");
     try {
       if (direction === "pull") {
         const { data, error } = await supabase
@@ -384,7 +385,17 @@ function CloudSettings() {
           );
           return;
         }
-        const parsed = stateSchema.parse(data.payload);
+        const result = stateSchema.safeParse(data.payload);
+        if (
+          !result.success ||
+          !Number.isSafeInteger(data.revision) ||
+          data.revision < 1 ||
+          !Number.isFinite(Date.parse(data.updated_at))
+        )
+          throw Error(
+            "Bản sao trên đám mây không hợp lệ. Dữ liệu trên thiết bị vẫn được giữ nguyên.",
+          );
+        const parsed = result.data;
         if (
           !window.confirm(
             `Tải bản sao ngày ${new Date(data.updated_at).toLocaleString("vi-VN")} (${parsed.attempts.length} lượt học)? Bản thiết bị hiện tại được xuất trước khi thay thế.`,
@@ -402,8 +413,9 @@ function CloudSettings() {
         const expected = Number(
           localStorage.getItem(`may-revision:${user.id}`) ?? 0,
         );
+        const uploaded = stateSchema.parse(currentBackupState());
         const { data, error } = await supabase.rpc("save_study_snapshot", {
-          p_payload: stateSchema.parse(state),
+          p_payload: uploaded,
           p_expected_revision: expected,
         });
         if (error) {
@@ -416,6 +428,13 @@ function CloudSettings() {
           );
         }
         localStorage.setItem(`may-revision:${user.id}`, String(data));
+        if (currentBackupState().updatedAt !== uploaded.updatedAt) {
+          setLast(
+            "Có thay đổi mới trên thiết bị chưa được lưu lên đám mây. Bấm Lưu lên đám mây lần nữa để cập nhật bản mới nhất.",
+          );
+          toast("Đã lưu bản trước đó. Thay đổi mới vẫn ở trên thiết bị.");
+          return;
+        }
         setLast(
           `Đã lưu lên đám mây lúc ${new Date().toLocaleTimeString("vi-VN")}.`,
         );

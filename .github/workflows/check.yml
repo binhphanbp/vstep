@@ -7,6 +7,10 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Fake public configuration: cloud E2E intercepts all Supabase requests.
+      NEXT_PUBLIC_SUPABASE_URL: https://may-e2e.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_placeholder
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
