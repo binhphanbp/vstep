@@ -51,7 +51,8 @@ Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot
 - JSON và Supabase snapshot **không bao gồm âm thanh**. Dùng nút tải bản ghi để giữ file hoặc chuyển thiết bị. Xóa dữ liệu trình duyệt/chế độ riêng tư có thể xóa kho học. Không có service worker hay cam kết offline hoàn toàn.
 - Micro chỉ mở khi bấm ghi âm, cần HTTPS hoặc localhost. Dừng ghi âm và chờ nút tải xuất hiện trước khi đóng/tải lại trang. Nếu trình duyệt crash khi đang thu, đoạn chưa lưu không thể bảo đảm khôi phục.
 - Giọng bài nghe/phát âm dùng speech synthesis của hệ điều hành. Hội thoại chọn giọng tiếng Anh khác nhau nếu thiết bị có đủ giọng; khả năng phát phụ thuộc thiết bị. Chưa có bản thu người nói.
-- Đăng xuất đám mây vẫn giữ dữ liệu trên thiết bị. Đây là ứng dụng cho thiết bị cá nhân, không phải kho được mã hóa bằng mật khẩu đăng nhập.
+- Đăng xuất đám mây chỉ kết thúc phiên trên thiết bị hiện tại và vẫn giữ dữ liệu học. Đây là ứng dụng cho thiết bị cá nhân, không phải kho được mã hóa bằng mật khẩu đăng nhập.
+- Đồng bộ dừng chờ sau 20 giây hoặc khi rời Cài đặt/đổi phiên đăng nhập. Nếu lần tải lên hết thời gian chờ, máy chủ có thể đã nhận bản sao; xuất bản thiết bị rồi tải bản cloud để kiểm tra trước khi thử lại. Không tự gửi lại hoặc tự hợp nhất dữ liệu.
 
 ## Kiểm tra và triển khai
 

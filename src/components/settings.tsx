@@ -333,13 +333,30 @@ function CloudSettings() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [last, setLast] = useState("");
+  const pendingSync = useRef<AbortController | null>(null);
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setUser(session?.user ?? null),
-    );
-    return () => data.subscription.unsubscribe();
+    let activeUser: string | null = null;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const nextUser = session?.user.id ?? null;
+      if (activeUser !== nextUser || event === "SIGNED_OUT") {
+        const pending = pendingSync.current;
+        pendingSync.current = null;
+        pending?.abort();
+        if (pending) setBusy(false);
+        setLast("");
+        setError("");
+      }
+      activeUser = nextUser;
+      // Session is used for display only; Supabase verifies Auth/RLS on requests.
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      data.subscription.unsubscribe();
+      const pending = pendingSync.current;
+      pendingSync.current = null;
+      pending?.abort();
+    };
   }, []);
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -364,7 +381,18 @@ function CloudSettings() {
     }
   }
   async function sync(direction: "push" | "pull") {
-    if (!supabase || !user) return;
+    if (!supabase || !user || pendingSync.current) return;
+    const controller = new AbortController();
+    pendingSync.current = controller;
+    const timeout = window.setTimeout(() => {
+      if (pendingSync.current !== controller) return;
+      pendingSync.current = null;
+      controller.abort();
+      setBusy(false);
+      setError(
+        "Kết nối mất quá lâu. Dữ liệu thiết bị vẫn còn. Nếu vừa lưu lên đám mây, hãy xuất bản thiết bị rồi tải bản đám mây để kiểm tra trước khi thử lại.",
+      );
+    }, 20000);
     setBusy(true);
     setError("");
     setLast("");
@@ -374,7 +402,9 @@ function CloudSettings() {
           .from("study_snapshots")
           .select("payload,revision,updated_at")
           .eq("user_id", user.id)
+          .abortSignal(controller.signal)
           .maybeSingle();
+        if (pendingSync.current !== controller) return;
         if (error)
           throw Error(
             "Không tải được bản sao. Kiểm tra kết nối và cấu hình quyền Supabase.",
@@ -414,10 +444,13 @@ function CloudSettings() {
           localStorage.getItem(`may-revision:${user.id}`) ?? 0,
         );
         const uploaded = stateSchema.parse(currentBackupState());
-        const { data, error } = await supabase.rpc("save_study_snapshot", {
-          p_payload: uploaded,
-          p_expected_revision: expected,
-        });
+        const { data, error } = await supabase
+          .rpc("save_study_snapshot", {
+            p_payload: uploaded,
+            p_expected_revision: expected,
+          })
+          .abortSignal(controller.signal);
+        if (pendingSync.current !== controller) return;
         if (error) {
           if (error.message.includes("revision_conflict"))
             throw Error(
@@ -441,11 +474,39 @@ function CloudSettings() {
       }
       toast("Đồng bộ thành công.");
     } catch (e) {
+      if (pendingSync.current !== controller) return;
       setError(
         e instanceof Error
           ? e.message
           : "Không đồng bộ được. Dữ liệu thiết bị vẫn còn.",
       );
+    } finally {
+      window.clearTimeout(timeout);
+      if (pendingSync.current === controller) {
+        pendingSync.current = null;
+        setBusy(false);
+      }
+    }
+  }
+  async function logout() {
+    if (!supabase || busy) return;
+    setBusy(true);
+    setError("");
+    setLast("");
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) {
+        const { data } = await supabase.auth.getSession();
+        setError(
+          data.session
+            ? "Không đăng xuất được. Kiểm tra kết nối rồi thử lại nhé."
+            : "Đã đăng xuất trên thiết bị, nhưng chưa xác nhận được việc kết thúc phiên trên máy chủ. Dữ liệu học vẫn được giữ lại.",
+        );
+        return;
+      }
+      toast("Đã đăng xuất. Dữ liệu thiết bị được giữ lại.");
+    } catch {
+      setError("Không đăng xuất được. Kiểm tra kết nối rồi thử lại nhé.");
     } finally {
       setBusy(false);
     }
@@ -495,12 +556,7 @@ function CloudSettings() {
             className="text-link"
             style={{ marginTop: 18 }}
             disabled={busy}
-            onClick={async () => {
-              if (!supabase) return;
-              const { error } = await supabase.auth.signOut();
-              if (error) setError("Không đăng xuất được. Thử lại nhé.");
-              else toast("Đã đăng xuất. Dữ liệu thiết bị được giữ lại.");
-            }}
+            onClick={logout}
           >
             <LogOut size={14} />
             Đăng xuất

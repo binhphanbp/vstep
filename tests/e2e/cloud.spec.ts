@@ -2,6 +2,147 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import type { StudyState } from "../../src/lib/learning";
 
+test("logout locks cloud actions and reports local sign-out when the server fails", async ({
+  page,
+}) => {
+  await login(page);
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let received!: () => void;
+  const arrived = new Promise<void>((resolve) => {
+    received = resolve;
+  });
+  const scopes: (string | null)[] = [];
+  await page.route("**/auth/v1/logout?**", async (route) => {
+    scopes.push(new URL(route.request().url()).searchParams.get("scope"));
+    received();
+    if (scopes.length === 1) {
+      await gate;
+      await route.fulfill({
+        status: 500,
+        json: { message: "Temporary failure" },
+      });
+    } else await route.fulfill({ status: 204 });
+  });
+  const before = await page.evaluate(() =>
+    localStorage.getItem("may-study-v1"),
+  );
+  const logout = page.getByRole("button", { name: "Đăng xuất", exact: true });
+  await logout.click();
+  await arrived;
+  try {
+    await expect(
+      page.getByRole("button", { name: "Lưu lên đám mây", exact: true }),
+    ).toBeDisabled();
+    await expect(logout).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect(page.locator("main [role=alert]")).toContainText(
+    "Đã đăng xuất trên thiết bị",
+  );
+  const signIn = page.getByRole("button", { name: "Đăng nhập", exact: true });
+  await expect(signIn).toBeEnabled();
+  await page.getByLabel("Mật khẩu", { exact: true }).fill("test-password");
+  await signIn.click();
+  await expect(logout).toBeEnabled();
+  await logout.click();
+  await expect(
+    page.getByRole("button", { name: "Đăng nhập", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("main [role=alert]")).toHaveCount(0);
+  expect(scopes).toEqual(["local", "local"]);
+  expect(await page.evaluate(() => localStorage.getItem("may-study-v1"))).toBe(
+    before,
+  );
+});
+
+test("leaving settings cancels a pending cloud restore", async ({ page }) => {
+  await login(page);
+  const payload = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("may-study-v1")!),
+  );
+  payload.profile.name = "Must not replace local data";
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let received!: () => void;
+  const arrived = new Promise<void>((resolve) => {
+    received = resolve;
+  });
+  await page.route("**/rest/v1/study_snapshots?**", async (route) => {
+    received();
+    await gate;
+    await route.fulfill({
+      json: { payload, revision: 8, updated_at: new Date().toISOString() },
+    });
+  });
+  let dialogs = 0;
+  page.on("dialog", async (dialog) => {
+    dialogs++;
+    await dialog.accept();
+  });
+  await page
+    .getByRole("button", { name: "Tải về thiết bị", exact: true })
+    .click();
+  await arrived;
+  try {
+    await page.locator('a[href="/practice"]').first().click();
+    await expect(page).toHaveURL(/\/practice$/);
+  } finally {
+    release();
+  }
+  await page.locator('a[href="/settings"]').first().click();
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue(
+    "Gùa kiểm thử",
+  );
+  expect(dialogs).toBe(0);
+});
+
+test("a stalled cloud request times out and leaves local progress intact", async ({
+  page,
+}) => {
+  await login(page);
+  await page.clock.install();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let received!: () => void;
+  const arrived = new Promise<void>((resolve) => {
+    received = resolve;
+  });
+  await page.route("**/rest/v1/study_snapshots?**", async (route) => {
+    received();
+    await gate;
+    await route.fulfill({ status: 503, json: { message: "Unavailable" } });
+  });
+  const before = await page.evaluate(() =>
+    localStorage.getItem("may-study-v1"),
+  );
+  const pull = page.getByRole("button", {
+    name: "Tải về thiết bị",
+    exact: true,
+  });
+  await pull.click();
+  await arrived;
+  try {
+    await page.clock.fastForward(21000);
+    await expect(pull).toBeEnabled();
+    await expect(page.locator("main [role=alert]")).toContainText(
+      "Kết nối mất quá lâu",
+    );
+    expect(
+      await page.evaluate(() => localStorage.getItem("may-study-v1")),
+    ).toBe(before);
+  } finally {
+    release();
+  }
+});
+
 const user = {
   id: "11111111-1111-4111-8111-111111111111",
   email: "learner@example.test",
@@ -11,6 +152,72 @@ const user = {
   user_metadata: {},
   created_at: "2026-01-01T00:00:00Z",
 };
+
+test("signing out in another tab cancels a pending restore without replacing progress", async ({
+  page,
+  context,
+}) => {
+  await login(page);
+  const before = await page.evaluate(() =>
+    localStorage.getItem("may-study-v1"),
+  );
+  const payload = JSON.parse(before!);
+  payload.profile.name = "Must not restore after sign-out";
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let received!: () => void;
+  const arrived = new Promise<void>((resolve) => {
+    received = resolve;
+  });
+  await page.route("**/rest/v1/study_snapshots?**", async (route) => {
+    received();
+    await gate;
+    await route.fulfill({
+      json: { payload, revision: 9, updated_at: new Date().toISOString() },
+    });
+  });
+  let dialogs = 0;
+  page.on("dialog", async (dialog) => {
+    dialogs++;
+    await dialog.accept();
+  });
+  const other = await context.newPage();
+  await other.route("https://*.supabase.co/**", async (route) => {
+    if (new URL(route.request().url()).pathname === "/auth/v1/logout")
+      await route.fulfill({ status: 204 });
+    else
+      await route.fulfill({
+        status: 503,
+        json: { message: "Mock endpoint unavailable" },
+      });
+  });
+  await other.goto("/settings");
+  await expect(
+    other.getByRole("button", { name: "Đăng xuất", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Tải về thiết bị", exact: true })
+    .click();
+  await arrived;
+  try {
+    await other.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Đăng nhập", exact: true }),
+    ).toBeVisible();
+  } finally {
+    release();
+  }
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue(
+    "Gùa kiểm thử",
+  );
+  expect(await page.evaluate(() => localStorage.getItem("may-study-v1"))).toBe(
+    before,
+  );
+  expect(dialogs).toBe(0);
+  await other.close();
+});
 
 async function login(page: Page) {
   await page.route("https://*.supabase.co/**", async (route) => {
