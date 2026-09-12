@@ -307,6 +307,7 @@ const listen = (
   minutes: number,
 ): Lesson => ({
   id,
+  version: 1,
   skill: "listening",
   title,
   subtitle: "Đề tự biên soạn đủ cấu trúc · Giọng đọc tổng hợp",

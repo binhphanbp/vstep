@@ -13,6 +13,30 @@ const boundedNumber = (minimum: number, maximum: number) =>
   z.number().check(z.minimum(minimum), z.maximum(maximum));
 const boundedInteger = (minimum: number, maximum: number) =>
   z.number().check(z.int(), z.minimum(minimum), z.maximum(maximum));
+const questionSnapshotSchema = z.object({
+  id: limitedString(100),
+  text: limitedString(3000),
+  options: z.array(limitedString(2000)).check(z.minLength(2), z.maxLength(8)),
+  answer: boundedInteger(0, 7),
+  explanation: limitedString(5000),
+  tag: limitedString(100),
+});
+const lessonSnapshotSchema = z.object({
+  id: limitedString(100),
+  version: boundedInteger(1, 1000000),
+  skill: skillSchema,
+  title: limitedString(500),
+  subtitle: limitedString(1000),
+  topic: limitedString(200),
+  level: z.enum(["B1", "B2"]),
+  minutes: boundedInteger(1, 300),
+  part: limitedString(500),
+  text: limitedString(50000),
+  questions: z.array(questionSnapshotSchema).check(z.maxLength(100)),
+  tips: z.array(limitedString(1000)).check(z.maxLength(30)),
+  minWords: z.optional(boundedInteger(1, 10000)),
+  sample: z.optional(limitedString(50000)),
+});
 
 export const profileSchema = z.object({
   name: z.string().check(z.trim(), z.minLength(1), z.maxLength(40)),
@@ -38,6 +62,7 @@ export const attemptSchema = z
     text: z.optional(limitedString(30000)),
     reflection: z.optional(z.array(limitedString(200)).check(z.maxLength(20))),
     recordingId: z.optional(limitedString(100)),
+    lessonSnapshot: z.optional(lessonSnapshotSchema),
   })
   .check(
     z.refine((attempt) => attempt.correct <= attempt.total, {
@@ -62,6 +87,9 @@ export const examSchema = z.object({
   writing: limitedString(30000),
   writingTask2: z.optional(limitedString(30000)),
   finished: z.boolean(),
+  lessonSnapshots: z.optional(
+    z.array(lessonSnapshotSchema).check(z.maxLength(40)),
+  ),
 });
 export const stateSchema = z
   .object({
@@ -330,8 +358,8 @@ export function mistakes(state: StudyState, now = new Date()) {
   const result = new Map<
     string,
     {
-      question: (typeof lessons)[number]["questions"][number];
-      lesson: (typeof lessons)[number];
+      question: Question;
+      lesson: Pick<(typeof lessons)[number], "id" | "title" | "skill" | "text">;
       chosen: number | undefined;
       confidence: Confidence | undefined;
       wrongCount: number;
@@ -340,7 +368,8 @@ export function mistakes(state: StudyState, now = new Date()) {
     }
   >();
   for (const a of state.attempts) {
-    const lesson = allLessons.find((l) => l.id === a.lessonId);
+    const lesson =
+      a.lessonSnapshot ?? allLessons.find((l) => l.id === a.lessonId);
     if (!lesson) continue;
     for (const question of lesson.questions) {
       if (a.answers[question.id] !== question.answer) {
@@ -378,9 +407,15 @@ export function scoreAnswers(
 ) {
   const lesson = allLessons.find((l) => l.id === lessonId);
   if (!lesson) throw Error("Không tìm thấy bài học.");
+  return scoreQuestionSet(lesson.questions, answers);
+}
+function scoreQuestionSet(
+  questions: Question[],
+  answers: Record<string, number>,
+) {
   return {
-    correct: lesson.questions.filter((q) => answers[q.id] === q.answer).length,
-    total: lesson.questions.length,
+    correct: questions.filter((q) => answers[q.id] === q.answer).length,
+    total: questions.length,
   };
 }
 
@@ -417,12 +452,18 @@ export function objectiveInsights(
 export function recordAttempt(state: StudyState, attempt: Attempt): StudyState {
   if (state.attempts.some((a) => a.id === attempt.id)) return state;
   const mistakeReviews = { ...state.mistakeReviews };
-  const lesson = allLessons.find((l) => l.id === attempt.lessonId);
+  const lesson =
+    attempt.lessonSnapshot ??
+    allLessons.find((candidate) => candidate.id === attempt.lessonId);
+  const recorded =
+    attempt.lessonSnapshot || !lesson
+      ? attempt
+      : { ...attempt, lessonSnapshot: structuredClone(lesson) };
   for (const question of lesson?.questions ?? []) {
     if (attempt.answers[question.id] !== question.answer)
       delete mistakeReviews[question.id];
   }
-  return { ...state, attempts: [...state.attempts, attempt], mistakeReviews };
+  return { ...state, attempts: [...state.attempts, recorded], mistakeReviews };
 }
 export const examStages = [
   {
@@ -502,7 +543,9 @@ export function advanceExam(
     );
     for (const lessonId of stage.lessonIds) {
       const id = `exam:${exam.id}:${lessonId}`;
-      const lesson = allLessons.find((l) => l.id === lessonId)!;
+      const lesson =
+        exam.lessonSnapshots?.find((candidate) => candidate.id === lessonId) ??
+        allLessons.find((candidate) => candidate.id === lessonId)!;
       const writing =
         lessonId === "writing-essay" ? (exam.writingTask2 ?? "") : exam.writing;
       // Blank productive responses are not counted as completed practice.
@@ -522,12 +565,13 @@ export function advanceExam(
               .filter((q) => exam!.answers[q.id] !== undefined)
               .map((q) => [q.id, exam!.answers[q.id]]),
           ),
-          ...scoreAnswers(lessonId, exam.answers),
+          ...scoreQuestionSet(lesson.questions, exam.answers),
           seconds:
             stage.skill === "writing" && exam.mode === "full"
               ? seconds * (lessonId === "writing-essay" ? 2 / 3 : 1 / 3)
               : seconds / stage.lessonIds.length,
           text: stage.skill === "writing" ? writing : undefined,
+          lessonSnapshot: structuredClone(lesson),
         });
     }
     if (exam.stage === 3) {

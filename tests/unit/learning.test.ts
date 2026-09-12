@@ -9,6 +9,7 @@ import {
   mistakes,
   objectiveInsights,
   profileSchema,
+  recordAttempt,
   scheduleReview,
   scoreAnswers,
   skillStats,
@@ -19,6 +20,7 @@ import {
   type Attempt,
 } from "../../src/lib/learning";
 import { lessons, vocabulary } from "../../src/lib/content";
+import { readQuizDraft } from "../../src/lib/quiz-draft";
 const now = new Date("2026-09-08T18:00:00+07:00");
 function attempt(date: string, extra: Partial<Attempt> = {}): Attempt {
   return {
@@ -89,8 +91,9 @@ describe("scoring and honest progress", () => {
     expect(skillStats(s, "reading").accuracy).toBe(100);
   });
   it("separates misconceptions from uncertain correct answers by question type", () => {
-    const questions = lessons.find((lesson) => lesson.id === "reading-cafe")!
-      .questions;
+    const questions = lessons.find(
+      (lesson) => lesson.id === "reading-cafe",
+    )!.questions;
     const insight = objectiveInsights(
       questions,
       { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
@@ -132,6 +135,47 @@ describe("scoring and honest progress", () => {
   });
 });
 describe("adaptive plan and memory scheduling", () => {
+  it("keeps submitted history stable when a later content version changes", () => {
+    const lesson = lessons.find((item) => item.id === "reading-cafe")!;
+    const answers = Object.fromEntries(
+      lesson.questions.map((question) => [question.id, question.answer]),
+    );
+    const saved = recordAttempt(
+      freshState(),
+      attempt(now.toISOString(), { answers }),
+    );
+    const originalAnswer = lesson.questions[0].answer;
+    const originalTitle = lesson.title;
+    try {
+      lesson.questions[0].answer = (originalAnswer + 1) % 4;
+      lesson.title = "A later editorial title";
+      expect(mistakes(saved)).toHaveLength(0);
+      expect(saved.attempts[0].lessonSnapshot).toMatchObject({
+        version: 1,
+        title: originalTitle,
+      });
+      expect(saved.attempts[0].lessonSnapshot?.questions[0].answer).toBe(
+        originalAnswer,
+      );
+    } finally {
+      lesson.questions[0].answer = originalAnswer;
+      lesson.title = originalTitle;
+    }
+  });
+  it("drops incompatible quiz answers instead of applying indices to new content", () => {
+    const lesson = lessons.find((item) => item.id === "reading-cafe")!;
+    expect(
+      readQuizDraft(
+        JSON.stringify({
+          contentVersion: lesson.version + 1,
+          answers: { rc1: 1 },
+          confidence: { rc1: "sure" },
+          seconds: 30,
+        }),
+        lesson,
+      ),
+    ).toEqual({ answers: {}, confidence: {}, seconds: 0 });
+  });
   it("fits a low-energy day and avoids repeating the same skill", () => {
     const s = freshState();
     s.mood[localDay(now)] = "low";

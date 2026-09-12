@@ -21,6 +21,7 @@ export function ExamPage() {
   const [mode, setMode] = useState<"mini" | "full">("mini");
   const [sections, setSections] = useState<Record<number, number>>({});
   const exam = state.exam;
+  const examLessons = exam?.lessonSnapshots ?? lessons;
   const examStages = getExamStages(exam?.mode ?? mode);
   const full = (exam?.mode ?? mode) === "full";
   useEffect(() => {
@@ -45,8 +46,7 @@ export function ExamPage() {
     window.addEventListener("beforeunload", leave);
     return () => window.removeEventListener("beforeunload", leave);
   }, [exam?.id, exam?.finished, exam]);
-  function start() {
-    const time = Date.now();
+  function start(time: number) {
     update((s) =>
       s.exam
         ? s
@@ -62,6 +62,11 @@ export function ExamPage() {
               writing: "",
               writingTask2: "",
               finished: false,
+              lessonSnapshots: structuredClone(
+                [
+                  ...new Set(examStages.flatMap((stage) => stage.lessonIds)),
+                ].map((id) => lessons.find((lesson) => lesson.id === id)!),
+              ),
             },
           },
     );
@@ -72,7 +77,7 @@ export function ExamPage() {
     if (!submitting || submitting.finished) return;
     const currentStage = examStages[submitting.stage];
     const stageQuestions = currentStage.lessonIds.flatMap(
-      (id) => lessons.find((lesson) => lesson.id === id)?.questions ?? [],
+      (id) => examLessons.find((lesson) => lesson.id === id)?.questions ?? [],
     );
     const unanswered = stageQuestions.filter(
       (question) => submitting.answers[question.id] === undefined,
@@ -202,7 +207,7 @@ export function ExamPage() {
               className="button primary"
               style={{ marginTop: 22 }}
               disabled={!ready}
-              onClick={start}
+              onClick={() => start(now)}
             >
               Bắt đầu {full ? 172 : 51} phút của mình
               <ArrowRight size={16} />
@@ -306,7 +311,7 @@ export function ExamPage() {
           {examStages[3].lessonIds.map((id) => (
             <div key={id}>
               <p className="help-copy">
-                {lessons.find((l) => l.id === id)?.part}
+                {examLessons.find((l) => l.id === id)?.part}
               </p>
               <Recorder
                 id={full ? `exam-${exam.id}-${id}` : `exam-${exam.id}`}
@@ -335,12 +340,15 @@ export function ExamPage() {
           .slice(0, 2)
           .flatMap((s) => s.lessonIds)
           .map((id) => {
-            const lesson = lessons.find((l) => l.id === id)!;
+            const lesson = examLessons.find((l) => l.id === id)!;
             return (
               <details key={id}>
                 <summary>{lesson.title} · Xem đáp án và giải thích</summary>
                 {lesson.skill === "listening" && (
-                  <section className="exam-transcript" aria-label="Bản chép lời">
+                  <section
+                    className="exam-transcript"
+                    aria-label="Bản chép lời"
+                  >
                     <h3>Bản chép lời để đối chiếu sau khi nộp</h3>
                     <div className="passage" lang="en">
                       {lesson.text}
@@ -366,7 +374,7 @@ export function ExamPage() {
   const stage = examStages[exam.stage];
   const remaining = Math.max(0, Math.ceil((exam.deadline - now) / 1000));
   const currentLessons = stage.lessonIds.map((id) =>
-    lessons.find((l) => l.id === id)!,
+    examLessons.find((l) => l.id === id)!,
   );
   const activeIndex = Math.min(
     sections[exam.stage] ?? 0,

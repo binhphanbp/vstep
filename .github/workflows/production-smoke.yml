@@ -1,0 +1,32 @@
+name: Smoke production
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: HTTPS deployment URL to verify
+        required: true
+        default: https://vstep-turtle.vercel.app
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: production-smoke-${{ github.event.deployment.id || github.run_id }}
+      cancel-in-progress: true
+    env:
+      MAY_PRODUCTION_URL: ${{ inputs.url || github.event.deployment_status.environment_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/smoke-https.mjs

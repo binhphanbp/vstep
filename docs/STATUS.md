@@ -2,6 +2,8 @@
 
 Code đã được lưu trong workspace sau các lần gián đoạn. Không dựng lại từ create-next-app.
 
+Rà soát và kế hoạch thực thi theo baseline `5303d15`: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). P0-01 đã sửa lịch sử/Sổ lỗi và đề đang làm để dùng snapshot học liệu có version. P0-02 có migration mới thu hồi direct DML và buộc ghi qua RPC revision; đã kiểm thử trong PGlite, preflight Supabase thật xác nhận snapshot hiện có tương thích, còn chờ chạy migration production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. Chờ CI/deploy của release mới và UAT thiết bị thật.
+
 ## Đã hoàn thành trong môi trường local
 
 - Mây: giao diện responsive, dashboard cá nhân hóa, 14 bài luyện, hành trình, từ vựng, sổ lỗi, lịch sử, cẩm nang và cài đặt.

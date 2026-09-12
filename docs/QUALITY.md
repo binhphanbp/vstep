@@ -4,6 +4,18 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 
 ## Lỗi dữ liệu đã tái hiện và sửa
 
+### Phiên bản học liệu và đường ghi cloud
+
+- Lượt học mới giữ snapshot đầy đủ của bài cùng `version`; Sổ lỗi và tiêu đề lịch sử không tự đổi khi bản biên tập sau sửa đáp án, lựa chọn, tiêu đề hoặc passage/transcript. Đề có giờ giữ snapshot ngân hàng từ lúc bắt đầu và dùng chính bản đó để chấm qua reload. Nháp quiz mang version; bản lệch version không áp lại chỉ số lựa chọn vào nội dung mới. Backup version 1 cũ vẫn hợp lệ và dùng fallback bank hiện hành.
+- Migration `002_harden_snapshots.sql` thu hồi `insert/update/delete` trực tiếp khỏi learner, bỏ policy ghi trực tiếp và chuyển RPC sang `security definer` với `search_path` rỗng, UID/membership/revision được kiểm tra rõ. Contract DB kiểm tra các trường state cấp cao trước khi nhận snapshot; giới hạn 10 MiB cũ vẫn giữ.
+- Kiểm thử hồi quy đã thất bại trên code/migration cũ: đổi đáp án làm phát sinh lỗi giả trong lịch sử; owner cập nhật trực tiếp mà revision không đổi; object chỉ có `version: 1` được DB nhận. Sau sửa, cả ba bị chặn hoặc giữ lịch sử đúng. Đề đang làm cũng được kiểm tra chấm theo snapshot cũ sau khi bank hiện hành đổi.
+
+### Auth, backup và phát hành
+
+- Supabase fetch có timeout 20 giây cho cả Auth và data; login treo trả lại nút cùng thông báo rõ, dữ liệu local giữ nguyên. Sync vẫn hủy khi rời trang/đổi phiên.
+- Nếu cloud nhận snapshot nhưng trình duyệt không lưu được revision, app xuất ngay backup JSON và hướng dẫn tải cloud để đối chiếu, thay vì báo lỗi kỹ thuật hoặc thử ghi đè mù.
+- CI chạy thêm `npm audit --omit=dev`. Workflow riêng chạy HTTPS smoke sau deployment Production và có chế độ chạy thủ công; runbook ghi cổng phát hành, rollback code/schema và khôi phục dữ liệu.
+
 Bổ sung sau release `ac80772`: bản dự phòng trước khi nhập JSON hoặc tải cloud nay đọc lại state mới nhất, thay vì dùng snapshot từ lúc bắt đầu chờ file/mạng. Kiểm thử hồi quy bao phủ cập nhật từ tab khác khi sự kiện storage chưa được xử lý. Báo cáo Word của release trước chưa bao gồm thay đổi bổ sung này và đợt sửa đồng bộ bên dưới; bằng chứng mới nhất nằm trong file này.
 
 ### Đồng bộ đám mây khi mạng chậm và có lỗi
@@ -44,8 +56,8 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Bằng chứng kiểm tra
 
-- 48 kiểm thử Vitest: logic học, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
-- 38 kiểm thử Playwright trên bản production: 34 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm tám ca cloud giả lập nêu trên, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 53 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
+- 40 kiểm thử Playwright trên bản production: 36 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 12/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

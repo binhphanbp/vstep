@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:production": "npm run build && node scripts/test-production.mjs",
+    "smoke:https": "node scripts/smoke-https.mjs",
     "format": "prettier --write src tests *.ts *.mts *.json",
     "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },

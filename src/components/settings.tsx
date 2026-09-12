@@ -18,7 +18,11 @@ import {
   type Profile,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
-import { supabase } from "@/lib/supabase";
+import {
+  CLOUD_REQUEST_TIMEOUT,
+  isCloudTimeout,
+  supabase,
+} from "@/lib/supabase";
 import { currentBackupState } from "@/lib/study-store";
 export function downloadJson(data: unknown, name: string) {
   const url = URL.createObjectURL(
@@ -368,10 +372,15 @@ function CloudSettings() {
         email,
         password,
       });
-      if (error)
+      if (error) {
+        if (isCloudTimeout(error))
+          throw Error(
+            "Kết nối đăng nhập mất quá lâu. Kiểm tra mạng rồi thử lại; tiến độ trên thiết bị vẫn còn.",
+          );
         throw Error(
           "Chưa đăng nhập được. Kiểm tra email, mật khẩu và tài khoản đã được chủ website cấp.",
         );
+      }
       setPassword("");
       toast("Đã đăng nhập. Chọn tải hoặc lưu bản sao để đồng bộ.");
     } catch (e) {
@@ -392,7 +401,7 @@ function CloudSettings() {
       setError(
         "Kết nối mất quá lâu. Dữ liệu thiết bị vẫn còn. Nếu vừa lưu lên đám mây, hãy xuất bản thiết bị rồi tải bản đám mây để kiểm tra trước khi thử lại.",
       );
-    }, 20000);
+    }, CLOUD_REQUEST_TIMEOUT);
     setBusy(true);
     setError("");
     setLast("");
@@ -437,7 +446,16 @@ function CloudSettings() {
           `may-before-cloud-${localDay()}.json`,
         );
         replace({ ...parsed, updatedAt: new Date().toISOString() });
-        localStorage.setItem(`may-revision:${user.id}`, String(data.revision));
+        try {
+          localStorage.setItem(
+            `may-revision:${user.id}`,
+            String(data.revision),
+          );
+        } catch {
+          throw Error(
+            "Đã tải bản đám mây nhưng thiết bị không lưu được mã đồng bộ. Bản cũ đã được tải xuống; hãy giải phóng dung lượng trước lần đồng bộ tiếp theo.",
+          );
+        }
         setLast("Đã tải bản sao và cập nhật hồ sơ trên thiết bị.");
       } else {
         const expected = Number(
@@ -460,7 +478,17 @@ function CloudSettings() {
             "Chưa lưu được lên đám mây. Kiểm tra mạng, migration và tài khoản được phép.",
           );
         }
-        localStorage.setItem(`may-revision:${user.id}`, String(data));
+        try {
+          localStorage.setItem(`may-revision:${user.id}`, String(data));
+        } catch {
+          downloadJson(
+            currentBackupState(),
+            `may-after-cloud-${localDay()}.json`,
+          );
+          throw Error(
+            "Cloud đã nhận bản sao nhưng thiết bị không lưu được mã đồng bộ. Mây đã xuất bản thiết bị; hãy tải bản cloud để đối chiếu sau khi giải phóng dung lượng.",
+          );
+        }
         if (currentBackupState().updatedAt !== uploaded.updatedAt) {
           setLast(
             "Có thay đổi mới trên thiết bị chưa được lưu lên đám mây. Bấm Lưu lên đám mây lần nữa để cập nhật bản mới nhất.",
@@ -591,6 +619,14 @@ function CloudSettings() {
           <button type="submit" className="button primary" disabled={busy}>
             {busy ? "Đang kết nối…" : "Đăng nhập"}
           </button>
+          <details>
+            <summary>Quên mật khẩu?</summary>
+            <p className="help-copy">
+              Nhờ chủ website đặt lại tài khoản trong Supabase. Không tạo tài
+              khoản mới và không gửi mật khẩu qua tin nhắn; tiến độ đang lưu
+              trên thiết bị vẫn dùng được khi chưa đăng nhập.
+            </p>
+          </details>
         </form>
       )}
       {last && (

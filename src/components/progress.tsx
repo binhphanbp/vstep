@@ -157,7 +157,11 @@ export function ProgressPage() {
                     <SkillIcon skill={a.skill} />
                     <div>
                       <Link href={`/practice/${a.lessonId}`}>
-                        <h3>{lesson?.title ?? "Bài luyện đã lưu"}</h3>
+                        <h3>
+                          {a.lessonSnapshot?.title ??
+                            lesson?.title ??
+                            "Bài luyện đã lưu"}
+                        </h3>
                       </Link>
                       <small>
                         {new Date(a.date).toLocaleString("vi-VN")} ·{" "}

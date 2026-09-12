@@ -15,6 +15,7 @@ export type Question = {
 };
 export type Lesson = {
   id: string;
+  version: number;
   skill: Skill;
   title: string;
   subtitle: string;
@@ -36,7 +37,7 @@ const q = (
   explanation: string,
   tag = "Thông tin chi tiết",
 ): Question => ({ id, text, options, answer, explanation, tag });
-export const lessons: Lesson[] = [
+const lessonDefinitions: Omit<Lesson, "version">[] = [
   {
     id: "reading-cafe",
     skill: "reading",
@@ -707,6 +708,10 @@ export const lessons: Lesson[] = [
     ],
   },
 ];
+export const lessons: Lesson[] = lessonDefinitions.map((lesson) => ({
+  ...lesson,
+  version: 1,
+}));
 export type Vocabulary = {
   id: string;
   word: string;

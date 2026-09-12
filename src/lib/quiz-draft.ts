@@ -10,6 +10,10 @@ export function readQuizDraft(
 } {
   try {
     const value = JSON.parse(raw ?? "{}");
+    const storedVersion =
+      typeof value?.contentVersion === "number" ? value.contentVersion : 1;
+    if (storedVersion !== lesson.version)
+      return { answers: {}, confidence: {}, seconds: 0 };
     if (value && typeof value === "object")
       return {
         answers:

@@ -2,6 +2,54 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import type { StudyState } from "../../src/lib/learning";
 
+test("a stalled login times out without losing local progress", async ({
+  page,
+}) => {
+  await page.clock.install();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let received!: () => void;
+  const arrived = new Promise<void>((resolve) => {
+    received = resolve;
+  });
+  await page.route("https://*.supabase.co/**", async (route) => {
+    if (new URL(route.request().url()).pathname === "/auth/v1/token") {
+      received();
+      await gate;
+      await route.fulfill({ status: 503, json: { message: "Unavailable" } });
+    } else
+      await route.fulfill({
+        status: 503,
+        json: { message: "Mock endpoint unavailable" },
+      });
+  });
+  await page.goto("/settings");
+  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  const before = await page.evaluate(() =>
+    localStorage.getItem("may-study-v1"),
+  );
+  await page.getByLabel("Email", { exact: true }).fill(user.email);
+  await page.getByLabel("Mật khẩu", { exact: true }).fill("test-password");
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
+  await arrived;
+  try {
+    await page.clock.fastForward(21000);
+    await expect(
+      page.getByRole("button", { name: "Đăng nhập", exact: true }),
+    ).toBeEnabled();
+    await expect(page.locator("main [role=alert]")).toContainText(
+      "Kết nối đăng nhập mất quá lâu",
+    );
+    expect(
+      await page.evaluate(() => localStorage.getItem("may-study-v1")),
+    ).toBe(before);
+  } finally {
+    release();
+  }
+});
+
 test("logout locks cloud actions and reports local sign-out when the server fails", async ({
   page,
 }) => {
@@ -379,6 +427,36 @@ test("invalid cloud payload cannot replace the learner state", async ({
   expect(await page.evaluate(() => localStorage.getItem("may-study-v1"))).toBe(
     before,
   );
+});
+
+test("cloud upload exports a backup when the local revision cannot be saved", async ({
+  page,
+}) => {
+  await login(page);
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key.startsWith("may-revision:"))
+        throw new DOMException("Storage full", "QuotaExceededError");
+      return original.call(this, key, value);
+    };
+  });
+  await page.route("**/rest/v1/rpc/save_study_snapshot", async (route) =>
+    route.fulfill({ json: 1 }),
+  );
+  const download = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Lưu lên đám mây", exact: true })
+    .click();
+  const path = await (await download).path();
+  const backup = JSON.parse(await readFile(path!, "utf8")) as StudyState;
+  expect(backup.profile.name).toBe("Gùa kiểm thử");
+  await expect(page.locator("main [role=alert]")).toContainText(
+    "Cloud đã nhận bản sao nhưng thiết bị không lưu được mã đồng bộ",
+  );
+  await expect(
+    page.getByRole("button", { name: "Lưu lên đám mây", exact: true }),
+  ).toBeEnabled();
 });
 
 test("cloud restore backs up edits made while waiting and persists the restored profile", async ({

@@ -18,6 +18,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev
       - run: npm run check
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: node scripts/test-production.mjs

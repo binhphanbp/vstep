@@ -276,6 +276,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               ...s.drafts,
               [`quiz:${lesson.id}`]: JSON.stringify({
                 ...current,
+                contentVersion: lesson.version,
                 seconds: Math.min(18000, current.seconds + 1),
               }),
             },
@@ -446,7 +447,10 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         </div>
       )}
       {insights && (
-        <section className="panel learning-insights" aria-labelledby="insight-title">
+        <section
+          className="panel learning-insights"
+          aria-labelledby="insight-title"
+        >
           <div className="panel-heading">
             <div>
               <span className="panel-label">PHẢN HỒI CÁ NHÂN</span>
@@ -478,9 +482,11 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                 <span
                   className="tag-meter"
                   aria-hidden="true"
-                  style={{
-                    "--score": `${Math.round((item.correct / item.total) * 100)}%`,
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      "--score": `${Math.round((item.correct / item.total) * 100)}%`,
+                    } as React.CSSProperties
+                  }
                 />
               </div>
             ))}
@@ -567,6 +573,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                     drafts: {
                       ...s.drafts,
                       [`quiz:${lesson.id}`]: JSON.stringify({
+                        contentVersion: lesson.version,
                         answers: { ...current.answers, [q.id]: value },
                         confidence: current.confidence,
                         seconds: current.seconds,
@@ -586,6 +593,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                     drafts: {
                       ...s.drafts,
                       [`quiz:${lesson.id}`]: JSON.stringify({
+                        contentVersion: lesson.version,
                         answers: current.answers,
                         confidence: { ...current.confidence, [q.id]: value },
                         seconds: current.seconds,

@@ -19,6 +19,9 @@ describe("Supabase migration on a PostgreSQL engine", () => {
     await db.exec(
       readFileSync("supabase/migrations/001_personal_study.sql", "utf8"),
     );
+    await db.exec(
+      readFileSync("supabase/migrations/002_harden_snapshots.sql", "utf8"),
+    );
     await db.query("insert into public.allowed_learners values ($1)", [owner]);
   }, 30000);
   afterAll(async () => {
@@ -73,7 +76,7 @@ describe("Supabase migration on a PostgreSQL engine", () => {
         "insert into public.study_snapshots(user_id,payload) values ($1,$2)",
         [other, JSON.stringify(freshState())],
       ),
-    ).rejects.toThrow(/row-level security/);
+    ).rejects.toThrow(/permission denied/);
   });
   it("does not let a learner self-enrol or write another owner’s row", async () => {
     await asUser(other);
@@ -86,7 +89,23 @@ describe("Supabase migration on a PostgreSQL engine", () => {
         "insert into public.study_snapshots(user_id,payload) values ($1,$2)",
         [other, JSON.stringify(freshState())],
       ),
-    ).rejects.toThrow(/row-level security/);
+    ).rejects.toThrow(/permission denied/);
+  });
+  it("forces the approved owner through the revision-controlled RPC", async () => {
+    await asUser(owner);
+    await expect(
+      db.query(
+        "update public.study_snapshots set payload = $1::jsonb where user_id = $2",
+        [JSON.stringify(freshState()), owner],
+      ),
+    ).rejects.toThrow(/permission denied/);
+    expect(
+      (
+        await db.query<{ revision: number }>(
+          "select revision from public.study_snapshots",
+        )
+      ).rows[0].revision,
+    ).toBe(2);
   });
   it("denies anonymous reads and RPC execution", async () => {
     await db.exec("reset role; set role anon");
@@ -104,5 +123,13 @@ describe("Supabase migration on a PostgreSQL engine", () => {
     await expect(
       db.query("select public.save_study_snapshot($1::jsonb,2)", ["{}"]),
     ).rejects.toThrow(/check constraint/);
+  });
+  it("rejects a version-only object at the database boundary", async () => {
+    await asUser(owner);
+    await expect(
+      db.query("select public.save_study_snapshot($1::jsonb,2)", [
+        JSON.stringify({ version: 1 }),
+      ]),
+    ).rejects.toThrow(/snapshot_contract/);
   });
 });

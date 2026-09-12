@@ -65,6 +65,35 @@ describe("full exam content and recovery", () => {
     expect(stateSchema.safeParse(result).success).toBe(true);
     expect(advanceExam(result, now + 200 * 60000)).toBe(result);
   });
+  it("scores an active exam against its frozen lesson version", () => {
+    const lesson = fullListening[0];
+    const originalAnswer = lesson.questions[0].answer;
+    const s = freshState();
+    const now = Date.now();
+    s.exam = {
+      id: "versioned-exam",
+      mode: "full",
+      startedAt: now,
+      deadline: now + 2400000,
+      stage: 0,
+      answers: { [lesson.questions[0].id]: originalAnswer },
+      writing: "",
+      writingTask2: "",
+      finished: false,
+      lessonSnapshots: structuredClone(fullListening),
+    };
+    try {
+      lesson.questions[0].answer = (originalAnswer + 1) % 4;
+      const result = advanceExam(s, now + 1000, true);
+      const attempt = result.attempts.find(
+        (item) => item.lessonId === lesson.id,
+      );
+      expect(attempt).toMatchObject({ correct: 1, total: 1 });
+      expect(attempt?.lessonSnapshot?.questions[0].answer).toBe(originalAnswer);
+    } finally {
+      lesson.questions[0].answer = originalAnswer;
+    }
+  });
   it("keeps today's plan stable after completing its first lesson", () => {
     const s = freshState();
     const now = new Date();
