@@ -23,6 +23,7 @@ jobs:
       # Vercel's deployment_status URL can point at a protected deployment URL.
       # The stable production alias is public and is the URL learners actually use.
       MAY_PRODUCTION_URL: ${{ inputs.url || 'https://vstep-turtle.vercel.app' }}
+      MAY_EXPECTED_SHA: ${{ github.event.deployment.sha || github.sha }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

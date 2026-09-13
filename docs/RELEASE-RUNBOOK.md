@@ -6,7 +6,7 @@
 2. Tạo backup Supabase trước migration. Chạy migration mới trên staging/PGlite và đọc phần rollback trước khi chạy production.
 3. Chạy `npm ci`, `npm audit --omit=dev`, `npm run check` và `npm run test:production`.
 4. Push đúng commit lên `main`. GitHub Actions phải đạt. Vercel chỉ được xem là triển khai xong khi status của cùng SHA đạt.
-5. Workflow `Smoke production` tự chạy sau deployment Production. Có thể chạy thủ công với URL preview/production; nó kiểm tra Settings, một bài Reading, một bài Listening, mobile overflow, lỗi runtime, security headers và HTTP 404.
+5. Workflow `Smoke production` tự chạy sau deployment Production. Nó chờ alias phục vụ đúng SHA ghi trong metadata `may-release`, rồi kiểm tra Settings, một bài Reading, một bài Listening, mobile overflow, lỗi runtime, security headers và HTTP 404. Có thể chạy thủ công với URL preview/production và SHA hiện tại.
 6. Với thay đổi dữ liệu/Auth, chạy UAT cloud và backup theo `PRODUCTION-ROADMAP.md`. Không dùng dữ liệu duy nhất của người học làm dữ liệu thử nếu chưa xuất backup.
 
 ## Khi release có lỗi

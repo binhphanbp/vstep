@@ -31,7 +31,7 @@ Báo cáo bàn giao đầy đủ: [docs/HANDOVER.md](docs/HANDOVER.md).
 
 ## Kết nối Supabase cho tài khoản riêng
 
-1. Tạo dự án Supabase. Chạy `supabase/migrations/001_personal_study.sql` trong SQL Editor của dự án mới.
+1. Tạo dự án Supabase. Chạy lần lượt `supabase/migrations/001_personal_study.sql` và `supabase/migrations/002_harden_snapshots.sql` trong SQL Editor của dự án mới.
 2. Tắt đăng ký công khai trong Auth; tạo tài khoản email/mật khẩu cho người học và lấy UUID tài khoản.
 3. Chạy SQL bằng quyền quản trị, thay UUID thực:
 

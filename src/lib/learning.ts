@@ -13,30 +13,59 @@ const boundedNumber = (minimum: number, maximum: number) =>
   z.number().check(z.minimum(minimum), z.maximum(maximum));
 const boundedInteger = (minimum: number, maximum: number) =>
   z.number().check(z.int(), z.minimum(minimum), z.maximum(maximum));
-const questionSnapshotSchema = z.object({
-  id: limitedString(100),
-  text: limitedString(3000),
-  options: z.array(limitedString(2000)).check(z.minLength(2), z.maxLength(8)),
-  answer: boundedInteger(0, 7),
-  explanation: limitedString(5000),
-  tag: limitedString(100),
-});
-const lessonSnapshotSchema = z.object({
-  id: limitedString(100),
-  version: boundedInteger(1, 1000000),
-  skill: skillSchema,
-  title: limitedString(500),
-  subtitle: limitedString(1000),
-  topic: limitedString(200),
-  level: z.enum(["B1", "B2"]),
-  minutes: boundedInteger(1, 300),
-  part: limitedString(500),
-  text: limitedString(50000),
-  questions: z.array(questionSnapshotSchema).check(z.maxLength(100)),
-  tips: z.array(limitedString(1000)).check(z.maxLength(30)),
-  minWords: z.optional(boundedInteger(1, 10000)),
-  sample: z.optional(limitedString(50000)),
-});
+const questionSnapshotSchema = z
+  .object({
+    id: limitedString(100),
+    text: limitedString(3000),
+    options: z.array(limitedString(2000)).check(z.minLength(2), z.maxLength(8)),
+    answer: boundedInteger(0, 7),
+    explanation: limitedString(5000),
+    tag: limitedString(100),
+  })
+  .check(
+    z.superRefine((question, ctx) => {
+      if (question.answer >= question.options.length)
+        ctx.addIssue({
+          code: "custom",
+          path: ["answer"],
+          message: "Đáp án đúng phải nằm trong danh sách lựa chọn.",
+        });
+      if (new Set(question.options).size !== question.options.length)
+        ctx.addIssue({
+          code: "custom",
+          path: ["options"],
+          message: "Các lựa chọn trong snapshot không được trùng nhau.",
+        });
+    }),
+  );
+const lessonSnapshotSchema = z
+  .object({
+    id: limitedString(100),
+    version: boundedInteger(1, 1000000),
+    skill: skillSchema,
+    title: limitedString(500),
+    subtitle: limitedString(1000),
+    topic: limitedString(200),
+    level: z.enum(["B1", "B2"]),
+    minutes: boundedInteger(1, 300),
+    part: limitedString(500),
+    text: limitedString(50000),
+    questions: z.array(questionSnapshotSchema).check(z.maxLength(100)),
+    tips: z.array(limitedString(1000)).check(z.maxLength(30)),
+    minWords: z.optional(boundedInteger(1, 10000)),
+    sample: z.optional(limitedString(50000)),
+  })
+  .check(
+    z.refine(
+      (lesson) =>
+        new Set(lesson.questions.map((question) => question.id)).size ===
+        lesson.questions.length,
+      {
+        error: "Mã câu hỏi trong snapshot không được trùng nhau.",
+        path: ["questions"],
+      },
+    ),
+  );
 
 export const profileSchema = z.object({
   name: z.string().check(z.trim(), z.minLength(1), z.maxLength(40)),
@@ -54,7 +83,7 @@ export const attemptSchema = z
     lessonId: limitedString(100),
     skill: skillSchema,
     date: z.iso.datetime(),
-    answers: z.record(z.string(), boundedInteger(0, 3)),
+    answers: z.record(z.string(), boundedInteger(0, 7)),
     confidence: z.optional(z.record(z.string(), confidenceSchema)),
     correct: boundedInteger(0, 100),
     total: boundedInteger(0, 100),
@@ -65,9 +94,61 @@ export const attemptSchema = z
     lessonSnapshot: z.optional(lessonSnapshotSchema),
   })
   .check(
-    z.refine((attempt) => attempt.correct <= attempt.total, {
-      error: "Số câu đúng không thể lớn hơn tổng số câu.",
-      path: ["correct"],
+    z.superRefine((attempt, ctx) => {
+      if (attempt.correct > attempt.total)
+        ctx.addIssue({
+          code: "custom",
+          path: ["correct"],
+          message: "Số câu đúng không thể lớn hơn tổng số câu.",
+        });
+      const snapshot = attempt.lessonSnapshot;
+      if (!snapshot) return;
+      if (snapshot.id !== attempt.lessonId)
+        ctx.addIssue({
+          code: "custom",
+          path: ["lessonSnapshot", "id"],
+          message: "Snapshot phải thuộc đúng bài của lượt học.",
+        });
+      if (snapshot.skill !== attempt.skill)
+        ctx.addIssue({
+          code: "custom",
+          path: ["lessonSnapshot", "skill"],
+          message: "Kỹ năng trong snapshot không khớp lượt học.",
+        });
+      if (snapshot.questions.length !== attempt.total)
+        ctx.addIssue({
+          code: "custom",
+          path: ["total"],
+          message: "Tổng số câu phải khớp snapshot của bài.",
+        });
+      const questions = new Map(
+        snapshot.questions.map((question) => [question.id, question]),
+      );
+      for (const [questionId, answer] of Object.entries(attempt.answers)) {
+        const question = questions.get(questionId);
+        if (!question || answer >= question.options.length)
+          ctx.addIssue({
+            code: "custom",
+            path: ["answers", questionId],
+            message: "Câu trả lời không thuộc snapshot của bài.",
+          });
+      }
+      for (const questionId of Object.keys(attempt.confidence ?? {}))
+        if (!questions.has(questionId))
+          ctx.addIssue({
+            code: "custom",
+            path: ["confidence", questionId],
+            message: "Độ chắc chắn không thuộc snapshot của bài.",
+          });
+      const correct = snapshot.questions.filter(
+        (question) => attempt.answers[question.id] === question.answer,
+      ).length;
+      if (correct !== attempt.correct)
+        ctx.addIssue({
+          code: "custom",
+          path: ["correct"],
+          message: "Điểm số phải khớp đáp án trong snapshot.",
+        });
     }),
   );
 const reviewSchema = z.object({
@@ -77,20 +158,66 @@ const reviewSchema = z.object({
   repetitions: z.number().check(z.int(), z.minimum(0)),
   lastDate: z.string(),
 });
-export const examSchema = z.object({
-  id: z.string(),
-  mode: z.optional(z.enum(["mini", "full"])),
-  startedAt: z.number(),
-  stage: boundedInteger(0, 3),
-  deadline: z.number(),
-  answers: z.record(z.string(), boundedInteger(0, 3)),
-  writing: limitedString(30000),
-  writingTask2: z.optional(limitedString(30000)),
-  finished: z.boolean(),
-  lessonSnapshots: z.optional(
-    z.array(lessonSnapshotSchema).check(z.maxLength(40)),
-  ),
+const examStageSchema = z.object({
+  skill: skillSchema,
+  label: limitedString(50),
+  seconds: boundedInteger(1, 18000),
+  lessonIds: z.array(limitedString(100)).check(z.minLength(1), z.maxLength(40)),
 });
+export const examSchema = z
+  .object({
+    id: limitedString(100),
+    mode: z.optional(z.enum(["mini", "full"])),
+    startedAt: z.number(),
+    stage: boundedInteger(0, 3),
+    deadline: z.number(),
+    answers: z.record(z.string(), boundedInteger(0, 7)),
+    writing: limitedString(30000),
+    writingTask2: z.optional(limitedString(30000)),
+    finished: z.boolean(),
+    lessonSnapshots: z.optional(
+      z.array(lessonSnapshotSchema).check(z.minLength(1), z.maxLength(40)),
+    ),
+    stagePlan: z.optional(
+      z.array(examStageSchema).check(z.minLength(4), z.maxLength(4)),
+    ),
+  })
+  .check(
+    z.superRefine((exam, ctx) => {
+      const snapshots = exam.lessonSnapshots ?? [];
+      if (
+        new Set(snapshots.map((lesson) => lesson.id)).size !== snapshots.length
+      )
+        ctx.addIssue({
+          code: "custom",
+          path: ["lessonSnapshots"],
+          message: "Mỗi bài trong snapshot đề phải có mã riêng.",
+        });
+      if (!exam.stagePlan) return;
+      const lessonsById = new Map(
+        snapshots.map((lesson) => [lesson.id, lesson]),
+      );
+      const plannedIds = exam.stagePlan.flatMap((stage) => stage.lessonIds);
+      if (new Set(plannedIds).size !== plannedIds.length)
+        ctx.addIssue({
+          code: "custom",
+          path: ["stagePlan"],
+          message: "Một bài không được xuất hiện ở nhiều phần thi.",
+        });
+      exam.stagePlan.forEach((stage, stageIndex) => {
+        stage.lessonIds.forEach((lessonId, lessonIndex) => {
+          const lesson = lessonsById.get(lessonId);
+          if (!lesson || lesson.skill !== stage.skill)
+            ctx.addIssue({
+              code: "custom",
+              path: ["stagePlan", stageIndex, "lessonIds", lessonIndex],
+              message:
+                "Mỗi bài trong cấu trúc đề phải có snapshot đúng kỹ năng.",
+            });
+        });
+      });
+    }),
+  );
 export const stateSchema = z
   .object({
     version: z.literal(1),
@@ -127,11 +254,59 @@ export type ExamSession = z.infer<typeof examSchema>;
 export const DEFAULT_LEARNER_NAME = "Gùa";
 
 export function personalizeLegacyState(state: StudyState): StudyState {
-  if (state.profile.name !== "bạn" || state.profile.onboarded) return state;
-  return {
-    ...state,
-    profile: { ...state.profile, name: DEFAULT_LEARNER_NAME },
-  };
+  let changed = false;
+  const profile =
+    state.profile.name === "bạn" && !state.profile.onboarded
+      ? ((changed = true), { ...state.profile, name: DEFAULT_LEARNER_NAME })
+      : state.profile;
+  const attempts = state.attempts.map((attempt) => {
+    if (attempt.lessonSnapshot) return attempt;
+    const lesson = allLessons.find(
+      (candidate) =>
+        candidate.id === attempt.lessonId && candidate.skill === attempt.skill,
+    );
+    if (!lesson || lesson.questions.length !== attempt.total) return attempt;
+    const questions = new Map(
+      lesson.questions.map((question) => [question.id, question]),
+    );
+    if (
+      Object.entries(attempt.answers).some(
+        ([id, answer]) =>
+          !questions.has(id) || answer >= questions.get(id)!.options.length,
+      ) ||
+      Object.keys(attempt.confidence ?? {}).some((id) => !questions.has(id)) ||
+      scoreQuestionSet(lesson.questions, attempt.answers).correct !==
+        attempt.correct
+    )
+      return attempt;
+    changed = true;
+    return { ...attempt, lessonSnapshot: structuredClone(lesson) };
+  });
+  let exam = state.exam;
+  if (exam && (!exam.lessonSnapshots || !exam.stagePlan)) {
+    const stagePlan =
+      exam.stagePlan ?? structuredClone(getExamStages(exam.mode));
+    const existing = new Map(
+      (exam.lessonSnapshots ?? []).map((lesson) => [lesson.id, lesson]),
+    );
+    for (const id of new Set(stagePlan.flatMap((stage) => stage.lessonIds))) {
+      if (existing.has(id)) continue;
+      const lesson = allLessons.find((candidate) => candidate.id === id);
+      if (lesson) existing.set(id, structuredClone(lesson));
+    }
+    const complete = stagePlan.every((stage) =>
+      stage.lessonIds.every((id) => existing.get(id)?.skill === stage.skill),
+    );
+    if (complete) {
+      changed = true;
+      exam = {
+        ...exam,
+        stagePlan,
+        lessonSnapshots: [...existing.values()],
+      };
+    }
+  }
+  return changed ? { ...state, profile, attempts, exam } : state;
 }
 
 export function freshState(): StudyState {
@@ -358,13 +533,18 @@ export function mistakes(state: StudyState, now = new Date()) {
   const result = new Map<
     string,
     {
+      key: string;
       question: Question;
-      lesson: Pick<(typeof lessons)[number], "id" | "title" | "skill" | "text">;
+      lesson: Pick<
+        (typeof lessons)[number],
+        "id" | "version" | "title" | "skill" | "text"
+      >;
       chosen: number | undefined;
       confidence: Confidence | undefined;
       wrongCount: number;
       due: boolean;
       date: string;
+      review: Review | undefined;
     }
   >();
   for (const a of state.attempts) {
@@ -373,9 +553,15 @@ export function mistakes(state: StudyState, now = new Date()) {
     if (!lesson) continue;
     for (const question of lesson.questions) {
       if (a.answers[question.id] !== question.answer) {
-        const previous = result.get(question.id);
-        const review = state.mistakeReviews[question.id];
-        result.set(question.id, {
+        const key = mistakeReviewKey(lesson, question.id);
+        const previous = result.get(key);
+        const review =
+          state.mistakeReviews[key] ??
+          (lesson.version === 1
+            ? state.mistakeReviews[question.id]
+            : undefined);
+        result.set(key, {
+          key,
           question,
           lesson,
           chosen: a.answers[question.id],
@@ -383,6 +569,7 @@ export function mistakes(state: StudyState, now = new Date()) {
           wrongCount: (previous?.wrongCount ?? 0) + 1,
           due: !review || Date.parse(review.due) <= now.getTime(),
           date: a.date,
+          review,
         });
       }
     }
@@ -400,6 +587,13 @@ export function mistakes(state: StudyState, now = new Date()) {
         (confidenceWeight[a.confidence ?? "guess"] + a.wrongCount * 4) ||
       Date.parse(b.date) - Date.parse(a.date),
   );
+}
+
+export function mistakeReviewKey(
+  lesson: Pick<(typeof lessons)[number], "id" | "version">,
+  questionId: string,
+) {
+  return `${lesson.id}@v${lesson.version}:${questionId}`;
 }
 export function scoreAnswers(
   lessonId: string,
@@ -460,8 +654,11 @@ export function recordAttempt(state: StudyState, attempt: Attempt): StudyState {
       ? attempt
       : { ...attempt, lessonSnapshot: structuredClone(lesson) };
   for (const question of lesson?.questions ?? []) {
-    if (attempt.answers[question.id] !== question.answer)
+    if (attempt.answers[question.id] !== question.answer) {
+      delete mistakeReviews[mistakeReviewKey(lesson!, question.id)];
+      // Remove the pre-versioning key as the attempt is now due again.
       delete mistakeReviews[question.id];
+    }
   }
   return { ...state, attempts: [...state.attempts, recorded], mistakeReviews };
 }
@@ -530,7 +727,7 @@ export function advanceExam(
   let exam = state.exam;
   if (!exam || exam.finished || (!force && now < exam.deadline)) return state;
   const attempts = [...state.attempts];
-  const stages = getExamStages(exam.mode);
+  const stages = exam.stagePlan ?? getExamStages(exam.mode);
   do {
     const stage = stages[exam.stage];
     const ended = Math.min(now, exam.deadline);
@@ -545,7 +742,8 @@ export function advanceExam(
       const id = `exam:${exam.id}:${lessonId}`;
       const lesson =
         exam.lessonSnapshots?.find((candidate) => candidate.id === lessonId) ??
-        allLessons.find((candidate) => candidate.id === lessonId)!;
+        allLessons.find((candidate) => candidate.id === lessonId);
+      if (!lesson) continue;
       const writing =
         lessonId === "writing-essay" ? (exam.writingTask2 ?? "") : exam.writing;
       // Blank productive responses are not counted as completed practice.
@@ -574,7 +772,7 @@ export function advanceExam(
           lessonSnapshot: structuredClone(lesson),
         });
     }
-    if (exam.stage === 3) {
+    if (exam.stage === stages.length - 1) {
       exam = { ...exam, finished: true };
       break;
     }

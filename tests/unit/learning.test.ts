@@ -8,6 +8,7 @@ import {
   localDay,
   mistakes,
   objectiveInsights,
+  personalizeLegacyState,
   profileSchema,
   recordAttempt,
   scheduleReview,
@@ -162,6 +163,23 @@ describe("adaptive plan and memory scheduling", () => {
       lesson.title = originalTitle;
     }
   });
+  it("keeps mistake schedules separate across lesson versions", () => {
+    const first = recordAttempt(
+      freshState(),
+      attempt(now.toISOString(), {
+        answers: { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
+        correct: 4,
+      }),
+    ).attempts[0];
+    const second = structuredClone(first);
+    second.id = "version-two";
+    second.lessonSnapshot!.version = 2;
+    const s = freshState();
+    s.attempts = [first, second];
+    const errors = mistakes(s);
+    expect(errors).toHaveLength(2);
+    expect(new Set(errors.map((item) => item.key)).size).toBe(2);
+  });
   it("drops incompatible quiz answers instead of applying indices to new content", () => {
     const lesson = lessons.find((item) => item.id === "reading-cafe")!;
     expect(
@@ -279,6 +297,58 @@ describe("exam persistence and deadlines", () => {
   });
   it("mini session duration matches the user-facing 51 minutes", () =>
     expect(examStages.reduce((s, p) => s + p.seconds, 0)).toBe(51 * 60));
+  it("uses the stage plan captured when the exam started", () => {
+    const s = freshState();
+    const picked = [
+      lessons.find((lesson) => lesson.id === "reading-cafe")!,
+      lessons.find((lesson) => lesson.id === "listening-weekend")!,
+      lessons.find((lesson) => lesson.id === "writing-email")!,
+      lessons.find((lesson) => lesson.id === "speaking-social")!,
+    ];
+    s.exam = {
+      id: "frozen-plan",
+      startedAt: now.getTime(),
+      stage: 0,
+      deadline: now.getTime() + 7000,
+      answers: { rc1: 1 },
+      writing: "",
+      finished: false,
+      lessonSnapshots: structuredClone(picked),
+      stagePlan: [
+        {
+          skill: "reading",
+          label: "Đọc",
+          seconds: 7,
+          lessonIds: ["reading-cafe"],
+        },
+        {
+          skill: "listening",
+          label: "Nghe",
+          seconds: 8,
+          lessonIds: ["listening-weekend"],
+        },
+        {
+          skill: "writing",
+          label: "Viết",
+          seconds: 9,
+          lessonIds: ["writing-email"],
+        },
+        {
+          skill: "speaking",
+          label: "Nói",
+          seconds: 10,
+          lessonIds: ["speaking-social"],
+        },
+      ],
+    };
+    expect(stateSchema.safeParse(s).success).toBe(true);
+    const result = advanceExam(s, s.exam.deadline);
+    expect(result.exam?.stage).toBe(1);
+    expect(result.exam?.deadline).toBe(now.getTime() + 15000);
+    expect(result.attempts.map((item) => item.lessonId)).toEqual([
+      "reading-cafe",
+    ]);
+  });
 });
 describe("content and backup integrity", () => {
   it("rejects impossible scores and duplicate attempt ids in a backup", () => {
@@ -324,5 +394,45 @@ describe("content and backup integrity", () => {
       profileSchema.safeParse({ ...freshState().profile, dailyMinutes: 0 })
         .success,
     ).toBe(false);
+  });
+  it("rejects inconsistent lesson snapshots in imported history", () => {
+    const saved = recordAttempt(freshState(), attempt(now.toISOString()));
+    const invalidAnswer = structuredClone(saved);
+    invalidAnswer.attempts[0].lessonSnapshot!.questions[0].answer = 7;
+    expect(stateSchema.safeParse(invalidAnswer).success).toBe(false);
+
+    const mismatchedLesson = structuredClone(saved);
+    mismatchedLesson.attempts[0].lessonSnapshot!.id = "another-lesson";
+    expect(stateSchema.safeParse(mismatchedLesson).success).toBe(false);
+
+    const mismatchedScore = structuredClone(saved);
+    mismatchedScore.attempts[0].correct = 0;
+    expect(stateSchema.safeParse(mismatchedScore).success).toBe(false);
+
+    const duplicateOption = structuredClone(saved);
+    duplicateOption.attempts[0].lessonSnapshot!.questions[0].options[1] =
+      duplicateOption.attempts[0].lessonSnapshot!.questions[0].options[0];
+    expect(stateSchema.safeParse(duplicateOption).success).toBe(false);
+  });
+  it("upgrades compatible legacy history and active exams to frozen content", () => {
+    const legacy = freshState();
+    legacy.attempts = [attempt(now.toISOString())];
+    legacy.exam = {
+      id: "legacy-exam",
+      startedAt: now.getTime(),
+      stage: 0,
+      deadline: now.getTime() + 600000,
+      answers: {},
+      writing: "",
+      finished: false,
+    };
+    const upgraded = personalizeLegacyState(legacy);
+    expect(upgraded.attempts[0].lessonSnapshot).toMatchObject({
+      id: "reading-cafe",
+      version: 1,
+    });
+    expect(upgraded.exam?.stagePlan).toEqual(examStages);
+    expect(upgraded.exam?.lessonSnapshots).not.toHaveLength(0);
+    expect(stateSchema.safeParse(upgraded).success).toBe(true);
   });
 });

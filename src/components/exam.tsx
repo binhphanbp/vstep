@@ -22,7 +22,7 @@ export function ExamPage() {
   const [sections, setSections] = useState<Record<number, number>>({});
   const exam = state.exam;
   const examLessons = exam?.lessonSnapshots ?? lessons;
-  const examStages = getExamStages(exam?.mode ?? mode);
+  const examStages = exam?.stagePlan ?? getExamStages(exam?.mode ?? mode);
   const full = (exam?.mode ?? mode) === "full";
   useEffect(() => {
     const tick = () => {
@@ -62,6 +62,7 @@ export function ExamPage() {
               writing: "",
               writingTask2: "",
               finished: false,
+              stagePlan: structuredClone(examStages),
               lessonSnapshots: structuredClone(
                 [
                   ...new Set(examStages.flatMap((stage) => stage.lessonIds)),

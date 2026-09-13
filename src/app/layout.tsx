@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     title: "Mây VSTEP",
     statusBarStyle: "default",
   },
+  other: {
+    "may-release":
+      process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? "local",
+  },
 };
 
 export const viewport: Viewport = {

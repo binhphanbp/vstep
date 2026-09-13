@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 
 const baseURL = process.env.MAY_PRODUCTION_URL;
+const expectedSha = process.env.MAY_EXPECTED_SHA;
 if (!baseURL || !baseURL.startsWith("https://")) {
   console.error("MAY_PRODUCTION_URL must be an HTTPS URL.");
   process.exit(1);
@@ -19,6 +20,23 @@ try {
   page.on("console", (message) => {
     if (message.type() === "error") runtimeErrors.push(message.text());
   });
+
+  if (expectedSha) {
+    let servedSha = "";
+    for (let attempt = 0; attempt < 12; attempt++) {
+      await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+      servedSha =
+        (await page
+          .locator('meta[name="may-release"]')
+          .getAttribute("content")) ?? "";
+      if (servedSha === expectedSha) break;
+      await page.waitForTimeout(5000);
+    }
+    if (servedSha !== expectedSha)
+      throw Error(
+        `Production serves ${servedSha || "no release SHA"}; expected ${expectedSha}.`,
+      );
+  }
 
   for (const path of routes) {
     const response = await page.goto(new URL(path, baseURL).href, {

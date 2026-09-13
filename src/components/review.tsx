@@ -282,9 +282,9 @@ export function MistakesPage() {
   const filtered = all.filter(
     (m) =>
       filter === "all" ||
-      revealed.includes(m.question.id) ||
-      !state.mistakeReviews[m.question.id] ||
-      Date.parse(state.mistakeReviews[m.question.id].due) <= now,
+      revealed.includes(m.key) ||
+      !m.review ||
+      Date.parse(m.review.due) <= now,
   );
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 30000);
@@ -344,9 +344,9 @@ export function MistakesPage() {
       {filtered.length ? (
         <div className="stack">
           {filtered.map((item, i) => {
-            const seen = revealed.includes(item.question.id);
+            const seen = revealed.includes(item.key);
             return (
-              <section className="panel" key={item.question.id}>
+              <section className="panel" key={item.key}>
                 <div className="section-heading">
                   <div>
                     <div className="mistake-signals">
@@ -399,10 +399,10 @@ export function MistakesPage() {
                   <QuestionCard
                     question={item.question}
                     index={i}
-                    chosen={chosen[item.question.id]}
+                    chosen={chosen[item.key]}
                     submitted={seen}
                     onChoose={(v) =>
-                      setChosen((c) => ({ ...c, [item.question.id]: v }))
+                      setChosen((c) => ({ ...c, [item.key]: v }))
                     }
                   />
                 </div>
@@ -410,9 +410,7 @@ export function MistakesPage() {
                   <button
                     type="button"
                     className="button primary small"
-                    onClick={() =>
-                      review(item.question.id, item.question.answer)
-                    }
+                    onClick={() => review(item.key, item.question.answer)}
                   >
                     <RotateCcw size={14} />
                     Kiểm tra lại
@@ -421,7 +419,7 @@ export function MistakesPage() {
                   <p className="help-copy">
                     Đã xếp lịch ôn tiếp:{" "}
                     {new Date(
-                      state.mistakeReviews[item.question.id].due,
+                      state.mistakeReviews[item.key].due,
                     ).toLocaleString("vi-VN")}
                     .
                   </p>

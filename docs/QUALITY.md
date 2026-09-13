@@ -6,7 +6,7 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 
 ### Phiên bản học liệu và đường ghi cloud
 
-- Lượt học mới giữ snapshot đầy đủ của bài cùng `version`; Sổ lỗi và tiêu đề lịch sử không tự đổi khi bản biên tập sau sửa đáp án, lựa chọn, tiêu đề hoặc passage/transcript. Đề có giờ giữ snapshot ngân hàng từ lúc bắt đầu và dùng chính bản đó để chấm qua reload. Nháp quiz mang version; bản lệch version không áp lại chỉ số lựa chọn vào nội dung mới. Backup version 1 cũ vẫn hợp lệ và dùng fallback bank hiện hành.
+- Lượt học mới giữ snapshot đầy đủ của bài cùng `version`; lịch sử version 1 tương thích được nâng cấp sang snapshot khi đọc hoặc nhập. Sổ lỗi và lịch ôn dùng khóa gồm bài, version và câu hỏi. Đề có giờ giữ cả snapshot ngân hàng lẫn cấu trúc bốn phần từ lúc bắt đầu. Nháp quiz mang version; bản lệch version không áp lại chỉ số lựa chọn vào nội dung mới. Snapshot sai bài, sai kỹ năng, sai đáp án, sai tổng câu hoặc sai điểm bị từ chối ở boundary nhập dữ liệu.
 - Migration `002_harden_snapshots.sql` thu hồi `insert/update/delete` trực tiếp khỏi learner, bỏ policy ghi trực tiếp và chuyển RPC sang `security definer` với `search_path` rỗng, UID/membership/revision được kiểm tra rõ. Contract DB kiểm tra các trường state cấp cao trước khi nhận snapshot; giới hạn 10 MiB cũ vẫn giữ.
 - Kiểm thử hồi quy đã thất bại trên code/migration cũ: đổi đáp án làm phát sinh lỗi giả trong lịch sử; owner cập nhật trực tiếp mà revision không đổi; object chỉ có `version: 1` được DB nhận. Sau sửa, cả ba bị chặn hoặc giữ lịch sử đúng. Đề đang làm cũng được kiểm tra chấm theo snapshot cũ sau khi bank hiện hành đổi.
 
@@ -56,14 +56,14 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Bằng chứng kiểm tra
 
-- 53 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
+- 57 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite.
 - 40 kiểm thử Playwright trên bản production: 36 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 12/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
-- GitHub Actions run `34687798626` đạt cho commit release `f43fc23`; pipeline đã chạy audit dependency, lint, typecheck, unit, build, Chromium, Firefox và WebKit.
+- GitHub Actions run `34688471036` đạt cho baseline bàn giao `2ccbea8`. Release candidate hiện tại đã đạt lint, typecheck, 57 unit, build 45 route và 40 E2E local; cần đối chiếu run CI mới sau khi push.
 - Smoke test bản HTTPS `https://vstep-turtle.vercel.app` ngày 12/09/2026: 23 route gồm 9 màn chính và 14 bài luyện tải đúng trên Chromium, Firefox và WebKit, không tràn ngang ở 390 px; route giả HTTP 404, HSTS/CSP và các header bảo vệ hiện diện. Luồng Reading/Listening chấm điểm, phân tích và mở transcript sau khi nộp không có lỗi runtime.
-- Supabase production trả HTTP 200 ở Auth settings; ba thao tác ẩn danh gồm đọc snapshot, đọc membership và gọi RPC lưu đều bị RLS chặn bằng mã `42501`.
+- Supabase production đã áp dụng migration 002 ngày 13/09/2026. Hậu kiểm xác nhận contract tồn tại, `authenticated` không có quyền UPDATE trực tiếp, không còn policy ghi trực tiếp, RPC dùng `SECURITY DEFINER`, và một snapshot hiện có vẫn nguyên vẹn.
 - Lighthouse mobile chạy ba lần trên bản production local sau tối ưu: tổng payload giảm từ khoảng 516 KiB xuống 376 KiB, JavaScript từ 354 KiB xuống 218 KiB và phần JavaScript chưa dùng từ 169 KiB xuống 26 KiB. Accessibility và Best Practices đạt 100; Performance dao động 73–84 do mô phỏng CPU. SEO 60 là hệ quả chủ đích của `noindex` cho ứng dụng cá nhân.
 
 ## Giới hạn còn mở

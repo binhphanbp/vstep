@@ -1,6 +1,6 @@
 # Báo cáo bàn giao website Mây VSTEP
 
-**Ngày chốt báo cáo:** 12/09/2026
+**Ngày cập nhật báo cáo:** 13/09/2026
 
 **Mốc nền tảng được đánh giá:** vòng kiểm định production Reading và Listening ngày 12/09/2026
 **Nhánh chính:** `main`  
@@ -10,11 +10,11 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Bản build, GitHub Actions và smoke test trên URL HTTPS pilot đã đạt; luồng Reading và Listening trọng yếu cũng đạt trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Baseline bàn giao `2ccbea8` đã qua GitHub Actions và smoke HTTPS; release candidate mới đã đạt toàn bộ cổng local với 57 unit và 40 E2E trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
-Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã qua kiểm thử và preflight dữ liệu thật nhưng còn chờ chạy trên production. Nghiệm thu thiết bị thật, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
+Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã áp dụng và hậu kiểm thành công trên production ngày 13/09/2026. Nghiệm thu thiết bị thật, cổng bắt buộc chờ CI trước deploy, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
 
 ## 2. Mục tiêu sản phẩm và hướng đi
 
@@ -153,7 +153,7 @@ flowchart LR
 
 ### 6.3 Mô hình state
 
-State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy và thời điểm cập nhật. Lượt học và phiên thi mới kèm snapshot học liệu có `version`; dữ liệu cũ không có snapshot vẫn đọc được bằng nội dung phiên bản 1 để giữ tương thích. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
+State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy và thời điểm cập nhật. Lượt học và phiên thi mới kèm snapshot học liệu có `version`; dữ liệu cũ tương thích được nâng cấp sang snapshot phiên bản 1 khi đọc hoặc nhập. Phiên thi mới giữ cả snapshot bài lẫn cấu trúc từng phần; lịch ôn lỗi dùng khóa theo bài và version. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
 
 Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp để nhét vào localStorage hoặc snapshot JSON. Vì vậy, đồng bộ Supabase và file backup chỉ đồng bộ dữ liệu học dạng JSON, không đồng bộ audio.
 
@@ -168,7 +168,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 - Đã kiểm thử thực tế tạo snapshot revision 1, cập nhật revision 2, đọc lại và từ chối revision cũ. Dữ liệu QA trong transaction đã rollback.
 - Đã đăng nhập từ giao diện local, lưu snapshot revision 1 và tải lại snapshot về thiết bị thành công.
 - Preflight production cho migration gia cố xác nhận 1/1 snapshot hiện có đúng contract và snapshot lớn nhất là 350 byte.
-- Migration `supabase/migrations/002_harden_snapshots.sql` cùng rollback đã sẵn sàng và đạt kiểm thử PGlite; chưa chạy trên dự án production tại thời điểm chốt báo cáo.
+- Migration `supabase/migrations/002_harden_snapshots.sql` đã chạy trong transaction trên production ngày 13/09/2026. Hậu kiểm trả `migration_applied=true`, `direct_update_allowed=false`, `write_policies=0`, `rpc_security_definer=true` và giữ nguyên một snapshot.
 - Chưa nghiệm thu đồng bộ trên thiết bị hoặc trình duyệt thứ hai.
 
 ### 7.2 Cơ chế bảo vệ
@@ -188,12 +188,12 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | --------------------- | ------------------ | ------------------------------------------------------------------------------------------------ |
 | ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
-| Vitest                | 53/53 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
+| Vitest                | 57/57 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
 | Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 12/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34687798626` cho commit `f43fc23`; đã chạy Chromium, Firefox và WebKit                      |
+| GitHub Actions        | Đạt ở baseline     | Run `34688471036` cho commit `2ccbea8`; release candidate chờ CI sau khi push                    |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -290,11 +290,10 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ### P0 Trước khi dùng như một sản phẩm production
 
-1. **Áp dụng migration gia cố Supabase.** Chạy migration 002 đã preflight, sau đó kiểm tra đọc snapshot, lưu revision mới và từ chối ghi trực tiếp.
-2. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404, font và smoke tự động đã kiểm tra. Còn đăng nhập và đồng bộ bằng tài khoản thật, micro và kiểm tra bundle không chứa secret ngoài publishable key.
-3. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone hoặc Safari hay Android hoặc Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt là hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
-4. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
-5. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
+1. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404, font và smoke tự động đã kiểm tra. Còn đăng nhập và đồng bộ bằng tài khoản thật, micro và kiểm tra bundle không chứa secret ngoài publishable key.
+2. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone hoặc Safari hay Android hoặc Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt là hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
+3. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
+4. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
 
 ### P1 Nâng chất lượng học tập
 
@@ -352,7 +351,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 - [x] Commit bàn giao đã qua GitHub Actions.
 - [x] `.env.local` được bỏ qua bởi Git.
 - [x] Supabase migration, RLS, Auth và đồng bộ một thiết bị đã kiểm tra.
-- [ ] Migration gia cố 002 đã preflight nhưng chưa áp dụng trên production.
+- [x] Migration gia cố 002 đã áp dụng và hậu kiểm trên production.
 - [ ] Người nhận xác nhận có quyền quản trị repository GitHub.
 - [ ] Người nhận xác nhận có quyền truy cập dự án Supabase.
 - [ ] Người nhận lưu thông tin tài khoản học ở trình quản lý mật khẩu an toàn.

@@ -281,8 +281,8 @@ def add_cover(doc):
     header_run = header_p.add_run("THÔNG TIN BÀN GIAO")
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
     metadata = [
-        ("Ngày chốt", "12/09/2026"),
-        ("Mốc đánh giá", "Kiểm định production Reading và Listening 12/09/2026"),
+        ("Ngày cập nhật", "13/09/2026"),
+        ("Mốc đánh giá", "Release candidate Reading và Listening 13/09/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
@@ -319,7 +319,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local, Supabase thật đã kết nối và toàn bộ pipeline kiểm tra đang đạt. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Lịch sử và đề đang làm được khóa theo đúng phiên bản học liệu. Bộ kiểm thử production gồm 53 unit test và 40 E2E trên Chromium, Firefox và WebKit. Migration gia cố quyền ghi cloud đã qua preflight nhưng còn chờ áp dụng trên production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Lịch sử tương thích được nâng cấp sang snapshot; lịch ôn tách theo phiên bản; đề đang làm khóa cả học liệu và cấu trúc phần thi. Bộ kiểm thử production gồm 57 unit test và 40 E2E trên Chromium, Firefox và WebKit. Migration gia cố quyền ghi cloud đã áp dụng và hậu kiểm thành công trên Supabase production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị, cổng phát hành chờ CI cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )
