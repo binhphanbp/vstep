@@ -306,7 +306,13 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const confidence = result?.confidence ?? draft.confidence;
   const seconds = result?.seconds ?? draft.seconds;
   const [checks, setChecks] = useState<string[]>([]);
-  const [hasRecording, setHasRecording] = useState(false);
+  const [takeSavedAt, setTakeSavedAt] = useState(0);
+  // A take counts only if it was captured after the last session already filed
+  // for this lesson, so an old recording cannot be submitted again as new work.
+  const lastFiled = state.attempts
+    .filter((a) => a.lessonId === lesson.id)
+    .reduce((latest, a) => Math.max(latest, Date.parse(a.date)), 0);
+  const hasRecording = takeSavedAt > lastFiled;
   const text = state.drafts[lesson.id] ?? "";
   const started = useRef(0);
   const lock = useRef(false);
@@ -410,9 +416,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     lock.current = true;
     if (lesson.skill === "speaking") {
       try {
-        const blob = await getRecording(lesson.id);
-        if (!blob) throw Error("missing");
-        await saveRecording(a.id, blob);
+        const stored = await getRecording(lesson.id);
+        if (!stored) throw Error("missing");
+        await saveRecording(a.id, stored.blob);
         a.recordingId = a.id;
       } catch {
         lock.current = false;
@@ -440,8 +446,6 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     }));
     setError("");
     setChecks([]);
-    // A new speaking round needs a new answer, not the recording already filed.
-    setHasRecording(false);
     started.current = Date.now();
   }
   return (
@@ -564,7 +568,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       )}
       <div className="practice-layout">
         <div
-          className="panel reading-panel"
+          className={`panel reading-panel ${lesson.skill === "reading" ? "passage-panel" : ""}`}
           tabIndex={0}
           role="region"
           aria-label="Ngữ liệu và hướng dẫn bài học"
@@ -702,7 +706,12 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           {lesson.skill === "speaking" && (
             <section className="panel">
               <h2>Giọng nói của mình</h2>
-              <Recorder id={lesson.id} onReady={setHasRecording} />
+              <Recorder
+                id={lesson.id}
+                onReady={(take) =>
+                  setTakeSavedAt(take.ready ? take.savedAt : 0)
+                }
+              />
             </section>
           )}
           {!lesson.questions.length && (

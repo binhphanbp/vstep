@@ -21,8 +21,8 @@ export default function Page() {
         <section className="panel">
           <h2>Định dạng bài thi đầy đủ</h2>
           <p className="help-copy" style={{ marginBottom: 18 }}>
-            Tóm lược theo định dạng VSTEP bậc 3–5 do Trường ĐH Ngoại ngữ,
-            ĐHQGHN công bố và đối chiếu với nguồn tại ĐH Sư phạm TP.HCM ngày
+            Tóm lược theo định dạng VSTEP bậc 3–5 do Trường ĐH Ngoại ngữ, ĐHQGHN
+            công bố và đối chiếu với nguồn tại ĐH Sư phạm TP.HCM ngày
             10/09/2026. Kiểm tra hướng dẫn của kỳ thi bạn đăng ký.
           </p>
           <div className="table-scroll">
@@ -78,8 +78,8 @@ export default function Page() {
             </a>
           </p>
           <p className="help-copy">
-            Đề luyện đủ cấu trúc hiện có của Mây dùng khoảng 1.900–2.050 từ
-            cho phần Reading, nằm trong phạm vi công bố trên.
+            Đề luyện đủ cấu trúc hiện có của Mây dùng khoảng 1.900–2.050 từ cho
+            phần Reading, nằm trong phạm vi công bố trên.
           </p>
         </section>
         <div className="content-grid">

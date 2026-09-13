@@ -53,6 +53,34 @@ describe("full exam content and recovery", () => {
         .filter((q) => shortListening.has(q.id)),
     ).toHaveLength(0);
   });
+  it("never reuses a question anchored to the end of the short passage", () => {
+    // extendReading appends paragraphs, so "the final paragraph" inherited from
+    // a short lesson would point at text the exam passage no longer ends with.
+    const shortIds = new Set(
+      lessons
+        .filter((lesson) => lesson.skill === "reading")
+        .flatMap((lesson) => lesson.questions.map((q) => q.id)),
+    );
+    for (const lesson of fullReading)
+      for (const q of lesson.questions) {
+        if (!shortIds.has(q.id.replace(/^full-/, ""))) continue;
+        expect(
+          /final paragraph|last paragraph/i.test(q.text),
+          `${lesson.id}/${q.id}`,
+        ).toBe(false);
+      }
+  });
+  it("points every end-of-passage question at the real last paragraph", () => {
+    for (const lesson of fullReading) {
+      const paragraphs = lesson.text.split(/\n\n+/);
+      const last = paragraphs[paragraphs.length - 1];
+      for (const q of lesson.questions) {
+        if (!/final paragraph|last paragraph/i.test(q.text)) continue;
+        if (!q.evidence) continue;
+        expect(last.includes(q.evidence), `${lesson.id}/${q.id}`).toBe(true);
+      }
+    }
+  });
   it("uses unique ids and complete answer feedback across both banks", () => {
     expect(new Set(allLessons.map((l) => l.id)).size).toBe(allLessons.length);
     const questions = allLessons.flatMap((l) => l.questions);
@@ -77,6 +105,11 @@ describe("full exam content and recovery", () => {
       writingTask2: "My independent essay response.",
       finished: false,
     };
+    // Answer every objective question so the recovery of all four stages is
+    // what is under test, not the abandoned-exam path.
+    for (const lesson of [...fullListening, ...fullReading])
+      for (const question of lesson.questions)
+        s.exam.answers[question.id] = question.answer;
     const result = advanceExam(s, now + 172 * 60000);
     expect(result.exam?.finished).toBe(true);
     expect(result.attempts.reduce((n, a) => n + a.total, 0)).toBe(75);
