@@ -281,7 +281,8 @@ export function SettingsPage() {
             </div>
             <p className="help-copy">
               Xuất tiến độ, bài viết, bản nháp và lịch ôn ra file JSON. File
-              không chứa bản ghi âm; hãy tải từng bản tại bài Nói.
+              không chứa bản ghi âm: bản ghi của từng buổi nằm ở trang Lịch sử,
+              mở buổi học rồi tải hoặc xóa từng bản.
             </p>
             <div className="button-row">
               <button

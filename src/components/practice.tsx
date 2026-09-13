@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -307,6 +307,10 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const seconds = result?.seconds ?? draft.seconds;
   const [checks, setChecks] = useState<string[]>([]);
   const [takeSavedAt, setTakeSavedAt] = useState(0);
+  // Without a microphone every Speaking lesson stays unfinished for ever, keeps
+  // its "never practised" bonus and holds a slot in the daily plan. Answering
+  // out loud is still practice; the session is filed, just with no take.
+  const [withoutRecording, setWithoutRecording] = useState(false);
   // A take counts only if it was captured after the last session already filed
   // for this lesson, so an old recording cannot be submitted again as new work.
   const lastFiled = state.attempts
@@ -316,6 +320,27 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const text = state.drafts[lesson.id] ?? "";
   const started = useRef(0);
   const lock = useRef(false);
+  /** Active seconds counted since the last write to the stored draft. */
+  const pending = useRef(0);
+  const flush = useCallback(() => {
+    const elapsed = pending.current;
+    if (!elapsed) return;
+    pending.current = 0;
+    update((s) => {
+      const current = readQuizDraft(s.drafts[`quiz:${lesson.id}`], lesson);
+      return {
+        ...s,
+        drafts: {
+          ...s.drafts,
+          [`quiz:${lesson.id}`]: JSON.stringify({
+            ...current,
+            contentVersion: lesson.version,
+            seconds: Math.min(18000, current.seconds + elapsed),
+          }),
+        },
+      };
+    });
+  }, [lesson, update]);
   const [error, setError] = useState("");
   const insights = result?.total
     ? objectiveInsights(lesson.questions, result.answers, result.confidence)
@@ -334,28 +359,25 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         !lock.current &&
         Date.now() - started.current < 120000
       )
-        update((s) => {
-          const current = readQuizDraft(s.drafts[`quiz:${lesson.id}`], lesson);
-          return {
-            ...s,
-            drafts: {
-              ...s.drafts,
-              [`quiz:${lesson.id}`]: JSON.stringify({
-                ...current,
-                contentVersion: lesson.version,
-                seconds: Math.min(18000, current.seconds + 1),
-              }),
-            },
-          };
-        });
+        pending.current += 1;
+      // Every stored second used to cost a full read, parse and validation of
+      // the whole profile. The count is kept in memory and written in batches;
+      // leaving the page flushes whatever has not been written yet.
+      if (pending.current >= 10) flush();
     }, 1000);
+    const leave = () => flush();
+    window.addEventListener("pagehide", leave);
+    document.addEventListener("visibilitychange", leave);
     return () => {
       clearInterval(t);
+      window.removeEventListener("pagehide", leave);
+      document.removeEventListener("visibilitychange", leave);
       window.removeEventListener("pointerdown", activity);
       window.removeEventListener("keydown", activity);
       window.removeEventListener("scroll", activity, true);
+      flush();
     };
-  }, [lesson, update]);
+  }, [lesson, update, flush]);
   const checklist =
     lesson.skill === "writing"
       ? [
@@ -395,9 +417,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       setError("Hãy viết ít nhất một đoạn ngắn (10 từ) trước khi hoàn thành.");
       return;
     }
-    if (lesson.skill === "speaking" && !hasRecording) {
+    if (lesson.skill === "speaking" && !hasRecording && !withoutRecording) {
       setError(
-        "Ghi âm câu trả lời trước khi hoàn thành để có thể nghe lại và cải thiện nhé.",
+        "Ghi âm câu trả lời trước khi hoàn thành để có thể nghe lại và cải thiện nhé. Nếu thiết bị không ghi âm được, hãy đánh dấu ô bên dưới phần ghi âm.",
       );
       return;
     }
@@ -409,12 +431,13 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       answers,
       confidence,
       ...scoreAnswers(lesson.id, answers),
-      seconds,
+      // Seconds counted since the last batch write belong to this session too.
+      seconds: Math.min(18000, seconds + pending.current),
       text: lesson.skill === "writing" ? text : undefined,
       reflection: checks,
     };
     lock.current = true;
-    if (lesson.skill === "speaking") {
+    if (lesson.skill === "speaking" && hasRecording) {
       try {
         const stored = await getRecording(lesson.id);
         if (!stored) throw Error("missing");
@@ -428,6 +451,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         return;
       }
     }
+    // Only once the attempt is really filed: a failed save above returns to a
+    // session whose counted seconds must still be there.
+    pending.current = 0;
     addAttempt(a);
     setResult(a);
     update((s) => ({
@@ -439,6 +465,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   }
   function retry() {
     lock.current = false;
+    pending.current = 0;
     setResult(null);
     update((s) => ({
       ...s,
@@ -446,6 +473,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     }));
     setError("");
     setChecks([]);
+    setWithoutRecording(false);
     started.current = Date.now();
   }
   return (
@@ -714,6 +742,21 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                   setTakeSavedAt(take.ready ? take.savedAt : 0)
                 }
               />
+              {!hasRecording && (
+                <label className="without-recording">
+                  <input
+                    type="checkbox"
+                    checked={withoutRecording}
+                    disabled={Boolean(result)}
+                    onChange={(e) => setWithoutRecording(e.target.checked)}
+                  />
+                  <span>
+                    Thiết bị này không ghi âm được. Mình đã trả lời thành tiếng
+                    và muốn lưu buổi luyện mà không kèm bản ghi — sẽ không có gì
+                    để nghe lại.
+                  </span>
+                </label>
+              )}
             </section>
           )}
           {!lesson.questions.length && (

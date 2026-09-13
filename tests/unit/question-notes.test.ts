@@ -71,11 +71,12 @@ describe("evidence and distractor notes", () => {
     for (const id of Object.keys(questionNotes)) expect(ids.has(id)).toBe(true);
   });
 
-  it("follows reused questions into the full exam", () => {
+  it("annotates the exam questions written against the shared passages", () => {
+    // The exam owns its questions, so the evidence layer has to be written for
+    // them too: reusing the short lesson's items is no longer an option.
     const full = allLessons.find((lesson) => lesson.id === "full-reading-cafe");
-    const reused = full?.questions.find(
-      (question) => question.id === "full-rc1",
-    );
-    expect(reused?.evidence).toBe(questionNotes.rc1.evidence);
+    const first = full?.questions.find((question) => question.id === "frc1");
+    expect(first?.evidence).toBe(questionNotes.frc1.evidence);
+    expect(first?.optionNotes).toHaveLength(4);
   });
 });

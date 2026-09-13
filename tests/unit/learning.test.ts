@@ -104,11 +104,35 @@ describe("scoring and honest progress", () => {
     expect(scoreAnswers("writing-email", {})).toEqual({ correct: 0, total: 0 });
     expect(skillStats(freshState(), "reading").accuracy).toBeNull();
   });
-  it("uses the last five scored attempts, weighted by question count", () => {
+  it("measures accuracy over recent questions, not recent attempts", () => {
     const s = freshState();
-    s.attempts = Array.from({ length: 6 }, (_, i) =>
-      attempt(`2026-09-0${i + 1}T10:00:00Z`, { correct: i === 0 ? 0 : 5 }),
-    );
+    // Six five-question lessons all answered perfectly, then a sitting that
+    // files one attempt per material — the shape of a timed exam section.
+    s.attempts = [
+      ...Array.from({ length: 6 }, (_, i) =>
+        attempt(`2026-09-0${i + 1}T10:00:00Z`, { correct: 5 }),
+      ),
+      ...Array.from({ length: 8 }, (_, i) => ({
+        ...attempt(`2026-09-08T1${i}:00:00Z`, { correct: 0, total: 1 }),
+        id: `exam-${i}`,
+        answers: {},
+      })),
+    ];
+    // Eight wrong single-question parts cannot stand for the whole skill: the
+    // window keeps reading back until it holds thirty questions.
+    // 25 of 33: the eight exam parts plus the five lessons it takes to fill
+    // the window. Counting attempts alone would have read 0%.
+    expect(skillStats(s, "reading").accuracy).toBe(76);
+    expect(skillStats(s, "reading").count).toBe(14);
+  });
+  it("forgets work that has fallen out of the recent-question window", () => {
+    const s = freshState();
+    s.attempts = [
+      attempt("2026-09-01T10:00:00Z", { correct: 0 }),
+      ...Array.from({ length: 6 }, (_, i) =>
+        attempt(`2026-09-0${i + 2}T10:00:00Z`, { correct: 5 }),
+      ),
+    ];
     expect(skillStats(s, "reading").accuracy).toBe(100);
   });
   it("separates misconceptions from uncertain correct answers by question type", () => {

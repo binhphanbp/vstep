@@ -183,10 +183,16 @@ export const examSchema = z
     mode: z.optional(z.enum(["mini", "full"])),
     startedAt: z.number(),
     stage: boundedInteger(0, 3),
+    // Which material of the current part is open. Reading runs four passages
+    // on one clock, so a reload has to come back to the passage being read.
+    material: z.optional(boundedInteger(0, 39)),
     deadline: z.number(),
     answers: z.record(z.string(), boundedInteger(0, 7)),
     writing: limitedString(30000),
     writingTask2: z.optional(limitedString(30000)),
+    // Speaking parts answered out loud on a device that cannot record. Without
+    // this the part is unfinishable and the sitting stays permanently open.
+    spoken: z.optional(z.array(limitedString(100)).check(z.maxLength(40))),
     finished: z.boolean(),
     lessonSnapshots: z.optional(
       z.array(lessonSnapshotSchema).check(z.minLength(1), z.maxLength(40)),
@@ -434,10 +440,24 @@ export function scheduleReview(
     lastDate: localDay(now),
   };
 }
+/**
+ * How many recent questions the accuracy figure is measured over. Counting
+ * attempts instead would let one exam decide everything: a full Listening
+ * section files fourteen separate attempts, so the five newest would all come
+ * from the last few minutes of that one sitting.
+ */
+const ACCURACY_QUESTION_WINDOW = 30;
 export function skillStats(state: StudyState, skill: Skill) {
-  const relevant = state.attempts
-    .filter((a) => a.skill === skill && a.total > 0)
-    .slice(-5);
+  const scored = state.attempts.filter((a) => a.skill === skill && a.total > 0);
+  const relevant: Attempt[] = [];
+  let questions = 0;
+  // Whole attempts, newest first, until the window is full: a lesson is never
+  // counted in half, and one short attempt can never stand for the skill.
+  for (const attempt of [...scored].reverse()) {
+    if (questions >= ACCURACY_QUESTION_WINDOW) break;
+    relevant.push(attempt);
+    questions += attempt.total;
+  }
   const total = relevant.reduce((s, a) => s + a.total, 0);
   return {
     count: state.attempts.filter((a) => a.skill === skill).length,
@@ -771,7 +791,17 @@ export function advanceExam(
           ) ?? allLessons.find((candidate) => candidate.id === lessonId),
       }))
       .filter(({ lessonId, lesson }) => {
-        if (!lesson || stage.skill === "speaking") return false;
+        if (!lesson) return false;
+        // A part the recorder already filed carries its real duration; filing
+        // it again here would also take a share of the stage time from the
+        // parts that still need one.
+        if (attempts.some((a) => a.id === `exam:${current.id}:${lessonId}`))
+          return false;
+        // Speaking files nothing on its own: a take is filed the moment it is
+        // captured. What is left is a part the learner answered out loud with
+        // no microphone available, and said so.
+        if (stage.skill === "speaking")
+          return (current.spoken ?? []).includes(lessonId);
         if (stage.skill === "writing")
           return Boolean(writingFor(lessonId).trim());
         return (
@@ -819,6 +849,8 @@ export function advanceExam(
     exam = {
       ...exam,
       stage: next,
+      // A new part starts at its first material, not where the last one ended.
+      material: 0,
       deadline: ended + stages[next].seconds * 1000,
     };
     force = false;

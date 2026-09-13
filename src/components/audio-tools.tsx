@@ -1,15 +1,55 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Play, Square, Volume2, Mic, Download } from "lucide-react";
-import { saveRecording, getRecording } from "@/lib/recordings";
+import { Play, Square, Volume2, Mic, Download, Trash2 } from "lucide-react";
+import { saveRecording, getRecording, deleteRecording } from "@/lib/recordings";
 import { speechChunks } from "@/lib/speech";
 let speechOwner: symbol | null = null;
 export function RecordingHistory({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
+  // Each submitted session keeps its own copy on the device for ever. Without a
+  // way to remove one, practising Speaking daily only ever adds to the pile.
+  const [removed, setRemoved] = useState(false);
+  const [error, setError] = useState("");
   return (
     <details onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>Nghe lại bản ghi của buổi này</summary>
-      {open && <Recorder id={id} readOnly />}
+      {open &&
+        (removed ? (
+          <p className="help-copy">
+            Đã xóa bản ghi của buổi này khỏi thiết bị. Kết quả buổi học vẫn được
+            giữ nguyên.
+          </p>
+        ) : (
+          <>
+            <Recorder id={id} readOnly />
+            <button
+              type="button"
+              className="button secondary small"
+              onClick={async () => {
+                if (
+                  !window.confirm(
+                    "Xóa hẳn bản ghi của buổi này khỏi thiết bị? Không khôi phục được.",
+                  )
+                )
+                  return;
+                try {
+                  await deleteRecording(id);
+                  setRemoved(true);
+                } catch {
+                  setError("Không xóa được bản ghi. Hãy thử lại.");
+                }
+              }}
+            >
+              <Trash2 size={14} />
+              Xóa bản ghi này
+            </button>
+          </>
+        ))}
+      {error && (
+        <p className="notice error" role="alert">
+          {error}
+        </p>
+      )}
     </details>
   );
 }

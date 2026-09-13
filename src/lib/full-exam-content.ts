@@ -1,5 +1,6 @@
 import { lessons, type Lesson, type Question } from "./content";
 import { withStableOptionOrder } from "./option-order";
+import { questionNotes } from "./question-notes";
 const question = (
   id: string,
   text: string,
@@ -8,40 +9,40 @@ const question = (
   explanation: string,
   tag = "Thông tin chi tiết",
 ): Question =>
-  withStableOptionOrder({ id, text, options, answer, explanation, tag });
+  withStableOptionOrder({
+    id,
+    text,
+    options,
+    answer,
+    explanation,
+    tag,
+    ...questionNotes[id],
+  });
 /**
- * Builds the exam passage by appending paragraphs to a short lesson and reusing
- * its questions. Appending moves the end of the text, so a reused question that
- * points at "the final paragraph" would now name the wrong one: `rewrites`
- * re-words those for the exam. Re-wording graded content means the exam lesson
- * carries its own `version`, separate from the short lesson it grew from.
+ * Builds the exam passage by appending paragraphs to a short lesson. The
+ * passage grows from the library text, but every question is the exam's own:
+ * sharing questions with the short lesson used to file the same mistake under
+ * two notebook keys, splitting its wrong count in half, and let a learner who
+ * had drilled the short lesson score half the section from memory.
  */
 const extendReading = (
   id: string,
   extra: string,
   questions: Question[],
-  version = 2,
-  rewrites: Record<string, string> = {},
+  version: number,
 ): Lesson => {
   const base = lessons.find((l) => l.id === id)!;
   return {
     ...base,
     id: `full-${id}`,
     version,
-    // The notebook lists entries by title, and this passage reuses the short
-    // lesson's questions: without a distinct name the two are indistinguishable.
+    // The notebook lists entries by title, and this passage grows out of the
+    // short lesson: without a distinct name the two are indistinguishable.
     title: `${base.title} · Đề đầy đủ`,
     minutes: 15,
     part: "Đề đầy đủ · Reading",
     text: `${base.text}\n\n${extra}`,
-    questions: [
-      ...base.questions.map((q) => ({
-        ...q,
-        id: `full-${q.id}`,
-        ...(rewrites[q.id] ? { text: rewrites[q.id] } : {}),
-      })),
-      ...questions,
-    ],
+    questions,
   };
 };
 export const fullReading: Lesson[] = [
@@ -49,6 +50,69 @@ export const fullReading: Lesson[] = [
     "reading-cafe",
     `To understand how well the study room was working, Linh asked visitors to complete a short anonymous questionnaire. She deliberately avoided collecting names or contact details. Most respondents praised the quiet atmosphere, but several mentioned that the booking page was difficult to use on a phone. Linh simplified it so that a customer needed only to select a date and a time. She also kept two seats available for people who arrived without a reservation.\n\nAnother suggestion concerned the length of bookings. A two-hour limit initially seemed fair, yet students preparing for examinations often needed longer. Linh introduced a simple compromise: visitors could extend their booking if nobody else was waiting. This prevented empty seats from remaining unused while still giving newcomers a reasonable chance to find a place. Staff explained the policy on a small sign rather than reminding each customer separately.\n\nThe café also changed how it handled waste. Reusable cups became standard for customers staying inside, and a discount encouraged takeaway customers to bring their own containers. Linh admitted that washing cups required additional staff time. Nevertheless, she considered the reduction in disposable packaging worthwhile. She did not describe the café as completely sustainable, because ingredients still arrived in plastic and electricity use remained significant.\n\nLooking back, Linh says that none of these changes was revolutionary. Their value came from responding to ordinary problems consistently. She plans to repeat the questionnaire every few months, accepting that the needs of her customers will continue to change.`,
     [
+      question(
+        "frc1",
+        "What had Linh expected her customers to do?",
+        [
+          "Buy a drink and leave soon afterwards",
+          "Book a table for a group project",
+          "Ask for quieter music upstairs",
+          "Stay for several hours on each visit",
+        ],
+        0,
+        "Câu mở đầu nêu đúng dự đoán ban đầu của Linh trước khi quán mở.",
+      ),
+      question(
+        "frc2",
+        "When is the upstairs room kept for quiet study?",
+        [
+          "On Thursday evenings",
+          "Between two and six in the afternoon",
+          "From opening until closing at weekends",
+          "Whenever a book club has booked it",
+        ],
+        1,
+        "Bài ghi rõ khung giờ dành cho phòng học yên tĩnh.",
+      ),
+      question(
+        "frc3",
+        "What does the passage suggest about Linh’s worry that longer stays would reduce her income?",
+        [
+          "It was confirmed when weekday takings fell",
+          "It led her to charge for each seat",
+          "It proved unfounded because visitors returned and brought friends",
+          "It made her close the study room after three months",
+        ],
+        2,
+        "“However” đảo lại nỗi lo: khách quay lại đều đặn và giới thiệu bạn bè.",
+        "Suy luận",
+      ),
+      question(
+        "frc4",
+        "In paragraph three, “them” in “Rather than ask them to leave” refers to:",
+        [
+          "the students who booked the study room",
+          "the regular customers who missed the lively conversations",
+          "the friends who were recommended the café",
+          "the members of local book clubs",
+        ],
+        1,
+        "“them” nối lại nhóm khách quen được nhắc ở câu ngay trước.",
+        "Từ tham chiếu",
+      ),
+      question(
+        "frc5",
+        "Why does the writer mention that Linh raised no prices and paid for no advertising?",
+        [
+          "To explain why the café was losing money",
+          "To argue that advertising never works for small businesses",
+          "To suggest that she should have advertised earlier",
+          "To show the improvement came from listening rather than spending",
+        ],
+        3,
+        "Câu ngay sau đó gắn kết quả với việc lắng nghe khách, không phải với chi phí.",
+        "Mục đích tác giả",
+      ),
       question(
         "frc6",
         "Why did Linh make the questionnaire anonymous?",
@@ -111,11 +175,75 @@ export const fullReading: Lesson[] = [
         "Quan điểm tác giả",
       ),
     ],
+    3,
   ),
   extendReading(
     "reading-commute",
     `The practical details of a transport policy can determine whether it achieves its aims. Consider a city that introduces an excellent bus route but provides no safe pavement leading to its stops. Parents with small children and people with limited mobility may still find the service difficult to use. A journey begins at the front door, not at the point where a passenger boards a vehicle. Planners therefore need to examine the whole trip, including the first and last few hundred metres.\n\nInformation is another relatively small investment with potentially wide benefits. Clear maps, readable signs and accurate arrival estimates reduce the uncertainty associated with an unfamiliar service. Visitors may need explanations that regular passengers no longer notice are missing. Consulting only existing users can consequently produce an incomplete picture of the barriers that keep others away.\n\nBusinesses also have a role. A shop owner may initially oppose removing a few parking spaces to create a safer crossing. However, the effect should be investigated rather than assumed. In some neighbourhoods, many customers already arrive on foot. Making their journeys easier may be more valuable than preserving every parking place. In other locations, deliveries or limited alternatives require a different arrangement.\n\nGood evaluation should record who benefits and who remains excluded. An average journey time can improve even while a particular group faces longer waits. Comparing experiences across different neighbourhoods and working schedules helps reveal these differences. Public discussion becomes more useful when it considers this evidence rather than treating every commuter as if they had identical needs.`,
     [
+      question(
+        "frt1",
+        "What did urban planners assume for years?",
+        [
+          "That new roads would fill almost immediately",
+          "That congestion would disappear on its own",
+          "That building more roads would solve congestion",
+          "That commuters would always prefer public transport",
+        ],
+        2,
+        "Câu mở đầu nêu đúng giả định này; phần còn lại của đoạn bác bỏ nó.",
+      ),
+      question(
+        "frt2",
+        "The word “unpredictably” in paragraph two is closest in meaning to:",
+        [
+          "at times that cannot be relied on",
+          "more slowly than usual",
+          "at the same hour every day",
+          "without charging a fare",
+        ],
+        0,
+        "Câu tiếp theo nhấn mạnh “Reliability”, tức giờ đến không đáng tin.",
+        "Từ vựng trong ngữ cảnh",
+      ),
+      question(
+        "frt3",
+        "According to paragraph two, what can make a journey that looks short impractical?",
+        [
+          "A fare that rises at peak times",
+          "Two long waits within the trip",
+          "A route that avoids the city centre",
+          "A shortage of parking at the destination",
+        ],
+        1,
+        "Bài nêu đúng điều kiện khiến hành trình ngắn trên bản đồ thành bất tiện.",
+      ),
+      question(
+        "frt4",
+        "What does the passage imply about a painted cycle line on a busy road?",
+        [
+          "It works better than lanes separated from traffic",
+          "It is too expensive for most cities to consider",
+          "It removes the need for extra street space",
+          "It costs little but reassures a nervous cyclist little",
+        ],
+        3,
+        "“though inexpensive” và “may do little to reassure” đi liền nhau trong một câu.",
+        "Suy luận",
+      ),
+      question(
+        "frt5",
+        "Why does the author mention that separated lanes need money and street space?",
+        [
+          "To explain why an effective measure can still be difficult to adopt",
+          "To argue that cycling projects are not worth their cost",
+          "To recommend painted lines as the better option",
+          "To show that street space is never available in cities",
+        ],
+        0,
+        "Câu này giải thích vì sao biện pháp hiệu quả hơn lại “politically difficult”.",
+        "Mục đích tác giả",
+      ),
       question(
         "frt6",
         "Why does the author discuss the pavement near bus stops?",
@@ -180,11 +308,75 @@ export const fullReading: Lesson[] = [
         "Suy luận",
       ),
     ],
+    3,
   ),
   extendReading(
     "reading-memory",
     `One teacher applied these ideas by beginning each lesson with three questions from earlier topics. The questions were not graded, and students answered individually before discussing their reasoning in pairs. At first, several students felt uncomfortable when they could not remember an answer. The teacher explained that these moments were useful signals about what needed attention, rather than evidence that a student lacked ability.\n\nFeedback was deliberately specific. Instead of writing only that an answer was wrong, the teacher identified the misunderstanding and gave a contrasting example. A learner who confused two similar words, for instance, saw each word in a different sentence. Students then wrote a sentence of their own to demonstrate that they understood the distinction. Simply copying the correction was not considered sufficient.\n\nThe teacher also asked students to predict which answers they would remember a week later. Comparing those predictions with actual performance helped some learners recognise that an easy-feeling study session could produce weak recall. Others discovered that they had underestimated themselves. The purpose was to improve decisions about future practice, not to rank students against one another.\n\nTechnology can make this process convenient by keeping a record of previous responses and suggesting review dates. Nevertheless, an application cannot directly observe understanding from a single button press. Learners need to judge their own recall honestly and occasionally test their knowledge in a new situation. A scheduling system is most useful when it supports thoughtful practice rather than replacing it with a series of mechanical clicks.`,
     [
+      question(
+        "frm1",
+        "According to paragraph one, what happens once the book is closed?",
+        [
+          "The explanation finally becomes obvious",
+          "The words look more familiar than before",
+          "The confident feeling can quickly disappear",
+          "Recall improves after the fifth reading",
+        ],
+        2,
+        "Bài đối lập cảm giác quen thuộc khi đang đọc với khả năng nhớ lại sau đó.",
+      ),
+      question(
+        "frm2",
+        "Why do some students believe retrieval practice is less effective?",
+        [
+          "Their teachers rarely recommend it",
+          "It feels harder than rereading",
+          "It takes longer than rereading",
+          "It removes the need to understand",
+        ],
+        1,
+        "Cảm giác khó khiến người học đánh giá sai hiệu quả của việc tự nhớ lại.",
+        "Suy luận",
+      ),
+      question(
+        "frm3",
+        "What does the passage recommend when a learner cannot retrieve an answer?",
+        [
+          "Dropping the topic for a longer period",
+          "Delaying the next review",
+          "Copying the definition several times",
+          "An earlier review together with a clear explanation",
+        ],
+        3,
+        "Bài nêu đúng hai việc cần làm khi người học không nhớ ra đáp án.",
+      ),
+      question(
+        "frm4",
+        "In “tasks must still be manageable”, the word “manageable” is closest in meaning to:",
+        [
+          "possible to cope with",
+          "impossible to finish",
+          "enjoyable to repeat",
+          "measured precisely",
+        ],
+        0,
+        "Câu này cân bằng lại ý “difficulty”: việc khó vẫn phải nằm trong sức của người học.",
+        "Từ vựng trong ngữ cảnh",
+      ),
+      question(
+        "frm5",
+        "Which sentence best summarises the passage as a whole?",
+        [
+          "Learning should feel smooth, so a difficult session is a wasted one",
+          "Effortful practice and honest self-checking build recall that lasts",
+          "Memorising definitions is enough as long as they are reviewed often",
+          "A scheduling application can decide what a learner needs to revise",
+        ],
+        1,
+        "Cả bài xoay quanh việc tự nhớ lại có nỗ lực, tự đánh giá trung thực và giữ độ khó vừa sức.",
+        "Ý chính",
+      ),
       question(
         "frm6",
         "How were the teacher’s opening questions used?",
@@ -248,16 +440,74 @@ export const fullReading: Lesson[] = [
         "Suy luận",
       ),
     ],
-    3,
-    {
-      // The short lesson ends on this warning; the exam passage does not.
-      rm5: "What warning does the passage give about difficulty?",
-    },
+    4,
   ),
   extendReading(
     "reading-garden",
     `The residents kept a simple notebook beside the entrance to record tasks and observations. It included watering dates, signs of insects and the amount harvested each week. The notebook was intended to help newcomers participate without depending on the retired gardener for every decision. Several entries were accompanied by drawings so that younger children could understand them too.\n\nAs the rainy season approached, drainage became a concern. Water sometimes collected underneath the planting boxes, attracting mosquitoes. The group raised the boxes on supports and checked that containers did not retain standing water. They also reviewed which plants were suitable for the changing weather. Some vegetables were replaced, while others were moved to positions with better shelter.\n\nThere were occasional disagreements about how to divide the harvest. One resident proposed giving most of the vegetables to those who had worked the longest hours. Others argued that older people and busy parents might contribute in less visible ways, such as sharing knowledge or lending tools. The group eventually agreed to distribute small portions among participating households and offer any surplus to neighbours who wanted to try the produce.\n\nThe project remained informal, but decisions were written down after monthly meetings. Residents found that clear agreements reduced misunderstandings without making the garden feel like another workplace. They were careful not to promise that it would feed the entire building. For them, its greatest contribution was a shared reason to step outside, notice the seasons and take an interest in people living nearby.`,
     [
+      question(
+        "frg1",
+        "How long did the manager approve the garden for at first?",
+        [
+          "One month",
+          "Six months as a trial",
+          "One year",
+          "Permanently, from the start",
+        ],
+        1,
+        "Người quản lý chọn thời hạn thử thay vì một thỏa thuận lâu dài.",
+      ),
+      question(
+        "frg2",
+        "Why did the group choose vegetables that could tolerate heat?",
+        [
+          "The site received strong afternoon sunlight",
+          "The retired gardener already had those seeds",
+          "The restaurant asked for them",
+          "They needed less water than flowers",
+        ],
+        0,
+        "“Because” mở đầu câu nêu thẳng lý do chọn loại rau chịu nóng.",
+      ),
+      question(
+        "frg3",
+        "What does the passage suggest kept some residents from helping at first?",
+        [
+          "They did not know when they were needed",
+          "They refused to pay for soil and tools",
+          "They preferred to work only in the evening",
+          "They believed the soil was too poor",
+        ],
+        0,
+        "Bài phân biệt người không muốn giúp với người muốn giúp nhưng không rõ lúc nào cần.",
+        "Suy luận",
+      ),
+      question(
+        "frg4",
+        "What does the passage as a whole suggest about the project?",
+        [
+          "Its hardest part was organising people rather than growing plants",
+          "It failed because too few residents were willing to help",
+          "It succeeded mainly because of the retired gardener’s expertise",
+          "Its purpose was to supply food for the whole building",
+        ],
+        0,
+        "Khó khăn lớn nhất là chia việc và thống nhất cách làm, không phải chuyện trồng trọt.",
+        "Ý chính",
+      ),
+      question(
+        "frg5",
+        "What condition is attached to the covered bench?",
+        [
+          "The restaurant has to pay for it",
+          "It must not block the emergency path",
+          "It has to be built before the rainy season",
+          "The retired gardener has to approve it",
+        ],
+        1,
+        "“provided” nêu điều kiện kèm theo cho chiếc ghế có mái che.",
+      ),
       question(
         "frg6",
         "What was the main purpose of the garden notebook?",
@@ -320,6 +570,7 @@ export const fullReading: Lesson[] = [
         "Suy luận",
       ),
     ],
+    3,
   ),
 ];
 const listen = (

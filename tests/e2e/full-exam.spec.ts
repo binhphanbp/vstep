@@ -14,6 +14,11 @@ test("full exam navigates all materials and restores both writing tasks", async 
   await page.getByLabel("Chọn ngữ liệu").selectOption("13");
   await expect(page.locator('input[name="fl35"]')).toHaveCount(4);
   await page.reload();
+  // The passage being worked on survives the reload: coming back to material 1
+  // while the clock keeps running would cost the learner the place they were at.
+  await expect(page.getByLabel("Chọn ngữ liệu")).toHaveValue("13");
+  await expect(page.locator('input[name="fl35"]')).toHaveCount(4);
+  await page.getByLabel("Chọn ngữ liệu").selectOption("0");
   await expect(page.locator('input[name="fl1"]').first()).toBeChecked();
   page.on("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
@@ -29,12 +34,15 @@ test("full exam navigates all materials and restores both writing tasks", async 
     .getByLabel("Bài viết trong phòng thi")
     .fill("This is my separate essay response about education.");
   await page.reload();
-  await expect(page.getByLabel("Bài viết trong phòng thi")).toContainText(
-    "Dear Alex",
-  );
-  await page.getByLabel("Chọn bài viết").selectOption("1");
+  // The task being written stays open across the reload, and both drafts keep
+  // their own text.
+  await expect(page.getByLabel("Chọn bài viết")).toHaveValue("1");
   await expect(page.getByLabel("Bài viết trong phòng thi")).toContainText(
     "separate essay",
+  );
+  await page.getByLabel("Chọn bài viết").selectOption("0");
+  await expect(page.getByLabel("Bài viết trong phòng thi")).toContainText(
+    "Dear Alex",
   );
   await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
   await expect(page.getByLabel("Chọn phần Nói").locator("option")).toHaveCount(

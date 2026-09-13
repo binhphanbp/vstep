@@ -327,6 +327,17 @@ test("recording uses a real MediaRecorder and survives reload", async ({
       ).length,
   );
   expect(speaking).toBe(1);
+  // Every filed session keeps its own copy on the device, so the history has to
+  // offer a way to remove one.
+  await page.goto("/progress");
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.getByText("Nghe lại bản ghi của buổi này").click();
+  await expect(page.locator("audio")).toBeVisible();
+  await page.getByRole("button", { name: "Xóa bản ghi này" }).click();
+  await expect(page.getByText("Đã xóa bản ghi của buổi này")).toBeVisible();
+  await page.reload();
+  await page.getByText("Nghe lại bản ghi của buổi này").click();
+  await expect(page.getByText("Không có bản ghi cho buổi này")).toBeVisible();
   await context.close();
 });
 test("every main route loads without runtime errors and fits mobile", async ({
