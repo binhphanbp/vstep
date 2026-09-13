@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 13/09/2026
 
-**Mốc nền tảng được đánh giá:** vòng kiểm định production Reading và Listening ngày 12/09/2026
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Baseline bàn giao `2ccbea8` đã qua GitHub Actions và smoke HTTPS; release candidate mới đã đạt toàn bộ cổng local với 57 unit và 40 E2E trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -192,8 +192,8 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
 | axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 45 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
-| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 12/09/2026                                                           |
-| GitHub Actions        | Đạt ở baseline     | Run `34688471036` cho commit `2ccbea8`; release candidate chờ CI sau khi push                    |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                           |
+| GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt             |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -378,6 +378,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                  |
 | `f89387d` | Kiểm tra tám bài ưu tiên và tải backup trên cả ba browser engine                   |
 | `f43fc23` | Version hóa lịch sử học, gia cố cloud và thêm smoke test sau deployment             |
+| `6cdbbfe` | Khép versioning legacy, cấu trúc đề, validation snapshot và smoke đối chiếu SHA      |
 
 ## 17. Tiêu chí hoàn tất giai đoạn hiện tại
 

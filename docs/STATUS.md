@@ -2,9 +2,9 @@
 
 Code đã được lưu trong workspace sau các lần gián đoạn. Không dựng lại từ create-next-app.
 
-Rà soát mới ngày 13/09/2026: [AUDIT-2026-09-13.md](AUDIT-2026-09-13.md). Release candidate hiện tại đã bổ sung nâng cấp snapshot cho lịch sử legacy tương thích, khóa lịch ôn theo phiên bản, đóng băng cấu trúc phần thi, kiểm tra liên kết snapshot và nhận diện SHA trên production. Migration 002 đã áp dụng thành công trên Supabase production và hậu kiểm đạt. Release vẫn chưa buộc Vercel chờ CI trước deploy; UAT thiết bị thật và thẩm định học liệu còn mở nên không kết luận toàn sản phẩm hoàn thành 100%.
+Rà soát mới ngày 13/09/2026: [AUDIT-2026-09-13.md](AUDIT-2026-09-13.md). Release `6cdbbfe` đã bổ sung nâng cấp snapshot cho lịch sử legacy tương thích, khóa lịch ôn theo phiên bản, đóng băng cấu trúc phần thi, kiểm tra liên kết snapshot và nhận diện SHA trên production. Migration 002 đã áp dụng thành công trên Supabase production và hậu kiểm đạt. Release vẫn chưa buộc Vercel chờ CI trước deploy; UAT thiết bị thật và thẩm định học liệu còn mở nên không kết luận toàn sản phẩm hoàn thành 100%.
 
-Rà soát và kế hoạch thực thi: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). Baseline `2ccbea8` có CI và smoke thành công; release candidate mới đạt 57 unit và 40 E2E local trên production build. Migration mới đã thu hồi direct DML và buộc ghi qua RPC revision trên Supabase production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. Workflow smoke dùng tên miền production công khai và sẽ đối chiếu SHA của deployment với metadata trong HTML. UAT thiết bị thật vẫn còn mở.
+Rà soát và kế hoạch thực thi: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). Release `6cdbbfe` đạt 57 unit, 40 E2E, build 45 route và audit dependency trong GitHub Actions run `34733331145`; smoke SHA run `34733348658` cũng đạt. Migration mới đã thu hồi direct DML và buộc ghi qua RPC revision trên Supabase production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. UAT thiết bị thật vẫn còn mở.
 
 ## Đã hoàn thành trong môi trường local
 
