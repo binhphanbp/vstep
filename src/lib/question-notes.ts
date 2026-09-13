@@ -12,6 +12,202 @@
 export type QuestionNote = { evidence: string; optionNotes: string[] };
 
 export const questionNotes: Record<string, QuestionNote> = {
+  frc1: {
+    evidence: "she expected most customers to buy a drink and leave",
+    optionNotes: [
+      "Đúng: đây là điều Linh dự đoán trước khi khách bắt đầu ở lại lâu.",
+      "Đặt chỗ chỉ xuất hiện sau này, khi phòng học yên tĩnh đã mở.",
+      "Có khách xin nhạc nhỏ hơn, nhưng đó là điều xảy ra ngoài dự đoán.",
+      "Ngồi hàng giờ là điều “Instead” — trái hẳn với dự đoán ban đầu.",
+    ],
+  },
+  frc2: {
+    evidence:
+      "She decided to reserve the upstairs room for quiet study between two and six in the afternoon.",
+    optionNotes: [
+      "Tối thứ Năm là buổi trao đổi ngôn ngữ ở tầng trệt.",
+      "Đúng: bài ghi thẳng khung giờ hai đến sáu giờ chiều.",
+      "Bài không nhắc đến cuối tuần.",
+      "Câu lạc bộ sách mới chỉ là dự định ở đoạn cuối.",
+    ],
+  },
+  frc3: {
+    evidence:
+      "At first, Linh worried that people staying longer would reduce her income. However, many visitors returned regularly and recommended the café to their friends.",
+    optionNotes: [
+      "Ngược lại: sau ba tháng quán đông hơn đúng vào ngày thường.",
+      "Bài khẳng định khách “did not have to pay an extra fee”.",
+      "Đúng: “However” đảo lại nỗi lo — khách quay lại và giới thiệu bạn bè.",
+      "Phòng học vẫn hoạt động; đoạn cuối còn bàn bước tiếp theo.",
+    ],
+  },
+  frc4: {
+    evidence:
+      "A group of regular customers missed the lively conversations upstairs. Rather than ask them to leave",
+    optionNotes: [
+      "Nhóm đặt chỗ học là người được phục vụ, không phải người bị đề nghị rời đi.",
+      "Đúng: “them” nối lại nhóm khách quen ở câu ngay trước.",
+      "Bạn bè được giới thiệu xuất hiện ở đoạn trước, không phải ở câu này.",
+      "Câu lạc bộ sách chưa đến quán vào thời điểm này.",
+    ],
+  },
+  frc5: {
+    evidence:
+      "Linh had not increased drink prices or spent money on advertising. She believes that listening to customers helped her more than following a complicated business plan.",
+    optionNotes: [
+      "Bài không nói quán lỗ; ngày thường còn đông hơn trước.",
+      "Bài chỉ kể lựa chọn của một quán, không kết luận về quảng cáo nói chung.",
+      "Bài không hàm ý Linh lẽ ra nên quảng cáo.",
+      "Đúng: câu ngay sau gắn kết quả với việc lắng nghe khách.",
+    ],
+  },
+  frt1: {
+    evidence:
+      "For years, urban planners assumed that adding more roads would solve congestion.",
+    optionNotes: [
+      "Đường mới đầy nhanh là điều đã xảy ra, không phải điều họ giả định.",
+      "Bài không nói ai tin tắc đường sẽ tự hết.",
+      "Đúng: câu mở đầu nêu đúng giả định kéo dài nhiều năm này.",
+      "Bài nói ngược lại: đường dễ đi thì nhiều người chọn lái xe hơn.",
+    ],
+  },
+  frt2: {
+    evidence: "may still ride a motorbike if the bus arrives unpredictably",
+    optionNotes: [
+      "Đúng: câu kế tiếp nhấn mạnh “Reliability”, tức giờ đến không đáng tin.",
+      "Chậm đều và thất thường là hai chuyện khác nhau.",
+      "Giờ cố định chính là nghĩa ngược lại.",
+      "Giá vé là ý khác trong cùng đoạn, không phải nghĩa của từ này.",
+    ],
+  },
+  frt3: {
+    evidence:
+      "A journey that looks short on a map may become impractical when it requires two long waits.",
+    optionNotes: [
+      "Bài không nhắc đến giá vé thay đổi theo giờ cao điểm.",
+      "Đúng: hai lần chờ lâu là điều biến hành trình ngắn thành bất tiện.",
+      "Bài không bàn đến tuyến tránh trung tâm.",
+      "Chỗ đỗ xe được nhắc ở đoạn khác, gắn với cửa hàng.",
+    ],
+  },
+  frt4: {
+    evidence:
+      "A painted line on a busy road, though inexpensive, may do little to reassure a nervous cyclist.",
+    optionNotes: [
+      "Bài nói ngược: làn tách khỏi dòng xe mới dễ thuyết phục người chưa đi xe đạp.",
+      "“though inexpensive” cho thấy vạch sơn là phương án rẻ.",
+      "Không gian đường là điều kiện của làn tách riêng, không phải của vạch sơn.",
+      "Đúng: rẻ nhưng ít trấn an được người đi xe đạp còn e ngại.",
+    ],
+  },
+  frt5: {
+    evidence:
+      "Such projects require both money and street space, which can make them politically difficult.",
+    optionNotes: [
+      "Đúng: câu này giải thích vì sao biện pháp hiệu quả hơn lại khó thực hiện.",
+      "Bài không kết luận rằng chi phí đó là không đáng.",
+      "Bài đánh giá vạch sơn là ít tác dụng, không khuyến nghị dùng thay thế.",
+      "Bài nói không gian đường khó giành, không phải không bao giờ có.",
+    ],
+  },
+  frm1: {
+    evidence:
+      "When the book is closed, that confident feeling can quickly disappear.",
+    optionNotes: [
+      "Cảm giác “obvious” xuất hiện lúc đang đọc, không phải sau khi gấp sách.",
+      "Quen mặt chữ là chuyện trong lúc đọc lại.",
+      "Đúng: bài đối lập cảm giác tự tin khi đọc với khả năng nhớ sau đó.",
+      "Bài không nói đọc năm lần thì nhớ tốt hơn.",
+    ],
+  },
+  frm2: {
+    evidence:
+      "This can feel harder than rereading, which sometimes leads students to believe that it is less effective.",
+    optionNotes: [
+      "Bài không nói gì về việc giáo viên có giới thiệu hay không.",
+      "Đúng: chính cảm giác khó khiến người học đánh giá thấp cách này.",
+      "Bài so sánh cảm giác khó, không so sánh thời gian.",
+      "Bài khẳng định các cách này “do not remove the need for understanding”.",
+    ],
+  },
+  frm3: {
+    evidence:
+      "If the learner cannot retrieve the answer, an earlier review and a clear explanation may help.",
+    optionNotes: [
+      "Bài không đề nghị bỏ chủ đề đó.",
+      "Lùi lịch ôn là việc dành cho câu đã trở nên quá dễ.",
+      "Chép lại định nghĩa là kiểu luyện bài phê phán.",
+      "Đúng: ôn sớm hơn kèm lời giải thích rõ ràng.",
+    ],
+  },
+  frm4: {
+    evidence:
+      "tasks must still be manageable, and learners need opportunities to recover",
+    optionNotes: [
+      "Đúng: việc khó vẫn phải nằm trong sức của người học.",
+      "Nếu không thể hoàn thành thì đã trái với ý cả đoạn.",
+      "Bài không nói việc học phải thú vị.",
+      "Từ này nói về mức độ kham được, không phải về đo đạc.",
+    ],
+  },
+  frm5: {
+    evidence: "In fact, the effort of retrieval can strengthen later recall.",
+    optionNotes: [
+      "Bài nói ngược: “Some hesitation can be a sign that the brain is doing useful work”.",
+      "Đúng: nỗ lực nhớ lại, khoảng cách ôn và tự đánh giá trung thực là trục của cả bài.",
+      "Bài cảnh báo định nghĩa học thuộc mà không vận dụng thì giá trị hạn chế.",
+      "Bài nói ứng dụng “cannot directly observe understanding”; người học vẫn phải tự xét.",
+    ],
+  },
+  frg1: {
+    evidence:
+      "The manager approved a six-month trial rather than a permanent arrangement.",
+    optionNotes: [
+      "Một tháng không xuất hiện trong bài.",
+      "Đúng: sáu tháng, và là thời hạn thử.",
+      "Bài không nhắc đến thời hạn một năm.",
+      "“rather than a permanent arrangement” loại bỏ phương án này.",
+    ],
+  },
+  frg2: {
+    evidence:
+      "Because the site received strong afternoon sunlight, the group chose vegetables that could tolerate heat.",
+    optionNotes: [
+      "Đúng: “Because” nêu thẳng lý do là nắng chiều gay gắt.",
+      "Người làm vườn về hưu giúp chọn cây, bài không nói ông có sẵn hạt giống.",
+      "Nhà hàng tặng thùng gỗ, không đặt yêu cầu về loại rau.",
+      "Bài không so sánh lượng nước giữa rau và hoa.",
+    ],
+  },
+  frg3: {
+    evidence: "Others wanted to help but did not know when they were needed.",
+    optionNotes: [
+      "Đúng: họ muốn giúp, chỉ không biết lúc nào cần đến mình.",
+      "Mỗi hộ đều đã góp một khoản nhỏ mua đất và dụng cụ.",
+      "Ca sáng và ca chiều chỉ có sau khi lịch được lập.",
+      "Vấn đề của nhóm không phải chất đất.",
+    ],
+  },
+  frg4: {
+    evidence:
+      "The biggest challenge was not growing the vegetables but sharing the work.",
+    optionNotes: [
+      "Đúng: câu này nêu thẳng khó khăn lớn nhất, và các đoạn sau vẫn xoay quanh việc chia việc, chia thu hoạch.",
+      "Hai mươi hộ tham gia và người quản lý đồng ý cho vườn ở lại.",
+      "Người làm vườn về hưu chỉ giúp chọn cây; sổ tay còn được lập để không phụ thuộc vào ông.",
+      "Bài nói rõ cư dân “careful not to promise that it would feed the entire building”.",
+    ],
+  },
+  frg5: {
+    evidence:
+      "They are now discussing a covered bench, provided it does not block the emergency path.",
+    optionNotes: [
+      "Nhà hàng chỉ tặng thùng gỗ trồng cây.",
+      "Đúng: “provided” nêu điều kiện là không chắn lối thoát hiểm.",
+      "Bài không đặt hạn trước mùa mưa cho chiếc ghế.",
+      "Người làm vườn về hưu không có vai trò phê duyệt.",
+    ],
+  },
   rc1: {
     evidence:
       "Linh realised that she was offering more than coffee: she was providing a place to learn.",

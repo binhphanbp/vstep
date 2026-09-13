@@ -19,15 +19,28 @@ export function ExamPage() {
   const [now, setNow] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
   const [mode, setMode] = useState<"mini" | "full">("mini");
-  const [sections, setSections] = useState<Record<number, number>>({});
   const exam = state.exam;
   const examLessons = exam?.lessonSnapshots ?? lessons;
   const examStages = exam?.stagePlan ?? getExamStages(exam?.mode ?? mode);
   const full = (exam?.mode ?? mode) === "full";
+  const deadline = exam && !exam.finished ? exam.deadline : 0;
+  // Which material is open is part of the session, not of this tab: a reload
+  // in the middle of the 60-minute Reading part has to come back to the same
+  // passage while the clock keeps running.
+  const openMaterial = (index: number) =>
+    update((s) =>
+      s.exam && !s.exam.finished
+        ? { ...s, exam: { ...s.exam, material: index } }
+        : s,
+    );
   useEffect(() => {
     const tick = () => {
       const time = Date.now();
       setNow(time);
+      // The clock only has to redraw every second; the stored profile changes
+      // once a part runs out. Calling update anyway would re-validate the whole
+      // history every second, which a phone feels long before a laptop does.
+      if (!deadline || time < deadline) return;
       update((s) =>
         s.exam && !s.exam.finished && time >= s.exam.deadline
           ? advanceExam(s, time)
@@ -37,7 +50,7 @@ export function ExamPage() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [update]);
+  }, [update, deadline]);
   useEffect(() => {
     if (!exam || exam.finished) return;
     const leave = (e: BeforeUnloadEvent) => {
@@ -94,8 +107,9 @@ export function ExamPage() {
             ? (submitting.writingTask2 ?? "")
             : submitting.writing
         ).trim();
-      return !state.attempts.some(
-        (a) => a.id === `exam:${submitting.id}:${id}`,
+      return (
+        !state.attempts.some((a) => a.id === `exam:${submitting.id}:${id}`) &&
+        !(submitting.spoken ?? []).includes(id)
       );
     });
     const notice =
@@ -203,7 +217,7 @@ export function ExamPage() {
             </div>
             <div className="notice" style={{ marginTop: 22 }}>
               {full
-                ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện: 20/40 câu Đọc chính là câu của bài ngắn, nên nếu đã luyện các bài đó thì điểm phần Đọc không đo được khả năng với ngữ liệu mới. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
                 : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
               Không quy đổi kết quả buổi này sang B1/B2/C1.
             </div>
@@ -322,7 +336,6 @@ export function ExamPage() {
             onClick={() => {
               update((s) => ({ ...s, exam: null }));
               setReady(false);
-              setSections({});
             }}
           >
             Chuẩn bị lượt mới
@@ -409,10 +422,7 @@ export function ExamPage() {
   const currentLessons = stage.lessonIds.map((id) =>
     examLessons.find((l) => l.id === id)!,
   );
-  const activeIndex = Math.min(
-    sections[exam.stage] ?? 0,
-    currentLessons.length - 1,
-  );
+  const activeIndex = Math.min(exam.material ?? 0, currentLessons.length - 1);
   return (
     <div className="page">
       <div className="study-header">
@@ -457,9 +467,7 @@ export function ExamPage() {
         </span>
         <select
           value={activeIndex}
-          onChange={(e) =>
-            setSections((s) => ({ ...s, [exam.stage]: Number(e.target.value) }))
-          }
+          onChange={(e) => openMaterial(Number(e.target.value))}
         >
           {currentLessons.map((l, i) => (
             <option key={l.id} value={i}>
@@ -591,9 +599,46 @@ export function ExamPage() {
                       });
                   }}
                 />
+                {!state.attempts.some(
+                  (a) => a.id === `exam:${exam.id}:${lesson.id}`,
+                ) && (
+                  <label className="without-recording">
+                    <input
+                      type="checkbox"
+                      checked={(exam.spoken ?? []).includes(lesson.id)}
+                      onChange={(e) =>
+                        update((s) =>
+                          s.exam && !s.exam.finished
+                            ? {
+                                ...s,
+                                exam: {
+                                  ...s.exam,
+                                  spoken: e.target.checked
+                                    ? [
+                                        ...new Set([
+                                          ...(s.exam.spoken ?? []),
+                                          lesson.id,
+                                        ]),
+                                      ]
+                                    : (s.exam.spoken ?? []).filter(
+                                        (id) => id !== lesson.id,
+                                      ),
+                                },
+                              }
+                            : s,
+                        )
+                      }
+                    />
+                    <span>
+                      Thiết bị này không ghi âm được. Mình đã trả lời thành
+                      tiếng — lưu phần này khi nộp, không kèm bản ghi.
+                    </span>
+                  </label>
+                )}
                 <p className="help-copy">
                   Dừng ghi âm trước khi nộp để lưu bản trả lời. Bạn được nghe
-                  lại sau buổi luyện.
+                  lại sau buổi luyện. Không có micro thì đánh dấu ô trên, phần
+                  Nói vẫn được tính là đã luyện.
                 </p>
               </section>
             )}
@@ -608,7 +653,7 @@ export function ExamPage() {
               type="button"
               className="button secondary"
               onClick={() => {
-                setSections((s) => ({ ...s, [exam.stage]: activeIndex + 1 }));
+                openMaterial(activeIndex + 1);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >

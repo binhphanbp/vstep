@@ -17,6 +17,13 @@ const serverSnapshot: Snapshot = {
 let snapshot = serverSnapshot;
 const listeners = new Set<() => void>();
 let initialized = false;
+/**
+ * The stored text as it looked when this tab last read or wrote it. Parsing
+ * and validating the whole profile costs several milliseconds once the history
+ * grows, and the timers on the practice and exam pages call in every second:
+ * when the text has not changed there is nothing new to learn from it.
+ */
+let lastRaw: string | null = null;
 function emit() {
   listeners.forEach((listener) => listener());
 }
@@ -25,6 +32,7 @@ function readInitial() {
   let storageError = "";
   try {
     const raw = localStorage.getItem(KEY);
+    lastRaw = raw;
     if (raw) {
       const parsed = stateSchema.safeParse(JSON.parse(raw));
       if (!parsed.success) throw Error("invalid");
@@ -38,6 +46,7 @@ function readInitial() {
 }
 function onStorage(event: StorageEvent) {
   if (event.key !== KEY || !event.newValue || snapshot.storageError) return;
+  lastRaw = event.newValue;
   try {
     const next = personalizeLegacyState(
       stateSchema.parse(JSON.parse(event.newValue)),
@@ -86,7 +95,8 @@ export function updateStudy(fn: (state: StudyState) => StudyState) {
   if (!snapshot.storageError) {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) {
+      if (raw && raw !== lastRaw) {
+        lastRaw = raw;
         const latest = personalizeLegacyState(
           stateSchema.parse(JSON.parse(raw)),
         );
@@ -109,7 +119,9 @@ export function updateStudy(fn: (state: StudyState) => StudyState) {
   let storageError = snapshot.storageError;
   if (!storageError) {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state));
+      const raw = JSON.stringify(state);
+      localStorage.setItem(KEY, raw);
+      lastRaw = raw;
     } catch {
       storageError =
         "Không lưu được trên thiết bị. Thay đổi mới đang ở phiên này; hãy xuất bản sao trong Cài đặt trước khi đóng trang.";
@@ -137,7 +149,9 @@ export function replaceStudy(input: unknown) {
     updatedAt: new Date(Math.max(Date.now(), previousTime + 1)).toISOString(),
   };
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    const raw = JSON.stringify(state);
+    localStorage.setItem(KEY, raw);
+    lastRaw = raw;
   } catch {
     throw Error("Không đủ bộ nhớ để nhập dữ liệu. Bản hiện tại vẫn được giữ.");
   }

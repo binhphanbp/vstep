@@ -1568,6 +1568,22 @@ textarea:focus-visible {
   margin-top: 5px;
   accent-color: var(--rose);
 }
+.without-recording {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 14px 0 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.without-recording input {
+  width: 18px;
+  min-height: 18px;
+  margin-top: 2px;
+  flex: none;
+  accent-color: var(--rose);
+}
 .result-banner {
   display: flex;
   gap: 18px;

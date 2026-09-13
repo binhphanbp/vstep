@@ -30,44 +30,41 @@ describe("full exam content and recovery", () => {
     expect(words).toBeLessThanOrEqual(2050);
     expect(fullExamStages.reduce((n, s) => n + s.seconds, 0)).toBe(172 * 60);
   });
-  it("keeps the disclosed amount of reused Reading material accurate", () => {
-    // The exam screen tells the learner 20 of 40 Reading questions come from
-    // the short lessons. Adding fresh items must update that sentence too.
+  it("shares no Reading or Listening question with the library lessons", () => {
+    // Reused questions filed one mistake under two notebook keys, halved its
+    // wrong count, and handed 20 of the 40 Reading marks to anyone who had
+    // drilled the short lessons. The exam now owns every question it asks.
+    const shortQuestions = lessons
+      .filter(
+        (lesson) => lesson.skill === "reading" || lesson.skill === "listening",
+      )
+      .flatMap((lesson) => lesson.questions);
     const shortIds = new Set(
-      lessons
-        .filter((lesson) => lesson.skill === "reading")
-        .flatMap((lesson) => lesson.questions.map((q) => `full-${q.id}`)),
+      shortQuestions.flatMap((q) => [q.id, `full-${q.id}`]),
     );
-    const fullQuestions = fullReading.flatMap((lesson) => lesson.questions);
-    expect(fullQuestions).toHaveLength(40);
-    expect(fullQuestions.filter((q) => shortIds.has(q.id))).toHaveLength(20);
-    // Listening is claimed to be entirely new material.
-    const shortListening = new Set(
-      lessons
-        .filter((lesson) => lesson.skill === "listening")
-        .flatMap((lesson) => lesson.questions.map((q) => `full-${q.id}`)),
+    const shortTexts = new Set(shortQuestions.map((q) => q.text));
+    const examQuestions = [...fullReading, ...fullListening].flatMap(
+      (lesson) => lesson.questions,
     );
-    expect(
-      fullListening
-        .flatMap((lesson) => lesson.questions)
-        .filter((q) => shortListening.has(q.id)),
-    ).toHaveLength(0);
+    expect(examQuestions.filter((q) => q.id.startsWith("full-"))).toHaveLength(
+      0,
+    );
+    for (const q of examQuestions) {
+      expect(shortIds.has(q.id), q.id).toBe(false);
+      expect(shortTexts.has(q.text), q.id).toBe(false);
+    }
+    expect(fullReading.flatMap((l) => l.questions)).toHaveLength(40);
+    expect(fullListening.flatMap((l) => l.questions)).toHaveLength(35);
   });
-  it("never reuses a question anchored to the end of the short passage", () => {
-    // extendReading appends paragraphs, so "the final paragraph" inherited from
-    // a short lesson would point at text the exam passage no longer ends with.
-    const shortIds = new Set(
-      lessons
-        .filter((lesson) => lesson.skill === "reading")
-        .flatMap((lesson) => lesson.questions.map((q) => q.id)),
-    );
+  it("answers every Reading question from the passage the exam shows", () => {
+    // The exam passage is the short text plus new paragraphs, so an item
+    // written for the short lesson could ask about an end that moved.
     for (const lesson of fullReading)
       for (const q of lesson.questions) {
-        if (!shortIds.has(q.id.replace(/^full-/, ""))) continue;
-        expect(
-          /final paragraph|last paragraph/i.test(q.text),
-          `${lesson.id}/${q.id}`,
-        ).toBe(false);
+        if (!q.evidence) continue;
+        expect(lesson.text.includes(q.evidence), `${lesson.id}/${q.id}`).toBe(
+          true,
+        );
       }
   });
   it("points every end-of-passage question at the real last paragraph", () => {

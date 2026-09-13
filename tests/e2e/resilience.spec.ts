@@ -92,6 +92,62 @@ test("invalid microphone permission shows an actionable error and saves no attem
   );
 });
 
+test("a device with no microphone can still finish a Speaking lesson", async ({
+  page,
+}) => {
+  // Without this path Speaking is unfinishable, so all three lessons keep the
+  // "never practised" bonus and hold a slot in the daily plan for ever.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      value: async () => {
+        throw new DOMException("Denied", "NotAllowedError");
+      },
+    });
+  });
+  await page.goto("/practice/speaking-social");
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await expect(page.locator("main [role=alert]").last()).toContainText(
+    "Ghi âm câu trả lời trước",
+  );
+  await page
+    .getByText("Thiết bị này không ghi âm được", { exact: false })
+    .click();
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await expect(
+    page.getByRole("heading", { name: "đã dành thời gian để luyện tập" }),
+  ).toBeVisible();
+  const attempts = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("may-study-v1")!).attempts,
+  );
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0].skill).toBe("speaking");
+  // Nothing was captured, so nothing may claim to be playable later.
+  expect(attempts[0].recordingId).toBeUndefined();
+});
+
+test("the practice clock is stored in batches, and the last seconds survive leaving", async ({
+  page,
+}) => {
+  await page.goto("/practice/reading-cafe");
+  const draft = () =>
+    page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("may-study-v1") ?? "{}").drafts?.[
+          "quiz:reading-cafe"
+        ] ?? "",
+    );
+  await page.waitForTimeout(4000);
+  // Four seconds of study must not have cost four full reads, validations and
+  // writes of the whole profile.
+  expect(await draft()).toBe("");
+  await page.getByRole("link", { name: "Về kho bài học" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Mỗi kỹ năng",
+  );
+  const saved = JSON.parse((await draft()) || "{}");
+  expect(saved.seconds).toBeGreaterThan(0);
+});
+
 test("a finished full exam exposes accessible reading feedback on mobile", async ({
   page,
 }) => {

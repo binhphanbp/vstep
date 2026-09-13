@@ -72,7 +72,7 @@ Trước khi dùng bản host với dữ liệu thật: thử đăng nhập/đ�
 
 ## Độ chân thực của nội dung
 
-Định dạng đối chiếu với [ULIS VSTEP Test format](https://vstep.vnu.edu.vn/test-format/) và [ĐH Sư phạm TP.HCM](https://vstep.hcmue.edu.vn/index.php/gioi-thieu/dinh-dang-de-thi/bac-345). Đề đầy đủ có đúng số câu và thời lượng theo khung; bốn bài Đọc của Mây dài khoảng 1.900–2.050 từ, nằm trong phạm vi 1.900–2.500 từ được ULIS công bố. Một phần ngữ liệu mở rộng từ bài ngắn, Viết/Nói dùng lại bài trong thư viện; không dùng đánh giá đầu vào nếu đã học trước.
+Định dạng đối chiếu với [ULIS VSTEP Test format](https://vstep.vnu.edu.vn/test-format/) và [ĐH Sư phạm TP.HCM](https://vstep.hcmue.edu.vn/index.php/gioi-thieu/dinh-dang-de-thi/bac-345). Đề đầy đủ có đúng số câu và thời lượng theo khung; bốn bài Đọc của Mây dài khoảng 1.900–2.050 từ, nằm trong phạm vi 1.900–2.500 từ được ULIS công bố. Bốn bài Đọc của đề mở rộng từ bài ngắn nhưng cả 40 câu hỏi là câu riêng của đề; Viết/Nói vẫn dùng lại bài trong thư viện. Không dùng đánh giá đầu vào nếu đã học trước.
 
 Sau mỗi bài Reading/Listening ngắn, kết quả phân tách theo dạng câu hỏi và đối chiếu đáp án với mức **Đoán / Chưa chắc / Rất chắc** để chỉ ra lỗi hiểu nhầm và câu đúng còn thiếu chắc chắn. Trong đề có giờ, hộp xác nhận nộp báo rõ số câu bỏ trống; transcript Listening chỉ xuất hiện sau khi kết thúc buổi luyện.
 

@@ -16,7 +16,27 @@ function db(): Promise<IDBDatabase> {
     };
   });
 }
+/**
+ * Ask once for storage the browser will not reclaim on its own. Recordings live
+ * only on the device — neither the JSON backup nor the cloud snapshot carries
+ * audio — so eviction under storage pressure would lose them for good.
+ */
+let persistence: Promise<boolean> | null = null;
+export function keepRecordings(): Promise<boolean> {
+  persistence ??= (async () => {
+    try {
+      if (!navigator.storage?.persist) return false;
+      return (
+        (await navigator.storage.persisted?.()) || navigator.storage.persist()
+      );
+    } catch {
+      return false;
+    }
+  })();
+  return persistence;
+}
 export async function saveRecording(id: string, blob: Blob) {
+  void keepRecordings();
   const database = await db();
   const record: StoredRecording = { blob, savedAt: Date.now() };
   try {
@@ -51,6 +71,22 @@ export async function getRecording(
     return stored instanceof Blob
       ? { blob: stored, savedAt: 0 }
       : (stored as StoredRecording);
+  } finally {
+    database.close();
+  }
+}
+
+export async function deleteRecording(id: string) {
+  const database = await db();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = database.transaction("recordings", "readwrite");
+      tx.objectStore("recordings").delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () =>
+        reject(tx.error ?? new Error("Giao dịch xóa bản ghi đã bị hủy."));
+    });
   } finally {
     database.close();
   }

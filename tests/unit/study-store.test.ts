@@ -24,6 +24,34 @@ it("backs up a newer tab update even before its storage event arrives", async ()
   );
   stop();
 });
+it("does not re-validate the whole profile when nothing has changed", async () => {
+  // The practice page writes once every ten seconds and reads far more often.
+  // Re-parsing 500 KiB of history on a call that changes nothing is time the
+  // learner pays for on a phone.
+  const store = await import("../../src/lib/study-store");
+  const stop = store.subscribe(() => {});
+  store.updateStudy((state) => ({ ...state, drafts: { a: "1" } }));
+  const parse = JSON.parse;
+  JSON.parse = () => {
+    throw Error("the unchanged text must not be parsed again");
+  };
+  try {
+    store.updateStudy((state) => ({ ...state, drafts: { a: "2" } }));
+  } finally {
+    JSON.parse = parse;
+  }
+  expect(store.getSnapshot().storageError).toBe("");
+  expect(store.getSnapshot().state.drafts.a).toBe("2");
+  // A write from another tab is still picked up: the text differs from the one
+  // this tab last saw.
+  const newer = freshState();
+  newer.updatedAt = "2030-01-01T00:00:00.000Z";
+  newer.drafts.a = "from the other tab";
+  values.set("may-study-v1", JSON.stringify(newer));
+  store.updateStudy((state) => state);
+  expect(store.getSnapshot().state.drafts.a).toBe("from the other tab");
+  stop();
+});
 it("personalizes an untouched legacy profile without replacing a chosen name", async () => {
   const legacy = freshState();
   legacy.profile = { ...legacy.profile, name: "bạn", onboarded: false };
