@@ -85,9 +85,32 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - **Bản ghi: giữ được, xóa được, chỉ đúng chỗ.** Lần lưu đầu tiên xin `navigator.storage.persist()` để trình duyệt không tự thu hồi; mỗi buổi trong Lịch sử có nút xóa kèm xác nhận; chữ trong Cài đặt sửa từ “tải từng bản tại bài Nói” thành trỏ sang Lịch sử, nơi thật sự có bản ghi của từng lượt.
 - **Phòng thi nhớ ngữ liệu đang làm.** Chỉ số ngữ liệu vào `examSchema`; tải lại giữa phần Đọc 60 phút quay lại đúng văn bản đang đọc thay vì bài 1/4, và phần Viết giữ đúng bài đang viết. Chỉ số đặt lại khi sang phần mới.
 
+## Ma trận dạng câu (F13)
+
+- **Bảng phân tích theo dạng câu đang nói sai về chính nó.** Sau mỗi buổi Reading/Listening, màn hình kết quả tách điểm theo dạng câu — nhưng 14 câu mang nhãn sai. “Why does the speaker mention a bench halfway to a park?” hỏi **chức năng của một ví dụ**, không phải một chi tiết; “Why is the river clean-up not selected?” phải **ghép hai lượt thoại** mới trả lời được; hai thông báo Part 1 (đổi sân ga, dời giờ hẹn) là dạng **thông tin bị đính chính**, dạng riêng của kỹ năng Nghe. Đã gắn lại nhãn theo đúng thứ câu hỏi đang đo. Việc này không đổi đề bài, phương án hay đáp án nên không tạo version mới — cùng quy ước đã dùng cho lớp chú giải.
+- **Ngân hàng chưa từng có ma trận.** `src/lib/question-types.ts` nay định nghĩa bộ nhãn của từng kỹ năng và số câu mục tiêu; `tests/unit/question-types.test.ts` khóa lại. Đây là ma trận biên soạn của Mây, **không phải quy định chính thức**: định dạng công bố nói số câu và thời lượng, không nói tỷ lệ từng dạng.
+- **Tám câu Đọc được viết mới để đủ ma trận**: hai câu từ vựng trong ngữ cảnh, ba câu từ tham chiếu, một câu ý chính và hai câu mục đích tác giả, thay cho tám câu chi tiết. Bốn bài Đọc của đề lên version 4, `full-reading-memory` lên 5; lịch ôn cũ của riêng bốn bài này không dùng lại, bài ngắn trong thư viện không đổi.
+
+| Dạng câu | Đọc trước | Đọc sau | Nghe trước | Nghe sau |
+| --- | --- | --- | --- | --- |
+| Thông tin chi tiết | 20 | **14** | 29 | **18** |
+| Suy luận | 9 | 9 | 1 | **5** |
+| Ý chính | 3 | **4** | 2 | **3** |
+| Từ vựng trong ngữ cảnh | 2 | **4** | – | – |
+| Từ tham chiếu | 1 | **4** | – | – |
+| Mục đích tác giả / người nói | 4 | 4 | 0 | **3** |
+| Quan điểm tác giả / người nói | 1 | 1 | 3 | **4** |
+| Thông tin thay đổi | – | – | 0 | **2** |
+
+Mỗi bài Đọc của đề nay có đủ sáu nhóm dạng câu và không quá 5 câu chi tiết. Phần Nghe được viết theo sàn và trần thay vì số chính xác: Part 1 là tám thông báo ngắn vài câu, ép trải đều ở đó sẽ thành bịa ra suy luận mà ngữ liệu không có. 18/35 câu chi tiết vẫn là nhiều; mở rộng ngân hàng Nghe còn là việc phía trước.
+
+Viết lại tám câu làm đổi đáp án, nên phép đo đoán mù theo chu kỳ được chạy lại và thứ tự phương án của tám câu mới được dò trên 65.536 tổ hợp: phần Đọc của đề còn **16/40 (40%)**, thấp hơn cả trước đợt này (17/40), và phân bố đáp án đều tuyệt đối A:10 B:10 C:10 D:10.
+
+Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 56/111): tám câu mới đều có trích dẫn nguyên văn và phân tích đủ bốn phương án.
+
 ## Bằng chứng kiểm tra
 
-- 75 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 81 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 44 kiểm thử Playwright trên bản production: 40 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 13 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px.
 - ESLint, TypeScript, production build: đạt.
@@ -99,6 +122,6 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 
 ## Giới hạn còn mở
 
-Chú giải bằng chứng phủ 56/111 câu Reading/Listening: toàn bộ 36 câu của 8 bài ngắn, cộng 20 câu Đọc mới viết cho đề đầy đủ. 35 câu Nghe và 20 câu Đọc còn lại của đề đầy đủ chưa có chú giải, nên các câu này vẫn chỉ hiện phần giải thích cũ. Kiểm thử chỉ xác minh trích dẫn khớp ngữ liệu và cấu trúc ghi chú, không thay cho thẩm định chuyên môn về độ khó hay tính chuẩn xác của lập luận.
+Chú giải bằng chứng phủ 64/111 câu Reading/Listening: toàn bộ 36 câu của 8 bài ngắn, cộng 28 câu Đọc của đề đầy đủ. 35 câu Nghe và 12 câu Đọc còn lại của đề đầy đủ chưa có chú giải, nên các câu này vẫn chỉ hiện phần giải thích cũ. Kiểm thử chỉ xác minh trích dẫn khớp ngữ liệu và cấu trúc ghi chú, không thay cho thẩm định chuyên môn về độ khó hay tính chuẩn xác của lập luận.
 
 Đã có môi trường HTTPS pilot nhưng chưa thử đăng nhập/sync bằng tài khoản thật trên host, micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Supabase thật đã được cấu hình và kiểm thử riêng theo `STATUS.md`. Đã có smoke test bằng engine WebKit nhưng chưa xác minh Safari/iOS trên thiết bị thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.
