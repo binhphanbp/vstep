@@ -1,3 +1,5 @@
+import { questionNotes } from "./question-notes";
+
 export type Skill = "listening" | "reading" | "writing" | "speaking";
 export const skillNames: Record<Skill, string> = {
   listening: "Listening",
@@ -12,6 +14,10 @@ export type Question = {
   answer: number;
   explanation: string;
   tag: string;
+  /** Exact quote from the passage or transcript that settles the answer. */
+  evidence?: string;
+  /** One note per option, in order, including the correct one. */
+  optionNotes?: string[];
 };
 export type Lesson = {
   id: string;
@@ -711,6 +717,10 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
 export const lessons: Lesson[] = lessonDefinitions.map((lesson) => ({
   ...lesson,
   version: 1,
+  questions: lesson.questions.map((question) => ({
+    ...question,
+    ...questionNotes[question.id],
+  })),
 }));
 export type Vocabulary = {
   id: string;

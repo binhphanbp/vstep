@@ -363,6 +363,7 @@ export function ExamPage() {
                     index={i}
                     chosen={exam.answers[q.id]}
                     submitted
+                    skill={lesson.skill}
                     onChoose={() => {}}
                   />
                 ))}

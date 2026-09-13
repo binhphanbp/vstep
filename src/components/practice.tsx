@@ -12,7 +12,13 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { lessons, skillNames, type Lesson, type Question } from "@/lib/content";
+import {
+  lessons,
+  skillNames,
+  type Lesson,
+  type Question,
+  type Skill,
+} from "@/lib/content";
 import {
   objectiveInsights,
   scoreAnswers,
@@ -163,6 +169,7 @@ export function QuestionCard({
   onChoose,
   confidence,
   onConfidence,
+  skill,
 }: {
   question: Question;
   index: number;
@@ -171,7 +178,16 @@ export function QuestionCard({
   onChoose: (value: number) => void;
   confidence?: Confidence;
   onConfidence?: (value: Confidence) => void;
+  skill?: Skill;
 }) {
+  const notes = question.optionNotes;
+  const others = notes
+    ? notes
+        .map((note, option) => ({ note, option }))
+        .filter(
+          (item) => item.option !== question.answer && item.option !== chosen,
+        )
+    : [];
   return (
     <fieldset className="question">
       <legend>
@@ -233,6 +249,50 @@ export function QuestionCard({
                 : "Mình xem lại một chút nhé."}
           </strong>{" "}
           {question.explanation}
+        </div>
+      )}
+      {submitted && question.evidence && (
+        <div className="evidence-block">
+          <span className="panel-label">
+            {skill === "listening"
+              ? "CÂU NÓI QUYẾT ĐỊNH ĐÁP ÁN"
+              : "CÂU TRONG BÀI QUYẾT ĐỊNH ĐÁP ÁN"}
+          </span>
+          <q lang="en">{question.evidence}</q>
+          {skill === "listening" && (
+            <AudioPlayer
+              text={question.evidence}
+              variant="inline"
+              allowSpeed={false}
+              label="Nghe lại câu này"
+            />
+          )}
+        </div>
+      )}
+      {submitted && notes && (
+        <div className="option-notes">
+          {chosen !== undefined && chosen !== question.answer && (
+            <p>
+              <strong>Vì sao {"ABCD"[chosen]} chưa đúng:</strong>{" "}
+              {notes[chosen]}
+            </p>
+          )}
+          <p>
+            <strong>Vì sao {"ABCD"[question.answer]} đúng:</strong>{" "}
+            {notes[question.answer].replace(/^Đúng:\s*/, "")}
+          </p>
+          {others.length > 0 && (
+            <details>
+              <summary>Phân tích các phương án còn lại</summary>
+              <ul className="tips-list">
+                {others.map((item) => (
+                  <li key={item.option}>
+                    <strong>{"ABCD"[item.option]}.</strong> {item.note}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
         </div>
       )}
     </fieldset>
@@ -561,6 +621,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               index={i}
               chosen={answers[q.id]}
               submitted={Boolean(result)}
+              skill={lesson.skill}
               confidence={confidence[q.id]}
               onChoose={(value) => {
                 update((s) => {

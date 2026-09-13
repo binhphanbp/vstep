@@ -1455,6 +1455,43 @@ textarea:focus-visible {
   margin-top: 12px;
   color: #6e6671;
 }
+.evidence-block {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 7px;
+  border: 1px solid #e6dde1;
+  background: #fffdfe;
+}
+.evidence-block q {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #5d5560;
+}
+.evidence-audio {
+  margin-top: 10px;
+}
+.option-notes {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #6e6671;
+}
+.option-notes p {
+  margin-bottom: 6px;
+}
+.option-notes strong {
+  color: #5d5560;
+  font-weight: 600;
+}
+.option-notes summary {
+  font-size: 13px;
+}
+.option-notes .tips-list {
+  font-size: 13px;
+  margin: 8px 0 0;
+}
 .answer-submit {
   display: flex;
   gap: 12px;
