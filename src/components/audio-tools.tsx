@@ -16,9 +16,13 @@ export function RecordingHistory({ id }: { id: string }) {
 export function AudioPlayer({
   text,
   allowSpeed = true,
+  variant = "panel",
+  label = "Phát bài nghe",
 }: {
   text: string;
   allowSpeed?: boolean;
+  variant?: "panel" | "inline";
+  label?: string;
 }) {
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
@@ -99,6 +103,24 @@ export function AudioPlayer({
     };
     next();
   }
+  if (variant === "inline")
+    return (
+      <div className="evidence-audio">
+        <button
+          type="button"
+          className="button secondary small"
+          onClick={playing ? stop : play}
+        >
+          {playing ? <Square size={14} /> : <Play size={14} />}{" "}
+          {playing ? "Dừng" : label}
+        </button>
+        {error && (
+          <p role="alert" className="help-copy">
+            {error}
+          </p>
+        )}
+      </div>
+    );
   return (
     <div className="audio-panel">
       <div className="panel-heading">

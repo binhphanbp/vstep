@@ -401,6 +401,7 @@ export function MistakesPage() {
                     index={i}
                     chosen={chosen[item.key]}
                     submitted={seen}
+                    skill={item.lesson.skill}
                     onChoose={(v) =>
                       setChosen((c) => ({ ...c, [item.key]: v }))
                     }

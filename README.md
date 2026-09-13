@@ -19,6 +19,7 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 
 - Kế hoạch ngày giải thích lý do chọn bài theo năng lượng, lỗi đến hạn, mức chắc chắn, kết quả, recency và ngày thi; hành trình, thống kê theo giờ Việt Nam.
 - 14 bài luyện ngắn bốn kỹ năng, giải thích câu hỏi, nháp Viết tự lưu, bài mẫu và tiêu chí tự kiểm tra.
+- Sau khi nộp, câu Nghe/Đọc đã chú giải chỉ ra câu trong ngữ liệu quyết định đáp án, vì sao phương án đã chọn chưa đúng và vì sao đáp án đúng; bài Nghe phát lại riêng câu đó. Hiện có 56/111 câu được chú giải.
 - Buổi rút gọn 51 phút và đề tự biên soạn đủ cấu trúc 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
 - Sổ câu sai ưu tiên lỗi “sai nhưng rất chắc”, số lần sai, subskill, luyện nhớ lại và lịch ôn; 20 thẻ từ có ví dụ, phiên âm và phát âm.
 - Ghi âm, nghe lại, tải âm thanh; bản Nói đã hoàn thành có bản lưu riêng trong lịch sử.

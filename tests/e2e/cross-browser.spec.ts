@@ -99,6 +99,7 @@ test("core Reading and Listening loop works across browser engines", async ({
     page.getByRole("button", { name: "Phát bài nghe", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Bản chép lời", { exact: false })).toHaveCount(0);
+  await expect(page.locator(".evidence-block")).toHaveCount(0);
   const questionNames = await page
     .locator('.question input[type="radio"]')
     .evaluateAll((inputs) => [
@@ -117,6 +118,12 @@ test("core Reading and Listening loop works across browser engines", async ({
     page.getByRole("heading", { name: "Mình vừa học được gì?" }),
   ).toBeVisible();
   await expect(page.getByText("Bản chép lời", { exact: false })).toBeVisible();
+  await expect(page.locator(".evidence-block q").first()).toContainText(
+    "Please meet at the bookshop opposite the main post office instead.",
+  );
+  await expect(
+    page.getByRole("button", { name: "Nghe lại câu này" }).first(),
+  ).toBeVisible();
 
   await page.goto("/settings");
   const download = page.waitForEvent("download");

@@ -102,6 +102,15 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   await expect(
     page.getByText("Cả bài kể quá trình Linh", { exact: false }),
   ).toBeVisible();
+  await expect(page.locator(".evidence-block q").first()).toContainText(
+    "she was providing a place to learn",
+  );
+  await expect(page.locator(".option-notes").first()).toContainText(
+    "Vì sao A chưa đúng:",
+  );
+  await expect(page.locator(".option-notes").first()).toContainText(
+    "Vì sao B đúng:",
+  );
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();
   await expect(page.getByText("1 câu đã ghi lại")).toBeVisible();
   await expect(page.getByText("Ưu tiên · Đã rất chắc")).toBeVisible();
@@ -110,6 +119,9 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   await expect(
     page.getByText("Cả bài kể quá trình Linh", { exact: false }),
   ).toBeVisible();
+  await expect(page.locator(".evidence-block q")).toContainText(
+    "she was providing a place to learn",
+  );
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Hôm nay không còn câu đến hạn." }),

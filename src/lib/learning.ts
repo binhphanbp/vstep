@@ -21,9 +21,22 @@ const questionSnapshotSchema = z
     answer: boundedInteger(0, 7),
     explanation: limitedString(5000),
     tag: limitedString(100),
+    evidence: z.optional(limitedString(3000)),
+    optionNotes: z.optional(
+      z.array(limitedString(2000)).check(z.minLength(2), z.maxLength(8)),
+    ),
   })
   .check(
     z.superRefine((question, ctx) => {
+      if (
+        question.optionNotes &&
+        question.optionNotes.length !== question.options.length
+      )
+        ctx.addIssue({
+          code: "custom",
+          path: ["optionNotes"],
+          message: "Mỗi lựa chọn phải có đúng một ghi chú phân tích.",
+        });
       if (question.answer >= question.options.length)
         ctx.addIssue({
           code: "custom",
