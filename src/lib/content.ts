@@ -381,7 +381,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
         ["8:00", "8:30", "9:00", "9:30"],
         2,
         "Người nói sửa giờ cũ 8:30 thành 9:00.",
-        "Nghe thông tin thay đổi",
+        "Thông tin thay đổi",
       ),
       q(
         "lw3",
@@ -435,6 +435,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
         ],
         1,
         "Ngày thường đóng cửa lúc 20:00 thay vì 18:00; cuối tuần không đổi.",
+        "Thông tin thay đổi",
       ),
       q(
         "ll2",

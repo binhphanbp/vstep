@@ -12,6 +12,85 @@
 export type QuestionNote = { evidence: string; optionNotes: string[] };
 
 export const questionNotes: Record<string, QuestionNote> = {
+  frg9: {
+    evidence:
+      "They were careful not to promise that it would feed the entire building.",
+    optionNotes: [
+      "Đúng: câu này cho thấy họ đặt kỳ vọng đúng với thứ khu vườn làm được.",
+      "Người quản lý đồng ý cho vườn ở lại sau thời gian thử.",
+      "Bài kể lại với giọng tán thành, không phê phán cư dân.",
+      "Vườn vẫn có thu hoạch, chỉ là khiêm tốn.",
+    ],
+  },
+  frg7: {
+    evidence:
+      "The group eventually agreed to distribute small portions among participating households and offer any surplus to neighbours who wanted to try the produce.",
+    optionNotes: [
+      "Bài không nói nhóm bán rau lấy tiền.",
+      "Rau hỏng là chuyện khác; bài không nói đem rau hỏng cho hàng xóm.",
+      "Đúng: phần còn lại sau khi mỗi hộ tham gia đã nhận phần của mình.",
+      "Thùng gỗ được kê cao lên chứ không bị loại bỏ.",
+    ],
+  },
+  frg6: {
+    evidence:
+      "Several entries were accompanied by drawings so that younger children could understand them too.",
+    optionNotes: [
+      "Rau trong thùng không phải thứ được minh họa.",
+      "Đúng: “them” trỏ các mục ghi trong sổ, thứ được vẽ kèm hình.",
+      "Cuộc họp hằng tháng xuất hiện ở đoạn cuối, không liên quan câu này.",
+      "Người ghi sổ là chủ thể, không phải thứ cần hiểu.",
+    ],
+  },
+  frm9: {
+    evidence:
+      "Comparing those predictions with actual performance helped some learners recognise that an easy-feeling study session could produce weak recall.",
+    optionNotes: [
+      "Bài nói rõ “not to rank students against one another”.",
+      "Đúng: mục đích là giúp người học quyết định đúng hơn cho lần ôn sau.",
+      "Có người lại đánh giá thấp bản thân, nên dự đoán sai theo cả hai chiều.",
+      "Bài không đề nghị thay việc luyện tập bằng bài kiểm tra hằng tuần.",
+    ],
+  },
+  frm8: {
+    evidence:
+      "A learner who confused two similar words, for instance, saw each word in a different sentence. Students then wrote a sentence of their own to demonstrate that they understood the distinction.",
+    optionNotes: [
+      "Bài chỉ kể một giáo viên, không so sánh hai cách dạy.",
+      "Đúng: “the distinction” là khác biệt giữa hai từ dễ nhầm vừa nhắc ở câu trước.",
+      "Việc so dự đoán với kết quả nằm ở đoạn sau.",
+      "Giãn cách và tự nhớ lại được bàn ở phần đầu, không phải trong câu này.",
+    ],
+  },
+  frt7: {
+    evidence:
+      "In some neighbourhoods, many customers already arrive on foot. Making their journeys easier may be more valuable than preserving every parking place.",
+    optionNotes: [
+      "Người lái xe tìm chỗ đỗ là bên mất chỗ, không phải bên được kể ở câu này.",
+      "Chủ cửa hàng là bên phản đối bỏ chỗ đỗ, không phải bên có hành trình đang nói.",
+      "Đúng: “their” nối lại nhóm khách đã đi bộ đến, nhắc ở câu ngay trước.",
+      "Nhà quy hoạch xuất hiện ở đoạn khác của bài.",
+    ],
+  },
+  frt6: {
+    evidence: "No single measure can serve every commuter.",
+    optionNotes: [
+      "Đoạn mở đầu bác bỏ chính ý này: đường mới đầy gần như ngay khi vừa xây.",
+      "Đúng: câu này tóm đúng mạch lập luận và đoạn kết của bài.",
+      "Bài nói giá rẻ là chưa đủ; độ tin cậy và kết nối quan trọng hơn.",
+      "Bài đề nghị kết hợp nhiều biện pháp, không thay thế giao thông công cộng.",
+    ],
+  },
+  frc9: {
+    evidence:
+      "Linh admitted that washing cups required additional staff time. Nevertheless, she considered the reduction in disposable packaging worthwhile.",
+    optionNotes: [
+      "Bài không nhắc đến quy định nào bắt buộc.",
+      "Đúng: “Nevertheless” đặt công rửa cốc lên bàn cân với lợi ích, và Linh thấy vẫn đáng.",
+      "Bài không so sánh giá của hai loại bao bì.",
+      "Bài không nói khách có thích cốc dùng lại hay không.",
+    ],
+  },
   frc1: {
     evidence: "she expected most customers to buy a drink and leave",
     optionNotes: [
