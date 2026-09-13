@@ -667,7 +667,10 @@ export function recordAttempt(state: StudyState, attempt: Attempt): StudyState {
       ? attempt
       : { ...attempt, lessonSnapshot: structuredClone(lesson) };
   for (const question of lesson?.questions ?? []) {
-    if (attempt.answers[question.id] !== question.answer) {
+    const answer = attempt.answers[question.id];
+    // Only a question the learner actually got wrong falls due again. Leaving
+    // one blank when time ran out must not erase a schedule already earned.
+    if (answer !== undefined && answer !== question.answer) {
       delete mistakeReviews[mistakeReviewKey(lesson!, question.id)];
       // Remove the pre-versioning key as the attempt is now due again.
       delete mistakeReviews[question.id];
@@ -751,39 +754,62 @@ export function advanceExam(
         (ended - (exam.deadline - stage.seconds * 1000)) / 1000,
       ),
     );
-    for (const lessonId of stage.lessonIds) {
-      const id = `exam:${exam.id}:${lessonId}`;
-      const lesson =
-        exam.lessonSnapshots?.find((candidate) => candidate.id === lessonId) ??
-        allLessons.find((candidate) => candidate.id === lessonId);
-      if (!lesson) continue;
-      const writing =
-        lessonId === "writing-essay" ? (exam.writingTask2 ?? "") : exam.writing;
-      // Blank productive responses are not counted as completed practice.
-      if (
-        stage.skill === "speaking" ||
-        (stage.skill === "writing" && !writing.trim())
-      )
-        continue;
-      if (!attempts.some((a) => a.id === id))
-        attempts.push({
-          id,
-          lessonId,
-          skill: stage.skill,
-          date: new Date(ended).toISOString(),
-          answers: Object.fromEntries(
-            lesson.questions
-              .filter((q) => exam!.answers[q.id] !== undefined)
-              .map((q) => [q.id, exam!.answers[q.id]]),
-          ),
-          ...scoreQuestionSet(lesson.questions, exam.answers),
-          seconds:
-            stage.skill === "writing" && exam.mode === "full"
-              ? seconds * (lessonId === "writing-essay" ? 2 / 3 : 1 / 3)
-              : seconds / stage.lessonIds.length,
-          text: stage.skill === "writing" ? writing : undefined,
-          lessonSnapshot: structuredClone(lesson),
-        });
+    const current = exam;
+    const writingFor = (lessonId: string) =>
+      lessonId === "writing-essay"
+        ? (current.writingTask2 ?? "")
+        : current.writing;
+    // Work the learner never did is not filed: a blank essay, an unrecorded
+    // speaking part, or a section with no answer at all. Filing those would
+    // invent both a score and the minutes the stage was scheduled to take.
+    const worked = stage.lessonIds
+      .map((lessonId) => ({
+        lessonId,
+        lesson:
+          current.lessonSnapshots?.find(
+            (candidate) => candidate.id === lessonId,
+          ) ?? allLessons.find((candidate) => candidate.id === lessonId),
+      }))
+      .filter(({ lessonId, lesson }) => {
+        if (!lesson || stage.skill === "speaking") return false;
+        if (stage.skill === "writing")
+          return Boolean(writingFor(lessonId).trim());
+        return (
+          !lesson.questions.length ||
+          lesson.questions.some((q) => current.answers[q.id] !== undefined)
+        );
+      })
+      .map((entry) => ({
+        ...entry,
+        // The full exam's essay is worth twice the email's time.
+        weight:
+          stage.skill === "writing" &&
+          current.mode === "full" &&
+          entry.lessonId === "writing-essay"
+            ? 2
+            : 1,
+      }));
+    // Time is shared across what was actually worked on, so an abandoned
+    // section does not silently take its neighbour's minutes with it.
+    const totalWeight = worked.reduce((sum, entry) => sum + entry.weight, 0);
+    for (const { lessonId, lesson, weight } of worked) {
+      const id = `exam:${current.id}:${lessonId}`;
+      if (attempts.some((a) => a.id === id)) continue;
+      attempts.push({
+        id,
+        lessonId,
+        skill: stage.skill,
+        date: new Date(ended).toISOString(),
+        answers: Object.fromEntries(
+          lesson!.questions
+            .filter((q) => current.answers[q.id] !== undefined)
+            .map((q) => [q.id, current.answers[q.id]]),
+        ),
+        ...scoreQuestionSet(lesson!.questions, current.answers),
+        seconds: (seconds * weight) / totalWeight,
+        text: stage.skill === "writing" ? writingFor(lessonId) : undefined,
+        lessonSnapshot: structuredClone(lesson!),
+      });
     }
     if (exam.stage === stages.length - 1) {
       exam = { ...exam, finished: true };

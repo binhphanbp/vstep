@@ -62,6 +62,18 @@ export function subscribe(listener: () => void) {
 }
 export const getSnapshot = () => snapshot;
 export const getServerSnapshot = () => serverSnapshot;
+/**
+ * The raw stored text. When the saved data cannot be parsed the in-memory
+ * state is empty, so this is the learner's only remaining copy and must be
+ * what gets exported before anything replaces it.
+ */
+export function rawStudyData(): string | null {
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+}
 export function currentBackupState(): StudyState {
   // Refresh from another tab before an asynchronous import replaces local data.
   // updateStudy also preserves unsaved RAM state when storage is unavailable.

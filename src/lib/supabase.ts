@@ -17,9 +17,19 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit) {
     CLOUD_REQUEST_TIMEOUT,
   );
   const upstream = init?.signal;
-  const signal = upstream
-    ? AbortSignal.any([upstream, controller.signal])
-    : controller.signal;
+  // AbortSignal.any only reached Safari 17.4 and Firefox 124. Forwarding the
+  // upstream signal by hand keeps cloud sync working on an older phone instead
+  // of throwing before the request is even sent.
+  if (upstream) {
+    if (upstream.aborted) controller.abort(upstream.reason);
+    else
+      upstream.addEventListener(
+        "abort",
+        () => controller.abort(upstream.reason),
+        { once: true },
+      );
+  }
+  const signal = controller.signal;
   try {
     return await fetch(input, { ...init, signal });
   } finally {

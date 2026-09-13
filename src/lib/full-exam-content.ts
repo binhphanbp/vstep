@@ -7,20 +7,37 @@ const question = (
   explanation: string,
   tag = "Thông tin chi tiết",
 ): Question => ({ id, text, options, answer, explanation, tag });
+/**
+ * Builds the exam passage by appending paragraphs to a short lesson and reusing
+ * its questions. Appending moves the end of the text, so a reused question that
+ * points at "the final paragraph" would now name the wrong one: `rewrites`
+ * re-words those for the exam. Re-wording graded content means the exam lesson
+ * carries its own `version`, separate from the short lesson it grew from.
+ */
 const extendReading = (
   id: string,
   extra: string,
   questions: Question[],
+  version = 1,
+  rewrites: Record<string, string> = {},
 ): Lesson => {
   const base = lessons.find((l) => l.id === id)!;
   return {
     ...base,
     id: `full-${id}`,
+    version,
+    // The notebook lists entries by title, and this passage reuses the short
+    // lesson's questions: without a distinct name the two are indistinguishable.
+    title: `${base.title} · Đề đầy đủ`,
     minutes: 15,
     part: "Đề đầy đủ · Reading",
     text: `${base.text}\n\n${extra}`,
     questions: [
-      ...base.questions.map((q) => ({ ...q, id: `full-${q.id}` })),
+      ...base.questions.map((q) => ({
+        ...q,
+        id: `full-${q.id}`,
+        ...(rewrites[q.id] ? { text: rewrites[q.id] } : {}),
+      })),
       ...questions,
     ],
   };
@@ -229,6 +246,11 @@ export const fullReading: Lesson[] = [
         "Suy luận",
       ),
     ],
+    2,
+    {
+      // The short lesson ends on this warning; the exam passage does not.
+      rm5: "What warning does the passage give about difficulty?",
+    },
   ),
   extendReading(
     "reading-garden",

@@ -268,6 +268,15 @@ test("corrupt local state is preserved instead of overwritten", async ({
   expect(await page.evaluate(() => localStorage.getItem("may-study-v1"))).toBe(
     "corrupt-json",
   );
+  // The banner sends the learner to Cài đặt to export, so that export must
+  // carry the damaged original: it is the only copy of her history left.
+  await page.goto("/settings");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
+  const saved = await (await download).createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of saved) chunks.push(chunk as Buffer);
+  expect(Buffer.concat(chunks).toString()).toContain("corrupt-json");
 });
 test("recording uses a real MediaRecorder and survives reload", async ({
   browser,
@@ -299,6 +308,20 @@ test("recording uses a real MediaRecorder and survives reload", async ({
   await expect(
     page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
   ).toBeVisible();
+  // Coming back later, the take already filed must not pass as a new answer.
+  await page.goto("/practice/speaking-social");
+  await expect(
+    page.getByRole("link", { name: "Tải bản ghi", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await expect(page.locator("main [role=alert]")).toContainText("Ghi âm");
+  const speaking = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("may-study-v1")!).attempts.filter(
+        (a: { skill: string }) => a.skill === "speaking",
+      ).length,
+  );
+  expect(speaking).toBe(1);
   await context.close();
 });
 test("every main route loads without runtime errors and fits mobile", async ({

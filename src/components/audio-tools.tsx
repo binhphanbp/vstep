@@ -164,13 +164,20 @@ export function AudioPlayer({
     </div>
   );
 }
+export type TakeState = {
+  ready: boolean;
+  /** Seconds captured, present only when this take was just recorded. */
+  duration?: number;
+  /** When the take reached storage; 0 for one restored from before timestamps. */
+  savedAt: number;
+};
 export function Recorder({
   id,
   onReady,
   readOnly = false,
 }: {
   id: string;
-  onReady?: (ready: boolean, duration?: number) => void;
+  onReady?: (take: TakeState) => void;
   readOnly?: boolean;
 }) {
   const [recording, setRecording] = useState(false);
@@ -194,14 +201,16 @@ export function Recorder({
     let cancelled = false;
     const load = () =>
       getRecording(id)
-        .then((blob) => {
-          if (blob && !cancelled && recorder.current?.state !== "recording") {
+        .then((stored) => {
+          if (stored && !cancelled && recorder.current?.state !== "recording") {
             if (currentUrl.current) URL.revokeObjectURL(currentUrl.current);
-            const next = URL.createObjectURL(blob);
+            const next = URL.createObjectURL(stored.blob);
             currentUrl.current = next;
             setUrl(next);
-            setMime(blob.type);
-            if (!readOnly) callback.current?.(true);
+            setMime(stored.blob.type);
+            // No duration: this take was restored, not captured just now.
+            if (!readOnly)
+              callback.current?.({ ready: true, savedAt: stored.savedAt });
           }
         })
         .catch(() => {
@@ -290,12 +299,12 @@ export function Recorder({
         }
         try {
           await saveRecording(id, blob);
-          callback.current?.(true, duration);
+          callback.current?.({ ready: true, duration, savedAt: Date.now() });
           window.dispatchEvent(
             new CustomEvent("may-recording-saved", { detail: id }),
           );
         } catch {
-          callback.current?.(false);
+          callback.current?.({ ready: false, savedAt: 0 });
           if (mounted.current)
             setError(
               "Không lưu được vào thiết bị. Tải bản ghi xuống trước khi rời trang.",
@@ -311,7 +320,7 @@ export function Recorder({
         }
       };
       setSeconds(0);
-      callback.current?.(false);
+      callback.current?.({ ready: false, savedAt: 0 });
       captureStarted.current = Date.now();
       rec.start(1000);
       setRecording(true);

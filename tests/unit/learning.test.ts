@@ -262,22 +262,68 @@ describe("exam persistence and deadlines", () => {
     const s = exam();
     expect(advanceExam(s, now.getTime() + 1000)).toBe(s);
   });
-  it("automatically saves unanswered items and moves to the next part", () => {
+  it("saves the answered section, skips the untouched one, and moves on", () => {
     const s = advanceExam(exam(), now.getTime() + 600000);
     expect(s.exam?.stage).toBe(1);
-    expect(s.attempts).toHaveLength(2);
+    expect(s.attempts.map((a) => a.lessonId)).toEqual(["listening-weekend"]);
     expect(s.attempts[0].correct).toBe(1);
+    // The learner sat the whole stage, so all of its time belongs to the one
+    // section she worked on rather than being halved with an untouched lesson.
     expect(s.attempts.reduce((n, a) => n + a.seconds, 0)).toBe(600);
+  });
+  it("invents no score, no minutes and no lost review schedule when abandoned", () => {
+    const s = freshState();
+    s.mistakeReviews["reading-cafe@v1:rc1"] = {
+      ...scheduleReview(undefined, "easy"),
+      interval: 120,
+      repetitions: 6,
+    };
+    s.exam = {
+      id: "abandoned",
+      startedAt: now.getTime(),
+      stage: 0,
+      deadline: now.getTime() + 600000,
+      answers: {},
+      writing: "",
+      finished: false,
+    };
+    const after = advanceExam(s, now.getTime() + 4 * 86400000);
+    expect(after.exam?.finished).toBe(true);
+    expect(after.attempts).toHaveLength(0);
+    expect(after.mistakeReviews["reading-cafe@v1:rc1"]?.interval).toBe(120);
+  });
+  it("keeps a schedule the learner simply ran out of time to answer", () => {
+    const s = freshState();
+    s.mistakeReviews["reading-cafe@v1:rc2"] = {
+      ...scheduleReview(undefined, "easy"),
+      interval: 90,
+      repetitions: 5,
+    };
+    // rc1 answered wrong, rc2 left blank.
+    const next = recordAttempt(s, {
+      id: "partial",
+      lessonId: "reading-cafe",
+      skill: "reading",
+      date: now.toISOString(),
+      answers: { rc1: 0 },
+      correct: 0,
+      total: 5,
+      seconds: 60,
+    });
+    expect(next.mistakeReviews["reading-cafe@v1:rc1"]).toBeUndefined();
+    expect(next.mistakeReviews["reading-cafe@v1:rc2"]?.interval).toBe(90);
   });
   it("anchors early submission to its real submission time", () => {
     const s = advanceExam(exam(), now.getTime() + 20000, true);
     expect(s.exam?.deadline).toBe(now.getTime() + 20000 + 900000);
     expect(s.attempts.reduce((n, a) => n + a.seconds, 0)).toBe(20);
   });
-  it("catches up every expired stage after a long absence without inventing writing/speaking work", () => {
+  it("catches up every expired stage after a long absence without inventing work", () => {
     const s = advanceExam(exam(), now.getTime() + 3600000);
     expect(s.exam?.finished).toBe(true);
-    expect(s.attempts).toHaveLength(4);
+    // Only listening-weekend was answered; the other three sections and the
+    // blank writing and speaking stages leave no trace.
+    expect(s.attempts.map((a) => a.lessonId)).toEqual(["listening-weekend"]);
     expect(s.attempts.every((a) => a.total > 0)).toBe(true);
     expect(advanceExam(s, now.getTime() + 4000000)).toBe(s);
   });

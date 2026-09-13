@@ -83,14 +83,37 @@ export function ExamPage() {
     const unanswered = stageQuestions.filter(
       (question) => submitting.answers[question.id] === undefined,
     ).length;
-    const unansweredNotice = unanswered
-      ? `Còn ${unanswered}/${stageQuestions.length} câu chưa trả lời. `
-      : "";
+    // Writing and Speaking carry no questions, so an untouched task used to be
+    // dropped in silence. Name what is still blank before it is given up.
+    const blank = currentStage.lessonIds.filter((id) => {
+      const lesson = examLessons.find((entry) => entry.id === id);
+      if (!lesson || lesson.questions.length) return false;
+      if (lesson.skill === "writing")
+        return !(
+          id === "writing-essay"
+            ? (submitting.writingTask2 ?? "")
+            : submitting.writing
+        ).trim();
+      return !state.attempts.some(
+        (a) => a.id === `exam:${submitting.id}:${id}`,
+      );
+    });
+    const notice =
+      (unanswered
+        ? `Còn ${unanswered}/${stageQuestions.length} câu chưa trả lời. `
+        : "") +
+      (blank.length
+        ? `Chưa có bài làm cho: ${blank
+            .map(
+              (id) => examLessons.find((entry) => entry.id === id)?.part ?? id,
+            )
+            .join(", ")}. Phần bỏ trống sẽ không được lưu. `
+        : "");
     if (
       !window.confirm(
         exam?.stage === 3
-          ? "Kết thúc buổi luyện và lưu kết quả hiện có?"
-          : `${unansweredNotice}Nộp phần này và chuyển tiếp? Bạn sẽ không quay lại sửa phần đã nộp.`,
+          ? `${notice}Kết thúc buổi luyện và lưu kết quả hiện có?`
+          : `${notice}Nộp phần này và chuyển tiếp? Bạn sẽ không quay lại sửa phần đã nộp.`,
       )
     )
       return;
@@ -208,7 +231,9 @@ export function ExamPage() {
               className="button primary"
               style={{ marginTop: 22 }}
               disabled={!ready}
-              onClick={() => start(now)}
+              // The interval clock is throttled in a hidden tab, so the
+              // deadline is anchored to the real time of the tap.
+              onClick={() => start(Date.now())}
             >
               Bắt đầu {full ? 172 : 51} phút của mình
               <ArrowRight size={16} />
@@ -345,17 +370,23 @@ export function ExamPage() {
             return (
               <details key={id}>
                 <summary>{lesson.title} · Xem đáp án và giải thích</summary>
-                {lesson.skill === "listening" && (
-                  <section
-                    className="exam-transcript"
-                    aria-label="Bản chép lời"
-                  >
-                    <h3>Bản chép lời để đối chiếu sau khi nộp</h3>
-                    <div className="passage" lang="en">
-                      {lesson.text}
-                    </div>
-                  </section>
-                )}
+                <section
+                  className="exam-transcript"
+                  aria-label={
+                    lesson.skill === "listening"
+                      ? "Bản chép lời"
+                      : "Ngữ liệu bài đọc"
+                  }
+                >
+                  <h3>
+                    {lesson.skill === "listening"
+                      ? "Bản chép lời để đối chiếu sau khi nộp"
+                      : "Bài đọc để đối chiếu sau khi nộp"}
+                  </h3>
+                  <div className="passage" lang="en">
+                    {lesson.text}
+                  </div>
+                </section>
                 {lesson.questions.map((q, i) => (
                   <QuestionCard
                     key={q.id}
@@ -447,7 +478,7 @@ export function ExamPage() {
           style={{ marginBottom: 30 }}
         >
           <section
-            className={`panel ${lesson.skill === "reading" ? "reading-panel" : ""}`}
+            className={`panel ${lesson.skill === "reading" ? "reading-panel passage-panel" : ""}`}
           >
             <div className="panel-label">{lesson.title}</div>
             {lesson.skill === "listening" ? (
@@ -541,8 +572,10 @@ export function ExamPage() {
                 <h2>Phần trả lời của bạn</h2>
                 <Recorder
                   id={full ? `exam-${exam.id}-${lesson.id}` : `exam-${exam.id}`}
-                  onReady={(has, duration) => {
-                    if (has)
+                  onReady={({ ready, duration }) => {
+                    // Only a take just captured files an attempt: a restored
+                    // one carries no duration and would log the part as 0 phút.
+                    if (ready && duration !== undefined)
                       addAttempt({
                         id: `exam:${exam.id}:${lesson.id}`,
                         lessonId: lesson.id,
@@ -554,7 +587,7 @@ export function ExamPage() {
                         recordingId: full
                           ? `exam-${exam.id}-${lesson.id}`
                           : `exam-${exam.id}`,
-                        seconds: duration ?? 0,
+                        seconds: duration,
                       });
                   }}
                 />

@@ -55,15 +55,33 @@ test("full exam navigates all materials and restores both writing tasks", async 
       name: "Bản chép lời để đối chiếu sau khi nộp",
     }),
   ).toBeVisible();
+  const readingReview = page
+    .locator("details")
+    .filter({ hasText: "A little café, a bigger change" })
+    .first();
+  await readingReview.locator("> summary").click();
+  await expect(
+    readingReview.getByRole("heading", {
+      name: "Bài đọc để đối chiếu sau khi nộp",
+    }),
+  ).toBeVisible();
+  await expect(readingReview.locator(".passage")).toContainText(
+    "When Linh opened her café",
+  );
   const attempts = await page.evaluate(
     () => JSON.parse(localStorage.getItem("may-study-v1")!).attempts,
   );
   expect(
     attempts.filter((a: { skill: string }) => a.skill === "writing"),
   ).toHaveLength(2);
+  // Only fl1 was answered, so only its section is filed. The Reading stage was
+  // never touched and must not appear as 0/40 of study that never happened.
   expect(
     attempts.reduce((n: number, a: { total: number }) => n + a.total, 0),
-  ).toBe(75);
+  ).toBe(1);
+  expect(
+    attempts.filter((a: { skill: string }) => a.skill === "reading"),
+  ).toHaveLength(0);
 });
 
 test("switching speaking parts saves the recording being stopped on unmount", async ({
