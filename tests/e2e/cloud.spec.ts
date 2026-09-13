@@ -2,6 +2,23 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import type { StudyState } from "../../src/lib/learning";
 
+test("damaged device data blocks the cloud push that would erase it", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("may-study-v1", "corrupt-json"),
+  );
+  await login(page);
+  // The cloud keeps a single row, so pushing an empty state over it would
+  // destroy the learner's only remaining copy of her history.
+  await expect(
+    page.getByRole("button", { name: "Lưu lên đám mây" }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Tải về thiết bị" }),
+  ).toBeEnabled();
+});
+
 test("a stalled login times out without losing local progress", async ({
   page,
 }) => {

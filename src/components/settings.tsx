@@ -23,10 +23,22 @@ import {
   isCloudTimeout,
   supabase,
 } from "@/lib/supabase";
-import { currentBackupState } from "@/lib/study-store";
+import { currentBackupState, rawStudyData } from "@/lib/study-store";
 export function downloadJson(data: unknown, name: string) {
+  downloadText(JSON.stringify(data, null, 2), name);
+}
+/**
+ * Exports whatever the learner still has. With damaged storage the parsed
+ * state is empty, so the raw text is the only copy worth saving.
+ */
+export function downloadBackup(damaged: boolean, name: string) {
+  const raw = damaged ? rawStudyData() : null;
+  if (raw === null) downloadJson(currentBackupState(), name);
+  else downloadText(raw, name);
+}
+function downloadText(text: string, name: string) {
   const url = URL.createObjectURL(
-    new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+    new Blob([text], { type: "application/json" }),
   );
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -38,7 +50,7 @@ export function downloadJson(data: unknown, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function SettingsPage() {
-  const { state, update, replace, toast } = useStudy();
+  const { state, update, replace, toast, storageError } = useStudy();
   const [profile, setProfile] = useState<Profile>(state.profile);
   const profileVersion = JSON.stringify(state.profile);
   const [loadedProfile, setLoadedProfile] = useState(profileVersion);
@@ -90,8 +102,8 @@ export function SettingsPage() {
         )
       )
         return;
-      downloadJson(
-        currentBackupState(),
+      downloadBackup(
+        Boolean(storageError),
         `may-before-import-${localDay()}.json`,
       );
       replace({ ...parsed, updatedAt: new Date().toISOString() });
@@ -261,7 +273,7 @@ export function SettingsPage() {
           </div>
         </form>
         <div className="stack">
-          <CloudSettings />
+          <CloudSettings storageError={storageError} />
           <section className="panel">
             <div className="section-title">
               <Download size={20} />
@@ -276,7 +288,10 @@ export function SettingsPage() {
                 type="button"
                 className="button secondary"
                 onClick={() =>
-                  downloadJson(state, `may-backup-${localDay()}.json`)
+                  downloadBackup(
+                    Boolean(storageError),
+                    `may-backup-${localDay()}.json`,
+                  )
                 }
               >
                 <Download size={15} />
@@ -329,7 +344,7 @@ export function SettingsPage() {
     </div>
   );
 }
-function CloudSettings() {
+function CloudSettings({ storageError }: { storageError: string }) {
   const { replace, toast } = useStudy();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [email, setEmail] = useState("");
@@ -391,6 +406,14 @@ function CloudSettings() {
   }
   async function sync(direction: "push" | "pull") {
     if (!supabase || !user || pendingSync.current) return;
+    // With damaged device data the in-memory state is empty, and the cloud
+    // keeps only one row: pushing it would destroy the last good copy.
+    if (direction === "push" && storageError) {
+      setError(
+        "Dữ liệu trên thiết bị đang lỗi nên chưa thể lưu lên đám mây — làm vậy sẽ ghi đè bản đám mây bằng một hồ sơ trống. Hãy xuất bản gốc ở mục sao lưu, rồi tải bản đám mây về hoặc nhập lại một bản hợp lệ.",
+      );
+      return;
+    }
     const controller = new AbortController();
     pendingSync.current = controller;
     const timeout = window.setTimeout(() => {
@@ -441,8 +464,8 @@ function CloudSettings() {
           )
         )
           return;
-        downloadJson(
-          currentBackupState(),
+        downloadBackup(
+          Boolean(storageError),
           `may-before-cloud-${localDay()}.json`,
         );
         replace({ ...parsed, updatedAt: new Date().toISOString() });
@@ -563,7 +586,7 @@ function CloudSettings() {
             <button
               type="button"
               className="button primary small"
-              disabled={busy}
+              disabled={busy || Boolean(storageError)}
               onClick={() => sync("push")}
             >
               <Upload size={15} />

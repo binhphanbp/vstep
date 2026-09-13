@@ -268,6 +268,15 @@ test("corrupt local state is preserved instead of overwritten", async ({
   expect(await page.evaluate(() => localStorage.getItem("may-study-v1"))).toBe(
     "corrupt-json",
   );
+  // The banner sends the learner to Cài đặt to export, so that export must
+  // carry the damaged original: it is the only copy of her history left.
+  await page.goto("/settings");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
+  const saved = await (await download).createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of saved) chunks.push(chunk as Buffer);
+  expect(Buffer.concat(chunks).toString()).toContain("corrupt-json");
 });
 test("recording uses a real MediaRecorder and survives reload", async ({
   browser,
