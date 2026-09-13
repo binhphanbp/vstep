@@ -23,13 +23,32 @@ import {
 import { lessons, vocabulary } from "../../src/lib/content";
 import { readQuizDraft } from "../../src/lib/quiz-draft";
 const now = new Date("2026-09-08T18:00:00+07:00");
+/** Read the keys from the content so a change of option order cannot lie. */
+function keys(lessonId = "reading-cafe") {
+  const lesson = lessons.find((item) => item.id === lessonId)!;
+  return Object.fromEntries(
+    lesson.questions.map((question) => [question.id, question.answer]),
+  );
+}
+/** Every answer right except the named questions. */
+function missing(wrong: string[], lessonId = "reading-cafe") {
+  const lesson = lessons.find((item) => item.id === lessonId)!;
+  return Object.fromEntries(
+    lesson.questions.map((question) => [
+      question.id,
+      wrong.includes(question.id)
+        ? (question.answer + 1) % question.options.length
+        : question.answer,
+    ]),
+  );
+}
 function attempt(date: string, extra: Partial<Attempt> = {}): Attempt {
   return {
     id: date,
     lessonId: "reading-cafe",
     skill: "reading",
     date,
-    answers: { rc1: 1, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
+    answers: keys(),
     correct: 5,
     total: 5,
     seconds: 300,
@@ -72,10 +91,11 @@ describe("Vietnam-local study dates", () => {
 });
 describe("scoring and honest progress", () => {
   it("scores all answers and counts unanswered questions as incorrect", () => {
-    expect(
-      scoreAnswers("reading-cafe", { rc1: 1, rc2: 2, rc3: 0, rc4: 3, rc5: 1 }),
-    ).toEqual({ correct: 5, total: 5 });
-    expect(scoreAnswers("reading-cafe", { rc1: 1 })).toEqual({
+    expect(scoreAnswers("reading-cafe", keys())).toEqual({
+      correct: 5,
+      total: 5,
+    });
+    expect(scoreAnswers("reading-cafe", { rc1: keys().rc1 })).toEqual({
       correct: 1,
       total: 5,
     });
@@ -95,17 +115,13 @@ describe("scoring and honest progress", () => {
     const questions = lessons.find(
       (lesson) => lesson.id === "reading-cafe",
     )!.questions;
-    const insight = objectiveInsights(
-      questions,
-      { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
-      {
-        rc1: "sure",
-        rc2: "unsure",
-        rc3: "sure",
-        rc4: "sure",
-        rc5: "guess",
-      },
-    );
+    const insight = objectiveInsights(questions, missing(["rc1"]), {
+      rc1: "sure",
+      rc2: "unsure",
+      rc3: "sure",
+      rc4: "sure",
+      rc5: "guess",
+    });
     expect(insight.confidentErrors).toBe(1);
     expect(insight.fragileCorrect).toBe(2);
     expect(insight.secureCorrect).toBe(2);
@@ -119,13 +135,8 @@ describe("scoring and honest progress", () => {
   it("stores a mistake only once even across repeated errors", () => {
     const s = freshState();
     s.attempts = [
-      attempt(now.toISOString(), {
-        answers: { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
-      }),
-      attempt(now.toISOString(), {
-        id: "second",
-        answers: { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
-      }),
+      attempt(now.toISOString(), { answers: missing(["rc1"]) }),
+      attempt(now.toISOString(), { id: "second", answers: missing(["rc1"]) }),
     ];
     expect(mistakes(s)).toHaveLength(1);
     expect(mistakes(s)[0].question.id).toBe("rc1");
@@ -152,7 +163,7 @@ describe("adaptive plan and memory scheduling", () => {
       lesson.title = "A later editorial title";
       expect(mistakes(saved)).toHaveLength(0);
       expect(saved.attempts[0].lessonSnapshot).toMatchObject({
-        version: 1,
+        version: lesson.version,
         title: originalTitle,
       });
       expect(saved.attempts[0].lessonSnapshot?.questions[0].answer).toBe(
@@ -167,13 +178,13 @@ describe("adaptive plan and memory scheduling", () => {
     const first = recordAttempt(
       freshState(),
       attempt(now.toISOString(), {
-        answers: { rc1: 0, rc2: 2, rc3: 0, rc4: 3, rc5: 1 },
+        answers: missing(["rc1"]),
         correct: 4,
       }),
     ).attempts[0];
     const second = structuredClone(first);
     second.id = "version-two";
-    second.lessonSnapshot!.version = 2;
+    second.lessonSnapshot!.version = first.lessonSnapshot!.version + 1;
     const s = freshState();
     s.attempts = [first, second];
     const errors = mistakes(s);
@@ -186,7 +197,7 @@ describe("adaptive plan and memory scheduling", () => {
       readQuizDraft(
         JSON.stringify({
           contentVersion: lesson.version + 1,
-          answers: { rc1: 1 },
+          answers: { rc1: keys().rc1 },
           confidence: { rc1: "sure" },
           seconds: 30,
         }),
@@ -213,7 +224,7 @@ describe("adaptive plan and memory scheduling", () => {
     const s = freshState();
     s.attempts = [
       attempt("2026-09-07T10:00:00+07:00", {
-        answers: { rc1: 0, rc2: 0, rc3: 0, rc4: 3, rc5: 1 },
+        answers: missing(["rc1", "rc2"]),
         correct: 3,
         confidence: { rc1: "sure", rc2: "guess" },
       }),
@@ -252,7 +263,7 @@ describe("exam persistence and deadlines", () => {
       startedAt: now.getTime(),
       stage: 0,
       deadline: now.getTime() + 600000,
-      answers: { lw1: 2 },
+      answers: { lw1: keys("listening-weekend").lw1 },
       writing: "",
       finished: false,
     };
@@ -273,7 +284,8 @@ describe("exam persistence and deadlines", () => {
   });
   it("invents no score, no minutes and no lost review schedule when abandoned", () => {
     const s = freshState();
-    s.mistakeReviews["reading-cafe@v1:rc1"] = {
+    const earned = `reading-cafe@v${lessons.find((item) => item.id === "reading-cafe")!.version}:rc1`;
+    s.mistakeReviews[earned] = {
       ...scheduleReview(undefined, "easy"),
       interval: 120,
       repetitions: 6,
@@ -290,11 +302,14 @@ describe("exam persistence and deadlines", () => {
     const after = advanceExam(s, now.getTime() + 4 * 86400000);
     expect(after.exam?.finished).toBe(true);
     expect(after.attempts).toHaveLength(0);
-    expect(after.mistakeReviews["reading-cafe@v1:rc1"]?.interval).toBe(120);
+    expect(after.mistakeReviews[earned]?.interval).toBe(120);
   });
   it("keeps a schedule the learner simply ran out of time to answer", () => {
     const s = freshState();
-    s.mistakeReviews["reading-cafe@v1:rc2"] = {
+    const cafe = lessons.find((item) => item.id === "reading-cafe")!;
+    const key = (question: string) =>
+      `reading-cafe@v${cafe.version}:${question}`;
+    s.mistakeReviews[key("rc2")] = {
       ...scheduleReview(undefined, "easy"),
       interval: 90,
       repetitions: 5,
@@ -305,13 +320,13 @@ describe("exam persistence and deadlines", () => {
       lessonId: "reading-cafe",
       skill: "reading",
       date: now.toISOString(),
-      answers: { rc1: 0 },
+      answers: { rc1: missing(["rc1"]).rc1 },
       correct: 0,
       total: 5,
       seconds: 60,
     });
-    expect(next.mistakeReviews["reading-cafe@v1:rc1"]).toBeUndefined();
-    expect(next.mistakeReviews["reading-cafe@v1:rc2"]?.interval).toBe(90);
+    expect(next.mistakeReviews[key("rc1")]).toBeUndefined();
+    expect(next.mistakeReviews[key("rc2")]?.interval).toBe(90);
   });
   it("anchors early submission to its real submission time", () => {
     const s = advanceExam(exam(), now.getTime() + 20000, true);
@@ -475,7 +490,7 @@ describe("content and backup integrity", () => {
     const upgraded = personalizeLegacyState(legacy);
     expect(upgraded.attempts[0].lessonSnapshot).toMatchObject({
       id: "reading-cafe",
-      version: 1,
+      version: lessons.find((item) => item.id === "reading-cafe")!.version,
     });
     expect(upgraded.exam?.stagePlan).toEqual(examStages);
     expect(upgraded.exam?.lessonSnapshots).not.toHaveLength(0);
