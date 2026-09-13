@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
+import { lessons } from "../../src/lib/content";
+const cafe = lessons.find((lesson) => lesson.id === "reading-cafe")!;
+/** Read the keys from the content so a change of option order cannot lie. */
+const key = (id: string) =>
+  cafe.questions.find((question) => question.id === id)!.answer;
+const missed = (id: string) => (key(id) + 1) % 4;
 
 const priorityLessonRoutes = [
   "/practice/reading-cafe",
@@ -74,13 +80,8 @@ test("core Reading and Listening loop works across browser engines", async ({
   ).toBe(true);
 
   await page.goto("/practice/reading-cafe");
-  for (const [id, value] of Object.entries({
-    rc1: 0,
-    rc2: 2,
-    rc3: 0,
-    rc4: 3,
-    rc5: 1,
-  })) {
+  for (const id of ["rc1", "rc2", "rc3", "rc4", "rc5"]) {
+    const value = id === "rc1" ? missed(id) : key(id);
     await page.locator(`input[name="${id}"][value="${value}"]`).check();
     await page
       .locator(".question")

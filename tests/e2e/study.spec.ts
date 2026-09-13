@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
+import { lessons } from "../../src/lib/content";
+const cafe = lessons.find((lesson) => lesson.id === "reading-cafe")!;
+/** Read the keys from the content so a change of option order cannot lie. */
+const key = (id: string) =>
+  cafe.questions.find((question) => question.id === id)!.answer;
+const missed = (id: string) => (key(id) + 1) % 4;
+const letter = (index: number) => "ABCD"[index];
+
 test("dashboard is honest, responsive, and energy changes the plan", async ({
   page,
 }) => {
@@ -58,7 +66,7 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   page,
 }) => {
   await page.goto("/practice/reading-cafe");
-  await page.locator('input[name="rc1"][value="0"]').check();
+  await page.locator(`input[name="rc1"][value="${missed("rc1")}"]`).check();
   await page
     .locator(".question")
     .filter({ has: page.locator('input[name="rc1"]') })
@@ -68,20 +76,17 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
     .poll(async () => page.evaluate(() => localStorage.getItem("may-study-v1")))
     .toContain("rc1");
   await page.reload();
-  await expect(page.locator('input[name="rc1"][value="0"]')).toBeChecked();
+  await expect(
+    page.locator(`input[name="rc1"][value="${missed("rc1")}"]`),
+  ).toBeChecked();
   await expect(
     page
       .locator(".question")
       .filter({ has: page.locator('input[name="rc1"]') })
       .getByRole("button", { name: "Rất chắc" }),
   ).toHaveAttribute("aria-pressed", "true");
-  for (const [id, value] of Object.entries({
-    rc2: 2,
-    rc3: 0,
-    rc4: 3,
-    rc5: 1,
-  })) {
-    await page.locator(`input[name="${id}"][value="${value}"]`).check();
+  for (const id of ["rc2", "rc3", "rc4", "rc5"]) {
+    await page.locator(`input[name="${id}"][value="${key(id)}"]`).check();
     await page
       .locator(".question")
       .filter({ has: page.locator(`input[name="${id}"]`) })
@@ -106,15 +111,15 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
     "she was providing a place to learn",
   );
   await expect(page.locator(".option-notes").first()).toContainText(
-    "Vì sao A chưa đúng:",
+    `Vì sao ${letter(missed("rc1"))} chưa đúng:`,
   );
   await expect(page.locator(".option-notes").first()).toContainText(
-    "Vì sao B đúng:",
+    `Vì sao ${letter(key("rc1"))} đúng:`,
   );
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();
   await expect(page.getByText("1 câu đã ghi lại")).toBeVisible();
   await expect(page.getByText("Ưu tiên · Đã rất chắc")).toBeVisible();
-  await page.locator('input[name="rc1"][value="1"]').check();
+  await page.locator(`input[name="rc1"][value="${key("rc1")}"]`).check();
   await page.getByRole("button", { name: "Kiểm tra lại", exact: true }).click();
   await expect(
     page.getByText("Cả bài kể quá trình Linh", { exact: false }),

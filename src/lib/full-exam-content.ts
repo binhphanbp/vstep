@@ -1,4 +1,5 @@
 import { lessons, type Lesson, type Question } from "./content";
+import { withStableOptionOrder } from "./option-order";
 const question = (
   id: string,
   text: string,
@@ -6,7 +7,8 @@ const question = (
   answer: number,
   explanation: string,
   tag = "Thông tin chi tiết",
-): Question => ({ id, text, options, answer, explanation, tag });
+): Question =>
+  withStableOptionOrder({ id, text, options, answer, explanation, tag });
 /**
  * Builds the exam passage by appending paragraphs to a short lesson and reusing
  * its questions. Appending moves the end of the text, so a reused question that
@@ -18,7 +20,7 @@ const extendReading = (
   id: string,
   extra: string,
   questions: Question[],
-  version = 1,
+  version = 2,
   rewrites: Record<string, string> = {},
 ): Lesson => {
   const base = lessons.find((l) => l.id === id)!;
@@ -246,7 +248,7 @@ export const fullReading: Lesson[] = [
         "Suy luận",
       ),
     ],
-    2,
+    3,
     {
       // The short lesson ends on this warning; the exam passage does not.
       rm5: "What warning does the passage give about difficulty?",
@@ -329,7 +331,7 @@ const listen = (
   minutes: number,
 ): Lesson => ({
   id,
-  version: 1,
+  version: 2,
   skill: "listening",
   title,
   subtitle: "Đề tự biên soạn đủ cấu trúc · Giọng đọc tổng hợp",

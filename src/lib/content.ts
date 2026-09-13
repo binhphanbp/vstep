@@ -1,4 +1,5 @@
 import { questionNotes } from "./question-notes";
+import { withStableOptionOrder } from "./option-order";
 
 export type Skill = "listening" | "reading" | "writing" | "speaking";
 export const skillNames: Record<Skill, string> = {
@@ -716,11 +717,12 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
 ];
 export const lessons: Lesson[] = lessonDefinitions.map((lesson) => ({
   ...lesson,
-  version: 1,
-  questions: lesson.questions.map((question) => ({
-    ...question,
-    ...questionNotes[question.id],
-  })),
+  // Version 2 fixes the option order from each question's id; the answers and
+  // the passages are unchanged.
+  version: 2,
+  questions: lesson.questions.map((question) =>
+    withStableOptionOrder({ ...question, ...questionNotes[question.id] }),
+  ),
 }));
 export type Vocabulary = {
   id: string;
