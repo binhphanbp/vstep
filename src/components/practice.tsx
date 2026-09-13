@@ -440,6 +440,8 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     }));
     setError("");
     setChecks([]);
+    // A new speaking round needs a new answer, not the recording already filed.
+    setHasRecording(false);
     started.current = Date.now();
   }
   return (
