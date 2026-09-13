@@ -4,6 +4,7 @@ import {
   fullListening,
   fullReading,
 } from "../../src/lib/full-exam-content";
+import { lessons } from "../../src/lib/content";
 import {
   advanceExam,
   freshState,
@@ -28,6 +29,29 @@ describe("full exam content and recovery", () => {
     expect(words).toBeGreaterThanOrEqual(1900);
     expect(words).toBeLessThanOrEqual(2050);
     expect(fullExamStages.reduce((n, s) => n + s.seconds, 0)).toBe(172 * 60);
+  });
+  it("keeps the disclosed amount of reused Reading material accurate", () => {
+    // The exam screen tells the learner 20 of 40 Reading questions come from
+    // the short lessons. Adding fresh items must update that sentence too.
+    const shortIds = new Set(
+      lessons
+        .filter((lesson) => lesson.skill === "reading")
+        .flatMap((lesson) => lesson.questions.map((q) => `full-${q.id}`)),
+    );
+    const fullQuestions = fullReading.flatMap((lesson) => lesson.questions);
+    expect(fullQuestions).toHaveLength(40);
+    expect(fullQuestions.filter((q) => shortIds.has(q.id))).toHaveLength(20);
+    // Listening is claimed to be entirely new material.
+    const shortListening = new Set(
+      lessons
+        .filter((lesson) => lesson.skill === "listening")
+        .flatMap((lesson) => lesson.questions.map((q) => `full-${q.id}`)),
+    );
+    expect(
+      fullListening
+        .flatMap((lesson) => lesson.questions)
+        .filter((q) => shortListening.has(q.id)),
+    ).toHaveLength(0);
   });
   it("uses unique ids and complete answer feedback across both banks", () => {
     expect(new Set(allLessons.map((l) => l.id)).size).toBe(allLessons.length);

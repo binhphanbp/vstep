@@ -180,7 +180,7 @@ export function ExamPage() {
             </div>
             <div className="notice" style={{ marginTop: 22 }}>
               {full
-                ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện: 20/40 câu Đọc chính là câu của bài ngắn, nên nếu đã luyện các bài đó thì điểm phần Đọc không đo được khả năng với ngữ liệu mới. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
                 : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
               Không quy đổi kết quả buổi này sang B1/B2/C1.
             </div>
@@ -446,7 +446,9 @@ export function ExamPage() {
           key={lesson.id}
           style={{ marginBottom: 30 }}
         >
-          <section className="panel">
+          <section
+            className={`panel ${lesson.skill === "reading" ? "reading-panel" : ""}`}
+          >
             <div className="panel-label">{lesson.title}</div>
             {lesson.skill === "listening" ? (
               <AudioPlayer text={lesson.text} allowSpeed={false} />

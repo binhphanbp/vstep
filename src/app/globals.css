@@ -2278,9 +2278,11 @@ details .passage {
   .practice-layout {
     grid-template-columns: 1fr;
   }
+  /* Keep the passage on screen so a question can be checked against it
+     without scrolling past several hundred words each time. */
   .reading-panel {
-    position: static;
-    max-height: none;
+    top: 8px;
+    max-height: 52vh;
   }
   .lesson-grid {
     gap: 15px;

@@ -132,6 +132,48 @@ test("a finished full exam exposes accessible reading feedback on mobile", async
   expect(result.violations).toEqual([]);
 });
 
+test("the timed Reading passage stays on screen next to its questions", async ({
+  page,
+}) => {
+  const s = freshState();
+  s.exam = {
+    id: "reading-layout-exam",
+    mode: "full",
+    startedAt: Date.now(),
+    deadline: Date.now() + 3600_000,
+    stage: 1,
+    answers: {},
+    writing: "",
+    finished: false,
+  };
+  await page.goto("/");
+  await page.evaluate(
+    (value) => localStorage.setItem("may-study-v1", JSON.stringify(value)),
+    s,
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/exam");
+  const panel = page.locator(".practice-layout .reading-panel");
+  await expect(panel).toBeVisible();
+  const layout = await panel.evaluate((el) => ({
+    position: getComputedStyle(el).position,
+    scrolls: el.scrollHeight > el.clientHeight,
+    height: el.getBoundingClientRect().height,
+  }));
+  // The passage scrolls inside its own box instead of pushing the questions
+  // hundreds of words down the page.
+  expect(layout.position).toBe("sticky");
+  expect(layout.scrolls).toBe(true);
+  expect(layout.height).toBeLessThan(844);
+  // It is still on screen while the last question of the passage is answered.
+  await page.locator(".question").last().scrollIntoViewIfNeeded();
+  const visible = await panel.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    return Math.min(box.bottom, innerHeight) - Math.max(box.top, 0);
+  });
+  expect(visible).toBeGreaterThan(200);
+});
+
 test("server serves security headers and a real 404 status", async ({
   request,
 }) => {
