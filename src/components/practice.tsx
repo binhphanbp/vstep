@@ -595,17 +595,19 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               {lesson.text}
             </div>
           )}
-          <div style={{ marginTop: 24 }}>
-            <div className="section-title" style={{ marginBottom: 0 }}>
-              <Lightbulb size={18} />
-              <h3>Một gợi ý nhỏ</h3>
+          {lesson.tips.length > 0 && (
+            <div style={{ marginTop: 24 }}>
+              <div className="section-title" style={{ marginBottom: 0 }}>
+                <Lightbulb size={18} />
+                <h3>Một gợi ý nhỏ</h3>
+              </div>
+              <ul className="tips-list">
+                {lesson.tips.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
             </div>
-            <ul className="tips-list">
-              {lesson.tips.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-          </div>
+          )}
           {lesson.sample && result && (
             <details>
               <summary>Tham khảo một cách triển khai</summary>

@@ -26,6 +26,9 @@ const extendReading = (
     ...base,
     id: `full-${id}`,
     version,
+    // The notebook lists entries by title, and this passage reuses the short
+    // lesson's questions: without a distinct name the two are indistinguishable.
+    title: `${base.title} · Đề đầy đủ`,
     minutes: 15,
     part: "Đề đầy đủ · Reading",
     text: `${base.text}\n\n${extra}`,
