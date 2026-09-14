@@ -2935,3 +2935,16 @@ details .passage {
   color: var(--muted);
   font-size: 12px;
 }
+.saved-word-add {
+  margin: 14px 0 0;
+}
+.vocab-list-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.vocab-list-item strong .confidence-pill {
+  margin-left: 8px;
+  vertical-align: middle;
+}

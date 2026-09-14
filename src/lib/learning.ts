@@ -1,6 +1,7 @@
 import * as z from "zod/mini";
 import { lessons, vocabulary, type Question, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
+import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -246,6 +247,11 @@ export const stateSchema = z
     mistakeReviews: z.record(z.string(), reviewSchema),
     drafts: z.record(z.string(), limitedString(30000)),
     mood: z.record(z.string(), z.enum(["low", "okay", "great"])),
+    // Optional on purpose: every backup written before word cards existed has
+    // to keep parsing, or it lands in the "damaged data" path instead.
+    savedWords: z.optional(
+      z.record(z.string(), z.object({ addedAt: z.iso.datetime() })),
+    ),
     exam: z.nullable(examSchema),
     updatedAt: z.iso.datetime(),
   })
@@ -346,6 +352,7 @@ export function freshState(): StudyState {
     mistakeReviews: {},
     drafts: {},
     mood: {},
+    savedWords: {},
     exam: null,
     updatedAt: new Date().toISOString(),
   };
@@ -800,6 +807,64 @@ export function quickSession(
     .filter((item) => item.due)
     .sort((a, b) => b.wrongCount - a.wrongCount)[0];
   return { lesson, words, mistake };
+}
+/**
+ * The word cards she added herself, shaped like the authored deck so the
+ * review screen does not need to know the difference. The card text lives in
+ * content; state stores only which question it came from and when it was
+ * added, so a card can be corrected later without rewriting her history.
+ */
+export type SavedWord = {
+  id: string;
+  questionId: string;
+  word: string;
+  ipa: string;
+  meaning: string;
+  example: string;
+  topic: string;
+  addedAt: string;
+};
+export function savedWords(state: StudyState): SavedWord[] {
+  return Object.entries(state.savedWords ?? {})
+    .filter(([questionId]) => wordCards[questionId])
+    .map(([questionId, saved]) => ({
+      id: `${SAVED_WORD_PREFIX}${questionId}`,
+      questionId,
+      ...wordCards[questionId],
+      addedAt: saved.addedAt,
+    }))
+    .sort((a, b) => Date.parse(a.addedAt) - Date.parse(b.addedAt));
+}
+/** A card exists for this question only if one was written for it. */
+export function wordCardFor(questionId: string) {
+  return wordCards[questionId];
+}
+export function addSavedWord(
+  state: StudyState,
+  questionId: string,
+  now = new Date(),
+): StudyState {
+  if (!wordCards[questionId] || state.savedWords?.[questionId]) return state;
+  return {
+    ...state,
+    savedWords: {
+      ...state.savedWords,
+      [questionId]: { addedAt: now.toISOString() },
+    },
+  };
+}
+export function removeSavedWord(
+  state: StudyState,
+  questionId: string,
+): StudyState {
+  if (!state.savedWords?.[questionId]) return state;
+  const rest = { ...state.savedWords };
+  delete rest[questionId];
+  // The review schedule goes with it: keeping it would quietly resurrect the
+  // card's history if she ever adds the same word again.
+  const reviews = { ...state.reviews };
+  delete reviews[`${SAVED_WORD_PREFIX}${questionId}`];
+  return { ...state, savedWords: rest, reviews };
 }
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;

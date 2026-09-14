@@ -12,6 +12,10 @@ import {
   mistakes,
   questionTypeStats,
   quickSession,
+  addSavedWord,
+  removeSavedWord,
+  savedWords,
+  wordCardFor,
   objectiveInsights,
   personalizeLegacyState,
   profileSchema,
@@ -956,5 +960,40 @@ describe("a ten-minute session for a day with no time in it", () => {
     const session = quickSession(state, now)!;
     expect(session.mistake?.question.id).toBe("rc1");
     expect(session.mistake?.wrongCount).toBe(2);
+  });
+});
+
+describe("word cards that grow out of her own mistakes", () => {
+  it("only offers a card for a question one was written for", () => {
+    expect(wordCardFor("rk4")?.word).toBe("doubtful");
+    expect(wordCardFor("rk1")).toBeUndefined();
+  });
+  it("adds a card once, keeps the source, and takes its schedule away again", () => {
+    let state = addSavedWord(freshState(), "rk4", now);
+    state = addSavedWord(state, "rk4", now);
+    const deck = savedWords(state);
+    expect(deck).toHaveLength(1);
+    expect(deck[0].id).toBe("w:rk4");
+    expect(deck[0].questionId).toBe("rk4");
+    expect(deck[0].meaning).toContain("thuyết phục");
+    state = {
+      ...state,
+      reviews: {
+        ...state.reviews,
+        "w:rk4": scheduleReview(undefined, "good", now),
+      },
+    };
+    state = removeSavedWord(state, "rk4");
+    expect(savedWords(state)).toEqual([]);
+    expect(state.reviews["w:rk4"]).toBeUndefined();
+  });
+  it("ignores a question with no card instead of inventing one", () => {
+    expect(savedWords(addSavedWord(freshState(), "rk1", now))).toEqual([]);
+  });
+  it("keeps reading backups written before word cards existed", () => {
+    const old = freshState();
+    delete (old as { savedWords?: unknown }).savedWords;
+    expect(stateSchema.safeParse(old).success).toBe(true);
+    expect(savedWords(old)).toEqual([]);
   });
 });

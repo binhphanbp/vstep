@@ -257,6 +257,44 @@ test("the exam date becomes a plan for the week, and nothing without one", async
   await expect(panel).toContainText("xây nền");
 });
 
+test("a word she got wrong can join the vocabulary garden", async ({
+  page,
+}) => {
+  // rk4 is the vocabulary-in-context question of reading-market: get it wrong
+  // and the notebook can turn it into a card.
+  await page.goto("/practice/reading-market");
+  for (const id of ["rk1", "rk2", "rk3", "rk4", "rk5"]) {
+    await page
+      .locator(
+        `input[name="${id}"][value="${id === "rk4" ? missed(id) : key(id)}"]`,
+      )
+      .check();
+    // Every question needs a confidence before the lesson can be submitted.
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await page.goto("/mistakes");
+  const add = page.getByRole("button", { name: /Thêm .*doubtful/ });
+  await expect(add).toBeVisible();
+  await add.click();
+  await expect(page.locator(".saved-word-add")).toContainText(
+    /Đã thêm .*doubtful/,
+  );
+  await page.goto("/vocabulary");
+  await page.getByRole("button", { name: "Tất cả từ vựng" }).click();
+  await page.getByLabel("Tìm từ vựng").fill("doubtful");
+  const row = page.locator(".vocab-list-item");
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText("Tự thêm");
+  await expect(row).toContainText("thuyết phục");
+  await row.getByRole("button", { name: "Bỏ khỏi vườn" }).click();
+  await expect(page.locator(".vocab-list-item")).toHaveCount(0);
+});
+
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({
   page,
 }) => {
