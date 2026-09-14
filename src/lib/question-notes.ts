@@ -12,6 +12,162 @@
 export type QuestionNote = { evidence: string; optionNotes: string[] };
 
 export const questionNotes: Record<string, QuestionNote> = {
+  lc1: {
+    evidence: "so we have moved your appointment to Friday at ten o'clock",
+    optionNotes: [
+      "Đó là lịch cũ, thứ vừa bị đổi vì bác sĩ nghỉ hôm ấy.",
+      "Ghép sai: thứ Năm là ngày cũ, mười giờ là giờ mới.",
+      "Ghép sai theo chiều ngược lại: thứ Sáu là ngày mới, 9h30 là giờ cũ.",
+      "Đúng: lịch mới là thứ Sáu, mười giờ.",
+    ],
+  },
+  lc2: {
+    evidence:
+      "Please remember to bring the results of the blood test you had in June",
+    optionNotes: [
+      "Đúng: thiếu kết quả xét nghiệm máu tháng Sáu thì bác sĩ phải cho làm lại.",
+      "Tin nhắn không nhắc tới giấy giới thiệu.",
+      "Không có chi tiết nào về thẻ thanh toán.",
+      "Danh sách thuốc không được nhắc tới trong tin nhắn này.",
+    ],
+  },
+  lc3: {
+    evidence:
+      "The clinic entrance on Hoa Street is closed for repairs until the end of the month.",
+    optionNotes: [
+      "Tin nhắn không nói cửa này dành riêng cho nhân viên.",
+      "Đúng: cửa đang sửa tới cuối tháng nên bệnh nhân phải đi cửa bên.",
+      "Đi thẳng lên tầng ba là đường từ cửa bên cạnh hiệu thuốc.",
+      "Không có mốc năm giờ nào gắn với cửa này; năm giờ là hạn gọi lại.",
+    ],
+  },
+  lc4: {
+    evidence: "please check in at the desk first so we know you are here",
+    optionNotes: [
+      "Tin nhắn không nhắc tới việc thanh toán.",
+      "Kết quả xét nghiệm là thứ bệnh nhân mang tới, không phải thứ tới lấy.",
+      "Đúng: lý do được nói thẳng là để nhân viên biết bệnh nhân đã tới.",
+      "Đổi bác sĩ là việc khác; tin nhắn chỉ mời gọi lại nếu thứ Sáu không tiện.",
+    ],
+  },
+  lb1: {
+    evidence:
+      "Buses will run every fifteen minutes instead of every ten, so please allow extra time.",
+    optionNotes: [
+      "Đó là tần suất bình thường, thứ đang bị thay.",
+      "Đúng: tuần này giãn còn mười lăm phút một chuyến.",
+      "Không có mốc hai mươi phút trong thông báo.",
+      "Nửa tiếng một chuyến là quá xa so với con số được nêu.",
+    ],
+  },
+  lb2: {
+    evidence:
+      "The nearest stop is outside the post office, about four hundred metres further along.",
+    optionNotes: [
+      "Đại học chỉ được nhắc tới như điểm mà tuyến 18 chạy tới.",
+      "Đúng: điểm dừng gần nhất là trước bưu điện.",
+      "Bệnh viện chính là điểm dừng bị bỏ trong tuần này.",
+      "Hiệu thuốc không xuất hiện trong thông báo về xe buýt.",
+    ],
+  },
+  lb3: {
+    evidence:
+      "If you use a monthly card, you do not need to do anything; the card will be accepted on both routes.",
+    optionNotes: [
+      "Ngược với thông báo: thẻ tháng dùng được trên cả hai tuyến.",
+      "Đúng: thẻ được chấp nhận ở cả hai tuyến và người dùng không phải làm gì thêm.",
+      "Không có yêu cầu đăng ký nào.",
+      "Vé tuyến 52 còn dùng được cho tuyến 18, nên hạn chế này không đúng.",
+    ],
+  },
+  lb4: {
+    evidence: "The change begins today and ends on Sunday evening.",
+    optionNotes: [
+      "Thông báo nói rõ đây là thay đổi có ngày kết thúc, không phải tuyến mới.",
+      "Đúng: thay đổi kéo dài tới tối Chủ nhật, trong thời gian thi công đường.",
+      "Không có chi tiết nào về giá vé tăng.",
+      "Lịch chạy mới chỉ áp dụng trong tuần này.",
+    ],
+  },
+  lt1: {
+    evidence:
+      "It will not raise your score by itself. What it gives you is eight weeks of feedback on your own writing",
+    optionNotes: [
+      "Người nói bác bỏ đúng điều này ngay ở đầu buổi.",
+      "Đúng: thứ khóa học đưa ra là tám tuần nhận xét bài viết, không phải một mức điểm.",
+      "Ngược lại: nghỉ nộp bài hai tuần liền là trường sẽ liên hệ.",
+      "Học phí có được nhắc tới nhưng không so sánh với nơi khác.",
+    ],
+  },
+  lt2: {
+    evidence:
+      "if you miss two in a row, we will contact you, because people who stop submitting usually stop attending soon afterwards",
+    optionNotes: [
+      "Không ai bị mất chỗ ngay; trường liên hệ trước.",
+      "Không có khoản phí phạt nào.",
+      "Đúng: trường liên hệ, vì ngừng nộp bài thường là dấu hiệu sắp bỏ học.",
+      "Không có chuyện chuyển sang lớp sau.",
+    ],
+  },
+  lt3: {
+    evidence:
+      "Marking every error takes the teacher's time and teaches the learner very little",
+    optionNotes: [
+      "Người nói cho rằng cách đó không hiệu quả, nên không thể là cách nhanh nhất.",
+      "Không có phân biệt theo trình độ trong phần này.",
+      "Đúng: tốn thời gian giáo viên mà người học thu được rất ít.",
+      "Lớp nhỏ là vì giữ ở mức mười hai người, không liên quan tới cách sửa lỗi.",
+    ],
+  },
+  lt4: {
+    evidence:
+      "We do not refund places given up for other reasons, because the seat cannot be filled once the course has started.",
+    optionNotes: [
+      "Đúng: lớp chỉ mười hai chỗ, hết nhanh, và chỗ bỏ giữa chừng không bù được.",
+      "Ngược lại: chỗ hết nhanh nên tuần hai thường đã không còn.",
+      "Không có chi tiết nào cho phép nhượng chỗ cho người khác.",
+      "Không có ưu tiên nào dành cho học viên cũ.",
+    ],
+  },
+  lg1: {
+    evidence:
+      "because a previous scheme in Block A failed when nobody explained it",
+    optionNotes: [
+      "Không ai yêu cầu thông báo dài hơn.",
+      "Đúng: lần trước ở Block A thất bại vì không ai giải thích.",
+      "Quỹ tòa nhà được nhắc tới như nơi nhận khoản tiết kiệm, không phải chỗ đang cạn.",
+      "Đội thu gom chỉ được nhắc trong phần đếm thùng.",
+    ],
+  },
+  lg2: {
+    evidence: "Food waste has its own green bin beside the bicycle store.",
+    optionNotes: [
+      "Thùng xanh dương dành cho giấy, nhựa và kim loại.",
+      "Thùng xám là cho phần rác còn lại.",
+      "Đúng: rác thực phẩm có thùng xanh lá riêng cạnh nhà để xe đạp.",
+      "Thông báo không cho phép bỏ tùy thùng dù có gói kín.",
+    ],
+  },
+  lg3: {
+    evidence:
+      "please tell the office rather than moving the bags yourself, because the collection team counts the bins",
+    optionNotes: [
+      "Đó đúng là việc thông báo yêu cầu không làm.",
+      "Không có hướng dẫn nào bảo chờ sang tuần.",
+      "Đúng: báo văn phòng, vì đội thu gom đếm theo thùng.",
+      "Đổ sang thùng xám là làm hỏng chính việc phân loại.",
+    ],
+  },
+  lg4: {
+    evidence:
+      "The scheme only works if it is easy enough to follow on a busy evening.",
+    optionNotes: [
+      "Đúng: người nói đặt điều kiện dễ làm lên trên, và nói rõ không bắt rửa hộp hay bóc nhãn.",
+      "Người nói nói thẳng là không yêu cầu rửa hộp.",
+      "Không có yêu cầu kiểm tra thùng mỗi sáng.",
+      "Thông báo áp dụng cho cả Block C chứ không tùy ai muốn tham gia.",
+    ],
+  },
   rn1: {
     evidence:
       "Still, she believes the night team deserves to be described accurately rather than treated as a footnote to the day.",
