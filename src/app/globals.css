@@ -1527,6 +1527,38 @@ textarea:focus-visible {
   display: block;
   color: #5a6a7e;
 }
+.audio-controls {
+  flex-wrap: wrap;
+}
+.audio-seek {
+  margin: 4px 0 12px;
+}
+/* The sentence position is written out beside the bar; the bar alone never
+   carries the information. */
+.audio-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #dce5f4;
+  overflow: hidden;
+}
+.audio-track span {
+  display: block;
+  height: 100%;
+  background: #43618f;
+  border-radius: 999px;
+}
+.audio-seek-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+.audio-position {
+  font-size: 12px;
+  color: #43618f;
+  min-width: 86px;
+}
 .tips-list {
   padding-left: 20px;
   margin: 12px 0;

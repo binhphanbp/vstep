@@ -295,6 +295,27 @@ test("a word she got wrong can join the vocabulary garden", async ({
   await expect(page.locator(".vocab-list-item")).toHaveCount(0);
 });
 
+test("the listening player can pause, seek by sentence and repeat one", async ({
+  page,
+}) => {
+  await page.goto("/practice/listening-clinic");
+  const panel = page.locator(".audio-panel");
+  await expect(panel).toContainText("Câu 1/");
+  // Pausing is only meaningful while something is playing.
+  await expect(panel.getByRole("button", { name: "Tạm dừng" })).toBeDisabled();
+  await panel.getByRole("button", { name: "Câu sau" }).click();
+  await expect(panel.locator(".audio-position")).toContainText("Câu 2/");
+  await panel.getByRole("button", { name: "Nghe lại câu này" }).click();
+  await expect(panel.locator(".audio-position")).toContainText("Câu 2/");
+  await panel.getByRole("button", { name: "Câu trước" }).click();
+  await expect(panel.locator(".audio-position")).toContainText("Câu 1/");
+  // The position is written out, not carried by the bar alone.
+  await expect(panel.getByRole("img")).toHaveAttribute(
+    "aria-label",
+    /Đang ở câu 1 trên \d+/,
+  );
+});
+
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({
   page,
 }) => {
