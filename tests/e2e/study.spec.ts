@@ -273,7 +273,10 @@ test("vocabulary recall schedules and persists", async ({ page }) => {
 });
 test("library search, skill filter, and unknown route", async ({ page }) => {
   await page.goto("/practice?skill=reading");
-  await expect(page.locator(".lesson-card")).toHaveCount(4);
+  // Counted from the bank so that adding a lesson never fails this filter test.
+  await expect(page.locator(".lesson-card")).toHaveCount(
+    lessons.filter((lesson) => lesson.skill === "reading").length,
+  );
   await page.getByRole("textbox", { name: "Tìm bài học" }).fill("commute");
   await expect(page.locator(".lesson-card")).toHaveCount(1);
   await page.getByRole("textbox", { name: "Tìm bài học" }).fill("zzzz");

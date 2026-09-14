@@ -122,6 +122,21 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Màn "Chỗ mình hay vấp" (B2).** Sổ lỗi có thêm phần đầu trang theo dạng câu: mỗi dòng một thanh tỉ lệ kèm con số viết bằng chữ ("Sai 6/7 câu"), nhãn riêng cho số câu sai dù đã chọn "Rất chắc", và một liên kết "Luyện dạng này" dẫn thẳng tới bài chứa dạng đó (ưu tiên bài chưa làm). Dạng chưa đủ 3 câu thì nói thẳng "chưa đủ để kết luận" thay vì vẽ thanh rỗng. Thanh dùng một màu duy nhất, có `role="img"` kèm nhãn đọc được, và con số luôn nằm ở phần chữ nên không có thông tin nào chỉ nằm ở màu.
 - Đo lại ở 390px và chạy axe WCAG A/AA: đạt.
 
+## Đợt 3 của kế hoạch 14/09 (A4): mở rộng ngân hàng — 16 bài mới
+
+- **Thêm 4 bài Đọc ngắn**: `reading-nightshift` (Công việc, B2, 10 phút), `reading-market` (Cuộc sống Sài Gòn, B1, 10 phút), `reading-homestay` (Du lịch, B1, 8 phút), `reading-sleep` (Sức khoẻ, B2, 10 phút). Bài mới mang mã mới; không sửa một chữ nào của bài đã phát hành nên không bài nào phải lên version và lịch ôn hiện có không mất.
+- **Viết theo ma trận dạng câu.** 20 câu mới phân bố: 4 ý chính, 5 thông tin chi tiết, 4 suy luận, 2 từ vựng trong ngữ cảnh, 2 mục đích tác giả, 2 quan điểm tác giả, 1 từ tham chiếu — không bài nào quá 2 câu chi tiết, tức không bài nào là bài dò thông tin.
+- **Đo lại chu kỳ đáp án sau khi thêm**: ngân hàng Đọc ngắn 40 câu, đoán mù theo chu kỳ tốt nhất còn **45%** (ngưỡng test là 65% cho ngân hàng nhỏ), phân bố đáp án A/B/C/D là 9/9/10/12 và không bài nào có hai đáp án giống nhau liên tiếp quá hai lần.
+- **Chú giải đầy đủ ngay từ đầu**: cả 20 câu đều có trích dẫn nguyên văn khớp ngữ liệu và bốn ghi chú phương án, đúng chuẩn F11 — test chú giải phủ toàn bộ 12 bài Đọc/Nghe ngắn hiện có.
+- **Kho cho kế hoạch ngày sau bốn bài Đọc**: 141 → 219 phút. Mô phỏng 14 ngày vẫn đưa ra được mọi bài trong thư viện.
+- Test lọc thư viện trong E2E nay đếm số bài từ chính ngân hàng thay vì con số cứng, nên thêm bài không còn làm đỏ một phép kiểm tra không liên quan.
+- **Thêm 4 bài Nghe ngắn**: `listening-clinic` (Sức khoẻ, B1, tin nhắn thoại đổi lịch hẹn), `listening-bus` (Giao thông, B1, thông báo đổi tuyến tạm thời), `listening-course` (Giáo dục, B2, buổi giới thiệu khóa học), `listening-recycling` (Môi trường, B2, thông báo phân loại rác). 16 câu mới chỉ có **5 câu chi tiết**; phần còn lại là thông tin thay đổi, ý chính, suy luận, mục đích và quan điểm người nói — đúng hướng đã sửa ở F13, nơi phần Nghe từng có 29/35 câu chi tiết.
+- **Đo lại ngân hàng Nghe ngắn sau khi thêm** (32 câu): đoán mù theo chu kỳ tốt nhất **50%**, phân bố đáp án 7/7/9/9. Cả 16 câu đều có trích dẫn nguyên văn khớp transcript và bốn ghi chú phương án.
+- **Thêm 4 bài Đọc và 4 bài Nghe nữa** để khép A4: `reading-tutor` (Giáo dục), `reading-river` (Môi trường), `reading-bikes` (Giao thông), `reading-interview` (Công việc); `listening-hotel` (Du lịch), `listening-water` (Cuộc sống Sài Gòn), `listening-handover` (Công việc), `listening-pharmacy` (Sức khoẻ).
+- **Kết quả cuối đợt**: thư viện 14 → **30 bài** (12 Đọc, 12 Nghe, 3 Viết, 3 Nói); kho cho kế hoạch ngày 141 → **329 phút**; build sinh 61 route (trước là 45); chú giải bằng chứng phủ **136/183 câu**.
+- **Đo lại toàn ngân hàng ngắn sau khi thêm**: Đọc 60 câu — đoán mù theo chu kỳ **40%**, phân bố 15/13/14/18; Nghe 48 câu — **43,8%**, phân bố 12/10/13/13. Cả hai đều tốt hơn trước khi thêm bài, vì ngân hàng lớn hơn thì một mẫu lặp khó trùng hơn.
+- **Một điều chỉnh test đã ghi lại trong kế hoạch**: phép kiểm tra "mọi bài đều có đường vào kế hoạch ngày" nâng cửa sổ mô phỏng từ 14 lên 21 ngày, vì thư viện nay nhiều hơn hai tuần học; bài muộn nhất xuất hiện ngày 15. Điều được kiểm tra vẫn là không bài nào nằm ngoài tầm với.
+
 ## Bằng chứng kiểm tra
 
 - 90 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
@@ -136,6 +151,6 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 ## Giới hạn còn mở
 
-Chú giải bằng chứng phủ 64/111 câu Reading/Listening: toàn bộ 36 câu của 8 bài ngắn, cộng 28 câu Đọc của đề đầy đủ. 35 câu Nghe và 12 câu Đọc còn lại của đề đầy đủ chưa có chú giải, nên các câu này vẫn chỉ hiện phần giải thích cũ. Kiểm thử chỉ xác minh trích dẫn khớp ngữ liệu và cấu trúc ghi chú, không thay cho thẩm định chuyên môn về độ khó hay tính chuẩn xác của lập luận.
+Chú giải bằng chứng phủ 136/183 câu Reading/Listening: toàn bộ 108 câu của 24 bài ngắn, cộng 28 câu Đọc của đề đầy đủ. 35 câu Nghe và 12 câu Đọc còn lại của đề đầy đủ chưa có chú giải, nên các câu này vẫn chỉ hiện phần giải thích cũ. Kiểm thử chỉ xác minh trích dẫn khớp ngữ liệu và cấu trúc ghi chú, không thay cho thẩm định chuyên môn về độ khó hay tính chuẩn xác của lập luận.
 
 Đã có môi trường HTTPS pilot nhưng chưa thử đăng nhập/sync bằng tài khoản thật trên host, micro/giọng đọc trên thiết bị người học, bản thu người nói, thẩm định độ khó từ giáo viên hay chức năng chấm Viết/Nói. Supabase thật đã được cấu hình và kiểm thử riêng theo `STATUS.md`. Đã có smoke test bằng engine WebKit nhưng chưa xác minh Safari/iOS trên thiết bị thật. Đồng bộ giữa tab giúp tránh ghi đè tuần tự thường gặp, không phải giao thức hợp nhất chỉnh sửa đồng thời như trình soạn thảo cộng tác. Dữ liệu vẫn cần sao lưu theo README, âm thanh tải riêng.

@@ -254,7 +254,11 @@ describe("scoring and honest progress", () => {
     s.profile = { ...s.profile, onboarded: true };
     const offered = new Set<string>();
     let flagged = false;
-    for (let day = 0; day < 14; day++) {
+    // Three weeks, not two: after A4 the library holds more material than a
+    // fortnight of 30-minute days, which is the point of expanding it. The
+    // claim under test is that nothing is unreachable, not that everything
+    // arrives inside two weeks.
+    for (let day = 0; day < 21; day++) {
       const when = new Date(
         Date.parse("2026-09-01T10:00:00+07:00") + day * 86400000,
       );
@@ -283,7 +287,7 @@ describe("scoring and honest progress", () => {
     }
     expect(offered.has("writing-essay")).toBe(true);
     expect(flagged).toBe(true);
-    // Every lesson in the library now has a route into the daily plan.
+    // Every lesson in the library still has a route into the daily plan.
     expect(offered.size).toBe(lessons.length);
   });
   it("reads the error rate of each question type from first meetings only", () => {
