@@ -8,6 +8,8 @@ Rà soát mới ngày 13/09/2026: [AUDIT-2026-09-13.md](AUDIT-2026-09-13.md). Re
 
 Đợt F13 tiếp sau `4c3554a`: ngân hàng câu hỏi có ma trận dạng câu (`src/lib/question-types.ts`), 14 câu bị gắn nhãn sai đã sửa lại và 8 câu Đọc được viết mới nên phần Đọc của đề còn 14/40 câu chi tiết (trước 20/40) và phần Nghe còn 18/35 (trước 29/35). Bốn bài Đọc của đề lên version 4, `full-reading-memory` lên 5.
 
+Kế hoạch hoàn thiện và nâng cấp tiếp theo: [PLAN-2026-09-14.md](PLAN-2026-09-14.md). Phát hiện chính của bản kế hoạch: toàn bộ nội dung chưa từng gặp chỉ khoảng 404 phút, tức chừng 13 ngày ở nhịp 30 phút/ngày, và chỉ số độ chính xác đang trộn lần đầu với lần làm lại.
+
 Rà soát và kế hoạch thực thi: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). Release `6cdbbfe` đạt 57 unit, 40 E2E, build 45 route và audit dependency trong GitHub Actions run `34733331145`; smoke SHA run `34733348658` cũng đạt. Migration mới đã thu hồi direct DML và buộc ghi qua RPC revision trên Supabase production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. UAT thiết bị thật vẫn còn mở.
 
 ## Đã hoàn thành trong môi trường local
