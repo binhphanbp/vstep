@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 13/09/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc hiện hành là `32422fa` sau bốn đợt sửa tiếp theo (F20, F14–F19, F13); số liệu kiểm thử hiện tại là 81 unit và 44 E2E, xem STATUS.md và QUALITY.md.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13; nhánh chính hiện đã đi tiếp qua đợt 1 và đợt 2 của kế hoạch 14/09 và đạt 90 unit, 46 E2E. Xem STATUS.md và QUALITY.md.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>

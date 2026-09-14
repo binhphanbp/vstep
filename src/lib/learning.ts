@@ -500,6 +500,71 @@ export function skillStats(state: StudyState, skill: Skill) {
     practiceAccuracy: recentQuestions(again.filter((a) => a.total > 0)),
   };
 }
+/**
+ * How each kind of question is going, measured on first meetings only. "Weak
+ * at Reading" is not something a learner can act on; "weak at vocabulary in
+ * context" is, and since every question carries a type this is already in the
+ * data — it was simply never read.
+ */
+export function questionTypeStats(state: StudyState) {
+  const firstIds = new Set(firstAttempts(state.attempts).map((a) => a.id));
+  const stats = new Map<
+    string,
+    { tag: string; asked: number; wrong: number; confidentWrong: number }
+  >();
+  for (const attempt of state.attempts) {
+    if (!firstIds.has(attempt.id)) continue;
+    const lesson =
+      attempt.lessonSnapshot ??
+      allLessons.find((candidate) => candidate.id === attempt.lessonId);
+    if (!lesson) continue;
+    for (const question of lesson.questions) {
+      const answer = attempt.answers[question.id];
+      // A blank says nothing about the type; it usually means time ran out.
+      if (answer === undefined) continue;
+      const entry = stats.get(question.tag) ?? {
+        tag: question.tag,
+        asked: 0,
+        wrong: 0,
+        confidentWrong: 0,
+      };
+      entry.asked += 1;
+      if (answer !== question.answer) {
+        entry.wrong += 1;
+        if (attempt.confidence?.[question.id] === "sure")
+          entry.confidentWrong += 1;
+      }
+      stats.set(question.tag, entry);
+    }
+  }
+  return [...stats.values()].sort((a, b) => b.asked - a.asked);
+}
+/** Enough questions of a type before its error rate means anything. */
+export const TYPE_EVIDENCE_MINIMUM = 3;
+/** Question types going wrong often enough to steer what is offered next. */
+export function weakQuestionTypes(state: StudyState) {
+  return questionTypeStats(state)
+    .filter((item) => item.asked >= TYPE_EVIDENCE_MINIMUM && item.wrong > 0)
+    .map((item) => ({ ...item, ratio: item.wrong / item.asked }))
+    .sort((a, b) => b.ratio - a.ratio || b.confidentWrong - a.confidentWrong);
+}
+/**
+ * A lesson worth opening to practise one kind of question. Prefers material
+ * she has not met, so "luyện dạng này" does not send her back through answers
+ * she already knows.
+ */
+export function lessonForType(state: StudyState, tag: string) {
+  const carrying = lessons.filter((lesson) =>
+    lesson.questions.some((question) => question.tag === tag),
+  );
+  const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
+  const count = (lesson: (typeof lessons)[number]) =>
+    lesson.questions.filter((question) => question.tag === tag).length;
+  return (
+    carrying.find((lesson) => !met.has(lesson.id)) ??
+    [...carrying].sort((a, b) => count(b) - count(a))[0]
+  );
+}
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
 export function todayPlan(state: StudyState, now = new Date()) {
@@ -517,6 +582,9 @@ export function todayPlan(state: StudyState, now = new Date()) {
       : state.profile.dailyMinutes;
   const examDays = daysUntil(state.profile.examDate, now);
   const dueMistakes = mistakes(history, now).filter((item) => item.due);
+  // The two kinds of question going wrong most often. Naming the type is what
+  // makes the plan actionable: "weak at Reading" is not something to practise.
+  const weakTypes = weakQuestionTypes(history).slice(0, 2);
   const ranked = lessons
     .map((lesson) => {
       const done = history.attempts.filter((a) => a.lessonId === lesson.id);
@@ -539,18 +607,33 @@ export function todayPlan(state: StudyState, now = new Date()) {
         (item) => item.confidence === "sure",
       ).length;
       const examUrgent = examDays !== null && examDays >= 0 && examDays <= 30;
+      // How much of this lesson trains a type she is getting wrong.
+      const weakHere = weakTypes
+        .map((type) => ({
+          ...type,
+          questions: lesson.questions.filter((q) => q.tag === type.tag).length,
+        }))
+        .filter((type) => type.questions > 0)
+        .sort((a, b) => b.ratio - a.ratio)[0];
       const score =
         (done.length === 0 ? 60 : 0) +
         (lesson.skill === state.profile.focus ? 20 : 0) +
         (state.profile.interests.includes(lesson.topic) ? 8 : 0) +
         (stat.accuracy !== null && stat.accuracy < 65 ? 15 : 0) +
         Math.min(100, dueForLesson.length * 45) +
-        confidentErrors * 30 +
+        // Capped: at 30 a point each, five confident errors in one lesson used
+        // to outweigh everything else and pin the plan to that lesson.
+        Math.min(45, confidentErrors * 15) +
+        (weakHere ? Math.min(24, 8 * weakHere.questions) : 0) +
         (recencyGap !== null ? Math.min(12, Math.floor(recencyGap / 3)) : 0) +
         (examUrgent && lesson.level === "B2" ? 12 : 0) +
         (state.profile.level === "starting" && lesson.level === "B1" ? 10 : 0) -
         done.length * 4;
       const reasons: string[] = [];
+      if (weakHere)
+        reasons.push(
+          `${weakHere.tag}: sai ${weakHere.wrong}/${weakHere.asked} câu đã làm`,
+        );
       if (confidentErrors)
         reasons.push(
           `${confidentErrors} câu sai dù đã chọn “Rất chắc” cần sửa ngay`,
@@ -571,7 +654,13 @@ export function todayPlan(state: StudyState, now = new Date()) {
         reasons.push("Bài mới để mở rộng kỹ năng");
       if (mood === "low" && reasons.length < 2)
         reasons.push(`Vừa nhịp học nhẹ ${budget} phút hôm nay`);
-      return { lesson, score, recencyGap, reasons: reasons.slice(0, 2) };
+      return {
+        lesson,
+        score,
+        recencyGap,
+        done: done.length,
+        reasons: reasons.slice(0, 2),
+      };
     })
     .sort((a, b) => b.score - a.score);
   // A lesson longer than the whole budget can never satisfy `minutes <=
@@ -585,7 +674,19 @@ export function todayPlan(state: StudyState, now = new Date()) {
   const picked: typeof ranked = [];
   const longer: string[] = [];
   let remaining = budget;
+  // One slot always goes to material she has not met, while any is left. A
+  // learner who keeps answering wrong used to be served the same two lessons
+  // for a fortnight: the due-mistake bonus outweighed everything else, so the
+  // rest of the library became unreachable exactly when she needed variety.
+  const unseen = ranked.find(
+    (item) => item.done === 0 && item.lesson.minutes <= remaining,
+  );
+  if (unseen) {
+    picked.push(unseen);
+    remaining -= unseen.lesson.minutes;
+  }
   for (const item of ranked) {
+    if (picked.includes(item)) continue;
     const { lesson } = item;
     const asSplit =
       split(lesson, item.recencyGap) &&

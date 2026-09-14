@@ -1568,6 +1568,49 @@ textarea:focus-visible {
   margin-top: 5px;
   accent-color: var(--rose);
 }
+.weak-spots ul {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+.weak-spots li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.weak-spots li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.weak-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.weak-head strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+/* The count is written out beside the bar: the proportion is never carried by
+   the bar's length alone. */
+.weak-head span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.weak-spots .skill-progress-track {
+  margin: 9px 0 0;
+}
+.weak-spots .skill-progress-track span {
+  background: var(--rose);
+}
+.weak-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  margin-top: 10px;
+}
 .skill-accuracy {
   display: flex;
   flex-direction: column;

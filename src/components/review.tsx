@@ -10,7 +10,13 @@ import {
   Volume2,
 } from "lucide-react";
 import { vocabulary } from "@/lib/content";
-import { mistakes, scheduleReview } from "@/lib/learning";
+import {
+  lessonForType,
+  mistakes,
+  questionTypeStats,
+  scheduleReview,
+  TYPE_EVIDENCE_MINIMUM,
+} from "@/lib/learning";
 import { useStudy } from "./study-provider";
 import { QuestionCard } from "./practice";
 import { AudioPlayer } from "./audio-tools";
@@ -272,6 +278,80 @@ export function VocabularyPage() {
     </div>
   );
 }
+/**
+ * The shape of the learner's mistakes, not the list of them. A notebook of
+ * individual cards says what went wrong; this says what keeps going wrong, and
+ * sends her straight at it.
+ */
+function WeakSpots() {
+  const { state } = useStudy();
+  const types = questionTypeStats(state);
+  if (!types.length) return null;
+  const ranked = [...types].sort(
+    (a, b) => b.wrong / b.asked - a.wrong / a.asked || b.asked - a.asked,
+  );
+  return (
+    <section className="panel weak-spots">
+      <div className="section-heading">
+        <div>
+          <h2>Chỗ mình hay vấp</h2>
+          <p>
+            Tính trên lần đầu gặp mỗi bài, vì làm lại bài đã biết đáp án thì
+            không nói lên điều gì.
+          </p>
+        </div>
+      </div>
+      <ul>
+        {ranked.map((type) => {
+          const enough = type.asked >= TYPE_EVIDENCE_MINIMUM;
+          const lesson = lessonForType(state, type.tag);
+          return (
+            <li key={type.tag}>
+              <div className="weak-head">
+                <strong>{type.tag}</strong>
+                <span>
+                  {enough
+                    ? `Sai ${type.wrong}/${type.asked} câu`
+                    : `Mới làm ${type.asked} câu — chưa đủ để kết luận`}
+                </span>
+              </div>
+              {enough && (
+                <div
+                  className="skill-progress-track"
+                  role="img"
+                  aria-label={`Sai ${type.wrong} trên ${type.asked} câu dạng ${type.tag}`}
+                >
+                  <span
+                    style={{
+                      width: `${Math.round((type.wrong / type.asked) * 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
+              <div className="weak-foot">
+                {type.confidentWrong > 0 && (
+                  <span className="confidence-pill priority">
+                    {type.confidentWrong} câu sai dù đã chọn “Rất chắc”
+                  </span>
+                )}
+                {lesson && (
+                  <Link className="text-link" href={`/practice/${lesson.id}`}>
+                    Luyện dạng này
+                    <ArrowRight size={14} />
+                  </Link>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="help-copy">
+        Kế hoạch mỗi ngày cũng ưu tiên hai dạng đang sai nhiều nhất, nên{" "}
+        {state.profile.name} không phải tự nhớ danh sách này.
+      </p>
+    </section>
+  );
+}
 export function MistakesPage() {
   const { state, update, toast } = useStudy();
   const [filter, setFilter] = useState<"due" | "all">("due");
@@ -327,6 +407,7 @@ export function MistakesPage() {
           )}
         </div>
       </div>
+      <WeakSpots />
       <div className="filters">
         <button
           type="button"
