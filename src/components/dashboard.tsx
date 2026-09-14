@@ -16,7 +16,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useStudy } from "./study-provider";
-import { todayPlan, localDay, skillStats, dayOffset } from "@/lib/learning";
+import {
+  todayPlan,
+  localDay,
+  skillStats,
+  dayOffset,
+  milestones,
+} from "@/lib/learning";
 import { vocabulary, skillNames, type Skill } from "@/lib/content";
 import { SkillIcon } from "./icons";
 import { useNow } from "@/lib/use-now";
@@ -38,6 +44,9 @@ export function Dashboard() {
     (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
   ).length;
   const week = Array.from({ length: 7 }, (_, i) => dayOffset(today, i - 6));
+  // Only milestones that really happened; an empty list shows the quote
+  // instead, because a congratulation she did not earn is worse than none.
+  const earned = milestones(state, new Date(now)).slice(0, 2);
   const completed = new Set(state.attempts.map((a) => a.lessonId));
   const dateLabel = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
@@ -386,17 +395,33 @@ export function Dashboard() {
           </section>
           <section className="panel small-win">
             <div className="panel-heading">
-              <h2>Một điều nho nhỏ</h2>
+              <h2>
+                {earned.length ? "Việc đã xảy ra thật" : "Một điều nho nhỏ"}
+              </h2>
               <Heart size={17} />
             </div>
-            <blockquote>
-              “You don’t have to be great to start. You have to start to grow.”
-            </blockquote>
-            <p>
-              Không cần giỏi mới bắt đầu.
-              <br />
-              Bắt đầu rồi, mình sẽ giỏi hơn.
-            </p>
+            {earned.length ? (
+              <ul className="milestone-list">
+                {earned.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.title}</strong>
+                    <span>{item.detail}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <>
+                <blockquote>
+                  “You don’t have to be great to start. You have to start to
+                  grow.”
+                </blockquote>
+                <p>
+                  Không cần giỏi mới bắt đầu.
+                  <br />
+                  Bắt đầu rồi, mình sẽ giỏi hơn.
+                </p>
+              </>
+            )}
             <div className="small-win-footer">
               <span className="status-dot" />
               {completed.size

@@ -2833,3 +2833,60 @@ details .passage {
     white-space: normal;
   }
 }
+.week-plan-phase {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.week-plan-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.week-plan-list li {
+  position: relative;
+  padding: 10px 0 10px 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.week-plan-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.week-plan-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+}
+.milestone-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+.milestone-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.milestone-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.milestone-list strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.milestone-list span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}

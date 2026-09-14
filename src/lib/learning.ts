@@ -1,5 +1,5 @@
 import * as z from "zod/mini";
-import { lessons, type Question, type Skill } from "./content";
+import { lessons, vocabulary, type Question, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
@@ -565,6 +565,182 @@ export function lessonForType(state: StudyState, tag: string) {
     [...carrying].sort((a, b) => count(b) - count(a))[0]
   );
 }
+/**
+ * The exam date turned into something to do this week.
+ *
+ * Before this, `examDate` did one thing: add twelve points to B2 lessons when
+ * the exam was thirty days away or closer. That is almost nothing, and it said
+ * the same thing on day 30 as on day 2. The weeks before an exam are not
+ * interchangeable: there is a stretch for building the base, a stretch for
+ * drilling the question types that are actually going wrong, and a last two
+ * weeks that should look like the exam itself.
+ *
+ * Every line this returns is built from the learner's own data. When there is
+ * no exam date it returns null and the interface says so plainly rather than
+ * inventing a deadline.
+ */
+export const EXAM_REHEARSAL_DAYS = 14;
+export const EXAM_DRILL_DAYS = 42;
+export type ExamWeekPlan = {
+  days: number;
+  weeks: number;
+  key: "foundation" | "weak-types" | "rehearsal";
+  title: string;
+  focus: string;
+  thisWeek: string[];
+};
+export function examWeekPlan(
+  state: StudyState,
+  now = new Date(),
+): ExamWeekPlan | null {
+  const days = daysUntil(state.profile.examDate, now);
+  if (days === null || days < 0) return null;
+  const weeks = Math.ceil(days / 7);
+  const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
+  const unseen = lessons.filter((lesson) => !met.has(lesson.id)).length;
+  const dueWords = vocabulary.filter((word) => {
+    const review = state.reviews[word.id];
+    return !review || Date.parse(review.due) <= now.getTime();
+  }).length;
+  const dueMistakes = mistakes(state, now).filter((item) => item.due).length;
+  const weak = weakQuestionTypes(state).slice(0, 2);
+  const satExam = state.attempts.some((attempt) =>
+    attempt.id.startsWith("exam:"),
+  );
+  const minutes = state.profile.dailyMinutes;
+  const thisWeek: string[] = [];
+  const key =
+    days <= EXAM_REHEARSAL_DAYS
+      ? "rehearsal"
+      : days <= EXAM_DRILL_DAYS
+        ? "weak-types"
+        : "foundation";
+  if (key === "foundation") {
+    thisWeek.push(
+      unseen
+        ? `Học ${Math.min(unseen, 5)} bài chưa gặp trong thư viện (còn ${unseen} bài)`
+        : `Giữ nhịp ${minutes} phút mỗi ngày và ôn lại bài đã học`,
+    );
+    if (dueWords) thisWeek.push(`Ôn ${dueWords} thẻ từ đã đến hạn`);
+    if (!satExam) thisWeek.push("Thử một đề rút gọn để biết nhịp làm bài");
+  } else if (key === "weak-types") {
+    if (weak.length)
+      for (const type of weak)
+        thisWeek.push(
+          `Luyện dạng “${type.tag}”: đang sai ${type.wrong}/${type.asked} câu đã làm`,
+        );
+    else
+      thisWeek.push(
+        "Chưa đủ dữ liệu để chỉ ra dạng câu yếu — làm thêm một bài Đọc và một bài Nghe",
+      );
+    if (dueMistakes) thisWeek.push(`Sửa ${dueMistakes} lỗi đã đến lịch ôn`);
+    if (!satExam)
+      thisWeek.push("Làm một đề đủ cấu trúc trước khi vào hai tuần cuối");
+  } else {
+    thisWeek.push("Làm đề đủ cấu trúc đúng giờ, ít nhất một lần trong tuần");
+    if (dueMistakes) thisWeek.push(`Ôn ${dueMistakes} câu sai đã đến hạn`);
+    thisWeek.push(`Giữ nhịp ${minutes} phút mỗi ngày, không mở thêm dạng mới`);
+  }
+  const title =
+    key === "foundation"
+      ? "Giai đoạn xây nền"
+      : key === "weak-types"
+        ? "Giai đoạn luyện dạng đang sai"
+        : "Hai tuần cuối: tập nhịp thi";
+  const focus =
+    key === "foundation"
+      ? `Còn ${days} ngày, khoảng ${weeks} tuần. Đủ thời gian để đi hết thư viện trước khi luyện sâu.`
+      : key === "weak-types"
+        ? `Còn ${days} ngày. Đây là lúc luyện đúng dạng câu đang sai thay vì học dàn đều.`
+        : `Còn ${days} ngày. Việc chính bây giờ là quen nhịp đề và giữ sức, không học thêm dạng mới.`;
+  return { days, weeks, key, title, focus, thisWeek };
+}
+/**
+ * Milestones that actually happened.
+ *
+ * Every entry here traces back to a specific attempt, review or date in the
+ * learner's own history, and carries the evidence with it. When nothing has
+ * happened yet this returns an empty list and the interface shows nothing:
+ * a congratulation for an achievement that was not earned is worse than
+ * silence, because it teaches her not to believe the next one.
+ */
+export const STREAK_MILESTONE_DAYS = 3;
+export const LONG_MEMORY_DAYS = 60;
+export type Milestone = {
+  id: string;
+  title: string;
+  detail: string;
+  date: string;
+};
+export function milestones(state: StudyState, now = new Date()): Milestone[] {
+  const found: Milestone[] = [];
+  const history = [...state.attempts].sort(
+    (a, b) => Date.parse(a.date) - Date.parse(b.date),
+  );
+  const days = streak(state.attempts, now);
+  const last = history.at(-1);
+  if (days >= STREAK_MILESTONE_DAYS && last)
+    found.push({
+      id: `streak:${days}`,
+      title: `${days} ngày liên tiếp có mặt`,
+      detail: `Buổi gần nhất: ${localDay(last.date)}.`,
+      date: last.date,
+    });
+  const firstExam = history.find((attempt) => attempt.id.startsWith("exam:"));
+  if (firstExam)
+    found.push({
+      id: "exam:first",
+      title: "Đã hoàn thành một đề có giờ",
+      detail: `Lần đầu vào phòng thi thử: ${localDay(firstExam.date)}.`,
+      date: firstExam.date,
+    });
+  // A question type she used to get wrong and then answered without a single
+  // mistake. Both halves have to be real: the earlier error and the clean run.
+  const wrongBefore = new Set<string>();
+  const cleaned = new Map<string, Milestone>();
+  for (const attempt of history) {
+    const lesson =
+      attempt.lessonSnapshot ??
+      allLessons.find((candidate) => candidate.id === attempt.lessonId);
+    if (!lesson) continue;
+    const seen = new Map<string, { asked: number; wrong: number }>();
+    for (const question of lesson.questions) {
+      const answer = attempt.answers[question.id];
+      if (answer === undefined) continue;
+      const entry = seen.get(question.tag) ?? { asked: 0, wrong: 0 };
+      entry.asked += 1;
+      if (answer !== question.answer) entry.wrong += 1;
+      seen.set(question.tag, entry);
+    }
+    for (const [tag, entry] of seen) {
+      if (
+        entry.wrong === 0 &&
+        entry.asked >= TYPE_EVIDENCE_MINIMUM &&
+        wrongBefore.has(tag) &&
+        !cleaned.has(tag)
+      )
+        cleaned.set(tag, {
+          id: `type:${tag}`,
+          title: `Lần đầu đúng trọn dạng “${tag}”`,
+          detail: `${entry.asked}/${entry.asked} câu trong bài “${lesson.title}”, ngày ${localDay(attempt.date)}.`,
+          date: attempt.date,
+        });
+      if (entry.wrong > 0) wrongBefore.add(tag);
+    }
+  }
+  found.push(...cleaned.values());
+  for (const word of vocabulary) {
+    const review = state.reviews[word.id];
+    if (!review || review.interval < LONG_MEMORY_DAYS) continue;
+    found.push({
+      id: `word:${word.id}`,
+      title: `Từ “${word.word}” đã nhớ qua mốc ${LONG_MEMORY_DAYS} ngày`,
+      detail: `Lần ôn gần nhất ${review.lastDate}, hẹn lại sau ${Math.round(review.interval)} ngày.`,
+      date: `${review.lastDate}T12:00:00+07:00`,
+    });
+  }
+  return found.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+}
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
 export function todayPlan(state: StudyState, now = new Date()) {
@@ -581,6 +757,9 @@ export function todayPlan(state: StudyState, now = new Date()) {
       ? Math.min(15, state.profile.dailyMinutes)
       : state.profile.dailyMinutes;
   const examDays = daysUntil(state.profile.examDate, now);
+  // Yesterday's data decides today's phase too, for the same reason the rest
+  // of the plan uses `history`: today's plan should not move while she works.
+  const phase = examWeekPlan(history, now);
   const dueMistakes = mistakes(history, now).filter((item) => item.due);
   // The two kinds of question going wrong most often. Naming the type is what
   // makes the plan actionable: "weak at Reading" is not something to practise.
@@ -606,7 +785,10 @@ export function todayPlan(state: StudyState, now = new Date()) {
       const confidentErrors = dueForLesson.filter(
         (item) => item.confidence === "sure",
       ).length;
-      const examUrgent = examDays !== null && examDays >= 0 && examDays <= 30;
+      // The phase decides what the last weeks are for; a flat "30 days left"
+      // said the same thing on day 30 as on day 2.
+      const rehearsing = phase?.key === "rehearsal";
+      const drilling = phase?.key === "weak-types";
       // How much of this lesson trains a type she is getting wrong.
       const weakHere = weakTypes
         .map((type) => ({
@@ -626,7 +808,8 @@ export function todayPlan(state: StudyState, now = new Date()) {
         Math.min(45, confidentErrors * 15) +
         (weakHere ? Math.min(24, 8 * weakHere.questions) : 0) +
         (recencyGap !== null ? Math.min(12, Math.floor(recencyGap / 3)) : 0) +
-        (examUrgent && lesson.level === "B2" ? 12 : 0) +
+        (rehearsing && lesson.level === "B2" ? 18 : 0) +
+        (drilling && weakHere ? 10 : 0) +
         (state.profile.level === "starting" && lesson.level === "B1" ? 10 : 0) -
         done.length * 4;
       const reasons: string[] = [];
@@ -644,8 +827,10 @@ export function todayPlan(state: StudyState, now = new Date()) {
         reasons.push(`Độ chính xác ${stat.accuracy}% đang cần củng cố`);
       if (lesson.skill === state.profile.focus)
         reasons.push(`Đúng kỹ năng ${state.profile.name} đang ưu tiên`);
-      if (examUrgent && lesson.level === "B2")
-        reasons.push(`Còn ${examDays} ngày đến ngày thi, ưu tiên mức B2`);
+      if (rehearsing && lesson.level === "B2")
+        reasons.push(`Còn ${examDays} ngày: hai tuần cuối ưu tiên mức B2`);
+      if (drilling && weakHere && reasons.length < 2)
+        reasons.push(`Còn ${examDays} ngày: giai đoạn luyện dạng đang sai`);
       if (reasons.length < 2 && state.profile.interests.includes(lesson.topic))
         reasons.push(`Chủ đề hợp sở thích: ${lesson.topic}`);
       if (reasons.length < 2 && recencyGap !== null && recencyGap >= 7)
@@ -721,6 +906,8 @@ export function todayPlan(state: StudyState, now = new Date()) {
     budget,
     mood,
     examDays,
+    /** Null when no exam date is set: the interface must not invent one. */
+    phase,
   };
 }
 export function mistakes(state: StudyState, now = new Date()) {

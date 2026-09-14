@@ -226,6 +226,28 @@ test("the notebook shows the shape of the mistakes, not just the list", async ({
   await expect(page.locator("main h1")).toBeVisible();
 });
 
+test("the exam date becomes a plan for the week, and nothing without one", async ({
+  page,
+}) => {
+  await page.goto("/journey");
+  const panel = page.locator(".week-plan");
+  await expect(panel).toContainText("Chưa có ngày thi");
+  await page.goto("/settings");
+  const soon = new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10);
+  await page.getByLabel("Ngày thi dự kiến").fill(soon);
+  await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu");
+  await page.goto("/journey");
+  await expect(panel).toContainText("Hai tuần cuối");
+  await expect(panel).toContainText("đề đủ cấu trúc");
+  const far = new Date(Date.now() + 120 * 86400000).toISOString().slice(0, 10);
+  await page.goto("/settings");
+  await page.getByLabel("Ngày thi dự kiến").fill(far);
+  await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
+  await page.goto("/journey");
+  await expect(panel).toContainText("xây nền");
+});
+
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({
   page,
 }) => {

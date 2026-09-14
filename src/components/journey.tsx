@@ -1,13 +1,23 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Check, Route, Target } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Check,
+  ListChecks,
+  Route,
+  Target,
+} from "lucide-react";
 import { useStudy } from "./study-provider";
 import { daysUntil, todayPlan, skillStats } from "@/lib/learning";
+import { useNow } from "@/lib/use-now";
 import { lessons } from "@/lib/content";
 export function JourneyPage() {
   const { state } = useStudy();
-  const plan = todayPlan(state);
-  const days = daysUntil(state.profile.examDate);
+  const now = useNow();
+  const plan = todayPlan(state, new Date(now));
+  const days = daysUntil(state.profile.examDate, new Date(now));
+  const phase = plan.phase;
   const explored = new Set(state.attempts.map((a) => a.lessonId));
   const basics = lessons.filter((l) => l.level === "B1");
   const advanced = lessons.filter((l) => l.level === "B2");
@@ -120,6 +130,29 @@ export function JourneyPage() {
               Xem nguồn lịch thi chính thức
               <ArrowRight size={14} />
             </Link>
+          </section>
+          <section className="panel week-plan">
+            <div className="section-title">
+              <ListChecks size={20} />
+              <h2>Tuần này làm gì</h2>
+            </div>
+            {phase ? (
+              <>
+                <strong className="week-plan-phase">{phase.title}</strong>
+                <p className="help-copy">{phase.focus}</p>
+                <ul className="week-plan-list">
+                  {phase.thisWeek.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="help-copy">
+                {state.profile.examDate
+                  ? "Ngày thi đã qua. Đặt mốc mới trong Cài đặt thì mình sẽ chia lại từng tuần."
+                  : "Chưa có ngày thi nên mình không đặt ra mốc nào. Điền ngày thi trong Cài đặt là phần này sẽ chia việc theo từng tuần."}
+              </p>
+            )}
           </section>
           <section className="vocab-teaser">
             <h2>Hôm nay, bắt đầu từ đây.</h2>
