@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 13/09/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **127 unit, 52 E2E**, build 86 route, axe trên 14 màn. Xem STATUS.md và QUALITY.md.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **135 unit, 53 E2E**, build 86 route, axe trên 14 màn. Xem STATUS.md và QUALITY.md.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 đạt 127 unit và 52 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 và đợt 1 của kế hoạch tiếp theo đạt 135 unit và 53 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -190,16 +190,16 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 
-| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                    |
-| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------ |
-| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                               |
-| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
+| Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                      |
+| --------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+| ESLint                | Đạt                | Quy tắc code Next.js và TypeScript                                                                 |
+| TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                  |
 | Vitest                | 57/57 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
-| Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
-| axe WCAG A/AA         | Đạt trên 14 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
-| Production build      | Đạt                | 86 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
-| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                           |
-| GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt             |
+| Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive    |
+| axe WCAG A/AA         | Đạt trên 14 màn    | Lỗi accessibility có thể tự động phát hiện                                                         |
+| Production build      | Đạt                | 86 route tĩnh/SSG được sinh thành công, gồm web app manifest                                       |
+| Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                             |
+| GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt               |
 
 GitHub Actions chạy `npm ci`, `npm run check`, cài Chromium, Firefox, WebKit và chạy bộ Playwright trên `next start`, không tái sử dụng dev server. Nếu thất bại, report Playwright được giữ bảy ngày làm artifact.
 
@@ -319,26 +319,26 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 13. Cấu trúc mã nguồn cần biết
 
-| Đường dẫn                                    | Nội dung                                                     |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| `src/app`                                    | Route, metadata, layout, error, global-error và not-found    |
-| `src/components/dashboard.tsx`               | Góc học hôm nay và kế hoạch ngày                             |
-| `src/components/practice.tsx`                | Thư viện và phiên luyện kỹ năng                              |
-| `src/components/exam.tsx`                    | Luồng mini/full exam và điều phối phần thi                   |
-| `src/components/audio-tools.tsx`             | Speech synthesis, ghi âm, phát và tải audio                  |
-| `src/components/review.tsx`                  | Từ vựng và sổ lỗi sai                                        |
-| `src/components/settings.tsx`                | Hồ sơ, backup, Auth và cloud sync                            |
-| `src/lib/content.ts`                         | 14 bài ngắn, 20 từ và nguồn tham khảo                        |
-| `src/lib/full-exam-content.ts`               | Ngữ liệu đề đủ cấu trúc                                      |
-| `src/lib/learning.ts`                        | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
-| `src/lib/study-store.ts`                     | Store, localStorage, nhiều tab và phục hồi                   |
-| `src/lib/recordings.ts`                      | IndexedDB cho bản ghi                                        |
-| `supabase/migrations/001_personal_study.sql` | Bảng, RLS và RPC snapshot nền tảng                            |
-| `supabase/migrations/002_harden_snapshots.sql` | Contract payload, thu hồi direct DML và RPC khóa revision   |
-| `supabase/rollback/002_harden_snapshots.sql` | Rollback khẩn cấp có chủ đích cho migration 002               |
-| `tests/unit`                                 | Logic và database tests                                      |
-| `tests/e2e`                                  | E2E, accessibility, resilience và full exam                  |
-| `.github/workflows/check.yml`                | Pipeline CI                                                  |
+| Đường dẫn                                      | Nội dung                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| `src/app`                                      | Route, metadata, layout, error, global-error và not-found    |
+| `src/components/dashboard.tsx`                 | Góc học hôm nay và kế hoạch ngày                             |
+| `src/components/practice.tsx`                  | Thư viện và phiên luyện kỹ năng                              |
+| `src/components/exam.tsx`                      | Luồng mini/full exam và điều phối phần thi                   |
+| `src/components/audio-tools.tsx`               | Speech synthesis, ghi âm, phát và tải audio                  |
+| `src/components/review.tsx`                    | Từ vựng và sổ lỗi sai                                        |
+| `src/components/settings.tsx`                  | Hồ sơ, backup, Auth và cloud sync                            |
+| `src/lib/content.ts`                           | 14 bài ngắn, 20 từ và nguồn tham khảo                        |
+| `src/lib/full-exam-content.ts`                 | Ngữ liệu đề đủ cấu trúc                                      |
+| `src/lib/learning.ts`                          | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
+| `src/lib/study-store.ts`                       | Store, localStorage, nhiều tab và phục hồi                   |
+| `src/lib/recordings.ts`                        | IndexedDB cho bản ghi                                        |
+| `supabase/migrations/001_personal_study.sql`   | Bảng, RLS và RPC snapshot nền tảng                           |
+| `supabase/migrations/002_harden_snapshots.sql` | Contract payload, thu hồi direct DML và RPC khóa revision    |
+| `supabase/rollback/002_harden_snapshots.sql`   | Rollback khẩn cấp có chủ đích cho migration 002              |
+| `tests/unit`                                   | Logic và database tests                                      |
+| `tests/e2e`                                    | E2E, accessibility, resilience và full exam                  |
+| `.github/workflows/check.yml`                  | Pipeline CI                                                  |
 
 ## 14. Các quyết định quan trọng cần giữ
 
@@ -368,23 +368,23 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 16. Lịch sử phát triển chính
 
-| Commit    | Nội dung                                                                           |
-| --------- | ---------------------------------------------------------------------------------- |
-| `96d1a61` | Xây trải nghiệm luyện VSTEP cá nhân, nội dung, thi có giờ, lưu dữ liệu và Supabase |
-| `7e3ab8e` | Thêm custom cursor responsive và accessible                                        |
-| `026a290` | Tinh chỉnh bảng màu hồng pastel                                                    |
-| `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa                                      |
-| `13e6683` | Thêm mức tự tin, ưu tiên lỗi sai và Daily Mission v2                               |
-| `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                               |
-| `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                     |
-| `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng             |
-| `80e6672` | Thêm phản hồi sâu cho Reading/Listening và hoàn thiện luồng đối chiếu sau khi nộp  |
-| `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                 |
-| `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                 |
-| `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                  |
-| `f89387d` | Kiểm tra tám bài ưu tiên và tải backup trên cả ba browser engine                   |
+| Commit    | Nội dung                                                                            |
+| --------- | ----------------------------------------------------------------------------------- |
+| `96d1a61` | Xây trải nghiệm luyện VSTEP cá nhân, nội dung, thi có giờ, lưu dữ liệu và Supabase  |
+| `7e3ab8e` | Thêm custom cursor responsive và accessible                                         |
+| `026a290` | Tinh chỉnh bảng màu hồng pastel                                                     |
+| `ed9007f` | Cá nhân hóa toàn bộ hành trình cho Gùa và Rùa                                       |
+| `13e6683` | Thêm mức tự tin, ưu tiên lỗi sai và Daily Mission v2                                |
+| `343a02f` | Đồng bộ báo cáo bàn giao với HTTPS pilot đã xác thực                                |
+| `867cb68` | Thêm màn hình phục hồi khi root layout gặp lỗi                                      |
+| `4e0ed58` | Chuẩn hóa ngữ nghĩa nút, bộ lọc, timer và cập nhật trạng thái trợ năng              |
+| `80e6672` | Thêm phản hồi sâu cho Reading/Listening và hoàn thiện luồng đối chiếu sau khi nộp   |
+| `ddf3eb7` | Bổ sung Content Security Policy cho bản production                                  |
+| `7b78df6` | Làm mới báo cáo và bằng chứng kiểm định production                                  |
+| `df8e6b6` | Gia cố tương thích đa trình duyệt, manifest, CSP và tối ưu bundle                   |
+| `f89387d` | Kiểm tra tám bài ưu tiên và tải backup trên cả ba browser engine                    |
 | `f43fc23` | Version hóa lịch sử học, gia cố cloud và thêm smoke test sau deployment             |
-| `6cdbbfe` | Khép versioning legacy, cấu trúc đề, validation snapshot và smoke đối chiếu SHA      |
+| `6cdbbfe` | Khép versioning legacy, cấu trúc đề, validation snapshot và smoke đối chiếu SHA     |
 | `cf12c02` | Bỏ chu kỳ đoán được khỏi đáp án phần Đọc (F20)                                      |
 | `4c3554a` | Đóng F14–F19: đề có câu hỏi riêng, số liệu kỹ năng, hiệu năng, phần Nói không micro |
 | `32422fa` | Ma trận dạng câu cho ngân hàng câu hỏi (F13)                                        |
@@ -398,7 +398,7 @@ Milestone nền tảng và hosting kỹ thuật được xem là hoàn tất vì
 | Nền tảng kỹ thuật   | Đạt milestone     | Build, unit, E2E, accessibility, Supabase Auth/RLS và backup đã kiểm tra     |
 | Cá nhân hóa         | Đạt vòng v2 đầu   | Có confidence, due review, weakness, recency, exam urgency và lý do chọn bài |
 | Hiệu quả học tập    | Chưa kết luận     | Cần 5–7 ngày pilot và checkpoint bằng ngữ liệu chưa từng học                 |
-| Chất lượng học liệu | Chưa kiểm định    | Đã version hóa dữ liệu; cần giáo viên VSTEP review nội dung                   |
+| Chất lượng học liệu | Chưa kiểm định    | Đã version hóa dữ liệu; cần giáo viên VSTEP review nội dung                  |
 | Hosting production  | Đạt kỹ thuật      | URL HTTPS, biến môi trường, route/status/header đã kiểm tra                  |
 | Production UAT      | Chưa đạt          | Cần login/sync thật, micro, hai thiết bị và quy trình vận hành               |
 

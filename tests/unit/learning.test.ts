@@ -26,6 +26,9 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  examSittings,
+  compareSittings,
+  PLAN_EXTRA_MINUTES,
   TYPE_EVIDENCE_MINIMUM,
   weakQuestionTypes,
   wordCount,
@@ -1059,5 +1062,130 @@ describe("Mây's own self-check criteria", () => {
     const old = freshState();
     old.attempts = [attempt("2026-09-08T10:00:00Z", { id: "old" })];
     expect(stateSchema.safeParse(old).success).toBe(true);
+  });
+});
+
+describe("sittings of the timed room", () => {
+  const sitting = (
+    id: string,
+    prefix: string,
+    date: string,
+    listening: number,
+    reading: number,
+  ): Attempt[] => [
+    attempt(date, {
+      id: `exam:${id}:${prefix}-listen-1`,
+      lessonId: `${prefix}-listen-1`,
+      skill: "listening",
+      correct: listening,
+      total: 35,
+      seconds: 2400,
+    }),
+    attempt(date, {
+      id: `exam:${id}:${prefix}-read-1`,
+      lessonId: `${prefix}-read-1`,
+      skill: "reading",
+      correct: reading,
+      total: 40,
+      seconds: 3600,
+    }),
+    attempt(date, {
+      id: `exam:${id}:${prefix}-writing-1`,
+      lessonId: `${prefix}-writing-1`,
+      skill: "writing",
+      correct: 0,
+      total: 0,
+      seconds: 1200,
+    }),
+  ];
+  it("groups each sitting's parts back into one row", () => {
+    const state = freshState();
+    state.attempts = [
+      ...sitting("s1", "full", "2026-08-01T02:00:00Z", 20, 24),
+      ...sitting("s2", "exam2", "2026-09-01T02:00:00Z", 27, 28),
+      // A single lesson practised outside the timed room stays out of it.
+      attempt("2026-09-02T02:00:00Z", { id: "plain" }),
+    ];
+    const rows = examSittings(state);
+    expect(rows.map((row) => row.paper)).toEqual(["full", "full2"]);
+    expect(rows[1].listening).toEqual({ correct: 27, total: 35 });
+    expect(rows[1].reading).toEqual({ correct: 28, total: 40 });
+    expect(rows[1].writing).toBe(1);
+    expect(rows[1].minutes).toBe(120);
+  });
+  it("reports the shift between two different papers", () => {
+    const state = freshState();
+    state.attempts = [
+      ...sitting("s1", "full", "2026-08-01T02:00:00Z", 20, 24),
+      ...sitting("s2", "exam2", "2026-09-01T02:00:00Z", 27, 28),
+    ];
+    const comparison = compareSittings(state)!;
+    expect(comparison.comparable).toBe(true);
+    // 20/35 → 27/35 is +20 points; 24/40 → 28/40 is +10.
+    expect(comparison.listening).toBe(20);
+    expect(comparison.reading).toBe(10);
+  });
+  it("refuses to call a repeat of one paper a measure of ability", () => {
+    const state = freshState();
+    state.attempts = [
+      ...sitting("s1", "full", "2026-08-01T02:00:00Z", 20, 24),
+      ...sitting("s2", "full", "2026-09-01T02:00:00Z", 31, 36),
+    ];
+    expect(compareSittings(state)!.comparable).toBe(false);
+  });
+  it("says nothing until there are two full-length sittings", () => {
+    const state = freshState();
+    state.attempts = sitting("s1", "full", "2026-08-01T02:00:00Z", 20, 24);
+    expect(compareSittings(state)).toBe(null);
+  });
+});
+describe("the day's budget", () => {
+  const planFor = (dailyMinutes: number) => {
+    const base = freshState();
+    return todayPlan(
+      { ...base, profile: { ...base.profile, dailyMinutes } },
+      new Date("2026-09-14T08:00:00+07:00"),
+    );
+  };
+  it("never plans more minutes than the learner set aside", () => {
+    for (const dailyMinutes of [15, 20, 30, 45, 60, 90]) {
+      const plan = planFor(dailyMinutes);
+      const minutes = plan.lessons
+        .filter((lesson) => !plan.longer.includes(lesson.id))
+        .reduce((sum, lesson) => sum + lesson.minutes, 0);
+      expect(minutes).toBeLessThanOrEqual(dailyMinutes);
+    }
+  });
+  it("leaves a short day exactly as it was", () => {
+    // Measured before this change: 18 of 20 minutes and 24 of 30.
+    expect(
+      planFor(20).lessons.reduce((sum, lesson) => sum + lesson.minutes, 0),
+    ).toBe(18);
+    expect(
+      planFor(30).lessons.reduce((sum, lesson) => sum + lesson.minutes, 0),
+    ).toBe(24);
+  });
+  it("fills an hour instead of handing back half of it", () => {
+    const plan = planFor(60);
+    const minutes = plan.lessons.reduce(
+      (sum, lesson) => sum + lesson.minutes,
+      0,
+    );
+    // The old plan stopped at three lessons: 38 of 60 minutes.
+    expect(minutes).toBeGreaterThan(45);
+    expect(plan.spare).toBeLessThan(PLAN_EXTRA_MINUTES);
+    // No skill is allowed to take over the day.
+    for (const skill of new Set(plan.lessons.map((lesson) => lesson.skill)))
+      expect(
+        plan.lessons.filter((lesson) => lesson.skill === skill).length,
+      ).toBeLessThanOrEqual(2);
+    expect(new Set(plan.lessons.map((lesson) => lesson.id)).size).toBe(
+      plan.lessons.length,
+    );
+  });
+  it("still explains why each extra lesson is there", () => {
+    const plan = planFor(60);
+    for (const lesson of plan.lessons)
+      expect(plan.reasons[lesson.id].length).toBeGreaterThan(0);
   });
 });
