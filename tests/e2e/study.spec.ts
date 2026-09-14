@@ -220,8 +220,10 @@ test("the notebook shows the shape of the mistakes, not just the list", async ({
     panel.locator("li").filter({ hasText: "Từ tham chiếu" }),
   ).toContainText("chưa đủ để kết luận");
   await detailRow.getByRole("link", { name: "Luyện dạng này" }).click();
+  // Wait for the navigation itself: /mistakes has an h1 too, so asserting the
+  // heading first can pass before the click has taken effect.
+  await page.waitForURL(/\/practice\//);
   await expect(page.locator("main h1")).toBeVisible();
-  expect(page.url()).toContain("/practice/");
 });
 
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({
