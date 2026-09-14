@@ -12,6 +12,361 @@
 export type QuestionNote = { evidence: string; optionNotes: string[] };
 
 export const questionNotes: Record<string, QuestionNote> = {
+  lh1: {
+    evidence:
+      "the airport shuttle now leaves at a quarter past five in the morning, not half past five as printed in your confirmation",
+    optionNotes: [
+      "Đúng: giờ mới là năm giờ mười lăm.",
+      "Đó là giờ in trong bản xác nhận, thứ vừa bị sửa.",
+      "Sáu giờ là mốc đường một chiều kết thúc, không phải giờ xe chạy.",
+      "Không có mốc sáu rưỡi nào cho xe sân bay; đó là giờ bắt đầu phục vụ bữa sáng.",
+    ],
+  },
+  lh2: {
+    evidence:
+      "we will give you a numbered ticket, so please keep it somewhere safe",
+    optionNotes: [
+      "Phòng để hành lý được khóa và khách không giữ chìa.",
+      "Đúng: khách nhận một phiếu có số và cần giữ cẩn thận.",
+      "Không có giấy tờ nào phải ký.",
+      "Tầng ba chỉ được nhắc tới vì máy nước nóng.",
+    ],
+  },
+  lh3: {
+    evidence: "as the app often sends cars to the address next door",
+    optionNotes: [
+      "Người nói không so sánh giá.",
+      "Khách sạn không có xe taxi riêng; chỉ có xe đưa đón sân bay.",
+      "Đúng: ứng dụng hay đưa xe tới địa chỉ nhà bên cạnh.",
+      "Không có chi tiết nào về việc trả tiền mặt.",
+    ],
+  },
+  lh4: {
+    evidence:
+      "Please tell us today if you would like a late check-out on Sunday, because we can only offer it to two rooms.",
+    optionNotes: [
+      "Không có chi tiết nào nói Chủ nhật trả phòng sớm hơn.",
+      "Bữa sáng cuối tuần còn phục vụ muộn hơn ngày thường.",
+      "Đúng: chỉ hai phòng được trả muộn nên phải báo trong hôm nay.",
+      "Xe đưa đón không bị nói là nghỉ Chủ nhật.",
+    ],
+  },
+  ls1: {
+    evidence:
+      "We had planned to do this on Wednesday, but the new pump arrives a day late, so please note the new date.",
+    optionNotes: [
+      "Đó là kế hoạch cũ, đã bị dời vì máy bơm về muộn.",
+      "Không có mốc chiều thứ Tư nào trong thông báo.",
+      "Đúng: cắt nước từ bảy giờ sáng thứ Năm tới khoảng một giờ chiều.",
+      "Buổi tối không được nhắc tới; công việc kết thúc vào đầu giờ chiều.",
+    ],
+  },
+  ls2: {
+    evidence:
+      "these are for drinking and washing, not for cleaning floors or watering plants",
+    optionNotes: [
+      "Đúng: hai bồn nước dùng để uống và rửa.",
+      "Lau nhà nằm trong nhóm bị loại trừ.",
+      "Tưới cây cũng nằm trong nhóm bị loại trừ.",
+      "Máy bơm mới do thợ lắp, không liên quan tới hai bồn này.",
+    ],
+  },
+  ls3: {
+    evidence: "because the pipes fill from the bottom",
+    optionNotes: [
+      "Thông báo không nói ống ở tầng trên cũ hơn.",
+      "Đúng: ống đầy dần từ dưới lên nên tầng trên có nước muộn hơn.",
+      "Không có so sánh lượng nước dùng giữa các tầng.",
+      "Không có chi tiết nào về bồn chứa riêng của từng tầng.",
+    ],
+  },
+  ls4: {
+    evidence:
+      "The water supply will be switched off on Thursday from seven in the morning until about one in the afternoon while the pump on the roof is replaced.",
+    optionNotes: [
+      "Ngược lại: đây là việc có kế hoạch và sẽ không phải làm lại trong năm nay.",
+      "Đúng: cả thông báo xoay quanh đợt cắt nước có kế hoạch để thay máy bơm.",
+      "Không có chi tiết nào về tiền nước.",
+      "Tưới cây chỉ là ví dụ về việc không dùng nước trong bồn, không phải quy định mới.",
+    ],
+  },
+  ln1: {
+    evidence:
+      "It is slower to use than the old one for simple jobs, and I am not going to pretend otherwise. What it does better is keep the history of a job in one place",
+    optionNotes: [
+      "Người nói bác bỏ đúng điều này ngay từ đầu.",
+      "Đúng: chậm hơn với việc đơn giản, nhưng giữ lịch sử công việc ở một chỗ.",
+      "Hệ thống mới thay chỗ ghi kết quả, không thay toàn bộ liên lạc nhóm.",
+      "Không có chi tiết nào nói đây là bản dùng thử có thể hủy.",
+    ],
+  },
+  ln2: {
+    evidence:
+      "write the outcome in the ticket before you close it, not in a message to the team",
+    optionNotes: [
+      "Đó chính là cách làm bị thay.",
+      "Không có yêu cầu quản lý duyệt.",
+      "Đúng: ghi kết quả vào ticket trước khi đóng.",
+      "Hệ thống cũ chỉ dùng song song cho việc gấp trong hai tuần đầu.",
+    ],
+  },
+  ln3: {
+    evidence:
+      'Writing "no checks done yet" is more useful than an empty field, because the next person will not repeat your search.',
+    optionNotes: [
+      "Đúng: ghi như vậy còn hơn để trống, vì người tiếp theo khỏi tìm lại từ đầu.",
+      "Người nói không coi đó là cẩu thả.",
+      "Không có giới hạn nào theo mức độ gấp.",
+      "Ngược với ý người nói: ô trống mới là thứ vô ích.",
+    ],
+  },
+  ln4: {
+    evidence:
+      "I would rather we were slow for a fortnight than lose a job in the change.",
+    optionNotes: [
+      "Hệ thống mới chạy từ thứ Hai, nên không phải chưa sẵn sàng.",
+      "Tập huấn diễn ra thứ Sáu, trước khi chuyển đổi.",
+      "Đúng: chấp nhận chậm hai tuần còn hơn để lọt mất một công việc.",
+      "Không có chi tiết nào nói khách hàng yêu cầu.",
+    ],
+  },
+  lp1: {
+    evidence: "I want to explain the reason behind it before the rules",
+    optionNotes: [
+      "Không có chi tiết nào nói quy định vừa thay đổi.",
+      "Đúng: nói lý do thuốc thừa đi đâu trước, rồi mới tới cách làm.",
+      "Dược sĩ chỉ có một đề nghị ở cuối, không phải yêu cầu nói dài hơn.",
+      "Không có khoản phạt nào được nhắc tới.",
+    ],
+  },
+  lp2: {
+    evidence:
+      "Please leave tablets in their original packaging so that staff can see what they are",
+    optionNotes: [
+      "Không có yêu cầu gom vào một túi trong suốt.",
+      "Đúng: để nguyên vỏ hộp để nhân viên nhận ra là thuốc gì.",
+      "Người nói nói rõ không cần hóa đơn.",
+      "Không ai yêu cầu ghi ngày mua.",
+    ],
+  },
+  lp3: {
+    evidence:
+      "because in the first month people were embarrassed and the boxes stayed empty",
+    optionNotes: [
+      "Bài không nói nhân viên bận.",
+      "Không có căn cứ pháp lý nào được nhắc tới.",
+      "Đúng: tháng đầu người ta ngại nên hộp thu trống, vì thế mới nhấn mạnh không ai hỏi gì.",
+      "Ngược lại: chính vì không ghi lại thông tin cá nhân nên người mang trả mới thấy dễ.",
+    ],
+  },
+  lp4: {
+    evidence:
+      "They are then left in a public space overnight, and it defeats the purpose of the scheme.",
+    optionNotes: [
+      "Gói kín không thay đổi việc thuốc nằm ở nơi công cộng cả đêm.",
+      "Đúng: làm vậy đi ngược đúng mục đích của chương trình.",
+      "Người nói không coi đây là cách tiện cho người bận.",
+      "Phòng khám nhận kim tiêm và dịch truyền, không phải nơi để bỏ thuốc qua khe cửa.",
+    ],
+  },
+  rs1: {
+    evidence:
+      "Instead of a new sheet each week, students received their own work from the previous week with three sentences underlined.",
+    optionNotes: [
+      "Bài không bàn tới lượng bài tập nhiều hay ít, mà bàn tới việc dùng bài của chính học sinh.",
+      "Đúng: toàn bài theo một thay đổi — học sinh nhận lại bài của mình có gạch chân thay vì phiếu mới.",
+      "Không có phần nào hướng dẫn ôn thi.",
+      "Phụ huynh cần được thuyết phục, nhưng đó là một đoạn chứ không phải nội dung chính.",
+    ],
+  },
+  rs2: {
+    evidence:
+      "The task was to explain, in a single sentence each, why those three sentences had been underlined.",
+    optionNotes: [
+      "Bài không yêu cầu chép lại.",
+      "Không có phần dịch nào trong nhiệm vụ này.",
+      "Đúng: mỗi câu gạch chân được giải thích bằng đúng một câu.",
+      "Tranh luận với bạn học là chuyện xảy ra sau đó, không phải nhiệm vụ được giao.",
+    ],
+  },
+  rs3: {
+    evidence:
+      "which the teachers had been counting for another reason entirely",
+    optionNotes: [
+      "Đúng: con số có sẵn vì mục đích khác nên không phải số liệu dựng lên để chứng minh thí nghiệm.",
+      "Bài không nói trung tâm cần thêm giáo viên.",
+      "Bài không chê cách lưu hồ sơ của trung tâm.",
+      "Số câu hỏi tăng được nêu như dấu hiệu tốt, không phải điều đáng phàn nàn.",
+    ],
+  },
+  rs4: {
+    evidence:
+      "Preparing the underlined work takes a teacher about twice as long as marking a sheet",
+    optionNotes: [
+      "Đúng: ngay sau từ này là hai bất lợi, không phải khoản tiền nào.",
+      "Bài không nhắc tới học phí ở đoạn này.",
+      "Không có khoản nợ nào trong bài.",
+      "Chậm trễ không phải điều được liệt kê sau đó.",
+    ],
+  },
+  rs5: {
+    evidence:
+      "One class in one centre proves nothing about teaching in general.",
+    optionNotes: [
+      "Cô ấy không kết luận cách cũ vô dụng; trung tâm vẫn giữ nó cho một nhóm học sinh.",
+      "Đúng: có dấu hiệu tốt nhưng một lớp ở một trung tâm chưa chứng minh được gì.",
+      "Chính cô ấy tránh khuyến nghị rộng như vậy.",
+      "Phụ huynh đã thôi phàn nàn sau khi có thư hằng tháng.",
+    ],
+  },
+  rv1: {
+    evidence:
+      "a rough reading every week for four years is a different kind of evidence from an exact reading twice a year",
+    optionNotes: [
+      "Bài không nói tình nguyện viên thay được phòng thí nghiệm; nó nêu rõ các điểm yếu.",
+      "Nhóm từ chối kết luận nước an toàn hay không.",
+      "Đúng: giá trị nằm ở tần suất — đo thô nhưng đều đặn là một loại bằng chứng khác.",
+      "Nhóm đại học kết thúc nghiên cứu đúng hạn; bài không trách họ.",
+    ],
+  },
+  rv2: {
+    evidence:
+      "Because the volunteers had four years of Sunday readings, they could show that nothing similar had happened in that month before.",
+    optionNotes: [
+      "Đúng: bốn năm số liệu cho phép chứng minh hiện tượng tháng Tư là bất thường.",
+      "Nhóm không bao giờ công bố số đo như một kết luận sức khỏe.",
+      "Bài không nói công trường bị đóng cửa.",
+      "Que thử vẫn được dùng; không có chuyện thay thiết bị.",
+    ],
+  },
+  rv3: {
+    evidence:
+      "who traced the change to a construction site washing equipment into a drain",
+    optionNotes: [
+      "Bài không nhắc tới nhà máy xả nước nóng.",
+      "Đúng: công trường rửa thiết bị xuống cống, và cống bị ghi sai trên bản vẽ cũ.",
+      "Cây cầu chỉ xuất hiện ở đoạn cuối, gắn với mùi chứ không phải ống tắc.",
+      "Sổ ghi của tình nguyện viên không bị kết luận là sai.",
+    ],
+  },
+  rv4: {
+    evidence:
+      "Volunteer measurements have obvious weaknesses. Test strips are less accurate than laboratory equipment, readings are taken at slightly different times, and volunteers change. The coordinator, an engineer named Phuc, does not hide any of this.",
+    optionNotes: [
+      "Đúng: “this” gom lại đúng các điểm yếu vừa liệt kê ở hai câu trước.",
+      "Giá thiết bị không được nêu ở đoạn này.",
+      "Báo cáo của nhóm đại học nằm ở đoạn trước và không phải thứ Phúc đang không giấu.",
+      "Thư mục ảnh chỉ là cách lưu số liệu.",
+    ],
+  },
+  rv5: {
+    evidence:
+      "The volunteers cannot say that the river is safe, and they never publish a reading as a health conclusion.",
+    optionNotes: [
+      "Bài cho thấy anh ấy nói ra trước, không đợi ai hỏi.",
+      "Đúng: nêu thẳng giới hạn và từ chối biến số đo thành kết luận sức khỏe.",
+      "Thêm người không làm que thử chính xác hơn; bài không hứa điều đó.",
+      "Ngược lại: chính vì sông nhỏ nên không có phòng thí nghiệm, và giới hạn càng phải nói rõ.",
+    ],
+  },
+  rb1: {
+    evidence:
+      "Riders were not avoiding the lane. They were avoiding the first and last fifty metres.",
+    optionNotes: [
+      "Bài nói mặt đường tốt và làn đủ rộng.",
+      "Đúng: vấn đề nằm ở hai đầu — vào làn phải cắt hai làn xe, ra làn thì không có chỗ chờ.",
+      "Độ rộng không phải vấn đề; bài khẳng định làn đủ rộng.",
+      "Người ta dắt xe trên vỉa hè, không phải vì vỉa hè nhanh hơn.",
+    ],
+  },
+  rb2: {
+    evidence:
+      "None of these changes appeared in the original plan, which had been drawn to a standard width rather than to the street.",
+    optionNotes: [
+      "Đúng: làn đường chỉ có người dùng sau khi hai đầu được sửa lại.",
+      "Bài không kể chiến dịch vận động đi xe đạp.",
+      "Hai chủ cửa hàng là một đoạn nhỏ, không phải nội dung chính.",
+      "Bài không so sánh các quận với nhau; các quận khác chỉ hỏi xin cách làm.",
+    ],
+  },
+  rb3: {
+    evidence:
+      "The department published both numbers, including the embarrassing first one.",
+    optionNotes: [
+      "Con số đầu không sai; nó chỉ khó nói.",
+      "Bài không nói cách sửa rẻ hay đắt.",
+      "Đúng: công bố cả con số bất lợi cho thấy cơ quan này tự nhận phần làm hỏng.",
+      "Ghi chú của kỹ sư được dẫn lại một cách tán thành.",
+    ],
+  },
+  rb4: {
+    evidence:
+      "Where those conditions are missing, moving a bus stop will not be enough.",
+    optionNotes: [
+      "Đúng: cách sửa hiệu quả nhờ làn đã rộng và mặt đường tốt; thiếu hai điều đó thì chưa đủ.",
+      "Bài không nói quận khác không cần làn xe đạp.",
+      "Ngược với câu cuối: lối vào cong không phải phép màu dùng ở đâu cũng được.",
+      "Không có chi tiết nào về ngân sách.",
+    ],
+  },
+  rb5: {
+    evidence:
+      "The city moved a bus stop back by twenty metres, added a short waiting area at the junction, and painted a curved entrance",
+    optionNotes: [
+      "Đúng: các việc được kể ngay sau đó đều nhỏ và không hào nhoáng.",
+      "Bài không nói chi phí; các việc này đều là sửa nhỏ.",
+      "Bản kế hoạch gốc mới là thứ bị chê, không phải cách sửa.",
+      "Không có chi tiết nào về thời gian thi công lâu.",
+    ],
+  },
+  rp1: {
+    evidence: "The results were uneven.",
+    optionNotes: [
+      "Bài nói việc huấn luyện không hiệu quả, nhưng đó là một câu chứ không phải luận điểm.",
+      "Lời khuyên cho ứng viên không phải mục đích của bài.",
+      "Đúng: công ty đổi cách phỏng vấn và kể cả phần chạy tốt lẫn phần không.",
+      "Vai trò an toàn vẫn dùng phần việc gửi trước; chỉ định dạng phỏng vấn là khác.",
+    ],
+  },
+  rp2: {
+    evidence: "candidates now receive the main task in advance",
+    optionNotes: [
+      "Bài không nhắc tới danh sách người phỏng vấn.",
+      "Đúng: ứng viên nhận trước phần việc chính và trình bày cách làm trong hai mươi phút đầu.",
+      "Quy tắc an toàn không được gửi trước.",
+      "Mười phút cuối là để ứng viên hỏi, không phải bộ câu hỏi được gửi trước.",
+    ],
+  },
+  rp3: {
+    evidence:
+      "the old silence at the end was not a lack of curiosity but a lack of warning",
+    optionNotes: [
+      "Đúng: được báo trước nên ứng viên chuẩn bị được, chứ không phải trước đây họ không tò mò.",
+      "Không ai được cho biết đáp án trước.",
+      "Bài nói ứng viên ít kinh nghiệm làm tốt hơn dưới định dạng mới.",
+      "Bài không cho rằng mười phút là quá dài.",
+    ],
+  },
+  rp4: {
+    evidence:
+      "Rather than insisting, the company asked him to record his reasons, and some of them were fair",
+    optionNotes: [
+      "Đúng: thay vì ép làm theo, công ty biến ý kiến trái chiều thành thông tin và nhận là có phần hợp lý.",
+      "Định dạng cũ không bị bỏ; công ty chạy song song hai định dạng.",
+      "Bài không dùng chi tiết này để chê cấp quản lý.",
+      "Vai trò an toàn vẫn có phỏng vấn, chỉ khác cách hỏi.",
+    ],
+  },
+  rp5: {
+    evidence:
+      "not long enough to see who does the job well over time. It says so on its own careers page, which is unusual.",
+    optionNotes: [
+      "Bài không coi đó là sai lầm.",
+      "Đúng: người viết gọi việc tự nói ra giới hạn của mình là chuyện không mấy nơi làm.",
+      "Chính câu đó thừa nhận chưa đủ thời gian để kết luận.",
+      "Ngược lại: đây là câu làm giảm nhẹ quảng cáo, không phải lời quảng cáo.",
+    ],
+  },
   lc1: {
     evidence: "so we have moved your appointment to Friday at ten o'clock",
     optionNotes: [
