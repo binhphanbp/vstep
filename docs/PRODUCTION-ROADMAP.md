@@ -59,7 +59,7 @@ Kế hoạch đã bắt đầu được thực thi. Trạng thái phải dựa t
 | F07 | Xác nhận từ logic/tài liệu | Có cá nhân hóa và thống kê, nhưng chưa có diagnostic/checkpoint bằng bài chưa từng học. Độ chính xác 5 lượt gần nhất có thể gồm bài làm lại; chưa đo được mức tiến bộ độc lập. | P1 |
 | F08 | Đã hoàn thành phần trong repository | CI có audit dependency; workflow smoke HTTPS chạy sau deployment và runbook release hoặc rollback đã có. Quy tắc bảo vệ branch, kênh nhận lỗi và uptime bên ngoài repository vẫn cần chủ website xác nhận. | P0/P2 vận hành |
 | F09 | Đã đồng bộ | HANDOVER, script Word, STATUS và QUALITY dùng số liệu 57 unit, 40 E2E và đúng run release. DOCX đã render, xem đủ 12 trang và audit accessibility 0 lỗi. | P0-07 |
-| F10 | Xác nhận từ code/tài liệu | Chưa có offline đầy đủ, đồng bộ audio, xóa/quản lý kho bản ghi trong UI, hoặc chấm Writing/Speaking. Đây là phần chưa xây có chủ đích, không phải lỗi của nút hiện tại. | P2/P3 |
+| F10 | Xác nhận từ code/tài liệu | Chưa có offline đầy đủ, đồng bộ audio hoặc chấm Writing/Speaking. Phần xóa và quản lý kho bản ghi trong UI đã làm ở F18. Đây là phần chưa xây có chủ đích, không phải lỗi của nút hiện tại. | P2/P3 |
 
 **Giới hạn của F02:** RLS vẫn giới hạn tài khoản/row; chưa phát hiện lộ dữ liệu chéo người dùng. UI hiện tại dùng RPC đúng. Vấn đề là đường cập nhật trực tiếp của chính tài khoản được phép có thể bỏ qua quy tắc revision và kiểm tra payload, không phải bằng chứng đã có người khai thác hoặc dữ liệu thật bị hỏng.
 

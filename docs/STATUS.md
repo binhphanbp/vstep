@@ -10,7 +10,7 @@ Rà soát mới ngày 13/09/2026: [AUDIT-2026-09-13.md](AUDIT-2026-09-13.md). Re
 
 Kế hoạch hoàn thiện và nâng cấp tiếp theo: [PLAN-2026-09-14.md](PLAN-2026-09-14.md). Ba phát hiện chính: kế hoạch ngày chỉ chọn được trong 141 phút bài (13/14 bài thư viện vừa ngân sách 30 phút), tức khoảng 5 ngày là hết bài mới; `skillStats` trộn lượt đầu với lượt làm lại nên độ chính xác tăng giả khi luyện lại; và thẻ trong Sổ lỗi không bao giờ rời sổ, kể cả khi câu đó đã được làm lại đúng.
 
-Rà soát và kế hoạch thực thi: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). Release `6cdbbfe` đạt 57 unit, 40 E2E, build 45 route và audit dependency trong GitHub Actions run `34733331145`; smoke SHA run `34733348658` cũng đạt. Migration mới đã thu hồi direct DML và buộc ghi qua RPC revision trên Supabase production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. UAT thiết bị thật vẫn còn mở.
+Rà soát và kế hoạch thực thi: [PRODUCTION-ROADMAP.md](PRODUCTION-ROADMAP.md). Mốc hiện hành là `32422fa`: đạt **81 unit, 44 E2E**, build 45 route và audit dependency trong GitHub Actions run `34790572846`; smoke production run `34790590164` cũng đạt. (Mốc `6cdbbfe` trước đó đạt 57 unit, 40 E2E trong run `34733331145`.) Migration mới đã thu hồi direct DML và buộc ghi qua RPC revision trên Supabase production. Auth request có timeout; lỗi lưu cloud revision tự xuất backup. UAT thiết bị thật vẫn còn mở.
 
 ## Đã hoàn thành trong môi trường local
 
