@@ -1,11 +1,16 @@
 import { test, expect } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
-const cafe = lessons.find((lesson) => lesson.id === "reading-cafe")!;
 /** Read the keys from the content so a change of option order cannot lie. */
-const key = (id: string) =>
-  cafe.questions.find((question) => question.id === id)!.answer;
-const missed = (id: string) => (key(id) + 1) % 4;
+const question = (id: string) => {
+  const found = lessons
+    .flatMap((lesson) => lesson.questions)
+    .find((item) => item.id === id);
+  if (!found) throw Error(`Không tìm thấy câu ${id}`);
+  return found;
+};
+const key = (id: string) => question(id).answer;
+const missed = (id: string) => (key(id) + 1) % question(id).options.length;
 const letter = (index: number) => "ABCD"[index];
 
 test("dashboard is honest, responsive, and energy changes the plan", async ({
@@ -178,6 +183,47 @@ test("a mistake answered right later leaves the queue, and repeats are counted a
   await expect(reading).toContainText("Luyện lại 100%");
   await expect(reading).toContainText("1 bài lần đầu");
   await expect(reading).toContainText("1 lượt luyện lại");
+});
+
+test("the notebook shows the shape of the mistakes, not just the list", async ({
+  page,
+}) => {
+  // reading-garden carries four detail questions: enough of one type for its
+  // error rate to mean something. Get three of them wrong, two while sure.
+  await page.goto("/practice/reading-garden");
+  const wrong = ["rg1", "rg2", "rg3"];
+  for (const id of ["rg1", "rg2", "rg3", "rg4", "rg5"]) {
+    const miss = wrong.includes(id);
+    await page
+      .locator(`input[name="${id}"][value="${miss ? missed(id) : key(id)}"]`)
+      .check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: miss ? "Rất chắc" : "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+
+  await page.goto("/mistakes");
+  const panel = page.locator(".weak-spots");
+  await expect(
+    panel.getByRole("heading", { name: "Chỗ mình hay vấp" }),
+  ).toBeVisible();
+  const detailRow = panel
+    .locator("li")
+    .filter({ hasText: "Thông tin chi tiết" });
+  await expect(detailRow).toContainText("Sai 3/4 câu");
+  await expect(detailRow).toContainText("3 câu sai dù đã chọn “Rất chắc”");
+  // A type with a single question must not be reported as a rate.
+  await expect(
+    panel.locator("li").filter({ hasText: "Từ tham chiếu" }),
+  ).toContainText("chưa đủ để kết luận");
+  await detailRow.getByRole("link", { name: "Luyện dạng này" }).click();
+  // Wait for the navigation itself: /mistakes has an h1 too, so asserting the
+  // heading first can pass before the click has taken effect.
+  await page.waitForURL(/\/practice\//);
+  await expect(page.locator("main h1")).toBeVisible();
 });
 
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({

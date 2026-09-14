@@ -8,6 +8,7 @@ import {
   localDay,
   mistakeReviewKey,
   mistakes,
+  questionTypeStats,
   objectiveInsights,
   personalizeLegacyState,
   profileSchema,
@@ -18,6 +19,8 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  TYPE_EVIDENCE_MINIMUM,
+  weakQuestionTypes,
   wordCount,
   type Attempt,
 } from "../../src/lib/learning";
@@ -282,6 +285,100 @@ describe("scoring and honest progress", () => {
     expect(flagged).toBe(true);
     // Every lesson in the library now has a route into the daily plan.
     expect(offered.size).toBe(lessons.length);
+  });
+  it("reads the error rate of each question type from first meetings only", () => {
+    const lesson = lessons.find((l) => l.id === "reading-cafe")!;
+    const wrongIds = lesson.questions
+      .filter((q) => q.tag === "Thông tin chi tiết")
+      .map((q) => q.id);
+    let s = freshState();
+    s = recordAttempt(s, {
+      ...attempt("2026-09-01T10:00:00Z", { correct: 5 - wrongIds.length }),
+      id: "first",
+      answers: missing(wrongIds),
+      confidence: Object.fromEntries(wrongIds.map((id) => [id, "sure"])),
+    });
+    const detail = questionTypeStats(s).find(
+      (t) => t.tag === "Thông tin chi tiết",
+    )!;
+    expect(detail.wrong).toBe(wrongIds.length);
+    expect(detail.confidentWrong).toBe(wrongIds.length);
+    // A repeat of the same lesson is practice, not new evidence about the type.
+    s = recordAttempt(s, {
+      ...attempt("2026-09-05T10:00:00Z", { correct: 5 }),
+      id: "again",
+      answers: keys(),
+    });
+    expect(
+      questionTypeStats(s).find((t) => t.tag === "Thông tin chi tiết")!.asked,
+    ).toBe(detail.asked);
+  });
+  it("ignores a question type until there is enough of it to judge", () => {
+    const lesson = lessons.find((l) => l.id === "reading-cafe")!;
+    const rare = lesson.questions.find(
+      (q) => q.tag === "Từ vựng trong ngữ cảnh",
+    )!;
+    let s = freshState();
+    s = recordAttempt(s, {
+      ...attempt("2026-09-01T10:00:00Z", { correct: 4 }),
+      answers: missing([rare.id]),
+    });
+    // One question of that type is not evidence, however badly it went.
+    expect(weakQuestionTypes(s).map((t) => t.tag)).not.toContain(rare.tag);
+    expect(
+      questionTypeStats(s).find((t) => t.tag === rare.tag)!.asked,
+    ).toBeLessThan(TYPE_EVIDENCE_MINIMUM);
+  });
+  it("names the weak question type in the reason for choosing a lesson", () => {
+    // Three detail questions wrong across two lessons: enough to act on.
+    let s = freshState();
+    s.profile = { ...s.profile, onboarded: true };
+    for (const [index, id] of ["reading-cafe", "reading-garden"].entries()) {
+      const lesson = lessons.find((l) => l.id === id)!;
+      const wrongIds = lesson.questions
+        .filter((q) => q.tag === "Thông tin chi tiết")
+        .map((q) => q.id);
+      s = recordAttempt(s, {
+        ...attempt(`2026-09-0${index + 1}T10:00:00Z`, {
+          correct: lesson.questions.length - wrongIds.length,
+        }),
+        id: `seed-${id}`,
+        lessonId: id,
+        answers: missing(wrongIds, id),
+      });
+    }
+    const plan = todayPlan(s, new Date("2026-09-10T10:00:00+07:00"));
+    const named = Object.values(plan.reasons)
+      .flat()
+      .filter((reason) => reason.startsWith("Thông tin chi tiết: sai"));
+    expect(named.length).toBeGreaterThan(0);
+    expect(named[0]).toMatch(/sai \d+\/\d+ câu đã làm/);
+  });
+  it("keeps offering new material to a learner who keeps answering wrong", () => {
+    // Before the mistake bonus was capped and a slot reserved for unseen work,
+    // this learner was served the same handful of lessons for a fortnight.
+    let s = freshState();
+    s.profile = { ...s.profile, onboarded: true };
+    const offered = new Set<string>();
+    for (let day = 0; day < 14; day++) {
+      const when = new Date(
+        Date.parse("2026-09-01T10:00:00+07:00") + day * 86400000,
+      );
+      for (const lesson of todayPlan(s, when).lessons) {
+        offered.add(lesson.id);
+        s = recordAttempt(s, {
+          id: `${day}-${lesson.id}`,
+          lessonId: lesson.id,
+          skill: lesson.skill,
+          date: when.toISOString(),
+          answers: {},
+          correct: 0,
+          total: lesson.questions.length,
+          seconds: lesson.minutes * 60,
+        });
+      }
+    }
+    expect(offered.size).toBeGreaterThanOrEqual(12);
   });
   it("separates misconceptions from uncertain correct answers by question type", () => {
     const questions = lessons.find(
