@@ -191,7 +191,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | Vitest                | 57/57 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
 | Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
 | axe WCAG A/AA         | Đạt trên 14 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
-| Production build      | Đạt                | 61 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
+| Production build      | Đạt                | 86 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                           |
 | GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt             |
 

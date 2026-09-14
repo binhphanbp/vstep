@@ -468,6 +468,32 @@ test("timed exam continues through reload and finishes expired stages", async ({
     ),
   ).toBe(0);
 });
+test("the second paper is a different exam, not the first one again", async ({
+  page,
+}) => {
+  await page.goto("/exam");
+  await page.getByRole("button", { name: "Đề 02 · 172 phút" }).click();
+  await expect(page.locator(".panel").first()).toContainText("số 02");
+  await expect(page.locator(".panel").first()).toContainText(
+    "không dùng chung ngữ liệu",
+  );
+  await page
+    .getByText("Mình có thời gian, đã kiểm tra âm thanh", { exact: false })
+    .click();
+  await page.getByRole("button", { name: "Bắt đầu 172 phút của mình" }).click();
+  // Its own Listening material, not paper 01's.
+  await expect(page.locator("main")).toContainText("Library opening hours");
+  const stored = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("may-study-v1")!).exam,
+  );
+  expect(stored.mode).toBe("full2");
+  expect(stored.stagePlan[3].lessonIds).toEqual([
+    "exam2-speaking-1",
+    "exam2-speaking-2",
+    "exam2-speaking-3",
+  ]);
+});
+
 test("backup export/import and invalid data protection", async ({ page }) => {
   await page.goto("/settings");
   const event = page.waitForEvent("download");

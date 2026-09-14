@@ -4,7 +4,7 @@ test("full exam navigates all materials and restores both writing tasks", async 
   page,
 }) => {
   await page.goto("/exam");
-  await page.getByRole("button", { name: "Đủ cấu trúc · 172 phút" }).click();
+  await page.getByRole("button", { name: "Đề 01 · 172 phút" }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Bắt đầu 172 phút của mình" }).click();
   await expect(page.getByLabel("Chọn ngữ liệu").locator("option")).toHaveCount(

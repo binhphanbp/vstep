@@ -1,4 +1,5 @@
 import { lessons, type Lesson, type Question } from "./content";
+import { fullExam2Lessons } from "./full-exam-02";
 import { withStableOptionOrder } from "./option-order";
 import { questionNotes } from "./question-notes";
 const question = (
@@ -1168,4 +1169,4 @@ export const fullListening: Lesson[] = [
   ),
 ];
 export const fullExamLessons = [...fullReading, ...fullListening];
-export const allLessons = [...lessons, ...fullExamLessons];
+export const allLessons = [...lessons, ...fullExamLessons, ...fullExam2Lessons];

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { lessons, type Question } from "../../src/lib/content";
 import { fullListening, fullReading } from "../../src/lib/full-exam-content";
+import { fullListening2, fullReading2 } from "../../src/lib/full-exam-02";
 import { withStableOptionOrder } from "../../src/lib/option-order";
 
 /** Best score a repeating key pattern of up to five letters can reach. */
@@ -29,6 +30,8 @@ const banks: Record<string, Question[]> = {
   shortListening: lessons
     .filter((lesson) => lesson.skill === "listening")
     .flatMap((lesson) => lesson.questions),
+  paper2Reading: fullReading2.flatMap((lesson) => lesson.questions),
+  paper2Listening: fullListening2.flatMap((lesson) => lesson.questions),
 };
 
 describe("answer keys carry no guessable pattern", () => {
@@ -38,6 +41,8 @@ describe("answer keys carry no guessable pattern", () => {
     const limits: Record<string, number> = {
       fullReading: 0.55,
       fullListening: 0.55,
+      paper2Reading: 0.55,
+      paper2Listening: 0.55,
       shortReading: 0.65,
       shortListening: 0.65,
     };
@@ -59,7 +64,13 @@ describe("answer keys carry no guessable pattern", () => {
 
   it("never repeats a key three times running inside one lesson", () => {
     // Whole banks can look fine while a single lesson reads DDDD on screen.
-    for (const lesson of [...lessons, ...fullReading, ...fullListening]) {
+    for (const lesson of [
+      ...lessons,
+      ...fullReading,
+      ...fullListening,
+      ...fullReading2,
+      ...fullListening2,
+    ]) {
       const keys = lesson.questions.map((question) => question.answer);
       if (keys.length >= 3)
         expect(new Set(keys).size, lesson.id).toBeGreaterThan(1);
