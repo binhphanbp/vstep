@@ -104,6 +104,12 @@ export const attemptSchema = z
     seconds: boundedNumber(0, 18000),
     text: z.optional(limitedString(30000)),
     reflection: z.optional(z.array(limitedString(200)).check(z.maxLength(20))),
+    // Her own rating against Mây's self-check criteria, 1-3 per criterion.
+    // Optional so that every attempt filed before the criteria existed - and
+    // every backup holding one - still parses.
+    selfCheck: z.optional(z.record(z.string(), boundedInteger(1, 3))),
+    /** What a teacher wrote back about this piece, typed in by hand. */
+    feedback: z.optional(limitedString(4000)),
     recordingId: z.optional(limitedString(100)),
     lessonSnapshot: z.optional(lessonSnapshotSchema),
   })

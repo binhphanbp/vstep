@@ -1,6 +1,17 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { Play, Square, Volume2, Mic, Download, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Play,
+  Pause,
+  Square,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  Mic,
+  Download,
+  Trash2,
+} from "lucide-react";
 import { saveRecording, getRecording, deleteRecording } from "@/lib/recordings";
 import { speechChunks } from "@/lib/speech";
 let speechOwner: symbol | null = null;
@@ -53,6 +64,18 @@ export function RecordingHistory({ id }: { id: string }) {
     </details>
   );
 }
+/**
+ * The listening player.
+ *
+ * It used to have three controls: play, stop, speed. That is not enough to
+ * study a recording with — there was no way to pause, to hear one sentence
+ * again, or to know how far through the passage you were. Because the audio is
+ * the device's own speech synthesis rather than a file, there is no waveform to
+ * scrub: the unit that can be addressed is the sentence. So the timeline is
+ * "câu 3/18", seeking is by sentence, and a single sentence can be repeated
+ * without restarting the passage. No sentence text is shown, so the control
+ * strip is safe in the exam room where the transcript stays closed.
+ */
 export function AudioPlayer({
   text,
   allowSpeed = true,
@@ -65,10 +88,14 @@ export function AudioPlayer({
   label?: string;
 }) {
   const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [at, setAt] = useState(0);
   const [rate, setRate] = useState(1);
   const [error, setError] = useState("");
+  const [noVoice, setNoVoice] = useState(false);
   const run = useRef(0);
   const owner = useRef(Symbol("audio-player"));
+  const parts = useMemo(() => speechChunks(text), [text]);
   useEffect(() => {
     const token = owner.current;
     const playback = run;
@@ -87,8 +114,9 @@ export function AudioPlayer({
       window.speechSynthesis?.cancel();
     }
     setPlaying(false);
+    setPaused(false);
   }
-  function play() {
+  function play(from = 0) {
     if (!("speechSynthesis" in window)) {
       setError("Trình duyệt chưa hỗ trợ giọng đọc. Hãy thử Chrome hoặc Edge.");
       return;
@@ -101,18 +129,25 @@ export function AudioPlayer({
     const englishVoices = voices
       .filter((v) => v.lang.startsWith("en"))
       .sort((a, b) => Number(b.lang === "en-GB") - Number(a.lang === "en-GB"));
-    const parts = speechChunks(text);
+    // Said plainly rather than left to sound wrong: a device with no English
+    // voice reads English with a Vietnamese one, and the practice is useless
+    // without the learner knowing why.
+    setNoVoice(voices.length > 0 && englishVoices.length === 0);
     const id = run.current;
-    let index = 0;
+    let index = Math.max(0, Math.min(from, parts.length - 1));
     setPlaying(true);
+    setPaused(false);
     const next = () => {
       if (id !== run.current) return;
       if (index >= parts.length) {
         if (speechOwner === owner.current) speechOwner = null;
         setPlaying(false);
+        setAt(parts.length ? parts.length - 1 : 0);
         return;
       }
-      const part = parts[index++];
+      const part = parts[index];
+      setAt(index);
+      index++;
       const utterance = new SpeechSynthesisUtterance(part.text);
       const voice = englishVoices[part.speaker % englishVoices.length];
       utterance.lang = "en-GB";
@@ -124,6 +159,7 @@ export function AudioPlayer({
         run.current++;
         if (speechOwner === owner.current) speechOwner = null;
         setPlaying(false);
+        setPaused(false);
         if (e.error !== "interrupted" && e.error !== "canceled") {
           setError(
             "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
@@ -136,6 +172,7 @@ export function AudioPlayer({
         run.current++;
         if (speechOwner === owner.current) speechOwner = null;
         setPlaying(false);
+        setPaused(false);
         setError(
           "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
         );
@@ -143,13 +180,28 @@ export function AudioPlayer({
     };
     next();
   }
+  function hold() {
+    if (!playing) return;
+    if (paused) {
+      window.speechSynthesis?.resume();
+      setPaused(false);
+    } else {
+      window.speechSynthesis?.pause();
+      setPaused(true);
+    }
+  }
+  function move(step: number) {
+    const target = Math.max(0, Math.min(at + step, parts.length - 1));
+    setAt(target);
+    play(target);
+  }
   if (variant === "inline")
     return (
       <div className="evidence-audio">
         <button
           type="button"
           className="button secondary small"
-          onClick={playing ? stop : play}
+          onClick={playing ? stop : () => play(0)}
         >
           {playing ? <Square size={14} /> : <Play size={14} />}{" "}
           {playing ? "Dừng" : label}
@@ -161,6 +213,7 @@ export function AudioPlayer({
         )}
       </div>
     );
+  const position = parts.length ? at + 1 : 0;
   return (
     <div className="audio-panel">
       <div className="panel-heading">
@@ -173,11 +226,21 @@ export function AudioPlayer({
         <button
           type="button"
           className="button primary"
-          onClick={playing ? stop : play}
+          onClick={playing ? stop : () => play(at)}
           aria-label={playing ? "Dừng bài nghe" : "Phát bài nghe"}
         >
           {playing ? <Square size={15} /> : <Play size={15} />}{" "}
           {playing ? "Dừng" : "Phát bài nghe"}
+        </button>
+        <button
+          type="button"
+          className="button secondary small"
+          onClick={hold}
+          disabled={!playing}
+          aria-label={paused ? "Tiếp tục" : "Tạm dừng"}
+        >
+          {paused ? <Play size={14} /> : <Pause size={14} />}
+          {paused ? "Tiếp tục" : "Tạm dừng"}
         </button>
         {allowSpeed && (
           <select
@@ -192,10 +255,60 @@ export function AudioPlayer({
           </select>
         )}
       </div>
+      {parts.length > 1 && (
+        <div className="audio-seek">
+          <div
+            className="audio-track"
+            role="img"
+            aria-label={`Đang ở câu ${position} trên ${parts.length}`}
+          >
+            <span style={{ width: `${(position / parts.length) * 100}%` }} />
+          </div>
+          <div className="audio-seek-row">
+            <span className="audio-position">
+              Câu {position}/{parts.length}
+            </span>
+            <button
+              type="button"
+              className="button secondary small"
+              onClick={() => move(-1)}
+              aria-label="Câu trước"
+            >
+              <SkipBack size={14} />
+              Câu trước
+            </button>
+            <button
+              type="button"
+              className="button secondary small"
+              onClick={() => play(at)}
+              aria-label="Nghe lại câu này"
+            >
+              <RotateCcw size={14} />
+              Nghe lại câu này
+            </button>
+            <button
+              type="button"
+              className="button secondary small"
+              onClick={() => move(1)}
+              aria-label="Câu sau"
+            >
+              <SkipForward size={14} />
+              Câu sau
+            </button>
+          </div>
+        </div>
+      )}
       <small>
         Giọng đọc tổng hợp của thiết bị · Nội dung tự biên soạn. Chưa thay thế
         bản thu đề thi chuẩn.
       </small>
+      {noVoice && (
+        <p role="status" className="notice">
+          Thiết bị này chưa có giọng tiếng Anh nên câu đang được đọc bằng giọng
+          mặc định. Cài thêm giọng tiếng Anh trong cài đặt hệ thống để nghe đúng
+          phát âm.
+        </p>
+      )}
       {error && (
         <p role="alert" className="help-copy">
           {error}

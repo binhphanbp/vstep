@@ -69,7 +69,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 
 - 30 bài luyện ngắn gồm 12 bài Đọc, 12 bài Nghe, 3 bài Viết và 3 bài Nói.
 - Bài Đọc/Nghe có câu hỏi, đáp án, giải thích, chấm điểm chính xác và chẩn đoán theo dạng câu cùng mức chắc chắn.
-- Bài Viết có đề, giới hạn thời gian gợi ý, đếm từ, nháp tự lưu, checklist tự đánh giá và bài mẫu.
+- Bài Viết có đề, giới hạn thời gian gợi ý, đếm từ, nháp tự lưu, bộ tiêu chí tự kiểm tra ba mức (của Mây, không phải thang chấm hội đồng thi), bài mẫu để đối chiếu và gói in được để gửi người chấm.
 - Bài Nói có đề, gợi ý cấu trúc, ghi âm qua MediaRecorder, nghe lại, tải file và lưu bản ghi theo lượt học.
 - Bộ lọc theo kỹ năng, tìm kiếm và trạng thái đã khám phá.
 
@@ -190,7 +190,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                |
 | Vitest                | 57/57 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
 | Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive   |
-| axe WCAG A/AA         | Đạt trên 13 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
+| axe WCAG A/AA         | Đạt trên 14 màn    | Lỗi accessibility có thể tự động phát hiện                                                       |
 | Production build      | Đạt                | 61 route tĩnh/SSG được sinh thành công, gồm web app manifest                                     |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                           |
 | GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt             |
