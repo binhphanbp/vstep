@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 13/09/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13; nhánh chính hiện đã đi tiếp qua đợt 1 và đợt 2 của kế hoạch 14/09 và đạt 90 unit, 46 E2E. Xem STATUS.md và QUALITY.md.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **127 unit, 52 E2E**, build 86 route, axe trên 14 màn. Xem STATUS.md và QUALITY.md.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, hai chế độ thi có giờ, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; mốc hiện hành `32422fa` đạt 81 unit và 44 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 đạt 127 unit và 52 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -76,7 +76,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 ### 4.5 Phòng luyện có giờ
 
 - **Chế độ rút gọn 51 phút:** Nghe 10 phút, Đọc 15 phút, Viết 20 phút, Nói 6 phút.
-- **Chế độ đủ cấu trúc 172 phút:** Nghe 40 phút với 35 câu, Đọc 60 phút với 40 câu, Viết 60 phút với email và essay, Nói 12 phút với ba phần.
+- **Chế độ đủ cấu trúc 172 phút, hai đề độc lập:** Nghe 40 phút với 35 câu, Đọc 60 phút với 40 câu, Viết 60 phút với hai bài, Nói 12 phút với ba phần. Đề 01 mở rộng bốn bài Đọc của thư viện (câu hỏi là của riêng đề) và dùng lại phần Viết/Nói của thư viện; **đề 02 không dùng chung mã bài, mã câu, ngữ liệu hay đề bài nào** với đề 01 và thư viện, nên dùng được để đo lại sau một giai đoạn học.
 - Đồng hồ dùng deadline tuyệt đối nên tiếp tục đúng sau khi reload, chuyển tab hoặc để máy ngủ.
 - Tự lưu đáp án, hai bài Viết và bản ghi từng phần Nói.
 - Báo rõ số câu Nghe/Đọc còn bỏ trống trước khi nộp; transcript Nghe chỉ xuất hiện trong phần đối chiếu sau khi hoàn thành.
@@ -85,11 +85,17 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 
 ### 4.6 Từ vựng và sổ lỗi sai
 
-- 20 từ có IPA, nghĩa tiếng Việt, ví dụ và chủ đề.
+- 20 từ có IPA, nghĩa tiếng Việt, ví dụ và chủ đề, cộng các thẻ người học tự thêm từ chính câu "từ vựng trong ngữ cảnh" đã làm sai (10 thẻ đã viết sẵn nghĩa tiếng Việt và IPA).
 - Phát âm bằng giọng tổng hợp của thiết bị.
 - Lịch ôn thay đổi theo bốn mức: chưa nhớ, khó, nhớ rồi và rất chắc.
 - Câu sai từ bài luyện và đề thi được gom một lần vào sổ lỗi.
 - Người học phải chọn lại đáp án trước khi xem kết quả và giải thích.
+
+### 4.6b Hoạt động ngoại tuyến, nguồn gốc học liệu và báo lỗi
+
+- Service worker viết tay cho phép mở lại app khi mất mạng; không lời gọi Supabase nào bị cache, và chỉ đăng ký ở bản production.
+- Mỗi bài học hiện người soạn và trạng thái thẩm định. Hiện tại **chưa bài nào qua thẩm định của giáo viên**; nhãn B1/B2 là định hướng biên soạn.
+- Cài đặt có nút tải file báo lỗi gồm thông tin máy, số lượng dữ liệu và tối đa 10 lỗi gần nhất; file không chứa bài viết, bản nháp hay bản ghi âm.
 
 ### 4.7 Tiến bộ và lịch sử
 

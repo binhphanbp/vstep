@@ -168,6 +168,12 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Một lỗi thật, tìm thấy nhờ đề 02.** `advanceExam` nhận diện bài Viết số 2 bằng cách so mã bài với `"writing-essay"`. Đề 02 có đề luận riêng, nên bài thư sẽ bị lưu vào **cả hai** lượt Viết và bài luận biến mất. Nay task 2 được xác định theo vị trí trong phần Viết của chính đề đang làm, ở cả `learning.ts` lẫn phòng thi; có test dựng một buổi thi đề 02 và khẳng định hai lượt Viết giữ đúng hai bài.
 - **Số liệu sau khi thêm**: ngân hàng câu hỏi Reading/Listening 183 → **258 câu**, chú giải bằng chứng 136 → **176 câu**; build sinh 86 route.
 
+## Đợt 6 (phần 3): báo cáo Word dựng lại từ một nguồn số liệu
+
+- Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
+- **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 127 unit / 52 E2E / 86 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+
 ## Bằng chứng kiểm tra
 
 - 127 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.

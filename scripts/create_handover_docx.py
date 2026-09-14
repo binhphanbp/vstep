@@ -24,6 +24,33 @@ BORDER = "D9D9D9"
 DARK = "4A3B42"
 
 
+def current_figures() -> dict[str, str]:
+    """Read the live figures out of HANDOVER.md instead of repeating them.
+
+    The cover of this report claimed "57 unit test và 40 E2E" for three
+    releases after that stopped being true, because the numbers were typed
+    here as well as in the document. Anything that appears twice drifts, so
+    the source of truth is the handover note itself and a missing line is a
+    hard failure rather than a stale number printed with confidence.
+    """
+    text = SOURCE.read_text(encoding="utf-8")
+    counts = re.search(r"\*\*(\d+) unit, (\d+) E2E\*\*", text)
+    updated = re.search(r"\*\*Cập nhật (\d{2}/\d{2}/\d{4}):\*\*", text)
+    routes = re.search(r"build (\d+) route", text)
+    screens = re.search(r"axe trên (\d+) màn", text)
+    if not (counts and updated and routes and screens):
+        raise SystemExit(
+            "HANDOVER.md thiếu dòng số liệu hiện hành; cập nhật tài liệu trước khi dựng báo cáo."
+        )
+    return {
+        "unit": counts.group(1),
+        "e2e": counts.group(2),
+        "updated": updated.group(1),
+        "routes": routes.group(1),
+        "screens": screens.group(1),
+    }
+
+
 def set_run_font(run, name="Arial", size=None, bold=None, color=INK):
     run.font.name = name
     run._element.get_or_add_rPr().rFonts.set(qn("w:ascii"), name)
@@ -280,8 +307,9 @@ def add_cover(doc):
     header_p.paragraph_format.space_after = Pt(0)
     header_run = header_p.add_run("THÔNG TIN BÀN GIAO")
     set_run_font(header_run, size=8.5, bold=True, color="FFFFFF")
+    figures = current_figures()
     metadata = [
-        ("Ngày cập nhật", "13/09/2026"),
+        ("Ngày cập nhật", figures["updated"]),
         ("Mốc đánh giá", "Release Reading và Listening 6cdbbfe"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
@@ -319,7 +347,15 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Lịch sử tương thích được nâng cấp sang snapshot; lịch ôn tách theo phiên bản; đề đang làm khóa cả học liệu và cấu trúc phần thi. Bộ kiểm thử production gồm 57 unit test và 40 E2E trên Chromium, Firefox và WebKit. Migration gia cố quyền ghi cloud đã áp dụng và hậu kiểm thành công trên Supabase production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị, cổng phát hành chờ CI cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Viết và Nói có bộ tiêu chí tự kiểm tra của Mây kèm gói in được để gửi người chấm; đây không phải thang chấm của hội đồng thi. Phòng thi có hai đề đủ cấu trúc độc lập nên đo lại được sau một giai đoạn học. App mở lại được khi mất mạng, và mỗi bài học hiện rõ chưa qua thẩm định của giáo viên. Bộ kiểm thử production gồm "
+        + figures["unit"]
+        + " unit test và "
+        + figures["e2e"]
+        + " E2E trên Chromium, Firefox và WebKit, build "
+        + figures["routes"]
+        + " route và axe trên "
+        + figures["screens"]
+        + " màn. Migration gia cố quyền ghi cloud đã áp dụng và hậu kiểm thành công trên Supabase production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị, cổng phát hành chờ CI cùng thẩm định học liệu bởi giáo viên VSTEP.",
         11,
         INK,
     )
