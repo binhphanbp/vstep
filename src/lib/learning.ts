@@ -741,6 +741,66 @@ export function milestones(state: StudyState, now = new Date()): Milestone[] {
   }
   return found.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }
+/**
+ * A ten-minute session for a day with no time in it.
+ *
+ * "Hơi mệt" used to do one thing: drop the budget to fifteen minutes and then
+ * serve the same standard lessons, the shortest of which is six minutes and
+ * most of which are eight or ten. There was no shape of session shorter than a
+ * lesson, so a tired day became an all-or-nothing choice. This is the smaller
+ * shape: one short listening or reading text, up to three vocabulary cards
+ * already due, and one mistake already due. Everything in it is an existing
+ * flow, so the session lands in the history exactly like any other.
+ */
+export const QUICK_SESSION_MINUTES = 10;
+/** Longest lesson that still leaves room for the cards and the mistake. */
+const QUICK_LESSON_MINUTES = 8;
+export type QuickSession = {
+  lesson: (typeof lessons)[number];
+  words: typeof vocabulary;
+  mistake: ReturnType<typeof mistakes>[number] | undefined;
+};
+export function quickSession(
+  state: StudyState,
+  now = new Date(),
+): QuickSession | null {
+  const met = new Map<string, string>();
+  for (const attempt of state.attempts)
+    if (
+      !met.has(attempt.lessonId) ||
+      met.get(attempt.lessonId)! < attempt.date
+    )
+      met.set(attempt.lessonId, attempt.date);
+  const short = lessons.filter(
+    (lesson) =>
+      lesson.minutes <= QUICK_LESSON_MINUTES &&
+      (lesson.skill === "listening" || lesson.skill === "reading"),
+  );
+  if (!short.length) return null;
+  // Listening first, as the plan says; an unseen lesson before a repeat; then
+  // whichever has been left alone longest.
+  const lesson =
+    [...short].sort((a, b) => {
+      const rank = (item: (typeof short)[number]) =>
+        (item.skill === "listening" ? 0 : 1) * 2 + (met.has(item.id) ? 1 : 0);
+      return (
+        rank(a) - rank(b) ||
+        Date.parse(met.get(a.id) ?? "1970-01-01T00:00:00Z") -
+          Date.parse(met.get(b.id) ?? "1970-01-01T00:00:00Z")
+      );
+    })[0] ?? null;
+  if (!lesson) return null;
+  const words = vocabulary
+    .filter((word) => {
+      const review = state.reviews[word.id];
+      return !review || Date.parse(review.due) <= now.getTime();
+    })
+    .slice(0, 3);
+  const mistake = mistakes(state, now)
+    .filter((item) => item.due)
+    .sort((a, b) => b.wrongCount - a.wrongCount)[0];
+  return { lesson, words, mistake };
+}
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
 export function todayPlan(state: StudyState, now = new Date()) {

@@ -11,6 +11,7 @@ import {
   milestones,
   mistakes,
   questionTypeStats,
+  quickSession,
   objectiveInsights,
   personalizeLegacyState,
   profileSchema,
@@ -896,5 +897,64 @@ describe("milestones that really happened", () => {
     const word = milestones(state, now).find((i) => i.id.startsWith("word:"));
     expect(word?.title).toContain(vocabulary[0].word);
     expect(word?.detail).toContain("2026-09-03");
+  });
+});
+
+describe("a ten-minute session for a day with no time in it", () => {
+  it("fits inside ten minutes and starts with something short to listen to", () => {
+    const session = quickSession(freshState(), now)!;
+    expect(session.lesson.minutes).toBeLessThanOrEqual(8);
+    expect(session.lesson.skill).toBe("listening");
+    expect(session.words.length).toBeLessThanOrEqual(3);
+  });
+  it("prefers material she has not met yet", () => {
+    const first = quickSession(freshState(), now)!;
+    const state = freshState();
+    state.attempts = [
+      attempt("2026-09-07T10:00:00Z", {
+        id: "done",
+        lessonId: first.lesson.id,
+        skill: first.lesson.skill,
+        answers: {},
+        correct: 0,
+        total: first.lesson.questions.length,
+      }),
+    ];
+    expect(quickSession(state, now)!.lesson.id).not.toBe(first.lesson.id);
+  });
+  it("says plainly when there is nothing due rather than inventing work", () => {
+    const state = freshState();
+    for (const word of vocabulary)
+      state.reviews[word.id] = {
+        due: "2026-12-01T10:00:00.000Z",
+        interval: 30,
+        ease: 2.5,
+        repetitions: 3,
+        lastDate: "2026-09-01",
+      };
+    const session = quickSession(state, now)!;
+    expect(session.words).toEqual([]);
+    expect(session.mistake).toBeUndefined();
+  });
+  it("puts the most repeated mistake first", () => {
+    let state = freshState();
+    const wrong = ["rc1"];
+    state = recordAttempt(state, {
+      ...attempt("2026-09-05T10:00:00Z", {
+        id: "one",
+        answers: missing(wrong),
+        correct: 4,
+      }),
+    });
+    state = recordAttempt(state, {
+      ...attempt("2026-09-06T10:00:00Z", {
+        id: "two",
+        answers: missing(wrong),
+        correct: 4,
+      }),
+    });
+    const session = quickSession(state, now)!;
+    expect(session.mistake?.question.id).toBe("rc1");
+    expect(session.mistake?.wrongCount).toBe(2);
   });
 });

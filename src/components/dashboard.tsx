@@ -22,6 +22,8 @@ import {
   skillStats,
   dayOffset,
   milestones,
+  quickSession,
+  QUICK_SESSION_MINUTES,
 } from "@/lib/learning";
 import { vocabulary, skillNames, type Skill } from "@/lib/content";
 import { SkillIcon } from "./icons";
@@ -47,6 +49,9 @@ export function Dashboard() {
   // Only milestones that really happened; an empty list shows the quote
   // instead, because a congratulation she did not earn is worse than none.
   const earned = milestones(state, new Date(now)).slice(0, 2);
+  // A tired day used to mean the same lessons in a smaller budget; this is
+  // a shape of session shorter than a single lesson.
+  const quick = plan.mood === "low" ? quickSession(state, new Date(now)) : null;
   const completed = new Set(state.attempts.map((a) => a.lessonId));
   const dateLabel = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
@@ -187,6 +192,57 @@ export function Dashboard() {
               ))}
             </div>
           </section>
+          {quick && (
+            <section className="panel quick-session">
+              <div className="section-title">
+                <Clock3 size={20} />
+                <h2>Buổi {QUICK_SESSION_MINUTES} phút cho hôm nay</h2>
+              </div>
+              <p className="help-copy">
+                Hôm nay {state.profile.name} đang mệt. Ba việc nhỏ này vẫn được
+                ghi vào lịch sử như một buổi học bình thường.
+              </p>
+              <ol className="quick-list">
+                <li>
+                  <Link href={`/practice/${quick.lesson.id}`}>
+                    <strong>{quick.lesson.title}</strong>
+                    <span>
+                      {skillNames[quick.lesson.skill]} · {quick.lesson.minutes}{" "}
+                      phút
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/vocabulary">
+                    <strong>
+                      {quick.words.length
+                        ? `Ôn ${quick.words.length} thẻ từ đã đến hạn`
+                        : "Chưa có thẻ từ nào đến hạn"}
+                    </strong>
+                    <span>
+                      {quick.words.length
+                        ? quick.words.map((word) => word.word).join(" · ")
+                        : "Ghé vườn từ vựng nếu còn sức"}
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/mistakes">
+                    <strong>
+                      {quick.mistake
+                        ? "Sửa một câu đã sai"
+                        : "Chưa có lỗi nào đến hạn ôn"}
+                    </strong>
+                    <span>
+                      {quick.mistake
+                        ? `${quick.mistake.lesson.title} · sai ${quick.mistake.wrongCount} lần`
+                        : "Sổ lỗi đang trống, nghỉ sớm cũng được"}
+                    </span>
+                  </Link>
+                </li>
+              </ol>
+            </section>
+          )}
           <section>
             <div className="section-heading">
               <div>

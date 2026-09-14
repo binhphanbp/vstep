@@ -33,6 +33,15 @@ test("dashboard is honest, responsive, and energy changes the plan", async ({
   await expect(
     page.getByText("Hôm nay học nhẹ thôi.", { exact: false }),
   ).toBeVisible();
+  // A tired day gets a session shorter than one lesson, not the same lessons
+  // in a smaller budget.
+  const quick = page.locator(".quick-session");
+  await expect(quick).toContainText("Buổi 10 phút");
+  await expect(quick.locator("li")).toHaveCount(3);
+  await expect(quick.locator("li").first().locator("a")).toHaveAttribute(
+    "href",
+    /\/practice\//,
+  );
   await page.screenshot({
     path: ".qa/dashboard-desktop.png",
     fullPage: true,
