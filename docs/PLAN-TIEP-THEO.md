@@ -72,13 +72,17 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 
 (Số của bảng 1.2 đo bằng một mô phỏng hơi khác nên lệch vài phút; hai cột trên đo bằng cùng một kịch bản nên so được với nhau.) Kế hoạch mặc định 30 phút vẫn đúng ba bài cũ: `listening-weekend`, `reading-cafe`, `speaking-social`. 4 ca unit khoá: không bao giờ vượt ngân sách ở 6 nhịp khác nhau, ngày ngắn giữ nguyên 18/20 và 24/30 phút, giờ học 60 phút dùng quá 45 phút và không kỹ năng nào chiếm quá 2 bài, mọi bài thêm đều có lý do.
 
-### N3. Ngân hàng Viết và Nói — M
+### N3. Ngân hàng Viết và Nói — M — ĐÃ XONG (đợt 2)
 
 **Vì sao.** 1.1. Đây là nửa kỳ thi đang mỏng nhất, và cũng là nửa khó tự học nhất.
 
 **Việc.** Thêm **6 đề Viết** (3 task 1, 3 task 2, mỗi đề có bài mẫu để đối chiếu từng tiêu chí) và **6 đề Nói** (2 cho mỗi phần). Đề mới mang mã mới; không sửa đề đã phát hành.
 
 **Xong khi.** Thư viện đạt 9 Viết + 9 Nói; mô phỏng 14 ngày ở nhịp 30 phút không còn lặp bài Nói trước ngày 10; mỗi đề Viết có bài mẫu dài hơn số từ tối thiểu; bộ tiêu chí tự kiểm tra nhận đúng task 1 hay task 2 cho mọi đề mới.
+
+**Đã làm.** 6 đề Viết mới (`writing-complaint`, `writing-apology`, `writing-directions` cho Task 1; `writing-remote-essay`, `writing-transport-essay`, `writing-health-essay` cho Task 2) và 6 đề Nói mới (`speaking-work-life`, `speaking-food` — phần 1; `speaking-course`, `speaking-commute` — phần 2; `speaking-technology`, `speaking-waste` — phần 3). Thư viện đạt **9 Viết + 9 Nói**, tổng 42 bài. Không sửa đề nào đã phát hành.
+
+**Đo được.** Mô phỏng 14 ngày (ghi đúng đáp án từng câu nên so được với bảng 1.2): ở nhịp 30 phút, bài Nói lặp lần đầu **ngày 6 → không lặp lần nào trong 14 ngày**; ở nhịp 60 phút, Nói **ngày 2 → ngày 5** và Viết **ngày 4 → ngày 7**. Thời lượng Viết 80 → 260 phút, Nói 21 → 63 phút. Bài mẫu Task 1 dài 157–164 từ (yêu cầu 120), Task 2 dài 290–303 từ (yêu cầu 250). 4 ca unit mới khoá số đề, bộ tiêu chí, độ dài bài mẫu và kết quả mô phỏng.
 
 ### N4. Chú giải cho phần Nghe của hai đề — M
 
@@ -111,7 +115,7 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 | Đợt | Nội dung                                                              | Vì sao trước                                               |
 | --- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
 | 1   | **N1** so sánh hai lần thi · **N2** dùng đúng ngân sách — **đã xong** | Nhỏ, đóng nốt F07 và mở khoá giá trị của đề 02             |
-| 2   | **N3** ngân hàng Viết/Nói                                             | Nửa kỳ thi đang mỏng nhất                                  |
+| 2   | **N3** ngân hàng Viết/Nói — **đã xong**                               | Nửa kỳ thi đang mỏng nhất                                  |
 | 3   | **N6** chặn tài liệu trôi · **N5** thẻ từ từ bài học                  | Một việc nhỏ có tính phòng ngừa, một việc vừa              |
 | 4   | **N4** chú giải phần Nghe (nhiều lô)                                  | Khối lớn nhất, mang tính hoàn thiện chứ không mở tính năng |
 

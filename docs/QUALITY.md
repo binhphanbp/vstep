@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 135 unit / 53 E2E / 86 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 139 unit / 53 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -182,9 +182,23 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Đo lại bằng cùng một mô phỏng 14 ngày:** 20 phút/ngày 264/280 → 264/280 (không đổi), 30 phút 359/420 → 359/420 (không đổi), 45 phút 461/630 → 551/630, 60 phút **495/840 → 752/840 (59% → 90%)**. Kế hoạch mặc định 30 phút vẫn là đúng ba bài cũ.
 - 8 ca unit và 1 ca E2E mới khoá cả hai việc: không kế hoạch nào vượt ngân sách, ngày ngắn giữ nguyên từng phút, và hai kết luận so sánh đều được kiểm trên bản production.
 
+## Đợt 2 của kế hoạch tiếp theo: ngân hàng Viết và Nói
+
+- **Nửa kỳ thi mỏng nhất được nhân ba.** Thư viện có 12 bài Đọc và 12 bài Nghe nhưng chỉ 3 bài Viết và 3 bài Nói. Thêm 6 đề Viết (3 Task 1 — thư phàn nàn, thư xin lỗi đổi hẹn, thư chỉ đường; 3 Task 2 — làm việc từ xa, ngân sách giao thông đô thị, trách nhiệm với lối sống lành mạnh) và 6 đề Nói (2 cho mỗi phần). Mã đề đều mới; không sửa một đề đã phát hành nào.
+- **Đo lại bằng mô phỏng 14 ngày** (ghi đúng đáp án từng câu, nên số liệu so được với bảng 1.2 của kế hoạch):
+
+| Nhịp         | Bài Nói lặp lần đầu                  | Bài Viết lặp lần đầu  |
+| ------------ | ------------------------------------ | --------------------- |
+| 30 phút/ngày | ngày 6 → **không lặp trong 14 ngày** | không lặp → không lặp |
+| 60 phút/ngày | ngày 2 → **ngày 5**                  | ngày 4 → **ngày 7**   |
+
+- Tổng thời lượng theo kỹ năng: Viết 80 → **260 phút**, Nói 21 → **63 phút**; thư viện 30 → **42 bài**, build 86 → **98 route**.
+- **Bài mẫu để đối chiếu, không phải để chép.** Mỗi đề Viết mới có bài mẫu dài hơn số từ tối thiểu (Task 1: 157–164 từ; Task 2: 290–303 từ). Có test khoá điều này cho mọi đề Viết trong thư viện.
+- 4 ca unit mới: đủ số đề cho cả hai task và cả ba phần Nói, mỗi đề nhận đúng bộ tiêu chí tự kiểm tra (w1/w2/s1/s2/s3), mọi đề Viết có bài mẫu dài hơn yêu cầu, và mô phỏng 14 ngày ở nhịp 30 phút không lặp đề Nói lần nào.
+
 ## Bằng chứng kiểm tra
 
-- 135 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 139 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 53 kiểm thử Playwright trên bản production: 49 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

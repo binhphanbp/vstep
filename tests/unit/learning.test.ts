@@ -1189,3 +1189,73 @@ describe("the day's budget", () => {
       expect(plan.reasons[lesson.id].length).toBeGreaterThan(0);
   });
 });
+
+describe("the Writing and Speaking bank", () => {
+  const of = (skill: string) => lessons.filter((l) => l.skill === skill);
+  it("holds enough prompts for a fortnight of practice", () => {
+    expect(of("writing").length).toBeGreaterThanOrEqual(9);
+    expect(of("speaking").length).toBeGreaterThanOrEqual(9);
+    // Both halves of the paper, and all three speaking parts, are present.
+    for (const part of ["Task 1", "Task 2"])
+      expect(
+        of("writing").filter((l) => l.part.includes(part)).length,
+      ).toBeGreaterThanOrEqual(3);
+    for (const part of ["Part 1", "Part 2", "Part 3"])
+      expect(
+        of("speaking").filter((l) => l.part.includes(part)).length,
+      ).toBeGreaterThanOrEqual(3);
+  });
+  it("shows the self-check list that matches each prompt", () => {
+    for (const lesson of [...of("writing"), ...of("speaking")]) {
+      const group = criteriaFor(lesson);
+      expect(group, lesson.id).not.toBe(null);
+      const expected = lesson.part.includes("Task 2")
+        ? "w2"
+        : lesson.part.includes("Task 1")
+          ? "w1"
+          : lesson.part.includes("Part 2")
+            ? "s2"
+            : lesson.part.includes("Part 3")
+              ? "s3"
+              : "s1";
+      expect(group!.key, lesson.id).toBe(expected);
+    }
+  });
+  it("gives every writing prompt a sample worth comparing against", () => {
+    for (const lesson of of("writing")) {
+      expect(lesson.minWords, lesson.id).toBeGreaterThan(0);
+      expect(wordCount(lesson.sample ?? ""), lesson.id).toBeGreaterThan(
+        lesson.minWords!,
+      );
+    }
+  });
+  it("no longer repeats a speaking prompt inside a fortnight", () => {
+    // Measured before the bank grew: the first repeat fell on day 6.
+    let state = freshState();
+    const seen = new Set<string>();
+    let firstRepeat = 0;
+    for (let day = 0; day < 14; day++) {
+      const now = new Date(
+        Date.parse("2026-09-14T08:00:00+07:00") + day * 86400000,
+      );
+      for (const lesson of todayPlan(state, now).lessons) {
+        if (lesson.skill === "speaking" && seen.has(lesson.id) && !firstRepeat)
+          firstRepeat = day + 1;
+        seen.add(lesson.id);
+        state = recordAttempt(state, {
+          id: `d${day}:${lesson.id}`,
+          lessonId: lesson.id,
+          skill: lesson.skill,
+          date: now.toISOString(),
+          correct: lesson.questions.length,
+          total: lesson.questions.length,
+          seconds: lesson.minutes * 60,
+          answers: Object.fromEntries(
+            lesson.questions.map((question) => [question.id, question.answer]),
+          ),
+        });
+      }
+    }
+    expect(firstRepeat).toBe(0);
+  });
+});
