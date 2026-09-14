@@ -6,6 +6,7 @@ import {
   examStages,
   freshState,
   localDay,
+  mistakeReviewKey,
   mistakes,
   objectiveInsights,
   personalizeLegacyState,
@@ -106,34 +107,181 @@ describe("scoring and honest progress", () => {
   });
   it("measures accuracy over recent questions, not recent attempts", () => {
     const s = freshState();
-    // Six five-question lessons all answered perfectly, then a sitting that
-    // files one attempt per material — the shape of a timed exam section.
+    // Distinct materials, so every attempt is a first meeting: six five-question
+    // lessons answered perfectly, then a sitting that files one attempt per
+    // material — the shape of a timed exam section.
     s.attempts = [
-      ...Array.from({ length: 6 }, (_, i) =>
-        attempt(`2026-09-0${i + 1}T10:00:00Z`, { correct: 5 }),
-      ),
+      ...Array.from({ length: 6 }, (_, i) => ({
+        ...attempt(`2026-09-0${i + 1}T10:00:00Z`, { correct: 5 }),
+        lessonId: `lesson-${i}`,
+      })),
       ...Array.from({ length: 8 }, (_, i) => ({
         ...attempt(`2026-09-08T1${i}:00:00Z`, { correct: 0, total: 1 }),
         id: `exam-${i}`,
+        lessonId: `exam-part-${i}`,
         answers: {},
       })),
     ];
     // Eight wrong single-question parts cannot stand for the whole skill: the
-    // window keeps reading back until it holds thirty questions.
-    // 25 of 33: the eight exam parts plus the five lessons it takes to fill
-    // the window. Counting attempts alone would have read 0%.
+    // window keeps reading back until it holds thirty questions. 25 of 33 —
+    // the eight exam parts plus the five lessons it takes to fill the window.
+    // Counting attempts alone would have read 0%.
     expect(skillStats(s, "reading").accuracy).toBe(76);
     expect(skillStats(s, "reading").count).toBe(14);
   });
   it("forgets work that has fallen out of the recent-question window", () => {
     const s = freshState();
     s.attempts = [
-      attempt("2026-09-01T10:00:00Z", { correct: 0 }),
-      ...Array.from({ length: 6 }, (_, i) =>
-        attempt(`2026-09-0${i + 2}T10:00:00Z`, { correct: 5 }),
-      ),
+      { ...attempt("2026-09-01T10:00:00Z", { correct: 0 }), lessonId: "old" },
+      ...Array.from({ length: 6 }, (_, i) => ({
+        ...attempt(`2026-09-0${i + 2}T10:00:00Z`, { correct: 5 }),
+        lessonId: `lesson-${i}`,
+      })),
     ];
     expect(skillStats(s, "reading").accuracy).toBe(100);
+  });
+  it("does not let repeating a known lesson raise the ability figure", () => {
+    // Two Reading lessons first done at 2 of 5 each: the honest figure is 40%.
+    const s = freshState();
+    for (const [index, id] of ["reading-cafe", "reading-garden"].entries())
+      s.attempts.push({
+        ...attempt(`2026-09-0${index + 1}T10:00:00Z`, { correct: 2 }),
+        id: `first-${id}`,
+        lessonId: id,
+        answers: missing(
+          lessons
+            .find((l) => l.id === id)!
+            .questions.slice(2)
+            .map((q) => q.id),
+          id,
+        ),
+      });
+    expect(skillStats(s, "reading").accuracy).toBe(40);
+    // Four repeats with every answer right — inevitable once the library runs
+    // out. Before this was separated, the figure read 80% and the skill lost
+    // the priority that todayPlan gives anything under 65%.
+    for (let round = 0; round < 4; round++) {
+      const id = round % 2 ? "reading-garden" : "reading-cafe";
+      s.attempts.push({
+        ...attempt(`2026-09-1${round}T10:00:00Z`, { correct: 5 }),
+        id: `redo-${round}`,
+        lessonId: id,
+        answers: keys(id),
+      });
+    }
+    const stats = skillStats(s, "reading");
+    expect(stats.accuracy).toBe(40);
+    expect(stats.practiceAccuracy).toBe(100);
+    expect(stats.firstCount).toBe(2);
+    expect(stats.practiceCount).toBe(4);
+  });
+  it("counts a lesson met again after a content change as new material", () => {
+    const s = freshState();
+    const lesson = lessons.find((l) => l.id === "reading-cafe")!;
+    const snapshot = (version: number) => ({
+      ...structuredClone(lesson),
+      version,
+    });
+    s.attempts = [
+      {
+        ...attempt("2026-09-01T10:00:00Z", { correct: 5 }),
+        id: "v2",
+        lessonSnapshot: snapshot(2),
+      },
+      {
+        ...attempt("2026-09-02T10:00:00Z", { correct: 5 }),
+        id: "v3",
+        lessonSnapshot: snapshot(3),
+      },
+    ];
+    // Rewritten questions are material she has not met, so both count.
+    expect(skillStats(s, "reading").firstCount).toBe(2);
+    expect(skillStats(s, "reading").practiceCount).toBe(0);
+  });
+  it("lets the notebook forget a mistake the learner has since got right", () => {
+    // Reproduces the reported behaviour: before this, answering the same
+    // question correctly later left the card in the book and still due, so the
+    // notebook could only ever grow and kept asking for a fixed mistake.
+    const lesson = lessons.find((l) => l.id === "reading-cafe")!;
+    let s = freshState();
+    s = recordAttempt(s, {
+      ...attempt("2026-09-01T10:00:00Z", { correct: 4 }),
+      id: "wrong",
+      answers: missing(["rc1"]),
+    });
+    expect(mistakes(s).map((m) => [m.question.id, m.due, m.fixed])).toEqual([
+      ["rc1", true, false],
+    ]);
+    s = recordAttempt(s, {
+      ...attempt("2026-09-05T10:00:00Z", { correct: 5 }),
+      id: "right",
+      answers: keys(),
+    });
+    const after = mistakes(s);
+    expect(after).toHaveLength(1);
+    expect(after[0].due).toBe(false);
+    expect(after[0].fixed).toBe(true);
+    // Getting it right counts as a review passed, so the card comes back later
+    // rather than never or immediately.
+    expect(s.mistakeReviews[mistakeReviewKey(lesson, "rc1")]).toBeTruthy();
+  });
+  it("puts a mistake back in the queue when it is repeated", () => {
+    let s = freshState();
+    for (const [index, answers] of [
+      missing(["rc1"]),
+      keys(),
+      missing(["rc1"]),
+    ].entries())
+      s = recordAttempt(s, {
+        ...attempt(`2026-09-0${index + 1}T10:00:00Z`, {
+          correct: index === 1 ? 5 : 4,
+        }),
+        id: `round-${index}`,
+        answers,
+      });
+    const card = mistakes(s)[0];
+    expect(card.fixed).toBe(false);
+    expect(card.due).toBe(true);
+    expect(card.wrongCount).toBe(2);
+  });
+  it("offers a lesson longer than the daily budget as a split session", () => {
+    // writing-essay is 40 minutes against a 30-minute rhythm, so it never once
+    // appeared in fourteen simulated days before this.
+    let s = freshState();
+    s.profile = { ...s.profile, onboarded: true };
+    const offered = new Set<string>();
+    let flagged = false;
+    for (let day = 0; day < 14; day++) {
+      const when = new Date(
+        Date.parse("2026-09-01T10:00:00+07:00") + day * 86400000,
+      );
+      const plan = todayPlan(s, when);
+      for (const lesson of plan.lessons) {
+        offered.add(lesson.id);
+        if (plan.longer.includes(lesson.id)) {
+          flagged = true;
+          expect(lesson.minutes).toBeGreaterThan(plan.budget);
+          expect(plan.reasons[lesson.id][0]).toContain("Bài dài");
+        }
+        // Answer everything correctly: a learner who answers nothing keeps the
+        // plan pinned to the lessons she is failing, which is a different case.
+        const answers = keys(lesson.id);
+        s = recordAttempt(s, {
+          id: `${day}-${lesson.id}`,
+          lessonId: lesson.id,
+          skill: lesson.skill,
+          date: when.toISOString(),
+          answers,
+          correct: lesson.questions.length,
+          total: lesson.questions.length,
+          seconds: lesson.minutes * 60,
+        });
+      }
+    }
+    expect(offered.has("writing-essay")).toBe(true);
+    expect(flagged).toBe(true);
+    // Every lesson in the library now has a route into the daily plan.
+    expect(offered.size).toBe(lessons.length);
   });
   it("separates misconceptions from uncertain correct answers by question type", () => {
     const questions = lessons.find(

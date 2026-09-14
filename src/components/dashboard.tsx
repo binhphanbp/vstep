@@ -239,6 +239,7 @@ export function Dashboard() {
                       <span>
                         <Clock3 size={14} />
                         {lesson.minutes} phút
+                        {plan.longer.includes(lesson.id) && " · chia buổi"}
                       </span>
                       <span className={`row-action ${done ? "finished" : ""}`}>
                         {done ? "Đã học" : "Vào học"}
@@ -291,7 +292,7 @@ export function Dashboard() {
                       <div className="skill-card-foot">
                         <span>
                           {stat.accuracy !== null
-                            ? "Độ chính xác"
+                            ? "Độ chính xác lần đầu"
                             : "Bài luyện đã hoàn thành"}
                         </span>
                         <strong>

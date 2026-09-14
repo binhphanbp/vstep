@@ -279,13 +279,12 @@ export function MistakesPage() {
   const [chosen, setChosen] = useState<Record<string, number>>({});
   const [revealed, setRevealed] = useState<string[]>([]);
   const all = mistakes(state, new Date(now));
+  // `due` already accounts for a question the learner has since answered
+  // correctly, so a corrected mistake stops being asked for.
   const filtered = all.filter(
-    (m) =>
-      filter === "all" ||
-      revealed.includes(m.key) ||
-      !m.review ||
-      Date.parse(m.review.due) <= now,
+    (m) => filter === "all" || revealed.includes(m.key) || m.due,
   );
+  const fixed = all.filter((m) => m.fixed).length;
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(id);
@@ -321,7 +320,12 @@ export function MistakesPage() {
           <h1>Không phải lỗi. Là điều vừa học.</h1>
           <p>Những câu từng làm mình phân vân, gom lại để lần sau vững hơn.</p>
         </div>
-        <span className="pill">{all.length} câu đã ghi lại</span>
+        <div className="mistake-signals">
+          <span className="pill">{all.length - fixed} câu đang cần sửa</span>
+          {fixed > 0 && (
+            <span className="confidence-pill">{fixed} câu đã sửa được</span>
+          )}
+        </div>
       </div>
       <div className="filters">
         <button
@@ -365,6 +369,11 @@ export function MistakesPage() {
                       {item.wrongCount > 1 && (
                         <span className="confidence-pill">
                           Sai {item.wrongCount} lần
+                        </span>
+                      )}
+                      {item.fixed && (
+                        <span className="confidence-pill">
+                          Lần gần nhất đã làm đúng
                         </span>
                       )}
                     </div>
