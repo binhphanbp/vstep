@@ -33,6 +33,15 @@ test("dashboard is honest, responsive, and energy changes the plan", async ({
   await expect(
     page.getByText("Hôm nay học nhẹ thôi.", { exact: false }),
   ).toBeVisible();
+  // A tired day gets a session shorter than one lesson, not the same lessons
+  // in a smaller budget.
+  const quick = page.locator(".quick-session");
+  await expect(quick).toContainText("Buổi 10 phút");
+  await expect(quick.locator("li")).toHaveCount(3);
+  await expect(quick.locator("li").first().locator("a")).toHaveAttribute(
+    "href",
+    /\/practice\//,
+  );
   await page.screenshot({
     path: ".qa/dashboard-desktop.png",
     fullPage: true,
@@ -224,6 +233,66 @@ test("the notebook shows the shape of the mistakes, not just the list", async ({
   // heading first can pass before the click has taken effect.
   await page.waitForURL(/\/practice\//);
   await expect(page.locator("main h1")).toBeVisible();
+});
+
+test("the exam date becomes a plan for the week, and nothing without one", async ({
+  page,
+}) => {
+  await page.goto("/journey");
+  const panel = page.locator(".week-plan");
+  await expect(panel).toContainText("Chưa có ngày thi");
+  await page.goto("/settings");
+  const soon = new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10);
+  await page.getByLabel("Ngày thi dự kiến").fill(soon);
+  await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu");
+  await page.goto("/journey");
+  await expect(panel).toContainText("Hai tuần cuối");
+  await expect(panel).toContainText("đề đủ cấu trúc");
+  const far = new Date(Date.now() + 120 * 86400000).toISOString().slice(0, 10);
+  await page.goto("/settings");
+  await page.getByLabel("Ngày thi dự kiến").fill(far);
+  await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
+  await page.goto("/journey");
+  await expect(panel).toContainText("xây nền");
+});
+
+test("a word she got wrong can join the vocabulary garden", async ({
+  page,
+}) => {
+  // rk4 is the vocabulary-in-context question of reading-market: get it wrong
+  // and the notebook can turn it into a card.
+  await page.goto("/practice/reading-market");
+  for (const id of ["rk1", "rk2", "rk3", "rk4", "rk5"]) {
+    await page
+      .locator(
+        `input[name="${id}"][value="${id === "rk4" ? missed(id) : key(id)}"]`,
+      )
+      .check();
+    // Every question needs a confidence before the lesson can be submitted.
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await page.goto("/mistakes");
+  const add = page.getByRole("button", { name: /Thêm .*doubtful/ });
+  await expect(add).toBeVisible();
+  await add.click();
+  await expect(page.locator(".saved-word-add")).toContainText(
+    /Đã thêm .*doubtful/,
+  );
+  await page.goto("/vocabulary");
+  await page.getByRole("button", { name: "Tất cả từ vựng" }).click();
+  await page.getByLabel("Tìm từ vựng").fill("doubtful");
+  const row = page.locator(".vocab-list-item");
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText("Tự thêm");
+  await expect(row).toContainText("thuyết phục");
+  await row.getByRole("button", { name: "Bỏ khỏi vườn" }).click();
+  await expect(page.locator(".vocab-list-item")).toHaveCount(0);
 });
 
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({

@@ -4,11 +4,18 @@ import {
   dayOffset,
   daysUntil,
   examStages,
+  examWeekPlan,
   freshState,
   localDay,
   mistakeReviewKey,
+  milestones,
   mistakes,
   questionTypeStats,
+  quickSession,
+  addSavedWord,
+  removeSavedWord,
+  savedWords,
+  wordCardFor,
   objectiveInsights,
   personalizeLegacyState,
   profileSchema,
@@ -768,5 +775,225 @@ describe("content and backup integrity", () => {
     expect(upgraded.exam?.stagePlan).toEqual(examStages);
     expect(upgraded.exam?.lessonSnapshots).not.toHaveLength(0);
     expect(stateSchema.safeParse(upgraded).success).toBe(true);
+  });
+});
+
+describe("the exam date as a plan for the week", () => {
+  const withExam = (days: number | null) => {
+    const state = freshState();
+    state.profile = {
+      ...state.profile,
+      onboarded: true,
+      examDate: days === null ? "" : dayOffset(localDay(now), days),
+    };
+    return state;
+  };
+  it("says nothing at all when no exam date is set", () => {
+    // The old behaviour invented nothing either, but the interface had no way
+    // of telling "no date" from "date far away".
+    expect(examWeekPlan(withExam(null), now)).toBeNull();
+    expect(todayPlan(withExam(null), now).phase).toBeNull();
+  });
+  it("says nothing once the date has passed rather than counting backwards", () => {
+    expect(examWeekPlan(withExam(-3), now)).toBeNull();
+  });
+  it("splits the remaining time into phases that do different things", () => {
+    expect(examWeekPlan(withExam(90), now)?.key).toBe("foundation");
+    expect(examWeekPlan(withExam(30), now)?.key).toBe("weak-types");
+    expect(examWeekPlan(withExam(10), now)?.key).toBe("rehearsal");
+    // The boundaries themselves belong to the nearer phase.
+    expect(examWeekPlan(withExam(42), now)?.key).toBe("weak-types");
+    expect(examWeekPlan(withExam(14), now)?.key).toBe("rehearsal");
+  });
+  it("builds the week from real data, and admits when there is none", () => {
+    const empty = examWeekPlan(withExam(30), now)!;
+    expect(empty.thisWeek.join(" ")).toContain("Chưa đủ dữ liệu");
+    // reading-garden carries four detail questions: enough of one type for an
+    // error rate to mean anything.
+    const wrongIds = lessons
+      .find((lesson) => lesson.id === "reading-garden")!
+      .questions.filter((question) => question.tag === "Thông tin chi tiết")
+      .slice(0, 3)
+      .map((question) => question.id);
+    const state = recordAttempt(withExam(30), {
+      ...attempt("2026-09-01T10:00:00Z", {
+        id: "first",
+        lessonId: "reading-garden",
+        answers: missing(wrongIds, "reading-garden"),
+        correct: 5 - wrongIds.length,
+      }),
+    });
+    const named = examWeekPlan(state, now)!;
+    expect(named.thisWeek[0]).toContain("Thông tin chi tiết");
+    expect(named.thisWeek.join(" ")).not.toContain("Chưa đủ dữ liệu");
+  });
+  it("prefers B2 material only in the last two weeks", () => {
+    const soon = todayPlan(withExam(7), now);
+    const far = todayPlan(withExam(90), now);
+    const b2 = (plan: ReturnType<typeof todayPlan>) =>
+      plan.lessons.filter((lesson) => lesson.level === "B2").length;
+    expect(b2(soon)).toBeGreaterThan(b2(far));
+    expect(
+      Object.values(soon.reasons)
+        .flat()
+        .some((reason) => reason.includes("hai tuần cuối")),
+    ).toBe(true);
+  });
+});
+describe("milestones that really happened", () => {
+  it("shows nothing to a learner who has done nothing", () => {
+    expect(milestones(freshState(), now)).toEqual([]);
+  });
+  it("counts a streak only from days that have attempts", () => {
+    const state = freshState();
+    state.attempts = [
+      attempt("2026-09-06T10:00:00Z"),
+      attempt("2026-09-07T10:00:00Z"),
+    ];
+    expect(milestones(state, now)).toEqual([]);
+    state.attempts.push(attempt("2026-09-08T03:00:00Z"));
+    const found = milestones(state, now);
+    expect(found[0].title).toContain("3 ngày");
+    expect(found[0].detail).toContain("2026-09-08");
+  });
+  it("celebrates a question type only after it was actually wrong first", () => {
+    const garden = (id: string, date: string, wrong: string[]) =>
+      attempt(date, {
+        id,
+        lessonId: "reading-garden",
+        answers: missing(wrong, "reading-garden"),
+        correct: 5 - wrong.length,
+      });
+    const clean = freshState();
+    clean.attempts = [garden("clean", "2026-09-06T10:00:00Z", [])];
+    expect(
+      milestones(clean, now).some((item) => item.id.startsWith("type:")),
+    ).toBe(false);
+    const detail = lessons
+      .find((lesson) => lesson.id === "reading-garden")!
+      .questions.filter((question) => question.tag === "Thông tin chi tiết")
+      .map((question) => question.id);
+    const fixed = freshState();
+    fixed.attempts = [
+      garden("wrong", "2026-09-06T10:00:00Z", detail),
+      garden("right", "2026-09-07T10:00:00Z", []),
+    ];
+    const earned = milestones(fixed, now).find((item) =>
+      item.id.startsWith("type:"),
+    );
+    expect(earned?.title).toContain("Thông tin chi tiết");
+    expect(earned?.detail).toContain("2026-09-07");
+    expect(earned?.detail).toContain(`${detail.length}/${detail.length} câu`);
+  });
+  it("reports a word only once it is genuinely remembered long", () => {
+    const state = freshState();
+    state.reviews[vocabulary[0].id] = {
+      due: "2026-11-01T10:00:00.000Z",
+      interval: 59,
+      ease: 2.5,
+      repetitions: 6,
+      lastDate: "2026-09-03",
+    };
+    expect(milestones(state, now).some((i) => i.id.startsWith("word:"))).toBe(
+      false,
+    );
+    state.reviews[vocabulary[0].id].interval = 61;
+    const word = milestones(state, now).find((i) => i.id.startsWith("word:"));
+    expect(word?.title).toContain(vocabulary[0].word);
+    expect(word?.detail).toContain("2026-09-03");
+  });
+});
+
+describe("a ten-minute session for a day with no time in it", () => {
+  it("fits inside ten minutes and starts with something short to listen to", () => {
+    const session = quickSession(freshState(), now)!;
+    expect(session.lesson.minutes).toBeLessThanOrEqual(8);
+    expect(session.lesson.skill).toBe("listening");
+    expect(session.words.length).toBeLessThanOrEqual(3);
+  });
+  it("prefers material she has not met yet", () => {
+    const first = quickSession(freshState(), now)!;
+    const state = freshState();
+    state.attempts = [
+      attempt("2026-09-07T10:00:00Z", {
+        id: "done",
+        lessonId: first.lesson.id,
+        skill: first.lesson.skill,
+        answers: {},
+        correct: 0,
+        total: first.lesson.questions.length,
+      }),
+    ];
+    expect(quickSession(state, now)!.lesson.id).not.toBe(first.lesson.id);
+  });
+  it("says plainly when there is nothing due rather than inventing work", () => {
+    const state = freshState();
+    for (const word of vocabulary)
+      state.reviews[word.id] = {
+        due: "2026-12-01T10:00:00.000Z",
+        interval: 30,
+        ease: 2.5,
+        repetitions: 3,
+        lastDate: "2026-09-01",
+      };
+    const session = quickSession(state, now)!;
+    expect(session.words).toEqual([]);
+    expect(session.mistake).toBeUndefined();
+  });
+  it("puts the most repeated mistake first", () => {
+    let state = freshState();
+    const wrong = ["rc1"];
+    state = recordAttempt(state, {
+      ...attempt("2026-09-05T10:00:00Z", {
+        id: "one",
+        answers: missing(wrong),
+        correct: 4,
+      }),
+    });
+    state = recordAttempt(state, {
+      ...attempt("2026-09-06T10:00:00Z", {
+        id: "two",
+        answers: missing(wrong),
+        correct: 4,
+      }),
+    });
+    const session = quickSession(state, now)!;
+    expect(session.mistake?.question.id).toBe("rc1");
+    expect(session.mistake?.wrongCount).toBe(2);
+  });
+});
+
+describe("word cards that grow out of her own mistakes", () => {
+  it("only offers a card for a question one was written for", () => {
+    expect(wordCardFor("rk4")?.word).toBe("doubtful");
+    expect(wordCardFor("rk1")).toBeUndefined();
+  });
+  it("adds a card once, keeps the source, and takes its schedule away again", () => {
+    let state = addSavedWord(freshState(), "rk4", now);
+    state = addSavedWord(state, "rk4", now);
+    const deck = savedWords(state);
+    expect(deck).toHaveLength(1);
+    expect(deck[0].id).toBe("w:rk4");
+    expect(deck[0].questionId).toBe("rk4");
+    expect(deck[0].meaning).toContain("thuyết phục");
+    state = {
+      ...state,
+      reviews: {
+        ...state.reviews,
+        "w:rk4": scheduleReview(undefined, "good", now),
+      },
+    };
+    state = removeSavedWord(state, "rk4");
+    expect(savedWords(state)).toEqual([]);
+    expect(state.reviews["w:rk4"]).toBeUndefined();
+  });
+  it("ignores a question with no card instead of inventing one", () => {
+    expect(savedWords(addSavedWord(freshState(), "rk1", now))).toEqual([]);
+  });
+  it("keeps reading backups written before word cards existed", () => {
+    const old = freshState();
+    delete (old as { savedWords?: unknown }).savedWords;
+    expect(stateSchema.safeParse(old).success).toBe(true);
+    expect(savedWords(old)).toEqual([]);
   });
 });

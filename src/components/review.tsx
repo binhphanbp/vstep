@@ -11,11 +11,15 @@ import {
 } from "lucide-react";
 import { vocabulary } from "@/lib/content";
 import {
+  addSavedWord,
   lessonForType,
   mistakes,
   questionTypeStats,
+  removeSavedWord,
+  savedWords,
   scheduleReview,
   TYPE_EVIDENCE_MINIMUM,
+  wordCardFor,
 } from "@/lib/learning";
 import { useStudy } from "./study-provider";
 import { QuestionCard } from "./practice";
@@ -26,7 +30,12 @@ export function VocabularyPage() {
   const [now, setNow] = useState(() => Date.now());
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"review" | "all">("review");
-  const due = vocabulary
+  // Cards she added from her own vocabulary mistakes sit in the same deck and
+  // follow the same schedule; only the label says where they came from.
+  const mine = savedWords(state);
+  const deck = [...vocabulary, ...mine];
+  const added = new Set(mine.map((word) => word.id));
+  const due = deck
     .filter(
       (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
     )
@@ -34,7 +43,7 @@ export function VocabularyPage() {
       (a, b) => (state.reviews[a.id] ? 0 : 1) - (state.reviews[b.id] ? 0 : 1),
     );
   const card = due[0];
-  const learned = vocabulary.filter((v) => state.reviews[v.id]).length;
+  const learned = deck.filter((v) => state.reviews[v.id]).length;
   useEffect(() => {
     const tick = setInterval(() => setNow(Date.now()), 30000);
     return () => {
@@ -80,7 +89,8 @@ export function VocabularyPage() {
           </p>
         </div>
         <span className="pill">
-          {learned}/{vocabulary.length} từ đã khám phá
+          {learned}/{deck.length} từ đã khám phá
+          {mine.length ? ` · ${mine.length} tự thêm` : ""}
         </span>
       </div>
       <div className="filters">
@@ -231,7 +241,7 @@ export function VocabularyPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
           <div className="vocab-list">
-            {vocabulary
+            {deck
               .filter((v) =>
                 `${v.word} ${v.meaning} ${v.topic}`
                   .toLocaleLowerCase("vi")
@@ -240,7 +250,12 @@ export function VocabularyPage() {
               .map((v) => (
                 <div className="vocab-list-item" key={v.id}>
                   <div>
-                    <strong>{v.word}</strong>
+                    <strong>
+                      {v.word}
+                      {added.has(v.id) && (
+                        <span className="confidence-pill">Tự thêm</span>
+                      )}
+                    </strong>
                     <small>
                       {v.meaning} · {v.topic}
                     </small>
@@ -253,18 +268,34 @@ export function VocabularyPage() {
                       {v.example}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={`Nghe phát âm ${v.word}`}
-                    onClick={() => speak(v.word)}
-                  >
-                    <Volume2 size={18} />
-                  </button>
+                  <div className="vocab-list-actions">
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label={`Nghe phát âm ${v.word}`}
+                      onClick={() => speak(v.word)}
+                    >
+                      <Volume2 size={18} />
+                    </button>
+                    {added.has(v.id) && (
+                      <button
+                        type="button"
+                        className="text-link"
+                        onClick={() => {
+                          update((state) =>
+                            removeSavedWord(state, v.id.replace("w:", "")),
+                          );
+                          toast(`Đã bỏ “${v.word}” khỏi vườn từ vựng.`);
+                        }}
+                      >
+                        Bỏ khỏi vườn
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
           </div>
-          {!vocabulary.some((v) =>
+          {!deck.some((v) =>
             `${v.word} ${v.meaning} ${v.topic}`
               .toLocaleLowerCase("vi")
               .includes(query.toLocaleLowerCase("vi")),
@@ -497,6 +528,31 @@ export function MistakesPage() {
                     }
                   />
                 </div>
+                {wordCardFor(item.question.id) && (
+                  <p className="saved-word-add">
+                    {state.savedWords?.[item.question.id] ? (
+                      <span className="confidence-pill">
+                        <Leaf size={12} />
+                        Đã thêm “{wordCardFor(item.question.id).word}” vào vườn
+                        từ
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="button secondary small"
+                        onClick={() => {
+                          update((s) => addSavedWord(s, item.question.id));
+                          toast(
+                            `Đã thêm “${wordCardFor(item.question.id).word}” vào vườn từ vựng.`,
+                          );
+                        }}
+                      >
+                        <Leaf size={14} />
+                        Thêm “{wordCardFor(item.question.id).word}” vào vườn từ
+                      </button>
+                    )}
+                  </p>
+                )}
                 {!seen ? (
                   <button
                     type="button"

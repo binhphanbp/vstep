@@ -2833,3 +2833,118 @@ details .passage {
     white-space: normal;
   }
 }
+.week-plan-phase {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.week-plan-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.week-plan-list li {
+  position: relative;
+  padding: 10px 0 10px 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.week-plan-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.week-plan-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+}
+.milestone-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+.milestone-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.milestone-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.milestone-list strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.milestone-list span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.quick-list {
+  list-style: none;
+  counter-reset: quick;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.quick-list li {
+  counter-increment: quick;
+  border-bottom: 1px solid var(--line);
+}
+.quick-list li:last-child {
+  border-bottom: 0;
+}
+.quick-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 0 12px 30px;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+.quick-list a::before {
+  content: counter(quick);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fdeef2;
+  /* Darker than --rose so an 11px numeral still clears 4.5:1 on this pink. */
+  color: #a3305f;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+}
+.quick-list strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.quick-list span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.saved-word-add {
+  margin: 14px 0 0;
+}
+.vocab-list-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.vocab-list-item strong .confidence-pill {
+  margin-left: 8px;
+  vertical-align: middle;
+}

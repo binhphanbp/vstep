@@ -16,7 +16,15 @@ import {
   Zap,
 } from "lucide-react";
 import { useStudy } from "./study-provider";
-import { todayPlan, localDay, skillStats, dayOffset } from "@/lib/learning";
+import {
+  todayPlan,
+  localDay,
+  skillStats,
+  dayOffset,
+  milestones,
+  quickSession,
+  QUICK_SESSION_MINUTES,
+} from "@/lib/learning";
 import { vocabulary, skillNames, type Skill } from "@/lib/content";
 import { SkillIcon } from "./icons";
 import { useNow } from "@/lib/use-now";
@@ -38,6 +46,12 @@ export function Dashboard() {
     (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
   ).length;
   const week = Array.from({ length: 7 }, (_, i) => dayOffset(today, i - 6));
+  // Only milestones that really happened; an empty list shows the quote
+  // instead, because a congratulation she did not earn is worse than none.
+  const earned = milestones(state, new Date(now)).slice(0, 2);
+  // A tired day used to mean the same lessons in a smaller budget; this is
+  // a shape of session shorter than a single lesson.
+  const quick = plan.mood === "low" ? quickSession(state, new Date(now)) : null;
   const completed = new Set(state.attempts.map((a) => a.lessonId));
   const dateLabel = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
@@ -178,6 +192,57 @@ export function Dashboard() {
               ))}
             </div>
           </section>
+          {quick && (
+            <section className="panel quick-session">
+              <div className="section-title">
+                <Clock3 size={20} />
+                <h2>Buổi {QUICK_SESSION_MINUTES} phút cho hôm nay</h2>
+              </div>
+              <p className="help-copy">
+                Hôm nay {state.profile.name} đang mệt. Ba việc nhỏ này vẫn được
+                ghi vào lịch sử như một buổi học bình thường.
+              </p>
+              <ol className="quick-list">
+                <li>
+                  <Link href={`/practice/${quick.lesson.id}`}>
+                    <strong>{quick.lesson.title}</strong>
+                    <span>
+                      {skillNames[quick.lesson.skill]} · {quick.lesson.minutes}{" "}
+                      phút
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/vocabulary">
+                    <strong>
+                      {quick.words.length
+                        ? `Ôn ${quick.words.length} thẻ từ đã đến hạn`
+                        : "Chưa có thẻ từ nào đến hạn"}
+                    </strong>
+                    <span>
+                      {quick.words.length
+                        ? quick.words.map((word) => word.word).join(" · ")
+                        : "Ghé vườn từ vựng nếu còn sức"}
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/mistakes">
+                    <strong>
+                      {quick.mistake
+                        ? "Sửa một câu đã sai"
+                        : "Chưa có lỗi nào đến hạn ôn"}
+                    </strong>
+                    <span>
+                      {quick.mistake
+                        ? `${quick.mistake.lesson.title} · sai ${quick.mistake.wrongCount} lần`
+                        : "Sổ lỗi đang trống, nghỉ sớm cũng được"}
+                    </span>
+                  </Link>
+                </li>
+              </ol>
+            </section>
+          )}
           <section>
             <div className="section-heading">
               <div>
@@ -386,17 +451,33 @@ export function Dashboard() {
           </section>
           <section className="panel small-win">
             <div className="panel-heading">
-              <h2>Một điều nho nhỏ</h2>
+              <h2>
+                {earned.length ? "Việc đã xảy ra thật" : "Một điều nho nhỏ"}
+              </h2>
               <Heart size={17} />
             </div>
-            <blockquote>
-              “You don’t have to be great to start. You have to start to grow.”
-            </blockquote>
-            <p>
-              Không cần giỏi mới bắt đầu.
-              <br />
-              Bắt đầu rồi, mình sẽ giỏi hơn.
-            </p>
+            {earned.length ? (
+              <ul className="milestone-list">
+                {earned.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.title}</strong>
+                    <span>{item.detail}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <>
+                <blockquote>
+                  “You don’t have to be great to start. You have to start to
+                  grow.”
+                </blockquote>
+                <p>
+                  Không cần giỏi mới bắt đầu.
+                  <br />
+                  Bắt đầu rồi, mình sẽ giỏi hơn.
+                </p>
+              </>
+            )}
             <div className="small-win-footer">
               <span className="status-dot" />
               {completed.size
