@@ -53,7 +53,7 @@ describe("evidence and distractor notes", () => {
     const short = lessons.filter(
       (lesson) => lesson.skill === "reading" || lesson.skill === "listening",
     );
-    expect(short.length).toBe(8);
+    expect(short.length).toBe(12);
     for (const lesson of short)
       for (const question of lesson.questions)
         expect(

@@ -12,6 +12,200 @@
 export type QuestionNote = { evidence: string; optionNotes: string[] };
 
 export const questionNotes: Record<string, QuestionNote> = {
+  rn1: {
+    evidence:
+      "Still, she believes the night team deserves to be described accurately rather than treated as a footnote to the day.",
+    optionNotes: [
+      "Đúng: bài mở đầu bằng chuyện ít ai viết về ca đêm, các đoạn giữa cho thấy đó là một công việc khác, và câu cuối đòi được mô tả cho đúng.",
+      "Ngược với bài: ít người trực hơn nên mỗi người phải tự quyết những việc bình thường được bàn với đồng nghiệp.",
+      "Bài không bàn tới lương của ai cả.",
+      "Bài nói về cách tổ chức ca trực, không so sánh trình độ chuyên môn.",
+    ],
+  },
+  rn2: {
+    evidence:
+      "yet fewer errors meant fewer hours spent correcting paperwork, and the difference was smaller than they had feared",
+    optionNotes: [
+      "Ngược lại: lịch mới cần thêm người, đó chính là lý do ban quản lý lo chi phí tăng.",
+      "Đúng: ít lỗi hơn nên mất ít giờ sửa giấy tờ hơn, phần chênh nhỏ hơn họ tưởng.",
+      "Bài không nói đóng khoa nào ban đêm.",
+      "Giờ nghỉ vẫn là hai mươi phút; không ai rút ngắn nó.",
+    ],
+  },
+  rn3: {
+    evidence:
+      "because walking there and back consumed most of the twenty minutes they had",
+    optionNotes: [
+      "Bài không nói phòng nghỉ ồn.",
+      "Không có quy định nào giới hạn ai được vào.",
+      "Đúng: đi bộ tới đó rồi quay lại đã hết gần hết hai mươi phút nghỉ.",
+      "Phòng có ghế êm; đó là lý do nó được dựng lên.",
+    ],
+  },
+  rn4: {
+    evidence:
+      "A blood test appears in a file; a five-minute conversation at three in the morning does not.",
+    optionNotes: [
+      "Bài không xếp hạng trò chuyện trên xét nghiệm; nó nói về chuyện được ghi nhận hay không.",
+      "Bài nói về người bệnh mất ngủ thấy dễ chịu hơn, không nói họ thích trò chuyện hơn là được điều trị.",
+      "Đúng: xét nghiệm để lại hồ sơ, cuộc trò chuyện thì không, nên phần việc đó dễ bị coi nhẹ.",
+      "Không có chi tiết nào nói ca đêm làm ít xét nghiệm.",
+    ],
+  },
+  rn5: {
+    evidence:
+      "She does not romanticise the work. The shifts are tiring, and she admits that her weekends are quieter than she would like.",
+    optionNotes: [
+      "Bài nói thẳng cô ấy không tô hồng công việc, nên “khuyên ai cũng nên làm” là quá đà.",
+      "Không có chi tiết nào cho thấy cô ấy hối tiếc hay muốn chuyển sang ca ngày.",
+      "Đúng: mệt và mất cuối tuần, nhưng cô ấy muốn công việc được mô tả đúng thay vì bị coi là phần phụ.",
+      "Bài không đặt điều kiện về kinh nghiệm cho người làm ca đêm.",
+    ],
+  },
+  rk1: {
+    evidence:
+      "Mrs Tam's view is simple: the market does not need to become a supermarket, but it cannot pretend the city still shops at six in the morning.",
+    optionNotes: [
+      "Siêu thị chỉ là một trong hai thay đổi mở đầu câu chuyện, không phải nội dung chính.",
+      "Đúng: cả bài theo một người bán hàng điều chỉnh cách bán khi khách quen chuyển sang giờ hành chính.",
+      "Bài không hướng dẫn chọn rau.",
+      "Bài không so sánh giá giữa bán online và bán tại sạp.",
+    ],
+  },
+  rk2: {
+    evidence: "Customers send a short message with a budget and a rough list",
+    optionNotes: [
+      "Người chụp ảnh, nếu có, sẽ là bà Tâm — và đó chính là việc bà không muốn làm.",
+      "Bài không nhắc tới việc trả tiền trước.",
+      "Đúng: một tin nhắn ngắn gồm ngân sách và danh sách sơ bộ, phần chọn rau để bà quyết.",
+      "Không có chi tiết nào về đơn đặt cả tháng.",
+    ],
+  },
+  rk3: {
+    evidence: "the fee was fixed but her income was not",
+    optionNotes: [
+      "Bài không nói bà không biết dùng ứng dụng.",
+      "Đúng: phí cố định trong khi thu nhập lên xuống, nên đó là rủi ro.",
+      "Chuyện giá cố định là việc bà tự từ chối cam kết, không phải yêu cầu của công ty giao hàng.",
+      "Con trai bà là người đề xuất bán online, không phải người can ngăn.",
+    ],
+  },
+  rk4: {
+    evidence:
+      "Mrs Tam was doubtful: she did not want to photograph every bundle of herbs",
+    optionNotes: [
+      "Đúng: ngay sau từ này là hai lý do khiến bà chưa bị thuyết phục.",
+      "Bài không nói tới chuyện mệt ở câu đó.",
+      "Trái nghĩa với mạch câu: bà đang ngần ngại chứ không hài lòng.",
+      "“Lạc lối” không khớp với việc nêu ra lý do cụ thể.",
+    ],
+  },
+  rk5: {
+    evidence:
+      "although one gave up after a fortnight, saying the packing took time she did not have",
+    optionNotes: [
+      "Đúng: đặt cạnh hai người bắt đầu làm theo, chi tiết này cho thấy cách làm không hợp với mọi người.",
+      "Chi tiết này không nói gì về việc chợ đông hơn vào buổi sáng.",
+      "Bài không chê ai; người bỏ cuộc được nêu lý do rõ ràng.",
+      "Bà Tâm vẫn đang bán được, nên không thể kết luận là không có lãi.",
+    ],
+  },
+  rd1: {
+    evidence: "Breakfast is served between seven and nine.",
+    optionNotes: [
+      "Sáu giờ là lúc chợ đông trong một bài khác, không phải giờ ăn sáng ở đây.",
+      "Đúng: danh sách quy định ghi đúng khung bảy đến chín giờ.",
+      "Đó là cách làm cũ, thứ đã khiến bữa sáng chậm và cả nhà mệt.",
+      "Bài không gắn bữa sáng với giờ trả phòng.",
+    ],
+  },
+  rd2: {
+    evidence: "several mentioned them in positive reviews",
+    optionNotes: [
+      "Đúng: câu trước nói khách thấy các quy định giúp lên kế hoạch dễ hơn, nên “them” trỏ các quy định.",
+      "Khách chính là người viết đánh giá, nên họ không nhắc tới chính mình ở đây.",
+      "Các đánh giá là nơi chứa lời nhắc, không phải thứ được nhắc.",
+      "Số lượt đặt phòng được nói ở câu sau và không phải thứ khách nhắc trong đánh giá.",
+    ],
+  },
+  rd3: {
+    evidence:
+      "something they could never have organised when every day was unpredictable",
+    optionNotes: [
+      "Bài không nói họ thiếu tiền; số lượt đặt chỉ giảm nhẹ.",
+      "Các lời phàn nàn là về bữa sáng chậm, không phải về việc không có gì để làm.",
+      "Đúng: chính vì ngày đã đoán trước được nên mới tổ chức nổi buổi đi bộ.",
+      "Bài không nói khu phố trở nên nổi tiếng hơn.",
+    ],
+  },
+  rd4: {
+    evidence:
+      "Mai realised that saying yes to everything had made the service worse for the guests who followed the rules.",
+    optionNotes: [
+      "Bài không so sánh homestay với khách sạn.",
+      "Đúng: từ chỗ nhận mọi yêu cầu sang chỗ đặt giới hạn rõ ràng, cả khách lẫn chủ nhà đều khá hơn.",
+      "Đánh giá là thứ giúp họ nhận ra vấn đề, không phải thứ quyết định sự sống còn.",
+      "Bài không khuyên đừng kinh doanh tại nhà.",
+    ],
+  },
+  rd5: {
+    evidence:
+      "they remove anything that sounds like an instruction to a stranger rather than a request from a host",
+    optionNotes: [
+      "Đọc to cho bố nghe là để kiểm tra giọng điệu, không phải để xin quyết định.",
+      "Độ dài sáu dòng được nói ở đoạn trước và không liên quan tới chi tiết này.",
+      "Đúng: chi tiết này đi kèm nỗi lo nghe khó gần, và họ bỏ đi câu nào nghe như ra lệnh.",
+      "Bài không nói các quy định thay đổi hằng tuần.",
+    ],
+  },
+  rh1: {
+    evidence:
+      "The advice is not wrong, but it assumes that the person receiving it controls their own evening.",
+    optionNotes: [
+      "Đó chính là lời khuyên quen thuộc mà bài đặt câu hỏi ngược lại.",
+      "Bài có nhắc các nhà nghiên cứu thận trọng, nhưng đó là một ý phụ chứ không phải luận điểm chính.",
+      "Bài không bàn tới nơi làm việc theo nghĩa địa điểm.",
+      "Đúng: lời khuyên giả định người nghe làm chủ buổi tối của mình, điều thường không đúng.",
+    ],
+  },
+  rh2: {
+    evidence:
+      "Messages sent after eight in the evening were delivered the next morning by default, and anyone who needed an answer sooner had to say so explicitly.",
+    optionNotes: [
+      "Tin nhắn không bị xoá, chỉ bị hoãn chuyển.",
+      "Đúng: mặc định là sáng hôm sau, trừ khi người gửi nói rõ là cần gấp.",
+      "Bài không nói tin nhắn phải qua quản lý.",
+      "Quy định mới bỏ đi đúng cái áp lực phải trả lời ngay.",
+    ],
+  },
+  rh3: {
+    evidence: "The habit, rather than the hour, had been the problem.",
+    optionNotes: [
+      "Đúng: chỉ ngủ thêm mười lăm phút nhưng thấy đỡ mệt hẳn, vì bỏ được thói quen xem điện thoại lúc nửa đêm.",
+      "Bài nói ngược: mười lăm phút là thay đổi nhỏ, phần thay đổi lớn nằm ở cảm giác.",
+      "Không có chi tiết nào nghi ngờ tính trung thực của nhân viên.",
+      "Bài không đề xuất cấm điện thoại.",
+    ],
+  },
+  rh4: {
+    evidence: "anyone who needed an answer sooner had to say so explicitly",
+    optionNotes: [
+      "Đúng: phải nói rõ thành lời thay vì để người khác tự đoán là gấp.",
+      "Bài không giới hạn phải nói bằng văn bản.",
+      "Lịch sự hay không nằm ngoài ý của câu này.",
+      "Số lần nhắc không phải điều câu này nói tới.",
+    ],
+  },
+  rh5: {
+    evidence:
+      "The trial is useful for a different reason: it moved the question from what a person should do at eleven at night to what an organisation asks of people at that hour.",
+    optionNotes: [
+      "Bài nói thẳng sáu mươi nhân viên chưa chứng minh được chính sách này hợp với nơi khác.",
+      "Đúng: giá trị nằm ở chỗ dời câu hỏi sang phía tổ chức, dù chưa phải bằng chứng.",
+      "Hai nhóm làm việc lệch múi giờ là một chi phí phát sinh, không biến cả thử nghiệm thành thất bại.",
+      "Ngược với bài: các thay đổi gần như không tốn kém.",
+    ],
+  },
   frg9: {
     evidence:
       "They were careful not to promise that it would feed the entire building.",
