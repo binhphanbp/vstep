@@ -117,7 +117,7 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
     `Vì sao ${letter(key("rc1"))} đúng:`,
   );
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();
-  await expect(page.getByText("1 câu đã ghi lại")).toBeVisible();
+  await expect(page.getByText("1 câu đang cần sửa")).toBeVisible();
   await expect(page.getByText("Ưu tiên · Đã rất chắc")).toBeVisible();
   await page.locator(`input[name="rc1"][value="${key("rc1")}"]`).check();
   await page.getByRole("button", { name: "Kiểm tra lại", exact: true }).click();
@@ -132,6 +132,54 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
     page.getByRole("heading", { name: "Hôm nay không còn câu đến hạn." }),
   ).toBeVisible();
 });
+test("a mistake answered right later leaves the queue, and repeats are counted apart", async ({
+  page,
+}) => {
+  const answer = async (wrong: string[]) => {
+    for (const id of ["rc1", "rc2", "rc3", "rc4", "rc5"]) {
+      const value = wrong.includes(id) ? missed(id) : key(id);
+      await page.locator(`input[name="${id}"][value="${value}"]`).check();
+      await page
+        .locator(".question")
+        .filter({ has: page.locator(`input[name="${id}"]`) })
+        .getByRole("button", { name: "Chưa chắc" })
+        .click();
+    }
+    await page
+      .getByRole("button", { name: "Xem kết quả", exact: true })
+      .click();
+  };
+
+  await page.goto("/practice/reading-cafe");
+  await answer(["rc1"]);
+  await page.goto("/mistakes");
+  await expect(page.getByText("1 câu đang cần sửa")).toBeVisible();
+
+  // Meet the same question again in a normal session and get it right. Before
+  // this, the card stayed in the book and stayed due for ever: only the
+  // notebook's own review button moved the schedule.
+  await page.goto("/practice/reading-cafe");
+  await answer([]);
+  await page.goto("/mistakes");
+  await expect(page.getByText("0 câu đang cần sửa")).toBeVisible();
+  await expect(page.getByText("1 câu đã sửa được")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Hôm nay không còn câu đến hạn." }),
+  ).toBeVisible();
+
+  // The repeat must not flatter the ability figure that picks tomorrow's
+  // lessons: first meeting was 4/5, so Reading stays at 80%.
+  await page.goto("/progress");
+  const reading = page
+    .locator(".history-row")
+    .filter({ hasText: "Reading" })
+    .first();
+  await expect(reading).toContainText("80%");
+  await expect(reading).toContainText("Luyện lại 100%");
+  await expect(reading).toContainText("1 bài lần đầu");
+  await expect(reading).toContainText("1 lượt luyện lại");
+});
+
 test("cannot submit unanswered practice; writing is saved and reviewable", async ({
   page,
 }) => {

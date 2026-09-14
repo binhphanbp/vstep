@@ -1568,6 +1568,18 @@ textarea:focus-visible {
   margin-top: 5px;
   accent-color: var(--rose);
 }
+.skill-accuracy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.skill-accuracy small {
+  /* No opacity here: fading an already muted tone drops the contrast under
+     the 4.5:1 the axe check enforces. */
+  color: var(--muted);
+  font-size: 12px;
+}
 .without-recording {
   display: flex;
   gap: 10px;

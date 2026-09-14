@@ -447,25 +447,61 @@ export function scheduleReview(
  * from the last few minutes of that one sitting.
  */
 const ACCURACY_QUESTION_WINDOW = 30;
-export function skillStats(state: StudyState, skill: Skill) {
-  const scored = state.attempts.filter((a) => a.skill === skill && a.total > 0);
+/** A lesson the learner has already met is the same material until it changes. */
+function lessonVersionKey(attempt: Attempt) {
+  return `${attempt.lessonId}@v${attempt.lessonSnapshot?.version ?? 0}`;
+}
+/**
+ * The attempts that measure ability: the first meeting with each lesson
+ * version. Doing a lesson again once the answers are known says something
+ * about effort, not about reading or listening, so the two are counted apart —
+ * otherwise repeating an old lesson raises the figure that decides what the
+ * learner is given next, and a weak skill quietly stops being prioritised.
+ */
+export function firstAttempts(attempts: Attempt[]): Attempt[] {
+  const met = new Set<string>();
+  return [...attempts]
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+    .filter((attempt) => {
+      const key = lessonVersionKey(attempt);
+      if (met.has(key)) return false;
+      met.add(key);
+      return true;
+    });
+}
+/** Newest attempts until the question window is full; never half a lesson. */
+function recentQuestions(scored: Attempt[]) {
   const relevant: Attempt[] = [];
   let questions = 0;
-  // Whole attempts, newest first, until the window is full: a lesson is never
-  // counted in half, and one short attempt can never stand for the skill.
   for (const attempt of [...scored].reverse()) {
     if (questions >= ACCURACY_QUESTION_WINDOW) break;
     relevant.push(attempt);
     questions += attempt.total;
   }
-  const total = relevant.reduce((s, a) => s + a.total, 0);
+  const total = relevant.reduce((sum, a) => sum + a.total, 0);
+  return total
+    ? Math.round(
+        (relevant.reduce((sum, a) => sum + a.correct, 0) / total) * 100,
+      )
+    : null;
+}
+export function skillStats(state: StudyState, skill: Skill) {
+  const mine = state.attempts.filter((a) => a.skill === skill);
+  const firstIds = new Set(firstAttempts(state.attempts).map((a) => a.id));
+  const first = mine.filter((a) => firstIds.has(a.id));
+  const again = mine.filter((a) => !firstIds.has(a.id));
   return {
-    count: state.attempts.filter((a) => a.skill === skill).length,
-    accuracy: total
-      ? Math.round((relevant.reduce((s, a) => s + a.correct, 0) / total) * 100)
-      : null,
+    count: mine.length,
+    /** Measured on first meetings only: this is the number that means ability. */
+    accuracy: recentQuestions(first.filter((a) => a.total > 0)),
+    firstCount: first.length,
+    /** Repeat work, kept separate so effort never reads as progress. */
+    practiceCount: again.length,
+    practiceAccuracy: recentQuestions(again.filter((a) => a.total > 0)),
   };
 }
+/** Days a lesson too long for the daily budget waits before being offered. */
+const LONG_SESSION_REST_DAYS = 14;
 export function todayPlan(state: StudyState, now = new Date()) {
   const today = localDay(now);
   // Keep today's plan stable while completed lessons gain checkmarks.
@@ -535,20 +571,42 @@ export function todayPlan(state: StudyState, now = new Date()) {
         reasons.push("Bài mới để mở rộng kỹ năng");
       if (mood === "low" && reasons.length < 2)
         reasons.push(`Vừa nhịp học nhẹ ${budget} phút hôm nay`);
-      return { lesson, score, reasons: reasons.slice(0, 2) };
+      return { lesson, score, recencyGap, reasons: reasons.slice(0, 2) };
     })
     .sort((a, b) => b.score - a.score);
+  // A lesson longer than the whole budget can never satisfy `minutes <=
+  // remaining`, so the 40-minute essay was never offered once at the default
+  // 30 minutes a day — and it is one of the exam's two Writing tasks. It is
+  // offered as a split session instead: today the plan or a first draft, the
+  // rest tomorrow, once half of it fits and it has been left alone a while.
+  const split = (lesson: (typeof lessons)[number], recencyGap: number | null) =>
+    lesson.minutes > budget &&
+    (recencyGap === null || recencyGap >= LONG_SESSION_REST_DAYS);
   const picked: typeof ranked = [];
+  const longer: string[] = [];
   let remaining = budget;
   for (const item of ranked) {
     const { lesson } = item;
+    const asSplit =
+      split(lesson, item.recencyGap) &&
+      remaining >= Math.round(lesson.minutes / 2);
     if (
-      lesson.minutes <= remaining &&
+      (lesson.minutes <= remaining || asSplit) &&
       picked.length < 3 &&
       !picked.some((entry) => entry.lesson.skill === lesson.skill)
     ) {
-      picked.push(item);
-      remaining -= lesson.minutes;
+      if (asSplit) {
+        longer.push(lesson.id);
+        picked.push({
+          ...item,
+          reasons: [
+            `Bài dài ${lesson.minutes} phút — hôm nay có thể chỉ làm một phần`,
+            ...item.reasons,
+          ].slice(0, 2),
+        });
+      } else picked.push(item);
+      // A split session only spends today's half of the budget.
+      remaining -= asSplit ? Math.round(lesson.minutes / 2) : lesson.minutes;
     }
   }
   if (!picked.length) picked.push(ranked[0]);
@@ -557,6 +615,8 @@ export function todayPlan(state: StudyState, now = new Date()) {
     reasons: Object.fromEntries(
       picked.map((item) => [item.lesson.id, item.reasons]),
     ) as Record<string, string[]>,
+    /** Lessons offered even though they do not fit today's budget. */
+    longer,
     budget,
     mood,
     examDays,
@@ -576,18 +636,24 @@ export function mistakes(state: StudyState, now = new Date()) {
       confidence: Confidence | undefined;
       wrongCount: number;
       due: boolean;
+      /** The most recent time this question came up, it was answered right. */
+      fixed: boolean;
       date: string;
       review: Review | undefined;
     }
   >();
-  for (const a of state.attempts) {
+  // Oldest first, so "the last time she met this question" is the last write.
+  const history = [...state.attempts].sort(
+    (a, b) => Date.parse(a.date) - Date.parse(b.date),
+  );
+  for (const a of history) {
     const lesson =
       a.lessonSnapshot ?? allLessons.find((l) => l.id === a.lessonId);
     if (!lesson) continue;
     for (const question of lesson.questions) {
+      const key = mistakeReviewKey(lesson, question.id);
+      const previous = result.get(key);
       if (a.answers[question.id] !== question.answer) {
-        const key = mistakeReviewKey(lesson, question.id);
-        const previous = result.get(key);
         const review =
           state.mistakeReviews[key] ??
           (lesson.version === 1
@@ -601,10 +667,16 @@ export function mistakes(state: StudyState, now = new Date()) {
           confidence: a.confidence?.[question.id],
           wrongCount: (previous?.wrongCount ?? 0) + 1,
           due: !review || Date.parse(review.due) <= now.getTime(),
+          fixed: false,
           date: a.date,
           review,
         });
+        continue;
       }
+      // Answered correctly. A card the learner has since got right is not due
+      // any more: the notebook used to keep asking for a mistake already
+      // corrected, and could only ever grow.
+      if (previous) result.set(key, { ...previous, due: false, fixed: true });
     }
   }
   const confidenceWeight: Record<Confidence, number> = {
@@ -686,14 +758,37 @@ export function recordAttempt(state: StudyState, attempt: Attempt): StudyState {
     attempt.lessonSnapshot || !lesson
       ? attempt
       : { ...attempt, lessonSnapshot: structuredClone(lesson) };
+  // Which of this lesson's questions the learner has got wrong before now.
+  const missedBefore = new Set<string>();
+  for (const past of state.attempts) {
+    const pastLesson =
+      past.lessonSnapshot ??
+      allLessons.find((candidate) => candidate.id === past.lessonId);
+    if (!pastLesson) continue;
+    for (const question of pastLesson.questions) {
+      const answer = past.answers[question.id];
+      if (answer !== undefined && answer !== question.answer)
+        missedBefore.add(mistakeReviewKey(pastLesson, question.id));
+    }
+  }
   for (const question of lesson?.questions ?? []) {
     const answer = attempt.answers[question.id];
+    const key = mistakeReviewKey(lesson!, question.id);
     // Only a question the learner actually got wrong falls due again. Leaving
     // one blank when time ran out must not erase a schedule already earned.
     if (answer !== undefined && answer !== question.answer) {
-      delete mistakeReviews[mistakeReviewKey(lesson!, question.id)];
+      delete mistakeReviews[key];
       // Remove the pre-versioning key as the attempt is now due again.
       delete mistakeReviews[question.id];
+    } else if (answer === question.answer && missedBefore.has(key)) {
+      // Recalling it correctly inside a lesson is retrieval too, so it counts
+      // as a review passed. Before this, only the notebook's own button moved
+      // the schedule and a corrected mistake stayed due for ever.
+      mistakeReviews[key] = scheduleReview(
+        mistakeReviews[key],
+        "good",
+        new Date(attempt.date),
+      );
     }
   }
   return { ...state, attempts: [...state.attempts, recorded], mistakeReviews };

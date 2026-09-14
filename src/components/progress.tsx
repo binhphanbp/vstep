@@ -122,20 +122,36 @@ export function ProgressPage() {
                   <SkillIcon skill={skill} size={19} />
                   <div>
                     <h3>{skillNames[skill]}</h3>
-                    <small>{stats.count} lượt luyện</small>
+                    <small>
+                      {stats.firstCount} bài lần đầu
+                      {stats.practiceCount > 0
+                        ? ` · ${stats.practiceCount} lượt luyện lại`
+                        : ""}
+                    </small>
                   </div>
-                  <strong>
-                    {stats.accuracy !== null
-                      ? `${stats.accuracy}% đúng`
-                      : "Chưa chấm điểm"}
-                  </strong>
+                  <div className="skill-accuracy">
+                    <strong>
+                      {stats.accuracy !== null
+                        ? `${stats.accuracy}%`
+                        : "Chưa có"}
+                    </strong>
+                    <small>
+                      {stats.practiceAccuracy !== null
+                        ? `Luyện lại ${stats.practiceAccuracy}%`
+                        : "lần đầu"}
+                    </small>
+                  </div>
                 </div>
               );
             },
           )}
           <p className="help-copy">
-            Nghe/Đọc: độ chính xác gộp của 5 lượt gần nhất. Không quy đổi sang
-            bậc VSTEP.
+            Con số lớn là độ chính xác của <strong>lần đầu</strong> gặp mỗi bài,
+            tính trên khoảng 30 câu gần nhất — đây là con số nói về năng lực, và
+            cũng là con số kế hoạch ngày dùng để chọn bài. Lượt luyện lại đếm
+            riêng vì khi đã biết đáp án thì điểm cao là chuyện đương nhiên. Bài
+            được viết lại nội dung sẽ tính là lần đầu trở lại. Không quy đổi
+            sang bậc VSTEP.
           </p>
         </section>
       </div>
