@@ -11,6 +11,7 @@ import {
   Lightbulb,
   Search,
   Sparkles,
+  BadgeCheck,
 } from "lucide-react";
 import {
   lessons,
@@ -26,6 +27,7 @@ import {
   type Attempt,
   type Confidence,
 } from "@/lib/learning";
+import { provenanceFor, provenanceLabel } from "@/lib/provenance";
 import {
   criteriaFor,
   selfCheckLevels,
@@ -384,6 +386,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     };
   }, [lesson, update, flush]);
   const criteria = criteriaFor(lesson);
+  const provenance = provenanceFor(lesson.id);
   async function submit() {
     if (lock.current) return;
     setError("");
@@ -490,6 +493,10 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           </div>
           <h1>{lesson.title}</h1>
           <p>{lesson.subtitle}</p>
+          <p className="provenance">
+            <BadgeCheck size={13} />
+            {provenanceLabel(provenance)} · {provenance.author}
+          </p>
         </div>
         <span className="timer" role="timer" aria-live="off">
           <Clock3 size={16} />

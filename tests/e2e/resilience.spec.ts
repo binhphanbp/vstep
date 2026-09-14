@@ -307,3 +307,31 @@ test("profile fields remain editable when another tab saves vocabulary progress"
     "Unsaved name",
   );
 });
+
+test("the app still opens when the network is gone", async ({
+  page,
+  context,
+}) => {
+  // Progress already lives on the device; this proves the shell itself
+  // survives a lost connection instead of showing the browser's error page.
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.goto("/practice");
+  await expect(page.locator("main h1")).toBeVisible();
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.locator("main h1")).toBeVisible();
+  await expect(page.locator(".lesson-card").first()).toBeVisible();
+  // The worker is really ours, not the browser's own HTTP cache.
+  expect(
+    await page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
+  ).toBe(true);
+  // A route never opened before still renders offline: the fallback document
+  // is served and the app, whose bundle is cached, routes to the real page.
+  await page.goto("/review-pack");
+  await expect(page.locator("main h1")).toContainText("Gói gửi giáo viên");
+  // The plain "no network" page is there for when even that cannot happen.
+  await page.goto("/offline");
+  await expect(page.locator("main h1")).toContainText("Mạng đang không ổn");
+  await context.setOffline(false);
+});

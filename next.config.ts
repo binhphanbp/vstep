@@ -9,6 +9,7 @@ const contentSecurityPolicy = `
   font-src 'self' data:;
   connect-src 'self' https://*.supabase.co wss://*.supabase.co;
   media-src 'self' data: blob:;
+  worker-src 'self';
   object-src 'none';
   base-uri 'self';
   form-action 'self';
