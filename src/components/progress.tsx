@@ -7,7 +7,16 @@ import {
   SELF_CHECK_DISCLAIMER,
 } from "@/lib/criteria";
 import { useStudy } from "./study-provider";
-import { dayOffset, localDay, skillStats, streak } from "@/lib/learning";
+import {
+  compareSittings,
+  dayOffset,
+  examSittings,
+  localDay,
+  paperNames,
+  skillStats,
+  streak,
+  type StudyState,
+} from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
@@ -160,6 +169,7 @@ export function ProgressPage() {
           </p>
         </section>
       </div>
+      <ExamSittings state={state} />
       <section style={{ marginTop: 25 }}>
         <div className="section-heading">
           <h2>Những bước chân đã qua</h2>
@@ -266,5 +276,77 @@ export function ProgressPage() {
         )}
       </section>
     </div>
+  );
+}
+
+/**
+ * The timed room, sitting by sitting.
+ *
+ * Two full papers exist precisely so that a second mock can mean something, so
+ * this block compares the last two — and says plainly when it cannot, because
+ * repeating one paper measures memory of it as much as ability.
+ */
+function ExamSittings({ state }: { state: StudyState }) {
+  const sittings = examSittings(state);
+  if (!sittings.length) return null;
+  const comparison = compareSittings(state);
+  const shift = (points: number | null) =>
+    points === null
+      ? "chưa đủ dữ liệu"
+      : points > 0
+        ? `+${points} điểm phần trăm`
+        : points < 0
+          ? `${points} điểm phần trăm`
+          : "không đổi";
+  return (
+    <section className="panel" style={{ marginTop: 25 }}>
+      <h2>Những lần thi thử</h2>
+      {[...sittings].reverse().map((sitting) => (
+        <div className="history-row" key={sitting.id}>
+          <SkillIcon skill="reading" size={19} />
+          <div>
+            <h3>{paperNames[sitting.paper]}</h3>
+            <small>
+              {new Date(sitting.date).toLocaleDateString("vi-VN")} ·{" "}
+              {sitting.minutes} phút
+              {sitting.writing || sitting.speaking
+                ? ` · đã nộp ${sitting.writing} bài viết, ${sitting.speaking} phần nói`
+                : ""}
+            </small>
+          </div>
+          <div className="skill-accuracy">
+            <strong>
+              {sitting.listening.total
+                ? `${sitting.listening.correct}/${sitting.listening.total}`
+                : "—"}{" "}
+              Nghe
+            </strong>
+            <small>
+              {sitting.reading.total
+                ? `${sitting.reading.correct}/${sitting.reading.total}`
+                : "—"}{" "}
+              Đọc
+            </small>
+          </div>
+        </div>
+      ))}
+      {comparison ? (
+        <p className="help-copy">
+          So hai lần gần nhất ({paperNames[comparison.before.paper]} →{" "}
+          {paperNames[comparison.after.paper]}): Nghe{" "}
+          {shift(comparison.listening)}, Đọc {shift(comparison.reading)}.{" "}
+          {comparison.comparable
+            ? "Hai đề khác nhau nên chênh lệch này nói được phần nào về năng lực."
+            : "Hai lần này là cùng một đề, nên chênh lệch đo trí nhớ về đề nhiều hơn là đo năng lực — muốn so cho thật thì làm đề còn lại."}{" "}
+          Phần Viết và Nói chỉ được lưu lại, không có điểm, và không quy đổi
+          sang bậc VSTEP.
+        </p>
+      ) : (
+        <p className="help-copy">
+          Làm đủ hai đề (01 và 02) thì ở đây sẽ hiện chênh lệch từng phần giữa
+          hai lần thi. Phần Viết và Nói chỉ được lưu lại, không chấm điểm.
+        </p>
+      )}
+    </section>
   );
 }

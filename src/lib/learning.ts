@@ -877,8 +877,120 @@ export function removeSavedWord(
   delete reviews[`${SAVED_WORD_PREFIX}${questionId}`];
   return { ...state, savedWords: rest, reviews };
 }
+/**
+ * Sittings of the timed room, and what can honestly be compared between them.
+ *
+ * Two independent papers exist so that a mock at the start of a course and a
+ * mock at the end mean something. Nothing read that data: the history listed
+ * each part of each sitting on its own row. This groups the rows back into the
+ * sitting they came from, and — this is the part that matters — refuses to
+ * call a repeat of the same paper a measure of progress, because the second
+ * time round the learner is partly remembering.
+ */
+export type Sitting = {
+  /** The exam id every attempt of the sitting shares. */
+  id: string;
+  paper: "mini" | "full" | "full2";
+  date: string;
+  listening: { correct: number; total: number };
+  reading: { correct: number; total: number };
+  /** Pieces of writing and speaking parts filed, which are not marked. */
+  writing: number;
+  speaking: number;
+  minutes: number;
+};
+export const paperNames: Record<Sitting["paper"], string> = {
+  mini: "Buổi rút gọn",
+  full: "Đề đủ cấu trúc 01",
+  full2: "Đề đủ cấu trúc 02",
+};
+export function examSittings(state: StudyState): Sitting[] {
+  const groups = new Map<string, Attempt[]>();
+  for (const attempt of state.attempts) {
+    if (!attempt.id.startsWith("exam:")) continue;
+    const id = attempt.id.split(":")[1];
+    if (!id) continue;
+    groups.set(id, [...(groups.get(id) ?? []), attempt]);
+  }
+  return [...groups.entries()]
+    .map(([id, attempts]) => {
+      const score = (skill: Skill) =>
+        attempts
+          .filter((attempt) => attempt.skill === skill)
+          .reduce(
+            (sum, attempt) => ({
+              correct: sum.correct + attempt.correct,
+              total: sum.total + attempt.total,
+            }),
+            { correct: 0, total: 0 },
+          );
+      const paper: Sitting["paper"] = attempts.some((attempt) =>
+        attempt.lessonId.startsWith("exam2-"),
+      )
+        ? "full2"
+        : attempts.some((attempt) => attempt.lessonId.startsWith("full-"))
+          ? "full"
+          : "mini";
+      return {
+        id,
+        paper,
+        date: attempts
+          .map((attempt) => attempt.date)
+          .sort()
+          .at(0)!,
+        listening: score("listening"),
+        reading: score("reading"),
+        writing: attempts.filter((attempt) => attempt.skill === "writing")
+          .length,
+        speaking: attempts.filter((attempt) => attempt.skill === "speaking")
+          .length,
+        minutes: Math.round(
+          attempts.reduce((sum, attempt) => sum + attempt.seconds, 0) / 60,
+        ),
+      };
+    })
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+}
+export type SittingComparison = {
+  before: Sitting;
+  after: Sitting;
+  /** Percentage points, positive means better in the later sitting. */
+  listening: number | null;
+  reading: number | null;
+  /** False when both sittings used the same paper. */
+  comparable: boolean;
+};
+/** The two most recent full-length sittings, if there are two. */
+export function compareSittings(state: StudyState): SittingComparison | null {
+  const full = examSittings(state).filter(
+    (sitting) => sitting.paper !== "mini",
+  );
+  if (full.length < 2) return null;
+  const [before, after] = full.slice(-2);
+  const shift = (key: "listening" | "reading") => {
+    if (!before[key].total || !after[key].total) return null;
+    return Math.round(
+      (after[key].correct / after[key].total -
+        before[key].correct / before[key].total) *
+        100,
+    );
+  };
+  return {
+    before,
+    after,
+    listening: shift("listening"),
+    reading: shift("reading"),
+    // The same paper twice measures memory as much as ability, and saying so
+    // is the difference between a measurement and a flattering number.
+    comparable: before.paper !== after.paper,
+  };
+}
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
+/** Minutes that must be left over before the plan offers a further lesson. */
+export const PLAN_EXTRA_MINUTES = 12;
+/** Lessons a single day is allowed to hold, however large the budget. */
+export const PLAN_MAX_LESSONS = 6;
 export function todayPlan(state: StudyState, now = new Date()) {
   const today = localDay(now);
   // Keep today's plan stable while completed lessons gain checkmarks.
@@ -1031,6 +1143,43 @@ export function todayPlan(state: StudyState, now = new Date()) {
       remaining -= asSplit ? Math.round(lesson.minutes / 2) : lesson.minutes;
     }
   }
+  // Second pass: spend what is left. The plan used to stop at three lessons
+  // with one skill each, so a learner who set aside an hour was handed about
+  // half of it — measured at 497 of 840 minutes across a fortnight of
+  // 60-minute days. A skill may now repeat, but only with a different lesson
+  // and only while a whole lesson still fits, so a short day is untouched.
+  // A skill with no lesson yet today comes before a second helping of one
+  // that already has one.
+  const order = [
+    ranked.filter(
+      (item) =>
+        !picked.some((entry) => entry.lesson.skill === item.lesson.skill),
+    ),
+    ranked,
+  ].flat();
+  if (remaining >= PLAN_EXTRA_MINUTES) {
+    for (const item of order) {
+      if (remaining < PLAN_EXTRA_MINUTES) break;
+      if (picked.length >= PLAN_MAX_LESSONS) break;
+      if (picked.some((entry) => entry.lesson.id === item.lesson.id)) continue;
+      if (item.lesson.minutes > remaining) continue;
+      // Two lessons of one skill in a day is plenty; a third would crowd out
+      // the skills she has not touched.
+      if (
+        picked.filter((entry) => entry.lesson.skill === item.lesson.skill)
+          .length >= 2
+      )
+        continue;
+      picked.push({
+        ...item,
+        reasons: [
+          ...item.reasons,
+          `Hôm nay còn ${remaining} phút trong ngân sách`,
+        ].slice(0, 2),
+      });
+      remaining -= item.lesson.minutes;
+    }
+  }
   if (!picked.length) picked.push(ranked[0]);
   return {
     lessons: picked.map((item) => item.lesson),
@@ -1040,6 +1189,8 @@ export function todayPlan(state: StudyState, now = new Date()) {
     /** Lessons offered even though they do not fit today's budget. */
     longer,
     budget,
+    /** Minutes of the budget the plan did not fill. */
+    spare: remaining,
     mood,
     examDays,
     /** Null when no exam date is set: the interface must not invent one. */

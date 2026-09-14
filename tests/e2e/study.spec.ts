@@ -628,3 +628,66 @@ test("every main route loads without runtime errors and fits mobile", async ({
   }
   expect(errors).toEqual([]);
 });
+
+test("two sittings of the timed room are compared, and honestly", async ({
+  page,
+}) => {
+  const state = freshState();
+  const sitting = (
+    id: string,
+    prefix: string,
+    date: string,
+    listening: number,
+    reading: number,
+  ) => [
+    {
+      id: `exam:${id}:${prefix}-listen-1`,
+      lessonId: `${prefix}-listen-1`,
+      skill: "listening" as const,
+      date,
+      answers: {},
+      correct: listening,
+      total: 35,
+      seconds: 2400,
+    },
+    {
+      id: `exam:${id}:${prefix}-read-1`,
+      lessonId: `${prefix}-read-1`,
+      skill: "reading" as const,
+      date,
+      answers: {},
+      correct: reading,
+      total: 40,
+      seconds: 3600,
+    },
+  ];
+  state.attempts = [
+    ...sitting("s1", "full", "2026-08-01T02:00:00.000Z", 20, 24),
+    ...sitting("s2", "full", "2026-09-01T02:00:00.000Z", 31, 36),
+  ];
+  // Seed once only: the second half of this test replaces the state and
+  // reloads, and an init script that ran again would put the first one back.
+  await page.addInitScript((value) => {
+    if (!localStorage.getItem("may-study-v1"))
+      localStorage.setItem("may-study-v1", JSON.stringify(value));
+  }, state);
+  await page.goto("/progress");
+  await expect(
+    page.getByRole("heading", { name: "Những lần thi thử" }),
+  ).toBeVisible();
+  await expect(page.getByText("31/35 Nghe")).toBeVisible();
+  // The same paper twice: the app must say what that number really measures.
+  await expect(page.getByText("đo trí nhớ về đề")).toBeVisible();
+  // A different paper the second time is a fair comparison, and says so.
+  state.attempts = [
+    ...sitting("s1", "full", "2026-08-01T02:00:00.000Z", 20, 24),
+    ...sitting("s2", "exam2", "2026-09-01T02:00:00.000Z", 27, 28),
+  ];
+  await page.evaluate(
+    (value) => localStorage.setItem("may-study-v1", JSON.stringify(value)),
+    state,
+  );
+  await page.reload();
+  await expect(page.getByText("Nghe +20 điểm phần trăm")).toBeVisible();
+  await expect(page.getByText("Đọc +10 điểm phần trăm")).toBeVisible();
+});

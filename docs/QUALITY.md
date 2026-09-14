@@ -91,16 +91,16 @@ Bốn kiểm thử mới về dữ liệu hỏng, timestamp, nháp hai tab và f
 - **Ngân hàng chưa từng có ma trận.** `src/lib/question-types.ts` nay định nghĩa bộ nhãn của từng kỹ năng và số câu mục tiêu; `tests/unit/question-types.test.ts` khóa lại. Đây là ma trận biên soạn của Mây, **không phải quy định chính thức**: định dạng công bố nói số câu và thời lượng, không nói tỷ lệ từng dạng.
 - **Tám câu Đọc được viết mới để đủ ma trận**: hai câu từ vựng trong ngữ cảnh, ba câu từ tham chiếu, một câu ý chính và hai câu mục đích tác giả, thay cho tám câu chi tiết. Bốn bài Đọc của đề lên version 4, `full-reading-memory` lên 5; lịch ôn cũ của riêng bốn bài này không dùng lại, bài ngắn trong thư viện không đổi.
 
-| Dạng câu | Đọc trước | Đọc sau | Nghe trước | Nghe sau |
-| --- | --- | --- | --- | --- |
-| Thông tin chi tiết | 20 | **14** | 29 | **18** |
-| Suy luận | 9 | 9 | 1 | **5** |
-| Ý chính | 3 | **4** | 2 | **3** |
-| Từ vựng trong ngữ cảnh | 2 | **4** | – | – |
-| Từ tham chiếu | 1 | **4** | – | – |
-| Mục đích tác giả / người nói | 4 | 4 | 0 | **3** |
-| Quan điểm tác giả / người nói | 1 | 1 | 3 | **4** |
-| Thông tin thay đổi | – | – | 0 | **2** |
+| Dạng câu                      | Đọc trước | Đọc sau | Nghe trước | Nghe sau |
+| ----------------------------- | --------- | ------- | ---------- | -------- |
+| Thông tin chi tiết            | 20        | **14**  | 29         | **18**   |
+| Suy luận                      | 9         | 9       | 1          | **5**    |
+| Ý chính                       | 3         | **4**   | 2          | **3**    |
+| Từ vựng trong ngữ cảnh        | 2         | **4**   | –          | –        |
+| Từ tham chiếu                 | 1         | **4**   | –          | –        |
+| Mục đích tác giả / người nói  | 4         | 4       | 0          | **3**    |
+| Quan điểm tác giả / người nói | 1         | 1       | 3          | **4**    |
+| Thông tin thay đổi            | –         | –       | 0          | **2**    |
 
 Mỗi bài Đọc của đề nay có đủ sáu nhóm dạng câu và không quá 5 câu chi tiết. Phần Nghe được viết theo sàn và trần thay vì số chính xác: Part 1 là tám thông báo ngắn vài câu, ép trải đều ở đó sẽ thành bịa ra suy luận mà ngữ liệu không có. 18/35 câu chi tiết vẫn là nhiều; mở rộng ngân hàng Nghe còn là việc phía trước.
 
@@ -113,7 +113,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Độ chính xác không còn tính lượt làm lại (A1, đóng phần lớn F07).** `skillStats` trước đây lấy 30 câu gần nhất bất kể là lần đầu gặp bài hay lần làm lại bài đã biết đáp án. Đo được: hai bài Đọc lần đầu đúng 2/5 mỗi bài cho **40%**; làm lại đúng hết bốn lần đẩy lên **80%**, vượt ngưỡng 65% mà `todayPlan` dùng để ưu tiên kỹ năng đang yếu — tức chỉ bằng việc lặp lại, kỹ năng yếu mất ưu tiên. Nay lượt đầu của mỗi `lesson@version` là lượt đo năng lực, lượt sau đếm riêng. Cách làm là **suy ra từ thứ tự thời gian, không thêm trường vào `attemptSchema`**, nên mọi bản sao lưu cũ vẫn nhập được. Bài được viết lại nội dung tính là lần đầu trở lại, vì đó là ngữ liệu người học chưa gặp.
 - **Sổ lỗi biết quên (A2).** Tái hiện trước khi sửa: làm sai `rc1`, làm lại cả bài đúng hết, thẻ vẫn nằm trong sổ và vẫn `due = true` — chỉ nút ôn trong chính màn Sổ lỗi mới dời lịch, nên số lỗi chỉ có thể tăng. Nay trả lời đúng trong một buổi luyện được tính như một lần ôn đạt và dời lịch; thẻ chuyển sang nhóm "đã sửa được" và không còn đến hạn. Sai lại thì thẻ quay lại hàng đợi, `wrongCount` tăng tiếp.
 - **Không bài nào nằm ngoài tầm với (A3).** `writing-essay` dài 40 phút nên không thể thỏa `minutes <= remaining` ở nhịp 30 phút: mô phỏng 14 ngày cho thấy nó **chưa từng được đưa ra một lần nào**. Nay bài dài hơn ngân sách được đề nghị dưới dạng **chia buổi** khi đã 14 ngày chưa đụng tới và còn đủ một nửa thời lượng, có nhãn "chia buổi" cùng lý do trên thẻ bài, và chỉ trừ nửa ngân sách của hôm nay. Mô phỏng lại: essay xuất hiện ngày 6, và cả **14/14 bài** đều có đường vào kế hoạch ngày.
-- Trang Tiến bộ tách hai con số kèm giải thích; thẻ kỹ năng ở trang chính đổi nhãn thành "Độ chính xác lần đầu"; màn Sổ lỗi đếm riêng *đang cần sửa* và *đã sửa được*.
+- Trang Tiến bộ tách hai con số kèm giải thích; thẻ kỹ năng ở trang chính đổi nhãn thành "Độ chính xác lần đầu"; màn Sổ lỗi đếm riêng _đang cần sửa_ và _đã sửa được_.
 
 ## Đợt 2 của kế hoạch 14/09: chọn bài theo dạng câu đang sai
 
@@ -172,12 +172,20 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 127 unit / 52 E2E / 86 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 135 unit / 53 E2E / 86 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+
+## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
+
+- **Hai đề độc lập nhưng không có chỗ nào so sánh.** Lịch sử chỉ gắn nhãn "Luyện có giờ" cho từng lượt; `examSittings` nay gom các lượt của cùng một buổi thi về một dòng (ngày, đề nào, đúng/tổng Nghe và Đọc, số phút, số bài Viết/Nói đã nộp) và trang Tiến bộ hiện khối "Những lần thi thử".
+- **Điều kiện so sánh được nói thẳng.** `compareSittings` chỉ so hai buổi đủ cấu trúc gần nhất và trả cờ `comparable`: khác đề thì chênh lệch nói được phần nào về năng lực; **cùng một đề làm lại** thì app ghi rõ đây là đo trí nhớ về đề chứ không phải đo năng lực. Không quy đổi sang bậc VSTEP, và Viết/Nói chỉ đếm số bài đã nộp vì không có ai chấm.
+- **Kế hoạch ngày trả lại phần giờ đang bỏ phí.** Trần cứng ba bài, mỗi kỹ năng một bài, khiến người hẹn 60 phút chỉ được đề nghị 495/840 phút trong 14 ngày. Vòng chọn cũ giữ nguyên; vòng thứ hai chỉ chạy khi còn từ 12 phút, ưu tiên kỹ năng chưa có bài, tối đa 2 bài một kỹ năng và 6 bài một ngày.
+- **Đo lại bằng cùng một mô phỏng 14 ngày:** 20 phút/ngày 264/280 → 264/280 (không đổi), 30 phút 359/420 → 359/420 (không đổi), 45 phút 461/630 → 551/630, 60 phút **495/840 → 752/840 (59% → 90%)**. Kế hoạch mặc định 30 phút vẫn là đúng ba bài cũ.
+- 8 ca unit và 1 ca E2E mới khoá cả hai việc: không kế hoạch nào vượt ngân sách, ngày ngắn giữ nguyên từng phút, và hai kết luận so sánh đều được kiểm trên bản production.
 
 ## Bằng chứng kiểm tra
 
-- 127 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 52 kiểm thử Playwright trên bản production: 48 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 135 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 53 kiểm thử Playwright trên bản production: 49 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
