@@ -1,6 +1,11 @@
 "use client";
 import Link from "next/link";
 import { ArrowRight, ChartNoAxesCombined, Sparkles } from "lucide-react";
+import {
+  allCriteria,
+  selfCheckLevels,
+  SELF_CHECK_DISCLAIMER,
+} from "@/lib/criteria";
 import { useStudy } from "./study-provider";
 import { dayOffset, localDay, skillStats, streak } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
@@ -198,6 +203,39 @@ export function ProgressPage() {
                     </details>
                   )}
                   {a.recordingId && <RecordingHistory id={a.recordingId} />}
+                  {(a.skill === "writing" || a.skill === "speaking") && (
+                    <Link
+                      className="text-link"
+                      href={`/review-pack?attempt=${a.id}`}
+                    >
+                      In gói gửi giáo viên
+                      <ArrowRight size={14} />
+                    </Link>
+                  )}
+                  {a.feedback && (
+                    <details>
+                      <summary>Nhận xét của người chấm</summary>
+                      <p className="help-copy">{a.feedback}</p>
+                    </details>
+                  )}
+                  {a.selfCheck && Object.keys(a.selfCheck).length > 0 && (
+                    <details>
+                      <summary>Mình đã tự chấm theo tiêu chí</summary>
+                      <ul className="tips-list">
+                        {Object.entries(a.selfCheck).map(([id, level]) => (
+                          <li key={id}>
+                            {allCriteria.find((item) => item.id === id)
+                              ?.label ?? id}
+                            :{" "}
+                            {selfCheckLevels.find(
+                              (item) => item.value === level,
+                            )?.label ?? level}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="help-copy">{SELF_CHECK_DISCLAIMER}</p>
+                    </details>
+                  )}
                   {a.reflection && a.reflection.length > 0 && (
                     <details>
                       <summary>Điều mình đã tự kiểm tra</summary>

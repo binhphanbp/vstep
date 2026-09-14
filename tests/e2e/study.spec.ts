@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
 /** Read the keys from the content so a change of option order cannot lie. */
@@ -13,6 +13,14 @@ const key = (id: string) => question(id).answer;
 const missed = (id: string) => (key(id) + 1) % question(id).options.length;
 const letter = (index: number) => "ABCD"[index];
 
+/** Writing and Speaking cannot be filed until every self-check row is rated. */
+async function rateSelfCheck(page: Page, level = "Tạm ổn") {
+  const rows = page.locator(".self-check .criteria-list li");
+  const total = await rows.count();
+  expect(total).toBeGreaterThan(0);
+  for (let index = 0; index < total; index++)
+    await rows.nth(index).getByRole("button", { name: level }).click();
+}
 test("dashboard is honest, responsive, and energy changes the plan", async ({
   page,
 }) => {
@@ -330,6 +338,7 @@ test("cannot submit unanswered practice; writing is saved and reviewable", async
   await expect(
     page.getByRole("textbox", { name: "Bài viết của bạn" }),
   ).toHaveValue(draft);
+  await rateSelfCheck(page);
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(
     page.getByText("Chưa có điểm chấm của giáo viên hoặc AI.", {
@@ -340,6 +349,43 @@ test("cannot submit unanswered practice; writing is saved and reviewable", async
   await page.getByText("Xem lại bài viết đã nộp").click();
   await expect(page.getByText(draft, { exact: true })).toBeVisible();
 });
+test("writing is self-checked against criteria and can be sent to a teacher", async ({
+  page,
+}) => {
+  await page.goto("/practice/writing-email");
+  await page
+    .getByRole("textbox", { name: "Bài viết của bạn" })
+    .fill(
+      "Dear Ms Hoa, I am writing about the training session next Friday. I would like to ask for a later start because my bus arrives at nine. I can bring the printed handouts for everyone if that helps. Please let me know whether ten o'clock is possible. Thank you very much for your help. Best regards, Gua.",
+    );
+  // The session cannot be filed until every criterion has been rated.
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await expect(page.locator("main [role=alert]")).toContainText("tự kiểm tra");
+  const panel = page.locator(".self-check");
+  await expect(panel).toContainText("không phải thang chấm");
+  await rateSelfCheck(page);
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await page.goto("/progress");
+  await page.getByText("Mình đã tự chấm theo tiêu chí").click();
+  await expect(page.getByText("Đủ yêu cầu của đề: Tạm ổn")).toBeVisible();
+  await page.getByRole("link", { name: "In gói gửi giáo viên" }).click();
+  await expect(page.locator(".pack-table")).toContainText("Việc cần làm tiếp");
+  await expect(page.locator(".pack-sheet")).toContainText("training session");
+  // Printing is the point of the page, so the action has to survive phone
+  // width, where heading actions are hidden by design.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("button", { name: "In hoặc lưu PDF" }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Nhận xét của giáo viên")
+    .fill("Cần thêm một câu kết rõ ràng hơn.");
+  await page.getByRole("button", { name: "Lưu nhận xét" }).click();
+  await page.goto("/progress");
+  await page.getByText("Nhận xét của người chấm").click();
+  await expect(page.getByText("Cần thêm một câu kết")).toBeVisible();
+});
+
 test("vocabulary recall schedules and persists", async ({ page }) => {
   await page.goto("/vocabulary");
   await expect(
@@ -496,6 +542,7 @@ test("recording uses a real MediaRecorder and survives reload", async ({
   await expect(
     page.getByRole("link", { name: "Tải bản ghi", exact: true }),
   ).toBeVisible();
+  await rateSelfCheck(page);
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(
     page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),

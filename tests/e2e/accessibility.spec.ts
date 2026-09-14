@@ -17,6 +17,7 @@ test("main learning surfaces have no WCAG A/AA violations", async ({
     "/practice/writing-email",
     "/vocabulary",
     "/progress",
+    "/review-pack",
   ]) {
     await page.goto(route);
     await expect(page.locator("main h1")).toBeVisible();

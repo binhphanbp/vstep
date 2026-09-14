@@ -33,6 +33,11 @@ import {
 } from "../../src/lib/learning";
 import { lessons, vocabulary } from "../../src/lib/content";
 import { readQuizDraft } from "../../src/lib/quiz-draft";
+import {
+  allCriteria,
+  criteriaFor,
+  SELF_CHECK_DISCLAIMER,
+} from "../../src/lib/criteria";
 const now = new Date("2026-09-08T18:00:00+07:00");
 /** Read the keys from the content so a change of option order cannot lie. */
 function keys(lessonId = "reading-cafe") {
@@ -995,5 +1000,64 @@ describe("word cards that grow out of her own mistakes", () => {
     delete (old as { savedWords?: unknown }).savedWords;
     expect(stateSchema.safeParse(old).success).toBe(true);
     expect(savedWords(old)).toEqual([]);
+  });
+});
+
+describe("Mây's own self-check criteria", () => {
+  it("gives Writing and Speaking a checklist and objective lessons none", () => {
+    const letter = criteriaFor({
+      id: "writing-email",
+      skill: "writing",
+      part: "Task 1 • Email",
+    });
+    const essay = criteriaFor({
+      id: "writing-essay",
+      skill: "writing",
+      part: "Task 2 • Essay",
+    });
+    expect(letter?.key).toBe("w1");
+    expect(essay?.key).toBe("w2");
+    expect(letter?.items).not.toEqual(essay?.items);
+    expect(
+      criteriaFor({
+        id: "speaking-topic",
+        skill: "speaking",
+        part: "Part 3 • Topic development",
+      })?.key,
+    ).toBe("s3");
+    expect(
+      criteriaFor({
+        id: "reading-cafe",
+        skill: "reading",
+        part: "Đọc hiểu • Bài ngắn",
+      }),
+    ).toBeNull();
+  });
+  it("says in words that this is not the examiner's scale", () => {
+    expect(SELF_CHECK_DISCLAIMER).toContain("không phải thang chấm");
+  });
+  it("keeps every criterion id unique and findable from history", () => {
+    const ids = allCriteria.map((item) => item.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const item of allCriteria) {
+      expect(item.question.length).toBeGreaterThan(10);
+      expect(item.look.length).toBeGreaterThan(10);
+    }
+  });
+  it("stores a rating and a teacher's note without breaking older backups", () => {
+    const state = freshState();
+    const filed = {
+      ...attempt("2026-09-08T10:00:00Z", { id: "w", skill: "writing" }),
+      selfCheck: { "w1-task": 2 as const },
+      feedback: "Cần một câu kết rõ hơn.",
+    };
+    state.attempts = [filed];
+    expect(stateSchema.safeParse(state).success).toBe(true);
+    // Out of range is rejected rather than silently stored.
+    state.attempts = [{ ...filed, selfCheck: { "w1-task": 9 } }];
+    expect(stateSchema.safeParse(state).success).toBe(false);
+    const old = freshState();
+    old.attempts = [attempt("2026-09-08T10:00:00Z", { id: "old" })];
+    expect(stateSchema.safeParse(old).success).toBe(true);
   });
 });

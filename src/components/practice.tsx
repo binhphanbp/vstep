@@ -26,6 +26,11 @@ import {
   type Attempt,
   type Confidence,
 } from "@/lib/learning";
+import {
+  criteriaFor,
+  selfCheckLevels,
+  SELF_CHECK_DISCLAIMER,
+} from "@/lib/criteria";
 import { useStudy } from "./study-provider";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
@@ -305,7 +310,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const answers = result?.answers ?? draft.answers;
   const confidence = result?.confidence ?? draft.confidence;
   const seconds = result?.seconds ?? draft.seconds;
-  const [checks, setChecks] = useState<string[]>([]);
+  const [selfCheck, setSelfCheck] = useState<Record<string, number>>({});
   const [takeSavedAt, setTakeSavedAt] = useState(0);
   // Without a microphone every Speaking lesson stays unfinished for ever, keeps
   // its "never practised" bonus and holds a slot in the daily plan. Answering
@@ -378,20 +383,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       flush();
     };
   }, [lesson, update, flush]);
-  const checklist =
-    lesson.skill === "writing"
-      ? [
-          "Mình đã trả lời đủ các yêu cầu trong đề.",
-          "Các đoạn có ý chính và nối với nhau hợp lý.",
-          "Mình đã kiểm tra thì, mạo từ, số ít/số nhiều.",
-          "Từ vựng phù hợp và không lặp lại quá nhiều.",
-        ]
-      : [
-          "Mình đã trả lời trực tiếp và giải thích lý do.",
-          "Mình đã thêm ví dụ hoặc so sánh khi cần.",
-          "Mình nghe lại và nhận ra một chỗ cần cải thiện.",
-          "Mình nói rõ, có ngắt nghỉ, không đọc cả bài soạn sẵn.",
-        ];
+  const criteria = criteriaFor(lesson);
   async function submit() {
     if (lock.current) return;
     setError("");
@@ -423,6 +415,15 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       );
       return;
     }
+    if (
+      criteria &&
+      criteria.items.some((item) => selfCheck[item.id] === undefined)
+    ) {
+      setError(
+        "Chấm cho mình từng tiêu chí trong phần tự kiểm tra trước khi hoàn thành nhé. Đây là tự đánh giá, không phải điểm chấm.",
+      );
+      return;
+    }
     const a: Attempt = {
       id: crypto.randomUUID(),
       lessonId: lesson.id,
@@ -434,7 +435,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       // Seconds counted since the last batch write belong to this session too.
       seconds: Math.min(18000, seconds + pending.current),
       text: lesson.skill === "writing" ? text : undefined,
-      reflection: checks,
+      selfCheck: criteria ? selfCheck : undefined,
     };
     lock.current = true;
     if (lesson.skill === "speaking" && hasRecording) {
@@ -472,7 +473,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       drafts: { ...s.drafts, [`quiz:${lesson.id}`]: "" },
     }));
     setError("");
-    setChecks([]);
+    setSelfCheck({});
     setWithoutRecording(false);
     started.current = Date.now();
   }
@@ -636,18 +637,6 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               </ul>
             </div>
           )}
-          {lesson.sample && result && (
-            <details>
-              <summary>Tham khảo một cách triển khai</summary>
-              <div className="passage" lang="en">
-                {lesson.sample}
-              </div>
-              <p className="help-copy">
-                Bài mẫu tự biên soạn để tham khảo cách triển khai, không phải
-                đáp án duy nhất hay bài được giám khảo chứng nhận.
-              </p>
-            </details>
-          )}
         </div>
         <div>
           {lesson.questions.map((q, i) => (
@@ -759,30 +748,58 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               )}
             </section>
           )}
-          {!lesson.questions.length && (
-            <section className="panel checklist" style={{ marginTop: 20 }}>
-              <h2>Tự nhìn lại bài làm</h2>
-              <p className="help-copy">
-                Đánh dấu điều bạn thực sự đã làm được. Đây là tự kiểm tra, không
-                phải điểm chấm.
-              </p>
-              {checklist.map((c) => (
-                <label key={c}>
-                  <input
-                    type="checkbox"
-                    disabled={Boolean(result)}
-                    checked={checks.includes(c)}
-                    onChange={(e) =>
-                      setChecks((prev) =>
-                        e.target.checked
-                          ? [...prev, c]
-                          : prev.filter((v) => v !== c),
-                      )
-                    }
-                  />
-                  {c}
-                </label>
-              ))}
+          {!lesson.questions.length && criteria && (
+            <section className="panel self-check" style={{ marginTop: 20 }}>
+              <div className="section-heading">
+                <div>
+                  <h2>{criteria.title}</h2>
+                  <p>{SELF_CHECK_DISCLAIMER}</p>
+                </div>
+              </div>
+              <ul className="criteria-list">
+                {criteria.items.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.label}</strong>
+                    <span>{item.question}</span>
+                    <small>{item.look}</small>
+                    <div
+                      className="criteria-levels"
+                      role="group"
+                      aria-label={item.label}
+                    >
+                      {selfCheckLevels.map((level) => (
+                        <button
+                          type="button"
+                          key={level.value}
+                          disabled={Boolean(result)}
+                          aria-pressed={selfCheck[item.id] === level.value}
+                          className={`filter ${selfCheck[item.id] === level.value ? "active" : ""}`}
+                          onClick={() =>
+                            setSelfCheck((prev) => ({
+                              ...prev,
+                              [item.id]: level.value,
+                            }))
+                          }
+                        >
+                          {level.label}
+                        </button>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {lesson.sample && (
+                <details>
+                  <summary>Đọc bài mẫu và đối chiếu từng tiêu chí</summary>
+                  <div className="passage" lang="en">
+                    {lesson.sample}
+                  </div>
+                  <p className="help-copy">
+                    Bài mẫu tự biên soạn để đối chiếu cách triển khai, không
+                    phải đáp án duy nhất hay bài được giám khảo chứng nhận.
+                  </p>
+                </details>
+              )}
             </section>
           )}
           {error && (

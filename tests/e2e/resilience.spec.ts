@@ -112,6 +112,11 @@ test("a device with no microphone can still finish a Speaking lesson", async ({
   await page
     .getByText("Thiết bị này không ghi âm được", { exact: false })
     .click();
+  // Speaking is filed only once every self-check row has been rated.
+  const rows = page.locator(".self-check .criteria-list li");
+  const total = await rows.count();
+  for (let index = 0; index < total; index++)
+    await rows.nth(index).getByRole("button", { name: "Tạm ổn" }).click();
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(
     page.getByRole("heading", { name: "đã dành thời gian để luyện tập" }),
