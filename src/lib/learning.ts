@@ -1,6 +1,12 @@
 import * as z from "zod/mini";
 import { lessons, vocabulary, type Question, type Skill } from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
+import {
+  fullListening2,
+  fullReading2,
+  fullSpeaking2,
+  fullWriting2,
+} from "./full-exam-02";
 import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
@@ -187,7 +193,9 @@ const examStageSchema = z.object({
 export const examSchema = z
   .object({
     id: limitedString(100),
-    mode: z.optional(z.enum(["mini", "full"])),
+    // "full2" is the second paper. New value, old backups unaffected: a
+    // stored sitting of "full" still parses and still finds its stages.
+    mode: z.optional(z.enum(["mini", "full", "full2"])),
     startedAt: z.number(),
     stage: boundedInteger(0, 3),
     // Which material of the current part is open. Reading runs four passages
@@ -779,10 +787,7 @@ export function quickSession(
 ): QuickSession | null {
   const met = new Map<string, string>();
   for (const attempt of state.attempts)
-    if (
-      !met.has(attempt.lessonId) ||
-      met.get(attempt.lessonId)! < attempt.date
-    )
+    if (!met.has(attempt.lessonId) || met.get(attempt.lessonId)! < attempt.date)
       met.set(attempt.lessonId, attempt.date);
   const short = lessons.filter(
     (lesson) =>
@@ -1264,8 +1269,41 @@ export const fullExamStages = [
     lessonIds: ["speaking-social", "speaking-solution", "speaking-topic"],
   },
 ];
-export function getExamStages(mode?: "mini" | "full") {
-  return mode === "full" ? fullExamStages : examStages;
+/**
+ * The second paper runs the same shape on entirely different material: its own
+ * transcripts, passages, Writing tasks and Speaking prompts. One paper cannot
+ * measure twice, because the second sitting measures memory.
+ */
+export const fullExam2Stages = [
+  {
+    skill: "listening" as Skill,
+    label: "Nghe",
+    seconds: 2400,
+    lessonIds: fullListening2.map((l) => l.id),
+  },
+  {
+    skill: "reading" as Skill,
+    label: "Đọc",
+    seconds: 3600,
+    lessonIds: fullReading2.map((l) => l.id),
+  },
+  {
+    skill: "writing" as Skill,
+    label: "Viết",
+    seconds: 3600,
+    lessonIds: fullWriting2.map((l) => l.id),
+  },
+  {
+    skill: "speaking" as Skill,
+    label: "Nói",
+    seconds: 720,
+    lessonIds: fullSpeaking2.map((l) => l.id),
+  },
+];
+export function getExamStages(mode?: "mini" | "full" | "full2") {
+  if (mode === "full") return fullExamStages;
+  if (mode === "full2") return fullExam2Stages;
+  return examStages;
 }
 
 /** Absolute deadlines survive reload, sleep, background tabs, and app crashes. */
@@ -1289,8 +1327,10 @@ export function advanceExam(
       ),
     );
     const current = exam;
+    // Task 2 is the second writing lesson of the stage, not one hard-coded
+    // id: paper 02 has its own essay and was filing the letter's text twice.
     const writingFor = (lessonId: string) =>
-      lessonId === "writing-essay"
+      stage.skill === "writing" && stage.lessonIds.indexOf(lessonId) === 1
         ? (current.writingTask2 ?? "")
         : current.writing;
     // Work the learner never did is not filed: a blank essay, an unrecorded

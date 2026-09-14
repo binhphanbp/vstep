@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useStudy } from "./study-provider";
+import { watchErrors } from "@/lib/error-log";
 import { streak, daysUntil } from "@/lib/learning";
 const nav = [
   { href: "/", label: "Góc học hôm nay", icon: LayoutDashboard },
@@ -37,6 +38,21 @@ export function Shell({ children }: { children: ReactNode }) {
   const [mobile, setMobile] = useState(false);
   const sidebar = useRef<HTMLElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
+  // Keep the last few runtime errors on the device so the bug report button
+  // in Settings has something factual to carry.
+  useEffect(() => watchErrors(), []);
+  // Offline support, production only: a service worker in development would
+  // serve yesterday's build back to the person editing it.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+    if (!("serviceWorker" in navigator)) return;
+    const register = () =>
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // Offline is a bonus; a browser that refuses the worker still works.
+      });
+    if (document.readyState === "complete") register();
+    else window.addEventListener("load", register, { once: true });
+  }, []);
   useEffect(() => {
     if (!mobile) return;
     const previousOverflow = document.body.style.overflow;

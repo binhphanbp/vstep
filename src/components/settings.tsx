@@ -4,8 +4,10 @@ import {
   Cloud,
   Download,
   Heart,
+  LifeBuoy,
   LogOut,
   Save,
+  Trash2,
   Upload,
   UserRound,
 } from "lucide-react";
@@ -24,6 +26,7 @@ import {
   supabase,
 } from "@/lib/supabase";
 import { currentBackupState, rawStudyData } from "@/lib/study-store";
+import { buildErrorReport, clearErrors, recentErrors } from "@/lib/error-log";
 export function downloadJson(data: unknown, name: string) {
   downloadText(JSON.stringify(data, null, 2), name);
 }
@@ -274,6 +277,48 @@ export function SettingsPage() {
         </form>
         <div className="stack">
           <CloudSettings storageError={storageError} />
+          <section className="panel">
+            <div className="section-title">
+              <LifeBuoy size={20} />
+              <h2>Khi có gì đó hỏng</h2>
+            </div>
+            <p className="help-copy">
+              Tải một file mô tả tình trạng máy và{" "}
+              {recentErrors().length
+                ? `${recentErrors().length} lỗi gần nhất`
+                : "các lỗi gần nhất nếu có"}{" "}
+              rồi gửi cho người dựng ứng dụng. File <strong>không chứa</strong>{" "}
+              bài viết, bản ghi âm hay nội dung đã gõ — chỉ có thông tin máy, số
+              lượng dữ liệu và thông báo lỗi.
+            </p>
+            <div className="button-row">
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  downloadJson(
+                    buildErrorReport(state, storageError),
+                    `may-bao-loi-${localDay()}.json`,
+                  );
+                  toast("Đã tải file báo lỗi.");
+                }}
+              >
+                <Download size={15} />
+                Tải file báo lỗi
+              </button>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  clearErrors();
+                  toast("Đã xoá danh sách lỗi trên máy này.");
+                }}
+              >
+                <Trash2 size={15} />
+                Xoá danh sách lỗi
+              </button>
+            </div>
+          </section>
           <section className="panel">
             <div className="section-title">
               <Download size={20} />

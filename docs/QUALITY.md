@@ -153,10 +153,31 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - Hai trường mới trong `attemptSchema` (`selfCheck`, `feedback`) đều **tùy chọn**, có test khoá việc lượt học và bản sao lưu cũ vẫn parse; mức tự chấm ngoài khoảng 1–3 bị từ chối.
 - Axe WCAG A/AA chạy thêm trên route mới `/review-pack`; tổng số màn kiểm tra accessibility lên 14.
 
+## Đợt 6 của kế hoạch 14/09 (phần 1): nguồn gốc học liệu, báo lỗi, offline
+
+- **Siêu dữ liệu biên tập (A6).** Mỗi bài nay mang người soạn, trạng thái duyệt, người duyệt, ngày duyệt và nguồn/quyền sử dụng; đầu bài hiện đúng trạng thái. Hôm nay tất cả đều là **"Chưa qua thẩm định của giáo viên"** — trước đây điều này chỉ nằm trong tài liệu dự án, nơi người học không bao giờ đọc, nên nhãn B1/B2 trên màn hình dễ bị hiểu là đã hiệu chuẩn. Dữ liệu để ngoài `content.ts` nên một lần thẩm định không làm bài lên version và không xoá lịch ôn. Test chặn việc tự gắn nhãn "đã duyệt" mà không có tên người duyệt và ngày.
+- **Nút báo lỗi.** Cài đặt có nút tải một file JSON gồm: thông tin thiết bị, đường dẫn trang, tình trạng lưu trữ, cấu hình học và **số lượng** dữ liệu, cộng tối đa 10 lỗi runtime gần nhất (thông báo + nơi phát sinh + thời điểm, giữ trong `sessionStorage`). File **không chứa** bài viết, bản nháp hay bản ghi âm — có test dựng một trạng thái chứa bài viết thật rồi khẳng định chuỗi đó không xuất hiện trong báo cáo.
+- **PWA/offline.** Service worker viết tay, không thêm phụ thuộc và không tải script ngoài (CSP sẽ chặn): asset băm phục vụ cache-first, trang tải mạng trước rồi mới tới cache rồi tới trang "mất mạng", mọi thứ không phải GET cùng origin thì bỏ qua — không có lời gọi Supabase nào bị cache. Chỉ đăng ký ở production. CSP thêm `worker-src 'self'`.
+- **Đo được**: E2E mới ngắt mạng thật (`context.setOffline`) rồi tải lại — app vẫn mở, vẫn hiện danh sách bài, và service worker đang thực sự điều khiển trang. Một địa chỉ chưa từng mở vẫn hiện đúng trang vì bundle đã nằm trong cache; trang "mất mạng" là phần còn lại cho trường hợp ngay cả điều đó cũng không xảy ra được.
+
+## Đợt 6 (phần 2): đề đủ cấu trúc số 02
+
+- **Vì sao cần đề thứ hai.** Một đề không đo lại được: lần thi thử thứ hai trên cùng đề đo trí nhớ. Đề 01 còn dùng lại **toàn bộ** phần Viết và Nói của thư viện, nên hai phần đó là lần làm lại bài đã học.
+- **Đề 02 gồm**: 14 ngữ liệu Nghe (35 câu: 8 thông báo, 3 hội thoại ×4, 3 bài nói ×5), 4 bài Đọc **1.913 từ** với 40 câu **có chú giải đầy đủ** (trích dẫn nguyên văn + phân tích bốn phương án), 2 đề Viết và 3 phần Nói của riêng đề.
+- **Không dùng chung gì với đề 01 hay thư viện**: test đối chiếu mã bài, mã câu, ngữ liệu và đề bài của cả ba nguồn. Phần Đọc viết theo **đúng ma trận** của đề 01 (4 ý chính / 14 chi tiết / 9 suy luận / 4 từ vựng / 4 từ tham chiếu / 4 mục đích / 1 quan điểm), không bài nào quá 5 câu chi tiết; phần Nghe nằm trong sàn và trần của ma trận Nghe. Test chu kỳ đáp án chạy thêm trên hai ngân hàng mới.
+- **Một lỗi thật, tìm thấy nhờ đề 02.** `advanceExam` nhận diện bài Viết số 2 bằng cách so mã bài với `"writing-essay"`. Đề 02 có đề luận riêng, nên bài thư sẽ bị lưu vào **cả hai** lượt Viết và bài luận biến mất. Nay task 2 được xác định theo vị trí trong phần Viết của chính đề đang làm, ở cả `learning.ts` lẫn phòng thi; có test dựng một buổi thi đề 02 và khẳng định hai lượt Viết giữ đúng hai bài.
+- **Số liệu sau khi thêm**: ngân hàng câu hỏi Reading/Listening 183 → **258 câu**, chú giải bằng chứng 136 → **176 câu**; build sinh 86 route.
+
+## Đợt 6 (phần 3): báo cáo Word dựng lại từ một nguồn số liệu
+
+- Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
+- **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 127 unit / 52 E2E / 86 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+
 ## Bằng chứng kiểm tra
 
-- 111 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 50 kiểm thử Playwright trên bản production: 46 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 127 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 52 kiểm thử Playwright trên bản production: 48 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

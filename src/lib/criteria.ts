@@ -169,7 +169,7 @@ export function criteriaFor(lesson: {
   part: string;
 }): CriteriaGroup | null {
   if (lesson.skill === "writing")
-    return lesson.id === "writing-essay"
+    return lesson.part.includes("Task 2") || lesson.id.endsWith("essay")
       ? { key: "w2", title: "Tự kiểm tra bài luận", items: writingTask2 }
       : { key: "w1", title: "Tự kiểm tra bài thư", items: writingTask1 };
   if (lesson.skill !== "speaking") return null;

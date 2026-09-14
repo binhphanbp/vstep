@@ -3088,3 +3088,11 @@ details .passage {
   flex-wrap: wrap;
   margin: -14px 0 18px;
 }
+.provenance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}

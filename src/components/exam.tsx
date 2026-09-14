@@ -18,11 +18,20 @@ export function ExamPage() {
   const { state, update, addAttempt } = useStudy();
   const [now, setNow] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
-  const [mode, setMode] = useState<"mini" | "full">("mini");
+  const [mode, setMode] = useState<"mini" | "full" | "full2">("mini");
   const exam = state.exam;
   const examLessons = exam?.lessonSnapshots ?? lessons;
   const examStages = exam?.stagePlan ?? getExamStages(exam?.mode ?? mode);
-  const full = (exam?.mode ?? mode) === "full";
+  const sitting = exam?.mode ?? mode;
+  /** Task 2 is the second writing lesson of the paper, not a fixed id. */
+  const isTask2 = (lessonId: string) =>
+    examStages.some(
+      (stage) =>
+        stage.skill === "writing" && stage.lessonIds.indexOf(lessonId) === 1,
+    );
+  const full = sitting !== "mini";
+  // The second paper shares nothing with the first, so its warning differs.
+  const paper2 = sitting === "full2";
   const deadline = exam && !exam.finished ? exam.deadline : 0;
   // Which material is open is part of the session, not of this tab: a reload
   // in the middle of the 60-minute Reading part has to come back to the same
@@ -103,9 +112,7 @@ export function ExamPage() {
       if (!lesson || lesson.questions.length) return false;
       if (lesson.skill === "writing")
         return !(
-          id === "writing-essay"
-            ? (submitting.writingTask2 ?? "")
-            : submitting.writing
+          isTask2(id) ? (submitting.writingTask2 ?? "") : submitting.writing
         ).trim();
       return (
         !state.attempts.some((a) => a.id === `exam:${submitting.id}:${id}`) &&
@@ -166,17 +173,27 @@ export function ExamPage() {
               </button>
               <button
                 type="button"
-                className={`filter ${full ? "active" : ""}`}
+                className={`filter ${full && !paper2 ? "active" : ""}`}
                 onClick={() => setMode("full")}
-                aria-pressed={full}
+                aria-pressed={full && !paper2}
               >
-                Đủ cấu trúc · 172 phút
+                Đề 01 · 172 phút
+              </button>
+              <button
+                type="button"
+                className={`filter ${paper2 ? "active" : ""}`}
+                onClick={() => setMode("full2")}
+                aria-pressed={paper2}
+              >
+                Đề 02 · 172 phút
               </button>
             </div>
             <span className="pill">
-              {full
-                ? "Đề tự biên soạn số 01 · Đủ cấu trúc"
-                : "Mô phỏng rút gọn · 51 phút"}
+              {paper2
+                ? "Đề tự biên soạn số 02 · Đủ cấu trúc"
+                : full
+                  ? "Đề tự biên soạn số 01 · Đủ cấu trúc"
+                  : "Mô phỏng rút gọn · 51 phút"}
             </span>
             <h2 style={{ fontSize: 26, margin: "17px 0" }}>
               Một vòng luyện, đủ bốn kỹ năng.
@@ -216,9 +233,11 @@ export function ExamPage() {
               ))}
             </div>
             <div className="notice" style={{ marginTop: 22 }}>
-              {full
-                ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
-                : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
+              {paper2
+                ? "Đề số 02 không dùng chung ngữ liệu, câu hỏi, đề Viết hay đề Nói nào với đề 01 và với thư viện, nên có thể dùng để đo lại sau một giai đoạn học. Nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                : full
+                  ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                  : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
               Không quy đổi kết quả buổi này sang B1/B2/C1.
             </div>
             <label
@@ -536,12 +555,12 @@ export function ExamPage() {
                   className="writing-area"
                   aria-label="Bài viết trong phòng thi"
                   placeholder={
-                    lesson.id === "writing-essay"
+                    isTask2(lesson.id)
                       ? "Write your essay here…"
-                      : "Write your email here…"
+                      : "Write your letter here…"
                   }
                   value={
-                    lesson.id === "writing-essay"
+                    isTask2(lesson.id)
                       ? (exam.writingTask2 ?? "")
                       : exam.writing
                   }
@@ -553,9 +572,8 @@ export function ExamPage() {
                             ...s,
                             exam: {
                               ...s.exam,
-                              [lesson.id === "writing-essay"
-                                ? "writingTask2"
-                                : "writing"]: e.target.value,
+                              [isTask2(lesson.id) ? "writingTask2" : "writing"]:
+                                e.target.value,
                             },
                           }
                         : s,
@@ -565,7 +583,7 @@ export function ExamPage() {
                 <div className="editor-status">
                   <span>
                     {wordCount(
-                      lesson.id === "writing-essay"
+                      isTask2(lesson.id)
                         ? (exam.writingTask2 ?? "")
                         : exam.writing,
                     )}{" "}
