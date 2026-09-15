@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 154 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 154 unit / 55 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -236,10 +236,15 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Lỗi đo được ngay khi dựng khối này.** Khi nộp một buổi Nói, bản ghi được sao từ khoá nháp sang khoá của lượt học nhưng **bản nháp không bị xoá**: panel đọc ra **2 bản ghi, 33 KB** cho một take hai giây duy nhất. Bản nháp đó vĩnh viễn không dùng lại được (một take chỉ tính khi được thu sau lần nộp gần nhất của bài), nên nó là rác đúng nghĩa. Nay nộp xong là xoá bản nháp; đo lại còn **1 bản ghi**.
 - 1 ca unit mới cho phần đọc dung lượng (định dạng B/KB/MB, đếm đúng byte của tiếng Việt, trình duyệt chặn thì trả 0 chứ không đoán). Ca E2E ghi âm kiểm thêm: sau khi nộp còn đúng một bản ghi, nút xoá hàng loạt tắt vì take vừa thu chưa đủ cũ, và quay lại bài thì phải thu mới chứ không dùng lại take cũ.
 
+## Diễn tập khôi phục: mất điện thoại rồi lấy lại được đúng những gì đã học
+
+- **Việc này trước đây nằm ở danh sách "cần chủ website làm tay".** Nay nó là một ca kiểm thử chạy trên bản production mỗi lần CI chạy: học một bài (có một câu sai), thêm một thẻ từ từ chính câu sai đó, gõ dở một bài Viết, **xuất bản sao thật** (đọc đúng file vừa tải về), rồi **xoá sạch máy** — `localStorage`, `sessionStorage` và cả IndexedDB bản ghi — như khi mất điện thoại; nhập lại file và kiểm ở đúng những nơi Gùa sẽ nhìn: Tiến bộ có buổi học, Sổ lỗi còn câu sai, Vườn từ còn thẻ tự thêm, bài Viết còn nguyên bản nháp.
+- Ca này cũng là chỗ khoá cho trường `library` mới: bản sao đi qua một vòng xuất–xoá–nhập mà lịch sử vẫn đọc đúng học liệu của nó.
+
 ## Bằng chứng kiểm tra
 
 - 154 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 54 kiểm thử Playwright trên bản production: 50 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 55 kiểm thử Playwright trên bản production: 51 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

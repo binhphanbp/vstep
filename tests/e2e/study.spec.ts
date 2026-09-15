@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
 /** Read the keys from the content so a change of option order cannot lie. */
@@ -763,4 +764,83 @@ test("a word card waits for the lesson it was taken from", async ({ page }) => {
     page.locator(".vocab-list-item", { hasText: "realised" }),
   ).toHaveCount(1);
   await expect(page.getByText("Còn 46 thẻ nữa đang chờ")).toBeVisible();
+});
+
+test("a lost phone: export, wipe everything, import, history intact", async ({
+  page,
+}) => {
+  // The drill the owner would otherwise have to do by hand. Everything the
+  // learner cannot recreate — her results, her mistakes, her saved words and
+  // an unfinished draft — has to survive a device that is gone.
+  await page.goto("/practice/reading-market");
+  for (const id of ["rk1", "rk2", "rk3", "rk4", "rk5"]) {
+    await page
+      .locator(
+        `input[name="${id}"][value="${id === "rk4" ? missed(id) : key(id)}"]`,
+      )
+      .check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await expect(page.locator(".result-score")).toHaveText("4/5");
+  await page.goto("/mistakes");
+  await page.getByRole("button", { name: /Thêm .*doubtful/ }).click();
+  // An unfinished piece of writing counts as work too.
+  await page.goto("/practice/writing-email");
+  await page.locator("textarea").fill("Hi Alex, I am still writing this.");
+  await expect
+    .poll(async () =>
+      page.evaluate(() => localStorage.getItem("may-study-v1") ?? ""),
+    )
+    .toContain("still writing this");
+
+  await page.goto("/settings");
+  const event = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
+  const file = await (await event).path();
+  const backup = readFileSync(file, "utf8");
+  expect(JSON.parse(backup).attempts).toHaveLength(1);
+
+  // The phone is gone: every trace of her work on this device disappears.
+  await page.evaluate(async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    await new Promise((resolve) => {
+      const request = indexedDB.deleteDatabase("may-recordings");
+      request.onsuccess = resolve;
+      request.onerror = resolve;
+      request.onblocked = resolve;
+    });
+  });
+  await page.reload();
+  await expect(page.getByPlaceholder("Tên hoặc biệt danh")).toHaveValue("Gùa");
+  page.on("dialog", (d) => d.accept());
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "may-backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(backup),
+  });
+
+  // Back, in the places she would look.
+  await page.goto("/progress");
+  await expect(
+    page
+      .locator(".history-row")
+      .filter({ hasText: "The market that opens at four" })
+      .first(),
+  ).toBeVisible();
+  await page.goto("/mistakes");
+  await expect(page.getByText("1 câu đang cần sửa")).toBeVisible();
+  await page.goto("/vocabulary");
+  await page.getByRole("button", { name: "Tất cả từ vựng" }).click();
+  await page.getByLabel("Tìm từ vựng").fill("doubtful");
+  await expect(page.locator(".vocab-list-item")).toHaveCount(1);
+  await page.goto("/practice/writing-email");
+  await expect(page.locator("textarea")).toHaveValue(
+    "Hi Alex, I am still writing this.",
+  );
 });
