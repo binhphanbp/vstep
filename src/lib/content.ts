@@ -1850,6 +1850,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Không cần dùng từ quá khó; ưu tiên rõ ý và nói tiếp được.",
       "Nghe lại xem mình có bỏ phần “why” không.",
     ],
+    sample: `I live in a small lane about ten minutes from the centre, and what I like most is that everything is close. There is a market at the end of the street, a coffee place I go to nearly every week, and my parents live two streets away. If I could change one thing, it would be the noise in the early morning, because deliveries start at about five and I am not a morning person.\n\nWould I prefer somewhere quieter? Honestly, no. I tried staying in a quieter district for two months last year and I found it a bit lonely. I think I like hearing people around me, even at five in the morning.\n\nTo relax I usually walk, or I watch something light for half an hour. I used to play badminton with friends every weekend when I was younger, but now most of my free time is alone, and I have made peace with that.`,
   },
   {
     id: "speaking-solution",
@@ -1867,6 +1868,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Đưa ra 2 lý do gắn với ngân sách và sở thích của người bạn.",
       "So sánh cả 2 phương án còn lại, không chỉ khen phương án mình chọn.",
     ],
+    sample: `I would choose the food tour. My friend enjoys trying new things, and a food tour gives them several small experiences in one afternoon rather than one long activity. It also fits a limited budget, because street food here is cheap and we can decide how much to spend as we go.\n\nThe museum would be my second choice. It is interesting, but it is quiet work: you look, you read, and you do not talk much. With only one day I would rather spend the time talking to each other and to the people we meet.\n\nThe shopping centre is the weakest option. It is comfortable and air-conditioned, but you could find the same shops in almost any city, so my friend would leave without having seen anything that belongs to this place. And shopping tends to cost more than we plan, which does not suit a limited budget.\n\nSo: the food tour for the experience, the museum if it rains, and the shopping centre only if they need to buy something specific.`,
   },
   {
     id: "writing-complaint",
@@ -1998,6 +2000,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Câu hỏi có “how” hoặc “why” thì phải có ít nhất một lý do.",
       "Nghe lại bản ghi: có câu nào chỉ dài hai từ không?",
     ],
+    sample: `At the moment I work in a small office doing customer support, and I chose it mostly by accident: a friend told me they were hiring and I needed a job that year. It turned out to suit me, because I like solving small problems and then moving on.\n\nThe part of the day I enjoy most is the first hour, before the phone starts. I make a list, and it is the only time the day feels organised. If I could change my schedule, I would start and finish an hour earlier, so the evening is not gone by the time I get home.\n\nRecently I have been learning English again, properly this time. I prefer having a teacher for the difficult parts, but I do most of the practice alone because of my hours. When it feels hard, I make the task smaller: ten minutes, one exercise, and that is enough for the day.`,
   },
   {
     id: "speaking-food",
@@ -2015,6 +2018,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Một ví dụ cụ thể (món ăn, buổi tối hôm qua) tốt hơn ba câu chung chung.",
       "Không cần nói dài; nói hết ý rồi dừng, tránh lặp lại câu hỏi.",
     ],
+    sample: `During the week I eat fairly simply: rice and vegetables at home most evenings, and something from the office canteen at lunch. I do enjoy cooking, but only when I am not tired, so in practice I cook properly two or three times a week and eat out the rest.\n\nMy food has changed in the last few years. I used to buy something on the way to work every morning, and now I usually eat at home, partly to save money and partly because I sleep badly when I eat late.\n\nOn sleep, I get about six and a half hours, which I know is not enough. What helps me relax is a short walk after dinner, without my phone. I do not think most people in my city have enough time to rest — the traffic alone takes an hour out of the day, and that hour has to come from somewhere.`,
   },
   {
     id: "speaking-course",
@@ -2032,6 +2036,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Gắn lý do với điều kiện của đề: đi làm toàn thời gian, một giờ mỗi ngày, sáu tháng.",
       "Nói cả điểm yếu của hai phương án còn lại, không chỉ khen phương án mình chọn.",
     ],
+    sample: `I would recommend the evening class twice a week. With six months and a full-time job, the most important thing is a schedule someone else keeps for them. A class at a fixed time is much harder to skip than an app, and it gives them people to speak with, which is the part they cannot practise alone.\n\nStudying alone with an app is the cheapest option and I would keep it as support — twenty minutes on the days without class. But used on its own, an app tends to become reading and tapping rather than speaking, and after six months they would still be nervous in a real conversation.\n\nA weekly tutor is probably the most effective hour of the three, but one hour a week is not much contact, and it is the most expensive. If their budget allowed only one, I would say the class; if it allowed two, class plus a tutor once a month to check their writing.\n\nSo: evening class as the backbone, app for the gaps, tutor if money allows.`,
   },
   {
     id: "speaking-commute",
@@ -2049,6 +2054,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Thừa nhận một nhược điểm của lựa chọn của mình rồi giải thích vì sao vẫn chọn.",
       "Kết lại bằng một câu tóm tắt lựa chọn.",
     ],
+    sample: `I would share a car with the two colleagues. Eight kilometres in the morning rush is not a long distance, but it is a slow one, and sharing means the cost of fuel and parking is divided by three. It is also the safest of the three in heavy traffic and in rain.\n\nThe motorbike would be faster on most days, and I would keep it for days when I need to leave early or stop somewhere. But riding in traffic every morning is tiring, and over a year that tiredness costs something too.\n\nThe bus is the cheapest option, and if it went directly I would take it. The problem is the connection: eight kilometres usually means one change, and a change in the rush hour can easily add twenty minutes I cannot predict.\n\nThe obvious weakness of car sharing is that I depend on other people's times. I would agree one fixed departure time and accept that if I am late, I take the bus that day.`,
   },
   {
     id: "speaking-technology",
@@ -2066,6 +2072,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Ý “của riêng mình” là chỗ ghi điểm — chuẩn bị sẵn một ý ngoài gợi ý.",
       "Câu hỏi mở rộng cần trả lời trực tiếp, không quay lại đọc dàn ý.",
     ],
+    sample: `Technology has changed work in ways that are easy to see and in ways that are not. The obvious one is flexibility: many people can now do part of their job from anywhere, at a time that suits them. That helps parents and people with long journeys especially.\n\nCommunication has changed more than people admit. Messages are faster, but decisions are now spread across chats where nobody can find them later. In my own work, the thing I miss is not the meeting — it is knowing who decided what.\n\nNew skills are needed too, although not the ones people expect. Using a new system is usually easy; writing clearly so a colleague understands you without a call is much harder, and almost nobody is taught it.\n\nHas it made work less stressful? Both. The work itself is lighter, but it follows you home, so the boundary is gone unless the company draws one.\n\nI do think companies should train older employees properly rather than assuming they will pick it up. And in twenty years, the work that still needs people will be the work that needs judgement and trust — deciding, persuading, caring for someone — rather than the work that needs speed.`,
   },
   {
     id: "speaking-waste",
@@ -2083,6 +2090,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Một ví dụ từ khu mình sống đáng giá hơn một câu khẩu hiệu.",
       "Nếu bí ý, nói về khó khăn thực tế — đó cũng là mở rộng chủ đề.",
     ],
+    sample: `Reducing household waste has to start with what is easy at home. In my building, separating waste takes about ten seconds a day once there are two bins instead of one — the difficulty is not effort, it is having somewhere to put it.\n\nShops matter more than households, honestly. Most of what I throw away is packaging I did not choose: three layers around one small object. If shops sold more things loose, the amount of waste would fall without anyone changing their habits.\n\nLocal authorities can do the part neither of us can: collect the separated waste separately. People stop sorting the moment they see everything going into the same truck, and I think that is a reasonable reaction.\n\nWhy do people find recycling difficult? Mostly because the rules are unclear and change from place to place. Nobody wants to be told they did it wrong.\n\nShould shops be required to reduce plastic? Required, yes, but with time to change and with the alternative available first. And schools help most when children take something home — a bin they made, a week of counting waste — because then the habit walks into the house by itself.`,
   },
   {
     id: "speaking-topic",
@@ -2100,6 +2108,7 @@ const lessonDefinitions: Omit<Lesson, "version">[] = [
       "Dùng “For instance”, “Another benefit”, “As a result” đúng ngữ cảnh.",
       "Dành thời gian cho câu hỏi mở rộng, tránh chỉ đọc lại các gợi ý.",
     ],
+    sample: `Regular physical activity helps in three ways that are quite different from each other. The clearest is physical health: moving every day keeps weight, blood pressure and sleep in better shape, and the effect does not need anything dramatic — a walk counts.\n\nThe second is mental. I notice this myself: after twenty minutes of walking my thinking is slower in a good way, and problems look smaller than they did in the office. For a lot of people that is the reason they keep going, not the health benefit.\n\nThe third is social. Exercise that involves other people — badminton, a running group, even a walking friend — gives you a reason to see someone regularly, and that is harder to arrange as we get older.\n\nWhy do people find it difficult? Usually time and distance rather than laziness. If the nearest safe place to walk is fifteen minutes away by motorbike, the activity costs an hour, not twenty minutes.\n\nI do think employers should help, though not by giving out fitness trackers. Finishing on time is the most useful thing a company can do. And cities can help most by making ordinary places walkable: lit pavements, a park that is open in the evening, a pool that is not expensive.`,
   },
 ];
 export const lessons: Lesson[] = lessonDefinitions.map((lesson) => ({

@@ -825,13 +825,18 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               </ul>
               {lesson.sample && (
                 <details>
-                  <summary>Đọc bài mẫu và đối chiếu từng tiêu chí</summary>
+                  <summary>
+                    {lesson.skill === "speaking"
+                      ? "Xem một câu trả lời mẫu và đối chiếu từng tiêu chí"
+                      : "Đọc bài mẫu và đối chiếu từng tiêu chí"}
+                  </summary>
                   <div className="passage" lang="en">
                     {lesson.sample}
                   </div>
                   <p className="help-copy">
-                    Bài mẫu tự biên soạn để đối chiếu cách triển khai, không
-                    phải đáp án duy nhất hay bài được giám khảo chứng nhận.
+                    {lesson.skill === "speaking"
+                      ? "Câu trả lời mẫu tự biên soạn, viết theo lối nói chứ không phải văn viết. Đây là một cách trả lời để đối chiếu, không phải đáp án duy nhất hay bài được giám khảo chứng nhận."
+                      : "Bài mẫu tự biên soạn để đối chiếu cách triển khai, không phải đáp án duy nhất hay bài được giám khảo chứng nhận."}
                   </p>
                 </details>
               )}

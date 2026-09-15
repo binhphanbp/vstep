@@ -586,6 +586,12 @@ test("recording uses a real MediaRecorder and survives reload", async ({
   await expect(
     page.getByRole("link", { name: "Tải bản ghi", exact: true }),
   ).toBeVisible();
+  // A speaking prompt now carries an answer to compare against, labelled for
+  // what it is: something written to sound spoken, not a certified answer.
+  await page
+    .getByText("Xem một câu trả lời mẫu và đối chiếu từng tiêu chí")
+    .click();
+  await expect(page.getByText("viết theo lối nói")).toBeVisible();
   await rateSelfCheck(page);
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(

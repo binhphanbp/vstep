@@ -745,8 +745,17 @@ describe("content and backup integrity", () => {
     }
   });
   it("writing examples meet their stated minimum word counts", () => {
-    for (const l of lessons.filter((l) => l.sample))
+    for (const l of lessons.filter((l) => l.sample && l.minWords))
       expect(wordCount(l.sample!), l.id).toBeGreaterThanOrEqual(l.minWords!);
+  });
+  it("gives every speaking prompt an answer to compare against", () => {
+    // Writing has had a sample since the start; speaking had none, which is
+    // the harder half to self-study precisely because nothing shows what a
+    // finished answer sounds like.
+    for (const lesson of lessons.filter((item) => item.skill === "speaking")) {
+      expect(lesson.sample, lesson.id).toBeTruthy();
+      expect(wordCount(lesson.sample!), lesson.id).toBeGreaterThanOrEqual(120);
+    }
   });
   it("accepts a valid export and rejects incompatible versions and invalid answers", () => {
     expect(stateSchema.safeParse(freshState()).success).toBe(true);

@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 159 unit / 56 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 160 unit / 56 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -253,9 +253,16 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Sửa theo hướng trình bày, không đụng vào thuật toán:** trang hiện 10 thẻ đầu theo đúng thứ tự ưu tiên cũ (câu sai dù đã chọn "Rất chắc" lên trước, rồi tới câu sai nhiều lần nhất), nói rõ đang hiện bao nhiêu trên tổng bao nhiêu và vì sao xếp thứ tự như vậy, kèm nút xem thêm từng 10 thẻ. Lịch ôn, thứ tự và số thẻ đến hạn **không đổi** — chỉ khác ở chỗ không đổ hết ra màn hình một lúc.
 - 1 ca E2E mới dựng đúng tình huống đó: 75 câu cần sửa, trang hiện 10 khối, bấm "Xem thêm" thì thành 20.
 
+## Phần Nói cũng có câu trả lời mẫu để đối chiếu
+
+- **Chỗ lệch:** mỗi đề Viết đều có bài mẫu từ đầu, còn 9 đề Nói thì **không có gì**. Đó lại là nửa khó tự học nhất, đúng vì không ai nghe được một câu trả lời hoàn chỉnh trông ra sao.
+- **Đã viết 9 câu trả lời mẫu** — 153–177 từ cho phần 1 và 2, 195–209 từ cho phần 3 — viết theo **lối nói**: có ngập ngừng, có thừa nhận ("honestly, no"), có chỗ tự sửa, chứ không phải văn viết đọc to. Mỗi mẫu bám đúng việc đề yêu cầu: phần 2 chọn một phương án rồi nói cả điểm yếu của hai phương án còn lại; phần 3 mở rộng đủ các nhánh gợi ý rồi trả lời các câu hỏi phụ.
+- **Nhãn đúng bản chất.** Khối mẫu của phần Nói ghi rõ: tự biên soạn, viết theo lối nói, là _một_ cách trả lời để đối chiếu — không phải đáp án duy nhất hay bài được giám khảo chứng nhận. Cùng chỗ với bộ tiêu chí tự kiểm tra, nên đọc mẫu là để soi từng tiêu chí chứ không phải để chép.
+- 1 ca unit mới khoá lại: mọi đề Nói phải có mẫu và mẫu phải dài ít nhất 120 từ (ca cũ về số từ tối thiểu của bài Viết được tách riêng, vì đề Nói không có `minWords`). Ca E2E ghi âm mở luôn khối mẫu và kiểm nhãn "viết theo lối nói".
+
 ## Bằng chứng kiểm tra
 
-- 159 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 160 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 56 kiểm thử Playwright trên bản production: 52 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
