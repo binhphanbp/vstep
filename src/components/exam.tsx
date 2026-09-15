@@ -11,6 +11,7 @@ import {
 import { useStudy } from "./study-provider";
 import {
   advanceExam,
+  examMinutes,
   getExamStages,
   nextStep,
   wordCount,
@@ -174,7 +175,7 @@ export function ExamPage() {
                 onClick={() => setMode("mini")}
                 aria-pressed={!full}
               >
-                Rút gọn · 51 phút
+                Rút gọn · {examMinutes("mini")} phút
               </button>
               <button
                 type="button"
@@ -182,7 +183,7 @@ export function ExamPage() {
                 onClick={() => setMode("full")}
                 aria-pressed={full && !paper2}
               >
-                Đề 01 · 172 phút
+                Đề 01 · {examMinutes("full")} phút
               </button>
               <button
                 type="button"
@@ -190,7 +191,7 @@ export function ExamPage() {
                 onClick={() => setMode("full2")}
                 aria-pressed={paper2}
               >
-                Đề 02 · 172 phút
+                Đề 02 · {examMinutes("full2")} phút
               </button>
             </div>
             <span className="pill">
@@ -198,7 +199,7 @@ export function ExamPage() {
                 ? "Đề tự biên soạn số 02 · Đủ cấu trúc"
                 : full
                   ? "Đề tự biên soạn số 01 · Đủ cấu trúc"
-                  : "Mô phỏng rút gọn · 51 phút"}
+                  : `Mô phỏng rút gọn · ${examMinutes("mini")} phút`}
             </span>
             <h2 style={{ fontSize: 26, margin: "17px 0" }}>
               Một vòng luyện, đủ bốn kỹ năng.
@@ -273,7 +274,7 @@ export function ExamPage() {
               // deadline is anchored to the real time of the tap.
               onClick={() => start(Date.now())}
             >
-              Bắt đầu {full ? 172 : 51} phút của mình
+              Bắt đầu {examMinutes(sitting)} phút của mình
               <ArrowRight size={16} />
             </button>
           </section>

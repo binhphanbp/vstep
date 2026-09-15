@@ -1171,6 +1171,56 @@ const LONG_SESSION_REST_DAYS = 14;
  * measure progress against something she has not already seen. This says it,
  * once, from counts rather than encouragement.
  */
+/**
+ * What to do with the minutes the plan could not fill.
+ *
+ * The library holds at most two lessons per skill a day - about 88 minutes -
+ * so a learner who sets aside two hours has time the plan genuinely cannot
+ * spend on new material. `spare` recorded that and nothing showed it: the day
+ * looked planned while half the budget went unmentioned. This says the number
+ * out loud and names one thing that actually fits, taken from her own data.
+ * It returns null rather than inventing filler, which is the point: silence is
+ * correct when there is nothing real left to do.
+ */
+export function spareStep(
+  state: StudyState,
+  now = new Date(),
+): (BigStep & { minutes: number }) | null {
+  const plan = todayPlan(state, now);
+  if (plan.spare < SPARE_WORTH_SAYING) return null;
+  const minutes = plan.spare;
+  const say = (text: string, href: string, label: string) => ({
+    text: `Còn ${minutes} phút trong nhịp học hôm nay. ${text}`,
+    href,
+    label,
+    minutes,
+  });
+  // A timed session is the only thing that uses a long stretch as one piece.
+  if (minutes >= MINI_EXAM_MINUTES)
+    return say(
+      `Đủ cho một buổi thi thử rút gọn ${MINI_EXAM_MINUTES} phút — luyện nhịp làm bài chứ không phải học bài mới.`,
+      "/exam",
+      "Vào phòng thi",
+    );
+  const due = mistakes(state, now).filter((item) => item.due).length;
+  if (due)
+    return say(
+      `Sổ tay đang có ${due} câu đến lịch ôn.`,
+      "/mistakes",
+      "Mở sổ tay",
+    );
+  const words = openVocabulary(state).filter((word) => {
+    const review = state.reviews[word.id];
+    return !review || Date.parse(review.due) <= now.getTime();
+  }).length;
+  if (words)
+    return say(
+      `Vườn từ vựng có ${words} thẻ đến lịch ôn.`,
+      "/vocabulary",
+      "Ôn từ vựng",
+    );
+  return null;
+}
 export type BigStep = { text: string; href: string; label: string };
 export function whatsNext(state: StudyState): BigStep | null {
   const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
@@ -1199,8 +1249,19 @@ export function whatsNext(state: StudyState): BigStep | null {
 export const REPEAT_DAY_PENALTY = 80;
 /** Minutes that must be left over before the plan offers a further lesson. */
 export const PLAN_EXTRA_MINUTES = 12;
-/** Lessons a single day is allowed to hold, however large the budget. */
-export const PLAN_MAX_LESSONS = 6;
+/**
+ * Lessons a single day is allowed to hold, however large the budget.
+ *
+ * Was six, which sounded generous and was not: the plan may take at most two
+ * lessons per skill, so six made that limit unreachable and capped the day at
+ * 58 minutes of material. Measured on a learner ten days in: a 90-minute
+ * budget wasted 32 of those minutes (36%) and gave Reading - the skill this
+ * app prioritises - a single lesson. At eight the two-per-skill rule is what
+ * binds, and 90 minutes wastes 2.
+ */
+export const PLAN_MAX_LESSONS = 8;
+/** Below this, the leftover is rounding, not an evening. */
+export const SPARE_WORTH_SAYING = 15;
 export function todayPlan(state: StudyState, now = new Date()) {
   const today = localDay(now);
   // Keep today's plan stable while completed lessons gain checkmarks.
@@ -1690,6 +1751,22 @@ export function getExamStages(mode?: "mini" | "full" | "full2") {
   if (mode === "full2") return fullExam2Stages;
   return examStages;
 }
+/**
+ * How long a sitting runs, added up from its own stages.
+ *
+ * The exam room printed "51 phút" and "172 phút" as literals in three places.
+ * Those are sums of the stage plans right above, so changing one stage by a
+ * minute would have left the interface quietly promising the old figure - the
+ * same drift that put a wrong test count on a report cover for three
+ * releases. Now there is one source and the labels follow it.
+ */
+export function examMinutes(mode?: "mini" | "full" | "full2") {
+  return Math.round(
+    getExamStages(mode).reduce((sum, stage) => sum + stage.seconds, 0) / 60,
+  );
+}
+/** The short sitting, for the places that offer it by length. */
+export const MINI_EXAM_MINUTES = examMinutes("mini");
 
 /** Absolute deadlines survive reload, sleep, background tabs, and app crashes. */
 export function advanceExam(

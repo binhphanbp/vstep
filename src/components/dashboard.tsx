@@ -18,6 +18,7 @@ import {
 import { useStudy } from "./study-provider";
 import {
   todayPlan,
+  spareStep,
   whatsNext,
   localDay,
   skillStats,
@@ -37,6 +38,8 @@ export function Dashboard() {
   // Only once there is nothing new left in the library; null the rest of the
   // time, so it never nags.
   const big = whatsNext(state);
+  // The minutes the plan could not fill: said out loud, or not at all.
+  const spare = spareStep(state);
   const today = localDay(new Date(now));
   const todayAttempts = state.attempts.filter(
     (a) => localDay(a.date) === today,
@@ -321,6 +324,15 @@ export function Dashboard() {
                 );
               })}
             </div>
+            {spare ? (
+              <p className="next-step">
+                <strong>Thời gian còn lại:</strong> {spare.text}{" "}
+                <Link className="text-link" href={spare.href}>
+                  {spare.label}
+                  <ArrowRight size={15} />
+                </Link>
+              </p>
+            ) : null}
             {big ? (
               <p className="next-step">
                 <strong>Bước lớn tiếp theo:</strong> {big.text}{" "}

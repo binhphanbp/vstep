@@ -6,7 +6,7 @@ Một người học tại TP.HCM, cần một chứng chỉ nhưng cũng cần 
 
 | Nỗi đau                      | Cách giải quyết đã triển khai                                                                                   | Nguyên tắc đo lường                                                         |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Không biết hôm nay học gì    | Chọn tối đa 6 bài vừa quỹ thời gian; ưu tiên kỹ năng, sở thích, bài chưa học và kết quả các ngày trước          | Kế hoạch giữ ổn định trong ngày; bài hoàn thành có dấu kiểm                 |
+| Không biết hôm nay học gì    | Chọn tối đa 8 bài vừa quỹ thời gian; ưu tiên kỹ năng, sở thích, bài chưa học và kết quả các ngày trước          | Kế hoạch giữ ổn định trong ngày; bài hoàn thành có dấu kiểm                 |
 | Áp lực, học đứt nhịp         | Chọn mức năng lượng; ngày mệt giảm ngân sách xuống tối đa 15 phút                                               | Chuỗi ngày không phạt trước khi ngày hiện tại kết thúc, theo giờ Việt Nam   |
 | Làm nhiều mà lặp lỗi         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai vào sổ tay, làm lại trước khi xem giải thích, xếp lịch ôn   | Ưu tiên lỗi sai dù rất chắc; chỉ ra câu đúng nhưng còn phân vân             |
 | Học từ rồi quên              | 68 thẻ có phiên âm, nghĩa, ví dụ, giọng đọc; lịch ôn theo mức nhớ                                               | Chưa nhớ: 10 phút; khó: một ngày; nhớ: tăng khoảng cách; đây là tự đánh giá |
