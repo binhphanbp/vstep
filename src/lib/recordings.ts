@@ -91,3 +91,76 @@ export async function deleteRecording(id: string) {
     database.close();
   }
 }
+
+/** Days after which a take is offered for deletion by the Settings panel. */
+export const OLD_RECORDING_DAYS = 30;
+/** What the recordings on this device add up to. */
+export type RecordingUsage = { count: number; bytes: number; oldest: number };
+/**
+ * How much room the takes occupy.
+ *
+ * Nothing in the app could answer this before: recordings live only on the
+ * device, they are the largest thing the app writes, and the only way to
+ * remove one was to find its session in the history. A learner who records
+ * every day deserves to see the number and to clear the old ones in one go.
+ */
+export async function recordingUsage(): Promise<RecordingUsage> {
+  const database = await db();
+  try {
+    return await new Promise<RecordingUsage>((resolve, reject) => {
+      const usage: RecordingUsage = { count: 0, bytes: 0, oldest: 0 };
+      const req = database
+        .transaction("recordings")
+        .objectStore("recordings")
+        .openCursor();
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) return resolve(usage);
+        const stored = cursor.value as StoredRecording | Blob;
+        const blob = stored instanceof Blob ? stored : stored.blob;
+        const savedAt = stored instanceof Blob ? 0 : stored.savedAt;
+        usage.count += 1;
+        usage.bytes += blob?.size ?? 0;
+        if (!usage.oldest || (savedAt && savedAt < usage.oldest))
+          usage.oldest = savedAt;
+        cursor.continue();
+      };
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    database.close();
+  }
+}
+/**
+ * Removes every take captured before `cutoff` and says how many went. Takes
+ * stored before recordings carried a timestamp count as old, which is the
+ * same reading `getRecording` gives them.
+ */
+export async function deleteRecordingsBefore(cutoff: number): Promise<number> {
+  const database = await db();
+  try {
+    return await new Promise<number>((resolve, reject) => {
+      let removed = 0;
+      const tx = database.transaction("recordings", "readwrite");
+      const req = tx.objectStore("recordings").openCursor();
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) return;
+        const stored = cursor.value as StoredRecording | Blob;
+        const savedAt = stored instanceof Blob ? 0 : stored.savedAt;
+        if (savedAt < cutoff) {
+          cursor.delete();
+          removed += 1;
+        }
+        cursor.continue();
+      };
+      req.onerror = () => reject(req.error);
+      tx.oncomplete = () => resolve(removed);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () =>
+        reject(tx.error ?? new Error("Giao dịch xóa bản ghi đã bị hủy."));
+    });
+  } finally {
+    database.close();
+  }
+}

@@ -158,3 +158,18 @@ export function replaceStudy(input: unknown) {
   snapshot = { state, ready: true, storageError: "" };
   emit();
 }
+
+/** Bytes as something a person reads, rounded the way a file manager rounds. */
+export function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+/** How many bytes the study data itself takes in this browser. */
+export function studyDataBytes() {
+  try {
+    return new Blob([localStorage.getItem(KEY) ?? ""]).size;
+  } catch {
+    return 0;
+  }
+}
