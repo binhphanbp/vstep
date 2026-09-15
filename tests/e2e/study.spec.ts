@@ -919,3 +919,58 @@ test("a bad paper does not turn the notebook into a wall", async ({ page }) => {
   await page.getByRole("button", { name: /Xem thêm 10 câu/ }).click();
   await expect(cards).toHaveCount(20);
 });
+
+test("a bug report can leave the phone in one tap, carrying no writing", async ({
+  page,
+}) => {
+  // A phone has a share sheet; this stub records what the page would hand it.
+  await page.addInitScript(() => {
+    const shared: string[] = [];
+    (window as unknown as { __shared: string[] }).__shared = shared;
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: (data: { text: string }) => {
+        shared.push(data.text);
+        return Promise.resolve();
+      },
+    });
+  });
+  await page.goto("/practice/writing-email");
+  await page
+    .getByRole("textbox")
+    .first()
+    .fill("Dear Alex, I am writing about the delayed order.");
+  await page.goto("/settings");
+  await page.getByRole("button", { name: "Gửi báo lỗi" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã mở chỗ gửi báo lỗi");
+  const text = await page.evaluate(
+    () => (window as unknown as { __shared: string[] }).__shared[0],
+  );
+  expect(text).toContain("Mây — báo lỗi");
+  expect(text).toContain("Trang: /settings");
+  expect(text).toContain("1 bài nháp");
+  expect(text).not.toContain("Dear Alex");
+});
+
+test("the question bank can be printed for a teacher, keys and all", async ({
+  page,
+}) => {
+  await page.goto("/settings");
+  await page.getByRole("link", { name: "Mở gói duyệt học liệu" }).click();
+  await page.waitForURL("**/review-pack/bank");
+  await page.getByRole("link", { name: /Thư viện Đọc/ }).click();
+  await page.waitForURL("**/review-pack/bank/reading");
+  const sheet = page.locator(".review-pack");
+  // What the reviewer is told before anything else: nobody has checked this.
+  await expect(sheet).toContainText("chưa qua giáo viên nào");
+  await expect(sheet).toContainText("chưa có người duyệt");
+  const cafe = question("rc1");
+  await expect(sheet).toContainText(cafe.text);
+  // The key is marked, so a wrong answer in the bank is visible on paper.
+  await expect(
+    sheet.locator("li", { hasText: cafe.options[cafe.answer] }).first(),
+  ).toContainText("✔");
+  await expect(sheet.locator(".pack-table").first()).toContainText(
+    "Đáp án đúng chưa",
+  );
+});

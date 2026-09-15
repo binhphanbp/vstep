@@ -3070,6 +3070,42 @@ details .passage {
 .pack-table td {
   height: 72px;
 }
+/* The material-review pack: long documents a teacher reads on paper, so the
+   lists stay plain and each lesson can start on its own sheet. */
+.plain-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #6b636d;
+}
+.bank-questions {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 18px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.bank-questions .plain-list {
+  margin-top: 4px;
+}
+.bank-sheet {
+  break-inside: auto;
+}
+.bank-sheet + .bank-sheet {
+  break-before: page;
+}
+.bank-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 /* The pack is meant to leave the screen on paper: everything that is only
    useful on a device is dropped, and the sheet gets the whole page. */
 @media print {

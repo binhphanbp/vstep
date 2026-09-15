@@ -115,3 +115,77 @@ export function buildErrorReport(state: StudyState, storageError: string) {
     errors: recentErrors(),
   };
 }
+
+export type ErrorReport = ReturnType<typeof buildErrorReport>;
+
+function shortTime(iso: string) {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return iso;
+  return at.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * The same facts as the JSON file, written so they can be pasted into a chat.
+ *
+ * On a phone a downloaded JSON is several taps away from actually reaching the
+ * person who can fix the problem, and the file picker in a messaging app does
+ * not always find it. Plain text can be shared or pasted in one tap, and it
+ * carries exactly what `buildErrorReport` allows: never her writing, her
+ * recordings or anything typed into a field.
+ */
+export function errorReportText(report: ErrorReport) {
+  const lines = [
+    `Mây — báo lỗi ${shortTime(report.at)}`,
+    `Trang: ${report.page || "(không rõ)"}`,
+    `Máy: ${report.userAgent || "(không rõ)"}`,
+    `Màn hình: ${report.screen || "(không rõ)"} — ngôn ngữ ${report.language || "(không rõ)"}`,
+    `Dữ liệu: ${report.counts.attempts} lượt học, ${report.counts.reviews} bài ôn, ${report.counts.mistakeReviews} câu sai đang ôn, ${report.counts.drafts} bài nháp, ${report.counts.savedWords} từ đã lưu${report.counts.examOpen ? ", đang mở một đề" : ""}`,
+    `Lưu trữ: ${report.storageError ? report.storageError : "không báo lỗi"}`,
+  ];
+  if (report.errors.length) {
+    lines.push(`Lỗi gần nhất (${report.errors.length}):`);
+    report.errors.forEach((item, index) =>
+      lines.push(
+        `${index + 1}. ${shortTime(item.at)} — ${item.message} [${item.source}]`,
+      ),
+    );
+  } else {
+    lines.push("Lỗi gần nhất: không có lỗi nào được ghi lại.");
+  }
+  lines.push(
+    "(Bản mô tả này không chứa bài viết, bản ghi âm hay nội dung đã gõ.)",
+  );
+  return lines.join("\n");
+}
+
+export type ReportDelivery = "share" | "copy" | "none";
+
+/**
+ * Hands the report to whatever the device offers, best first.
+ *
+ * A phone has a share sheet, so the report can go straight into a chat; a
+ * laptop usually has only the clipboard. Either way the text never leaves the
+ * device on its own: the learner chooses where it goes.
+ */
+export async function sendErrorReport(text: string): Promise<ReportDelivery> {
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function")
+    try {
+      await navigator.share({ title: "Mây — báo lỗi", text });
+      return "share";
+    } catch {
+      // Cancelled or refused by the browser: the clipboard still works.
+    }
+  if (typeof navigator !== "undefined" && navigator.clipboard)
+    try {
+      await navigator.clipboard.writeText(text);
+      return "copy";
+    } catch {
+      // Clipboard permission denied: the JSON download is still there.
+    }
+  return "none";
+}
