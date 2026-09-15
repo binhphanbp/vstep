@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 145 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 146 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -204,9 +204,16 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Và một khoá để không lệch lần thứ tư.** `tests/unit/documents.test.ts` đọc HANDOVER, STATUS, QUALITY và PRODUCTION-ROADMAP rồi đối chiếu từng con số hiện hành với mã nguồn: số unit đếm từ `tests/unit`, số E2E đếm từ `tests/e2e` (có nhân ba cho spec chạy trên cả ba engine), số route, tổng số câu hỏi, số câu đã có chú giải và số bài trong thư viện. Sửa một con số mà quên chỗ khác thì CI đỏ ngay.
 - 9 ca unit và 1 ca E2E mới: thẻ trích nguyên văn, thẻ chờ đúng bài của nó, kích thước bộ thẻ, và ba nhóm đối chiếu tài liệu.
 
+## Đợt 4 của kế hoạch tiếp theo: chú giải bằng chứng phủ hết ngân hàng câu hỏi
+
+- **Chỗ hổng.** Vòng chữa bài chỉ chạy được khi câu hỏi có trích dẫn bằng chứng và ghi chú từng phương án. Thư viện đã đủ, nhưng **82 câu của hai đề đầy đủ** thì chưa — trong đó có toàn bộ 70 câu Nghe, nên sai một câu Nghe trong phòng thi thì Sổ lỗi không phát lại được đúng câu bằng chứng.
+- **Đã viết chú giải cho cả 82 câu**, chia ba lô, mỗi lô một commit: 35 câu Nghe đề 01, 35 câu Nghe đề 02, 12 câu Đọc còn thiếu của đề 01. Mỗi câu có một trích dẫn **nguyên văn** từ transcript hoặc ngữ liệu, cùng bốn ghi chú giải thích từng phương án.
+- **Một chỗ chứa cho phần Nghe.** Đề 02 vốn viết chú giải ngay cạnh ngữ liệu; helper `ask()` nay đọc thêm từ `question-notes.ts`, nên toàn bộ chú giải phần Nghe của cả hai đề nằm cùng một chỗ với thư viện. Chú giải là lớp mô tả nội dung đã phát hành nên **không** tạo version mới — đúng quy ước cũ.
+- **Phủ 176 → 258/258 câu.** Kiểm thử sẵn có đối chiếu từng trích dẫn với transcript nên một trích dẫn sai chính tả là đỏ ngay; thêm một ca mới chặn mọi câu hỏi thiếu bằng chứng hoặc thiếu đủ bốn ghi chú, để mức phủ này không tụt lại.
+
 ## Bằng chứng kiểm tra
 
-- 145 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 146 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 54 kiểm thử Playwright trên bản production: 50 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

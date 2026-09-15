@@ -1,5 +1,6 @@
 import type { Lesson, Question } from "./content";
 import { withStableOptionOrder } from "./option-order";
+import { questionNotes } from "./question-notes";
 /**
  * The second full-length paper.
  *
@@ -26,12 +27,19 @@ type Item = {
   /** One note per option, in authored order, the key prefixed "Đúng:". */
   notes?: string[];
 };
-const ask = ({ notes, tag, ...item }: Item): Question =>
-  withStableOptionOrder({
+const ask = ({ notes, tag, ...item }: Item): Question => {
+  // Reading notes are written beside their passage in this file. The listening
+  // notes were written later and live with every other lesson's, in
+  // question-notes.ts, so a reviewer looking for a transcript quote finds all
+  // of them in one place.
+  const shared = questionNotes[item.id];
+  return withStableOptionOrder({
     ...item,
     tag: tag ?? "Thông tin chi tiết",
-    optionNotes: notes,
+    evidence: item.evidence ?? shared?.evidence,
+    optionNotes: notes ?? shared?.optionNotes,
   });
+};
 const listen = (
   id: string,
   title: string,

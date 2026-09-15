@@ -79,4 +79,16 @@ describe("evidence and distractor notes", () => {
     expect(first?.evidence).toBe(questionNotes.frc1.evidence);
     expect(first?.optionNotes).toHaveLength(4);
   });
+  it("leaves no objective question without evidence and four notes", () => {
+    // Coverage reached every question in the library and both papers; this
+    // keeps it there, so a new question cannot ship without the review loop
+    // that makes a wrong answer worth anything.
+    const bare = allLessons
+      .flatMap((lesson) => lesson.questions)
+      .filter(
+        (question) => !question.evidence || question.optionNotes?.length !== 4,
+      )
+      .map((question) => question.id);
+    expect(bare).toEqual([]);
+  });
 });
