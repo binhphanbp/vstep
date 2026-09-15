@@ -24,8 +24,9 @@ import {
   milestones,
   quickSession,
   QUICK_SESSION_MINUTES,
+  openVocabulary,
 } from "@/lib/learning";
-import { vocabulary, skillNames, type Skill } from "@/lib/content";
+import { skillNames, type Skill } from "@/lib/content";
 import { SkillIcon } from "./icons";
 import { useNow } from "@/lib/use-now";
 export function Dashboard() {
@@ -42,7 +43,8 @@ export function Dashboard() {
   const learnedMinutes = Math.round(
     todayAttempts.reduce((s, a) => s + a.seconds, 0) / 60,
   );
-  const due = vocabulary.filter(
+  const open = openVocabulary(state);
+  const due = open.filter(
     (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
   ).length;
   const week = Array.from({ length: 7 }, (_, i) => dayOffset(today, i - 6));
@@ -438,7 +440,7 @@ export function Dashboard() {
             </h2>
             <p>
               <strong>{due} từ</strong>{" "}
-              {due === vocabulary.length
+              {due === open.length
                 ? `sẵn sàng để ${state.profile.name} khám phá.`
                 : `đang chờ ${state.profile.name} ôn lại.`}
               <br />

@@ -26,6 +26,7 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  openVocabulary,
   examSittings,
   compareSittings,
   PLAN_EXTRA_MINUTES,
@@ -1257,5 +1258,49 @@ describe("the Writing and Speaking bank", () => {
       }
     }
     expect(firstRepeat).toBe(0);
+  });
+});
+
+describe("the vocabulary garden grows out of the lessons", () => {
+  const sourced = vocabulary.filter((word) => word.source);
+  it("holds enough cards, most of them from the lessons themselves", () => {
+    expect(vocabulary.length).toBeGreaterThanOrEqual(60);
+    expect(vocabulary.length).toBeLessThanOrEqual(80);
+    expect(sourced.length).toBeGreaterThanOrEqual(40);
+  });
+  it("quotes the sentence she actually met, word for word", () => {
+    for (const word of sourced) {
+      const lesson = lessons.find((item) => item.id === word.source);
+      expect(lesson, word.id).toBeTruthy();
+      // The example must be a real sentence of the passage or transcript,
+      // not a sentence written to look like one.
+      expect(
+        lesson!.text.includes(word.example),
+        `${word.id}: ${word.example}`,
+      ).toBe(true);
+      expect(
+        word.example.toLowerCase().includes(word.word.toLowerCase()),
+        word.id,
+      ).toBe(true);
+      expect(word.ipa.startsWith("/"), word.id).toBe(true);
+      expect(word.meaning.length, word.id).toBeGreaterThan(2);
+    }
+  });
+  it("keeps a card out of the deck until its lesson has been worked", () => {
+    const state = freshState();
+    const open = openVocabulary(state);
+    expect(open.length).toBe(vocabulary.length - sourced.length);
+    const first = sourced[0];
+    state.attempts = [
+      attempt("2026-09-10T02:00:00Z", {
+        id: "met",
+        lessonId: first.source!,
+        skill: lessons.find((item) => item.id === first.source)!.skill,
+      }),
+    ];
+    const after = openVocabulary(state);
+    expect(after.some((word) => word.id === first.id)).toBe(true);
+    // Only that lesson's cards joined; the rest still wait.
+    expect(after.length).toBeLessThan(vocabulary.length);
   });
 });

@@ -691,3 +691,40 @@ test("two sittings of the timed room are compared, and honestly", async ({
   await expect(page.getByText("Nghe +20 điểm phần trăm")).toBeVisible();
   await expect(page.getByText("Đọc +10 điểm phần trăm")).toBeVisible();
 });
+
+test("a word card waits for the lesson it was taken from", async ({ page }) => {
+  const state = freshState();
+  await page.addInitScript((value) => {
+    if (!localStorage.getItem("may-study-v1"))
+      localStorage.setItem("may-study-v1", JSON.stringify(value));
+  }, state);
+  await page.goto("/vocabulary");
+  await page.getByRole("button", { name: "Tất cả từ vựng" }).click();
+  // "realised" is quoted from reading-cafe, which she has not read yet.
+  await expect(page.getByText("Còn 48 thẻ nữa đang chờ")).toBeVisible();
+  await expect(
+    page.locator(".vocab-list-item", { hasText: "realised" }),
+  ).toHaveCount(0);
+  state.attempts = [
+    {
+      id: "met-cafe",
+      lessonId: "reading-cafe",
+      skill: "reading" as const,
+      date: "2026-09-10T02:00:00.000Z",
+      answers: {},
+      correct: 5,
+      total: 5,
+      seconds: 600,
+    },
+  ];
+  await page.evaluate(
+    (value) => localStorage.setItem("may-study-v1", JSON.stringify(value)),
+    state,
+  );
+  await page.reload();
+  await page.getByRole("button", { name: "Tất cả từ vựng" }).click();
+  await expect(
+    page.locator(".vocab-list-item", { hasText: "realised" }),
+  ).toHaveCount(1);
+  await expect(page.getByText("Còn 46 thẻ nữa đang chờ")).toBeVisible();
+});

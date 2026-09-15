@@ -92,7 +92,7 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 
 **Xong khi.** Chú giải phủ **258/258 câu**; test hiện có tự bắt trích dẫn sai vì nó đối chiếu với transcript.
 
-### N5. Thẻ từ mọc ra từ chính bài đã học — M
+### N5. Thẻ từ mọc ra từ chính bài đã học — M — ĐÃ XONG (đợt 3)
 
 **Vì sao.** Bộ 20 thẻ không liên quan gì tới bài học; một người nhắm B2 cần nhiều hơn thế.
 
@@ -100,13 +100,17 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 
 **Xong khi.** Bộ thẻ tăng lên 60–80; mỗi thẻ truy được về một bài có thật và ví dụ khớp nguyên văn (có test); thẻ của bài chưa học không xuất hiện trong buổi ôn.
 
-### N6. Chặn tài liệu trôi khỏi sự thật — S
+**Đã làm.** 48 thẻ mới (`v21`–`v68`), hai thẻ cho mỗi bài trong 24 bài Đọc/Nghe, mỗi thẻ có `source` là mã bài và ví dụ là đúng một câu trong bài. `Vocabulary.source` là trường tuỳ chọn nên 20 thẻ cũ và mọi bản sao lưu cũ vẫn đọc được. `openVocabulary(state)` lọc theo tiến độ và được dùng ở trang Từ vựng, trang chính, buổi 10 phút và kế hoạch tuần. Bộ thẻ: 20 → **68**.
+
+### N6. Chặn tài liệu trôi khỏi sự thật — S — ĐÃ XONG (đợt 3)
 
 **Vì sao.** Đây là lần thứ ba tài liệu lệch: bìa báo cáo Word ghi 57 unit/40 E2E suốt ba release; hôm nay ba dòng trong `PRODUCTION-ROADMAP.md` vẫn nói app **chưa có** siêu dữ liệu biên tập (F06), **chưa có** offline (F10) và tài liệu đang dùng số 57/40 (F09) — cả ba đều đã làm xong.
 
 **Việc.** Cập nhật ba dòng đó cho đúng, và thêm một **test đọc tài liệu**: số bài, số câu, số route và số kiểm thử ghi trong `STATUS.md`/`QUALITY.md` phải khớp với con số đếm được từ mã nguồn. Sai lệch thì CI đỏ, không phải đợi người đọc phát hiện.
 
 **Xong khi.** Sửa một con số trong tài liệu mà quên nơi khác thì CI báo ngay.
+
+**Đã làm.** Ba dòng F06/F09/F10 được viết lại theo hiện trạng, và `tests/unit/documents.test.ts` đối chiếu số unit, số E2E, số route, tổng số câu hỏi, số câu đã có chú giải và số bài trong thư viện giữa bốn tài liệu với mã nguồn. Đã thử: đổi một con số trong tài liệu là test đỏ ngay.
 
 ---
 
@@ -116,7 +120,7 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 | --- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
 | 1   | **N1** so sánh hai lần thi · **N2** dùng đúng ngân sách — **đã xong** | Nhỏ, đóng nốt F07 và mở khoá giá trị của đề 02             |
 | 2   | **N3** ngân hàng Viết/Nói — **đã xong**                               | Nửa kỳ thi đang mỏng nhất                                  |
-| 3   | **N6** chặn tài liệu trôi · **N5** thẻ từ từ bài học                  | Một việc nhỏ có tính phòng ngừa, một việc vừa              |
+| 3   | **N6** chặn tài liệu trôi · **N5** thẻ từ từ bài học — **đã xong**    | Một việc nhỏ có tính phòng ngừa, một việc vừa              |
 | 4   | **N4** chú giải phần Nghe (nhiều lô)                                  | Khối lớn nhất, mang tính hoàn thiện chứ không mở tính năng |
 
 ---
