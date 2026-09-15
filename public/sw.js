@@ -48,18 +48,44 @@ const PRECACHE = [
 const WARM_LIMIT = 8;
 
 /**
- * Stores one address, ignoring a failure.
+ * Stores one address and the build assets its document names.
  *
  * `cache.addAll` rejects as a whole when any single request fails, which would
- * lose the essential pages over one 404. Each page is stored on its own.
+ * lose the essential pages over one 404, so each page is stored on its own.
+ *
+ * The assets matter as much as the document. A page whose document is cached
+ * but whose route chunk is not renders the app's error screen with the network
+ * off - measured on `/exam` in CI, where nothing had prefetched that chunk
+ * first. Each route boots from its own chunk, so the document is only half of
+ * what "this page works offline" needs.
  */
 async function store(cache, path) {
   try {
     const response = await fetch(path, { cache: "reload" });
-    if (response.ok) await cache.put(path, response);
-    return response.ok;
+    if (!response.ok) return false;
+    const type = response.headers.get("content-type") ?? "";
+    const html = type.includes("text/html")
+      ? await response.clone().text()
+      : "";
+    await cache.put(path, response);
+    if (html) await storeAssets(cache, html);
+    return true;
   } catch {
     return false;
+  }
+}
+
+/** Every `/_next/static/...` address a document names, stored once each. */
+async function storeAssets(cache, html) {
+  const found = new Set(html.match(/\/_next\/static\/[^"'\\\s>)]+/g) ?? []);
+  for (const asset of found) {
+    if (await cache.match(asset)) continue;
+    try {
+      const response = await fetch(asset);
+      if (response.ok) await cache.put(asset, response);
+    } catch {
+      // One missing asset must not stop the rest of the page being stored.
+    }
   }
 }
 

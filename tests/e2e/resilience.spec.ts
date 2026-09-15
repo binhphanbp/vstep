@@ -342,8 +342,14 @@ test("every page of the app opens with the network gone, not just the last one v
   // install instead of waiting for a first visit.
   await page.goto("/");
   await page.evaluate(() => navigator.serviceWorker.ready);
-  // The install stores the pages one at a time; give it a moment to finish.
-  await page.waitForTimeout(1500);
+  // The install stores each page and its build assets one at a time. Waiting
+  // for the last page of the list to land beats a fixed pause: a slow runner
+  // would otherwise be cut off mid-install and fail for the wrong reason.
+  await page.waitForFunction(
+    () => caches.match("/guide").then(Boolean),
+    undefined,
+    { timeout: 30000 },
+  );
   await context.setOffline(true);
   const pages: [string, string][] = [
     ["/practice", "Mỗi kỹ năng"],
@@ -359,6 +365,15 @@ test("every page of the app opens with the network gone, not just the last one v
     await page.goto(route);
     await expect(page.locator("main h1"), route).toContainText(heading);
   }
+  // The document alone is not enough: a page whose route chunk is missing
+  // renders the app's error screen instead. This is what CI caught.
+  const chunks = await page.evaluate(async () => {
+    const cache = await caches.open("may-v2-shell");
+    return (await cache.keys())
+      .map((request) => new URL(request.url).pathname)
+      .filter((path) => path.startsWith("/_next/static/chunks/")).length;
+  });
+  expect(chunks, "phải lưu cả chunk của từng trang").toBeGreaterThan(10);
   await context.setOffline(false);
 });
 
@@ -375,9 +390,14 @@ test("today's lessons are kept for the train, and they open with no network", as
     .first()
     .getAttribute("href");
   expect(planned, "kế hoạch hôm nay phải có ít nhất một bài").toBeTruthy();
-  // Warming happens after the worker takes over; it fetches one page per plan
-  // entry, so allow for that before cutting the network.
-  await page.waitForTimeout(2500);
+  // Warming happens after the worker takes over: one page per plan entry, plus
+  // the assets each one names. Wait for the first lesson to be in the cache
+  // rather than guessing how long that takes.
+  await page.waitForFunction(
+    (path) => caches.match(path).then(Boolean),
+    planned!,
+    { timeout: 30000 },
+  );
   await context.setOffline(true);
   await page.goto(planned!);
   await expect(page.locator("main h1")).not.toContainText("Mạng đang không ổn");
