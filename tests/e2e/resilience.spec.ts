@@ -326,16 +326,81 @@ test("the app still opens when the network is gone", async ({
   expect(
     await page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
   ).toBe(true);
-  // A route never opened before still lands inside the app rather than on the
-  // browser's error screen: the fallback document is served, and whether the
-  // router then reaches the real page depends on what is already cached, so
-  // both endings are correct and the test accepts either.
-  await page.goto("/review-pack");
-  await expect(page.locator("main h1")).toContainText(
-    /Gói gửi giáo viên|Mạng đang không ổn/,
-  );
   // The plain "no network" page is always reachable.
   await page.goto("/offline");
   await expect(page.locator("main h1")).toContainText("Mạng đang không ổn");
+  await context.setOffline(false);
+});
+
+test("every page of the app opens with the network gone, not just the last one visited", async ({
+  page,
+  context,
+}) => {
+  // Measured before this was fixed: with the network off, every address except
+  // "/" showed the offline page - including a lesson. A study app that travels
+  // has to survive a train tunnel, so the worker now stores each fixed page at
+  // install instead of waiting for a first visit.
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  // The install stores each page and its build assets one at a time. Waiting
+  // for the last page of the list to land beats a fixed pause: a slow runner
+  // would otherwise be cut off mid-install and fail for the wrong reason.
+  await page.waitForFunction(
+    () => caches.match("/guide").then(Boolean),
+    undefined,
+    { timeout: 30000 },
+  );
+  await context.setOffline(true);
+  const pages: [string, string][] = [
+    ["/practice", "Mỗi kỹ năng"],
+    ["/journey", "Đường đến B2"],
+    ["/exam", "Tập bình tĩnh"],
+    ["/vocabulary", "Gieo một từ"],
+    ["/mistakes", "Không phải lỗi"],
+    ["/progress", "Tiến bộ đôi khi"],
+    ["/settings", "Góc học"],
+    ["/guide", "Hiểu kỳ thi"],
+  ];
+  for (const [route, heading] of pages) {
+    await page.goto(route);
+    await expect(page.locator("main h1"), route).toContainText(heading);
+  }
+  // The document alone is not enough: a page whose route chunk is missing
+  // renders the app's error screen instead. This is what CI caught.
+  const chunks = await page.evaluate(async () => {
+    const cache = await caches.open("may-v2-shell");
+    return (await cache.keys())
+      .map((request) => new URL(request.url).pathname)
+      .filter((path) => path.startsWith("/_next/static/chunks/")).length;
+  });
+  expect(chunks, "phải lưu cả chunk của từng trang").toBeGreaterThan(10);
+  await context.setOffline(false);
+});
+
+test("today's lessons are kept for the train, and they open with no network", async ({
+  page,
+  context,
+}) => {
+  // The worker cannot know which lessons today asks for: the plan comes from
+  // her own data, so the app hands it the addresses once it has loaded.
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  const planned = await page
+    .locator(".plan-list a[href^='/practice/']")
+    .first()
+    .getAttribute("href");
+  expect(planned, "kế hoạch hôm nay phải có ít nhất một bài").toBeTruthy();
+  // Warming happens after the worker takes over: one page per plan entry, plus
+  // the assets each one names. Wait for the first lesson to be in the cache
+  // rather than guessing how long that takes.
+  await page.waitForFunction(
+    (path) => caches.match(path).then(Boolean),
+    planned!,
+    { timeout: 30000 },
+  );
+  await context.setOffline(true);
+  await page.goto(planned!);
+  await expect(page.locator("main h1")).not.toContainText("Mạng đang không ổn");
+  await expect(page.locator(".question").first()).toBeVisible();
   await context.setOffline(false);
 });
