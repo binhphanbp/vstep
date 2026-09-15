@@ -2021,4 +2021,121 @@ export const questionNotes: Record<string, QuestionNote> = {
       "Không có yêu cầu lặp lại ba lần.",
     ],
   },
+  frc6: {
+    evidence: "She deliberately avoided collecting names or contact details",
+    optionNotes: [
+      "Phiếu hỏi cố ý không thu số điện thoại.",
+      "Đúng: lấy phản hồi mà không gắn với danh tính người trả lời.",
+      "Không có trang web mới nào được quảng bá.",
+      "Ẩn danh thì không thể nhận ra ai tới thường xuyên.",
+    ],
+  },
+  frc7: {
+    evidence:
+      "Linh simplified it so that a customer needed only to select a date and a time",
+    optionNotes: [
+      "Không có yêu cầu trả tiền trước.",
+      "Không ai buộc phải đặt qua điện thoại.",
+      "Đúng: thao tác đặt chỗ trên điện thoại được rút gọn.",
+      "Chỗ ngồi vẫn đặt được trực tuyến.",
+    ],
+  },
+  frc8: {
+    evidence: "visitors could extend their booking if nobody else was waiting",
+    optionNotes: [
+      "Đúng: gia hạn được khi không có ai đang chờ.",
+      "Không có điều kiện nào về số ly nước.",
+      "Không giới hạn vào một buổi tối cố định nào.",
+      "Ngược lại: hết chỗ thì không gia hạn.",
+    ],
+  },
+  frc10: {
+    evidence:
+      "Their value came from responding to ordinary problems consistently",
+    optionNotes: [
+      "Kế hoạch của Linh liên tục thay đổi theo phản hồi.",
+      "Đúng: những điều chỉnh nhỏ, làm đều, dựa trên phản hồi.",
+      "Quán vẫn giữ hai chỗ cho khách vãng lai, không chỉ phục vụ sinh viên.",
+      "Không có chi tiết nào về mở thêm chi nhánh.",
+    ],
+  },
+  frt8: {
+    evidence:
+      "Consulting only existing users can consequently produce an incomplete picture of the barriers that keep others away",
+    optionNotes: [
+      "Bài đọc không nói hành khách hiện tại trả lời thiếu trung thực.",
+      "Chủ cửa hàng được nhắc ở đoạn khác, không phải trong khảo sát này.",
+      "Đúng: khảo sát bỏ sót rào cản của những người chưa dùng dịch vụ.",
+      "Giá vé không phải điều bài đọc bàn ở đây.",
+    ],
+  },
+  frt9: {
+    evidence: "However, the effect should be investigated rather than assumed",
+    optionNotes: [
+      "Bài đọc nói rõ nhiều khách đã tới bằng cách đi bộ.",
+      "Không ai đề nghị bỏ hết chỗ đỗ xe ngay lập tức.",
+      "Nhu cầu giao hàng được nêu là thứ phải tính tới.",
+      "Đúng: khảo sát thói quen đi lại thực tế của khu vực trước khi quyết định.",
+    ],
+  },
+  frt10: {
+    evidence:
+      "An average journey time can improve even while a particular group faces longer waits",
+    optionNotes: [
+      "Thời gian trung bình vẫn dựa trên các chuyến đi thật.",
+      "Đúng: nó có thể che đi bất lợi của một nhóm cụ thể.",
+      "Nó đo thời gian, không đo giá vé.",
+      "Không có quy luật nào nói nó luôn tăng.",
+    ],
+  },
+  frm6: {
+    evidence:
+      "The questions were not graded, and students answered individually before discussing their reasoning in pairs",
+    optionNotes: [
+      "Ba câu hỏi này không tính điểm.",
+      "Đúng: một vòng ôn lại nội dung cũ, không chấm điểm.",
+      "Không có cuộc thi nào giữa các lớp.",
+      "Chúng hỏi về chủ đề đã học, không phải chủ đề mới.",
+    ],
+  },
+  frm7: {
+    evidence:
+      "the teacher identified the misunderstanding and gave a contrasting example",
+    optionNotes: [
+      "Học sinh không phải chép lại danh sách dài hơn.",
+      "Phản hồi được đưa ngay trong buổi học.",
+      "Đúng: hai từ dễ nhầm được đặt trong hai câu tương phản.",
+      "Bài đọc không nhắc tới việc trừ điểm.",
+    ],
+  },
+  frm10: {
+    evidence:
+      "an application cannot directly observe understanding from a single button press",
+    optionNotes: [
+      "Ứng dụng vẫn lưu được câu trả lời trước đó.",
+      "Đúng: một lần bấm nút không trực tiếp chứng minh đã hiểu.",
+      "Ngày ôn được gợi ý theo từng người, không giống hệt nhau.",
+      "Ngược lại: người học được khuyến khích thử kiến thức trong tình huống mới.",
+    ],
+  },
+  frg8: {
+    evidence:
+      "Water sometimes collected underneath the planting boxes, attracting mosquitoes",
+    optionNotes: [
+      "Đúng: nước đọng dưới các thùng trồng cây, kéo theo muỗi.",
+      "Thu hoạch nhiều không phải mối lo được nêu.",
+      "Bài đọc không nói thiếu người tham gia.",
+      "Không có nhà hàng nào trong đoạn này.",
+    ],
+  },
+  frg10: {
+    evidence:
+      "Residents found that clear agreements reduced misunderstandings without making the garden feel like another workplace",
+    optionNotes: [
+      "Bài đọc nói ngược lại: khu vườn không vì thế mà thành nơi làm việc.",
+      "Đúng: thoả thuận rõ giúp tránh hiểu lầm mà vẫn giữ được không khí thân tình.",
+      "Thoả thuận không thay cho sự hợp tác.",
+      "Cư dân cẩn thận không hứa khu vườn nuôi đủ cả toà nhà.",
+    ],
+  },
 };

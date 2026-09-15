@@ -182,10 +182,10 @@ test("a finished full exam exposes accessible reading feedback on mobile", async
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  // The lesson's own summary, not the per-question "other options" one that
+  // the evidence notes now add inside it.
   await page
-    .locator("details")
-    .filter({ hasText: "A change at the station" })
-    .locator("summary")
+    .getByText("A change at the station · Xem đáp án và giải thích")
     .click();
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

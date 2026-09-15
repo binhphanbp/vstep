@@ -84,13 +84,15 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 
 **Đo được.** Mô phỏng 14 ngày (ghi đúng đáp án từng câu nên so được với bảng 1.2): ở nhịp 30 phút, bài Nói lặp lần đầu **ngày 6 → không lặp lần nào trong 14 ngày**; ở nhịp 60 phút, Nói **ngày 2 → ngày 5** và Viết **ngày 4 → ngày 7**. Thời lượng Viết 80 → 260 phút, Nói 21 → 63 phút. Bài mẫu Task 1 dài 157–164 từ (yêu cầu 120), Task 2 dài 290–303 từ (yêu cầu 250). 4 ca unit mới khoá số đề, bộ tiêu chí, độ dài bài mẫu và kết quả mô phỏng.
 
-### N4. Chú giải cho phần Nghe của hai đề — M
+### N4. Chú giải cho phần Nghe của hai đề — M — ĐÃ XONG (đợt 4)
 
 **Vì sao.** Phát hiện nhỏ ở mục 1: sai một câu Nghe trong phòng thi thì Sổ lỗi không phát lại được câu bằng chứng.
 
 **Việc.** Viết trích dẫn nguyên văn + phân tích bốn phương án cho **70 câu Nghe** của đề 01 và đề 02, cộng 12 câu Đọc còn thiếu của đề 01. Làm theo lô, mỗi lô một commit.
 
 **Xong khi.** Chú giải phủ **258/258 câu**; test hiện có tự bắt trích dẫn sai vì nó đối chiếu với transcript.
+
+**Đã làm.** Ba lô, ba commit: 35 câu Nghe đề 01, 35 câu Nghe đề 02, 12 câu Đọc còn thiếu của đề 01. Chú giải phần Nghe của đề 02 được đưa về `question-notes.ts` cùng chỗ với mọi bài khác (helper `ask()` đọc thêm từ đó). Phủ 176 → **258/258**, và một ca unit mới chặn mọi câu hỏi thiếu bằng chứng hoặc thiếu bốn ghi chú.
 
 ### N5. Thẻ từ mọc ra từ chính bài đã học — M — ĐÃ XONG (đợt 3)
 
@@ -121,7 +123,7 @@ Lý do viết đề 02 là để đo lại. Hiện lịch sử chỉ liệt kê 
 | 1   | **N1** so sánh hai lần thi · **N2** dùng đúng ngân sách — **đã xong** | Nhỏ, đóng nốt F07 và mở khoá giá trị của đề 02             |
 | 2   | **N3** ngân hàng Viết/Nói — **đã xong**                               | Nửa kỳ thi đang mỏng nhất                                  |
 | 3   | **N6** chặn tài liệu trôi · **N5** thẻ từ từ bài học — **đã xong**    | Một việc nhỏ có tính phòng ngừa, một việc vừa              |
-| 4   | **N4** chú giải phần Nghe (nhiều lô)                                  | Khối lớn nhất, mang tính hoàn thiện chứ không mở tính năng |
+| 4   | **N4** chú giải phần Nghe (nhiều lô) — **đã xong**                    | Khối lớn nhất, mang tính hoàn thiện chứ không mở tính năng |
 
 ---
 

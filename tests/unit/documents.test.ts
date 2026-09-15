@@ -127,7 +127,7 @@ describe("the documents say what the code says", () => {
       expect(total).toBe(questions);
     for (const [covered, total] of figures(
       doc("PRODUCTION-ROADMAP.md"),
-      /Phủ (\d+)\/(\d+) câu/,
+      /Phủ \*{0,2}(\d+)\/(\d+) câu/,
     ))
       expect([covered, total]).toEqual([annotated, questions]);
     for (const [stated] of figures(
