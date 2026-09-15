@@ -8,6 +8,7 @@ import {
 } from "@/lib/criteria";
 import { useStudy } from "./study-provider";
 import {
+  attemptLesson,
   compareSittings,
   dayOffset,
   examSittings,
@@ -189,7 +190,7 @@ export function ProgressPage() {
                     <div>
                       <Link href={`/practice/${a.lessonId}`}>
                         <h3>
-                          {a.lessonSnapshot?.title ??
+                          {attemptLesson(state, a)?.title ??
                             lesson?.title ??
                             "Bài luyện đã lưu"}
                         </h3>

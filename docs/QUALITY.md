@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 150 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 153 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -219,9 +219,19 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Đo lại cùng mô phỏng:** không còn bài nào lặp hai ngày liền; số bài Đọc khác nhau trong 14 ngày **2 → 5**, Nghe 12, Nói 9.
 - 4 ca unit mới: bước tiếp theo chỉ chẩn đoán dạng câu khi đã đủ bằng chứng và không chỉ ngược về bài đang làm; khi chưa đủ thì nói đúng chuyện Sổ lỗi; câu "Rất chắc" có lời riêng; và kế hoạch không đưa cùng một bài Đọc hai ngày liền. Ca E2E của vòng chữa bài kiểm thêm khối "Bước tiếp theo" và kiểm rằng câu làm đúng thì không có khối ấy.
 
+## Bản chụp học liệu: một bản cho mỗi phiên bản, không phải một bản cho mỗi lượt
+
+- **Đo được.** Mô phỏng 90 ngày học đều (3 bài/ngày, 265 lượt): dữ liệu lưu trong máy tăng lên **980 KB**, trong đó **95% là bản chụp học liệu bị lặp** — cùng vài chục bài được sao chép lại trên từng lượt. Hạn mức localStorage thường là 5 MB, tức khoảng hơn một năm học là app không lưu được nữa; bản sao lưu JSON và một dòng snapshot trên Supabase cũng phình theo đúng tỉ lệ đó.
+- **Vì sao có bản chụp.** Để kết quả cũ không đổi nghĩa khi học liệu được viết lại — đó là quy tắc đã có từ đầu và không bị bỏ. Cái sai chỉ là chỗ cất: mỗi lượt giữ một bản riêng dù 30 lượt cùng học một bài.
+- **Sửa.** `state.library` giữ **một bản cho mỗi phiên bản bài học**, khoá `lessonId@vN`; mỗi lượt chỉ mang `lessonRef` trỏ tới đó. `attemptLesson(state, attempt)` là chỗ duy nhất đọc học liệu của một lượt: bản chụp gắn kèm (dữ liệu cũ) → bản trong thư viện → nội dung hôm nay. Cả hai trường đều **tuỳ chọn**, nên mọi bản sao lưu cũ vẫn đọc được nguyên vẹn.
+- **Lịch sử cũ cũng được gộp lại.** `personalizeLegacyState` chuyển bản chụp gắn kèm vào thư viện khi tải, nên người đã học vài tháng không phải tiếp tục trả giá cho dữ liệu trùng.
+- **Quy tắc kiểm tra dữ liệu không đổi.** Bộ kiểm tra chéo (bản chụp đúng bài, đúng kỹ năng, đúng số câu, đáp án khớp điểm) nay viết một lần trong `checkAttemptAgainstLesson` và dùng cho **cả hai** cách lưu, nên một bản sao lưu tự mâu thuẫn vẫn bị từ chối như trước.
+- **Đo lại cùng mô phỏng:** sau 30 ngày 306 → **153 KB**, sau 90 ngày **980 → 191 KB (−80%)**; phần thư viện bị chặn trên bởi số phiên bản bài học (tối đa 83), nên tốc độ tăng từ ~330 KB/tháng còn ~20 KB/tháng.
+- 3 ca unit mới: mỗi phiên bản chỉ được lưu một lần và state sau một tháng dưới 250 KB; mỗi lượt vẫn đọc đúng học liệu của nó; lịch sử mang bản chụp cũ được gộp lại mà không đổi nội dung. Ca kiểm thử từ chối bản sao lưu mâu thuẫn được viết lại để kiểm cả hai cách lưu.
+
 ## Bằng chứng kiểm tra
 
-- 150 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 153 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 54 kiểm thử Playwright trên bản production: 50 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
