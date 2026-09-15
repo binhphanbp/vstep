@@ -704,7 +704,7 @@ export const EXAM_DRILL_DAYS = 42;
 export type ExamWeekPlan = {
   days: number;
   weeks: number;
-  key: "foundation" | "weak-types" | "rehearsal";
+  key: "foundation" | "weak-types" | "rehearsal" | "exam-day";
   title: string;
   focus: string;
   thisWeek: string[];
@@ -730,12 +730,23 @@ export function examWeekPlan(
   const minutes = state.profile.dailyMinutes;
   const thisWeek: string[] = [];
   const key =
-    days <= EXAM_REHEARSAL_DAYS
-      ? "rehearsal"
-      : days <= EXAM_DRILL_DAYS
-        ? "weak-types"
-        : "foundation";
-  if (key === "foundation") {
+    days === 0
+      ? "exam-day"
+      : days <= EXAM_REHEARSAL_DAYS
+        ? "rehearsal"
+        : days <= EXAM_DRILL_DAYS
+          ? "weak-types"
+          : "foundation";
+  if (key === "exam-day") {
+    // Telling someone to sit a full mock on the morning of the exam is worse
+    // than saying nothing. The honest advice for today is short.
+    thisWeek.push(
+      "Hôm nay là ngày thi — không có bài nào ở đây quan trọng hơn việc giữ sức.",
+    );
+    thisWeek.push(
+      "Thi xong, đặt mốc mới trong Cài đặt hoặc quay lại nhịp học bình thường.",
+    );
+  } else if (key === "foundation") {
     thisWeek.push(
       unseen
         ? `Học ${Math.min(unseen, 5)} bài chưa gặp trong thư viện (còn ${unseen} bài)`
@@ -762,17 +773,21 @@ export function examWeekPlan(
     thisWeek.push(`Giữ nhịp ${minutes} phút mỗi ngày, không mở thêm dạng mới`);
   }
   const title =
-    key === "foundation"
-      ? "Giai đoạn xây nền"
-      : key === "weak-types"
-        ? "Giai đoạn luyện dạng đang sai"
-        : "Hai tuần cuối: tập nhịp thi";
+    key === "exam-day"
+      ? "Hôm nay là ngày thi"
+      : key === "foundation"
+        ? "Giai đoạn xây nền"
+        : key === "weak-types"
+          ? "Giai đoạn luyện dạng đang sai"
+          : "Hai tuần cuối: tập nhịp thi";
   const focus =
-    key === "foundation"
-      ? `Còn ${days} ngày, khoảng ${weeks} tuần. Đủ thời gian để đi hết thư viện trước khi luyện sâu.`
-      : key === "weak-types"
-        ? `Còn ${days} ngày. Đây là lúc luyện đúng dạng câu đang sai thay vì học dàn đều.`
-        : `Còn ${days} ngày. Việc chính bây giờ là quen nhịp đề và giữ sức, không học thêm dạng mới.`;
+    key === "exam-day"
+      ? `Những gì làm được thì đã làm rồi. Chúc ${state.profile.name} một buổi thi nhẹ nhàng.`
+      : key === "foundation"
+        ? `Còn ${days} ngày, khoảng ${weeks} tuần. Đủ thời gian để đi hết thư viện trước khi luyện sâu.`
+        : key === "weak-types"
+          ? `Còn ${days} ngày. Đây là lúc luyện đúng dạng câu đang sai thay vì học dàn đều.`
+          : `Còn ${days} ngày. Việc chính bây giờ là quen nhịp đề và giữ sức, không học thêm dạng mới.`;
   return { days, weeks, key, title, focus, thisWeek };
 }
 /**
@@ -1145,6 +1160,41 @@ export function nextStep(
 }
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
+/**
+ * The one bigger thing worth doing next, when the daily plan is no longer the
+ * whole answer.
+ *
+ * The library is finite: measured at 42 lessons, a learner working three a day
+ * has met every one of them inside six weeks. After that the plan keeps
+ * offering sensible repeats and says nothing about the two full-length papers,
+ * which are the most valuable material the app has left — and the only way to
+ * measure progress against something she has not already seen. This says it,
+ * once, from counts rather than encouragement.
+ */
+export type BigStep = { text: string; href: string; label: string };
+export function whatsNext(state: StudyState): BigStep | null {
+  const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
+  const unseen = lessons.filter((lesson) => !met.has(lesson.id)).length;
+  if (unseen > 0) return null;
+  const papers = new Set(
+    examSittings(state)
+      .filter((sitting) => sitting.paper !== "mini")
+      .map((sitting) => sitting.paper),
+  );
+  if (!papers.size)
+    return {
+      text: `${state.profile.name} đã học hết ${lessons.length} bài trong thư viện. Một đề đủ cấu trúc đo được nhịp làm bài trên ngữ liệu chưa từng gặp.`,
+      href: "/exam",
+      label: "Vào phòng thi",
+    };
+  if (papers.size === 1)
+    return {
+      text: `Còn một đề đủ cấu trúc chưa làm. Hai đề khác ngữ liệu nên chênh lệch giữa chúng mới nói được điều gì đó về năng lực.`,
+      href: "/exam",
+      label: "Làm đề còn lại",
+    };
+  return null;
+}
 /** Points taken off a lesson worked yesterday, so a skill is not pinned. */
 export const REPEAT_DAY_PENALTY = 80;
 /** Minutes that must be left over before the plan offers a further lesson. */

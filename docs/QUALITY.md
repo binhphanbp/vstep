@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 154 unit / 55 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 159 unit / 55 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -241,9 +241,15 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Việc này trước đây nằm ở danh sách "cần chủ website làm tay".** Nay nó là một ca kiểm thử chạy trên bản production mỗi lần CI chạy: học một bài (có một câu sai), thêm một thẻ từ từ chính câu sai đó, gõ dở một bài Viết, **xuất bản sao thật** (đọc đúng file vừa tải về), rồi **xoá sạch máy** — `localStorage`, `sessionStorage` và cả IndexedDB bản ghi — như khi mất điện thoại; nhập lại file và kiểm ở đúng những nơi Gùa sẽ nhìn: Tiến bộ có buổi học, Sổ lỗi còn câu sai, Vườn từ còn thẻ tự thêm, bài Viết còn nguyên bản nháp.
 - Ca này cũng là chỗ khoá cho trường `library` mới: bản sao đi qua một vòng xuất–xoá–nhập mà lịch sử vẫn đọc đúng học liệu của nó.
 
+## Khi thư viện hết bài, và khi hôm nay chính là ngày thi
+
+- **Thư viện là hữu hạn.** Mô phỏng người học ba bài mỗi ngày: sau khoảng sáu tuần đã gặp đủ **42/42 bài**. Từ đó kế hoạch ngày vẫn đề nghị những bài hợp lý để làm lại, nhưng **không nói gì về hai đề đủ cấu trúc** — thứ giá trị nhất còn lại, và là cách duy nhất để đo trên ngữ liệu chưa từng gặp. `whatsNext(state)` nay nói đúng một câu, dựng từ số đếm: hết bài mà chưa thi lần nào thì mời vào phòng thi; đã làm một đề thì nhắc đề còn lại (vì hai đề khác ngữ liệu nên chênh lệch mới có nghĩa); còn bài chưa học, hoặc đã làm cả hai đề, thì **im lặng**.
+- **Lời khuyên sai vào đúng ngày thi.** Đo `examWeekPlan` theo từng mốc: còn 0 ngày vẫn nói y như còn 10 ngày — "làm đề đủ cấu trúc đúng giờ, ít nhất một lần trong tuần". Bảo ai đó thi thử nguyên đề vào sáng ngày thi thì tệ hơn là không nói gì. Nay có giai đoạn riêng `exam-day`: hôm nay không có bài nào quan trọng hơn việc giữ sức, và thi xong thì đặt mốc mới. Ngày trước đó vẫn là giai đoạn tập nhịp; ngày thi đã qua vẫn trả `null` như cũ (trang Lộ trình đã có câu trả lời riêng cho trường hợp đó).
+- 5 ca unit mới: im lặng khi còn bài chưa học, mời vào phòng thi khi hết bài, nhắc đề còn lại sau một lần thi rồi im khi đã đủ hai; ngày thi không đòi thi thử và xưng đúng tên người học; hôm trước ngày thi vẫn tập nhịp.
+
 ## Bằng chứng kiểm tra
 
-- 154 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 159 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 55 kiểm thử Playwright trên bản production: 51 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
