@@ -112,3 +112,22 @@ it("does not lose in-memory data when storage is full and restore fails", async 
   expect(store.getSnapshot().state.profile.name).toBe("Keep me");
   stop();
 });
+
+it("reads sizes a person can read, and measures the real stored bytes", async () => {
+  const store = await import("../../src/lib/study-store");
+  expect(store.formatBytes(0)).toBe("0 B");
+  expect(store.formatBytes(1023)).toBe("1023 B");
+  expect(store.formatBytes(2048)).toBe("2 KB");
+  expect(store.formatBytes(3 * 1024 * 1024)).toBe("3.0 MB");
+  // Vietnamese text is multi-byte, so counting characters would under-report
+  // what the browser is actually holding.
+  values.set("may-study-v1", "ừ");
+  expect(store.studyDataBytes()).toBe(3);
+  // A browser that refuses to hand over storage reports nothing, not a guess.
+  vi.stubGlobal("localStorage", {
+    getItem: () => {
+      throw new Error("blocked");
+    },
+  });
+  expect(store.studyDataBytes()).toBe(0);
+});

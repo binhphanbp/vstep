@@ -38,7 +38,7 @@ import {
 import { useStudy } from "./study-provider";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
-import { getRecording, saveRecording } from "@/lib/recordings";
+import { deleteRecording, getRecording, saveRecording } from "@/lib/recordings";
 import { readQuizDraft } from "@/lib/quiz-draft";
 export function PracticeLibrary() {
   const params = useSearchParams();
@@ -461,6 +461,12 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         if (!stored) throw Error("missing");
         await saveRecording(a.id, stored.blob);
         a.recordingId = a.id;
+        // The draft copy has done its job. Leaving it behind kept two copies
+        // of the same audio on the device — measured at 33 KB for a single
+        // two-second take — and the spare one can never be filed again,
+        // because a take only counts if it was captured after the last
+        // session filed for this lesson.
+        await deleteRecording(lesson.id).catch(() => {});
       } catch {
         lock.current = false;
         setError(

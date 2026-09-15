@@ -589,11 +589,31 @@ test("recording uses a real MediaRecorder and survives reload", async ({
   await expect(
     page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
   ).toBeVisible();
-  // Coming back later, the take already filed must not pass as a new answer.
+  // Settings can now say what the take costs, measured rather than guessed.
+  await page.goto("/settings");
+  const storage = page
+    .locator(".panel")
+    .filter({ hasText: "Chỗ ở của dữ liệu" });
+  // Exactly one copy: filing moves the take to the session and clears the
+  // draft, which used to leave two copies of the same audio behind.
+  await expect(storage.getByText("1 bản ghi")).toBeVisible();
+  await expect(
+    storage.getByText(/^\d+(\.\d+)? (B|KB|MB)$/).first(),
+  ).toBeVisible();
+  // A take captured a minute ago is not old, so the bulk delete stays off.
+  await expect(
+    storage.getByRole("button", { name: /Xoá bản ghi cũ hơn/ }),
+  ).toBeDisabled();
+  // Coming back later, the take already filed must not pass as a new answer:
+  // the draft copy is gone (it lives in the history now) and the session
+  // cannot be filed again without recording something new.
   await page.goto("/practice/speaking-social");
   await expect(
-    page.getByRole("link", { name: "Tải bản ghi", exact: true }),
+    page.getByRole("button", { name: "Bắt đầu ghi âm", exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Tải bản ghi", exact: true }),
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(page.locator("main [role=alert]")).toContainText("Ghi âm");
   const speaking = await page.evaluate(

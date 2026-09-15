@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Cloud,
   Download,
+  HardDrive,
   Heart,
   LifeBuoy,
   LogOut,
@@ -25,7 +26,18 @@ import {
   isCloudTimeout,
   supabase,
 } from "@/lib/supabase";
-import { currentBackupState, rawStudyData } from "@/lib/study-store";
+import {
+  currentBackupState,
+  formatBytes,
+  rawStudyData,
+  studyDataBytes,
+} from "@/lib/study-store";
+import {
+  deleteRecordingsBefore,
+  OLD_RECORDING_DAYS,
+  recordingUsage,
+  type RecordingUsage,
+} from "@/lib/recordings";
 import { buildErrorReport, clearErrors, recentErrors } from "@/lib/error-log";
 export function downloadJson(data: unknown, name: string) {
   downloadText(JSON.stringify(data, null, 2), name);
@@ -319,6 +331,7 @@ export function SettingsPage() {
               </button>
             </div>
           </section>
+          <StoragePanel />
           <section className="panel">
             <div className="section-title">
               <Download size={20} />
@@ -708,6 +721,151 @@ function CloudSettings({ storageError }: { storageError: string }) {
           {error}
         </p>
       )}
+    </section>
+  );
+}
+
+/**
+ * What the app is keeping on this device, in bytes she can read.
+ *
+ * Recordings are the largest thing the app writes and they live only here:
+ * the JSON backup and the cloud snapshot carry no audio. Until now nothing
+ * could say how much room they took, and removing one meant finding its
+ * session in the history. This panel measures the real numbers — no estimate
+ * is invented when the browser refuses to give one — and offers the one bulk
+ * action that is safe to offer: takes older than a month.
+ */
+function StoragePanel() {
+  const { toast } = useStudy();
+  type Report = {
+    data: number;
+    usage: RecordingUsage | null;
+    quota: { usage: number; quota: number } | null;
+    cutoff: number;
+    failed: boolean;
+  };
+  const [report, setReport] = useState<Report | null>(null);
+  // Reading the recording store is asynchronous, so the numbers arrive
+  // together in one state write: a panel about storage must not show a figure
+  // it has not measured yet.
+  const measure = useCallback(
+    () =>
+      Promise.all([
+        recordingUsage().then(
+          (usage) => ({ usage, failed: false }),
+          () => ({ usage: null, failed: true }),
+        ),
+        Promise.resolve()
+          .then(() => navigator.storage?.estimate?.())
+          .then(
+            (estimate) =>
+              estimate?.usage != null && estimate?.quota != null
+                ? { usage: estimate.usage, quota: estimate.quota }
+                : null,
+            () => null,
+          ),
+      ]).then(([takes, quota]) =>
+        setReport({
+          data: studyDataBytes(),
+          usage: takes.usage,
+          failed: takes.failed,
+          quota,
+          cutoff: Date.now() - OLD_RECORDING_DAYS * 86400000,
+        }),
+      ),
+    [],
+  );
+  useEffect(() => {
+    void measure();
+  }, [measure]);
+  const usage = report?.usage ?? null;
+  const hasOld = Boolean(
+    report && usage?.count && usage.oldest && usage.oldest < report.cutoff,
+  );
+  return (
+    <section className="panel">
+      <div className="section-title">
+        <HardDrive size={20} />
+        <h2>Chỗ ở của dữ liệu</h2>
+      </div>
+      <div className="history-row">
+        <div>
+          <h3>Dữ liệu học</h3>
+          <small>Tiến độ, bài viết, bản nháp và lịch ôn.</small>
+        </div>
+        <div className="skill-accuracy">
+          <strong>{report ? formatBytes(report.data) : "—"}</strong>
+          <small>trong trình duyệt</small>
+        </div>
+      </div>
+      <div className="history-row">
+        <div>
+          <h3>Bản ghi âm</h3>
+          <small>
+            {report?.failed
+              ? "Không đọc được kho bản ghi trên máy này."
+              : "Chỉ nằm trên máy này; bản sao JSON và cloud không chứa âm thanh."}
+          </small>
+        </div>
+        <div className="skill-accuracy">
+          <strong>{usage ? formatBytes(usage.bytes) : "—"}</strong>
+          <small>{usage ? `${usage.count} bản ghi` : "chưa đo được"}</small>
+        </div>
+      </div>
+      {report?.quota ? (
+        <p className="help-copy">
+          Trình duyệt báo ứng dụng đang dùng {formatBytes(report.quota.usage)}{" "}
+          trong khoảng {formatBytes(report.quota.quota)} được cấp. Đây là ước
+          lượng của trình duyệt, không phải con số Mây tự tính.
+        </p>
+      ) : (
+        <p className="help-copy">
+          Trình duyệt này không cho biết dung lượng còn lại, nên Mây chỉ hiện
+          phần tự đo được.
+        </p>
+      )}
+      <div className="button-row">
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => void measure()}
+        >
+          Đo lại
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          disabled={!hasOld}
+          onClick={async () => {
+            if (
+              !window.confirm(
+                `Xoá các bản ghi cũ hơn ${OLD_RECORDING_DAYS} ngày? Việc này không thể hoàn tác.`,
+              )
+            )
+              return;
+            try {
+              const removed = await deleteRecordingsBefore(
+                Date.now() - OLD_RECORDING_DAYS * 86400000,
+              );
+              await measure();
+              toast(
+                removed
+                  ? `Đã xoá ${removed} bản ghi cũ.`
+                  : "Không có bản ghi nào đủ cũ để xoá.",
+              );
+            } catch {
+              toast("Không xoá được bản ghi trên máy này.");
+            }
+          }}
+        >
+          <Trash2 size={15} />
+          Xoá bản ghi cũ hơn {OLD_RECORDING_DAYS} ngày
+        </button>
+      </div>
+      <p className="help-copy">
+        Xoá từng bản ghi của một buổi cụ thể ở trang Lịch sử. Bản ghi bị xoá
+        không khôi phục được.
+      </p>
     </section>
   );
 }
