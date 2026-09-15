@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 169 unit / 59 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 170 unit / 61 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -276,10 +276,23 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - **Nghiệm thu điện thoại.** [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md): 20 mục, 25–35 phút, chỉ gồm những thứ máy ảo không kiểm được — micro thật, bàn phím tiếng Việt, loa và tai nghe, khóa màn hình giữa bài, chế độ máy bay, khay chia sẻ. Bước đầu tiên là xuất bản sao, vì dữ liệu học của Gùa là bản duy nhất.
 - 11 ca kiểm thử mới: **9 unit** (5 cho bản báo lỗi dạng chữ và ba đường giao cho máy, 4 cho cổng promote) và **2 E2E** (gửi báo lỗi mà bài viết không đi theo; in gói duyệt học liệu có đánh dấu đáp án). Axe chạy thêm 2 màn. Tổng: 160 → 169 unit, 57 → 59 E2E, 14 → 16 màn axe, 98 → 106 route.
 
+## Mất mạng: trước đây chỉ mở được trang chủ
+
+- **Lỗi đo được.** Tắt mạng rồi mở từng địa chỉ trên bản production: **8/9 trang ra trang "Mạng đang không ổn"**, kể cả một bài học. Chỉ `/` mở được. Với một ứng dụng học trên đường — tàu điện, thang máy, hết data — nghĩa là không học được gì.
+- **Comment trong `public/sw.js` nói sai.** Nó viết rằng khi nhận tài liệu offline cho một địa chỉ chưa từng vào, router vẫn render đúng trang từ JavaScript đã cache. Phép đo phủ định điều đó: tài liệu khởi động của mỗi route là riêng của route đó, không có gì cho router phục hồi. Comment đã được sửa lại kèm kết quả đo, thay vì xoá đi.
+- **Sửa.** Service worker lên `may-v2` và lưu sẵn **toàn bộ 8 trang cố định** ngay khi cài, thay vì chờ lần vào đầu tiên; lưu từng trang một nên một trang lỗi không làm mất cả danh sách. Thêm vào đó, worker nhận địa chỉ **các bài của kế hoạch hôm nay** do chính ứng dụng gửi sang sau khi tải xong — worker không thể tự biết, vì kế hoạch nằm trong dữ liệu của người học. Chặn trên 8 địa chỉ mỗi lần gửi. Request `?_rsc=` của router cũng đi qua cùng luật, nên chuyển trang trong ứng dụng khi mất mạng cũng chạy.
+- **Đo lại cùng phép đo:** **9/9 trang mở đúng nội dung**, và bài đầu tiên của kế hoạch hôm nay mở ra kèm đủ câu hỏi.
+- 2 ca E2E mới thay cho một ca cũ vốn chấp nhận cả hai kết cục ("bài học hiện ra" hoặc "trang mất mạng hiện ra") — tức là không ai biết thật sự cái nào xảy ra. Nay một ca kiểm tám trang cố định theo đúng tiêu đề của từng trang, một ca kiểm bài của kế hoạch hôm nay.
+
+## Tài liệu trôi số: khép chỗ cuối cùng
+
+- `docs/PRODUCT.md` là tệp duy nhất không có ca kiểm thử nào đọc, và nó trôi xa nhất: ghi "14 bài ngắn" và "20 thẻ" trong khi thực tế là 42 bài và 68 thẻ, cùng mức trần kế hoạch 3 bài trong khi lượt hai đã nâng lên 6.
+- Đã sửa cả ba con số, và mở rộng `documents.test.ts` để đọc luôn tệp này: số bài theo từng kỹ năng, tổng câu khách quan, số thẻ từ vựng và mức trần `PLAN_MAX_LESSONS` nay đều phải khớp mã nguồn, nếu không thì CI đỏ.
+
 ## Bằng chứng kiểm tra
 
-- 169 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 59 kiểm thử Playwright trên bản production: 55 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 170 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 61 kiểm thử Playwright trên bản production: 57 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

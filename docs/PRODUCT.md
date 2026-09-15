@@ -6,10 +6,10 @@ Một người học tại TP.HCM, cần một chứng chỉ nhưng cũng cần 
 
 | Nỗi đau                      | Cách giải quyết đã triển khai                                                                                   | Nguyên tắc đo lường                                                         |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Không biết hôm nay học gì    | Chọn tối đa 3 bài vừa quỹ thời gian; ưu tiên kỹ năng, sở thích, bài chưa học và kết quả các ngày trước          | Kế hoạch giữ ổn định trong ngày; bài hoàn thành có dấu kiểm                 |
+| Không biết hôm nay học gì    | Chọn tối đa 6 bài vừa quỹ thời gian; ưu tiên kỹ năng, sở thích, bài chưa học và kết quả các ngày trước          | Kế hoạch giữ ổn định trong ngày; bài hoàn thành có dấu kiểm                 |
 | Áp lực, học đứt nhịp         | Chọn mức năng lượng; ngày mệt giảm ngân sách xuống tối đa 15 phút                                               | Chuỗi ngày không phạt trước khi ngày hiện tại kết thúc, theo giờ Việt Nam   |
 | Làm nhiều mà lặp lỗi         | Kết quả tách theo dạng câu và độ chắc chắn; câu sai vào sổ tay, làm lại trước khi xem giải thích, xếp lịch ôn   | Ưu tiên lỗi sai dù rất chắc; chỉ ra câu đúng nhưng còn phân vân             |
-| Học từ rồi quên              | 20 thẻ có phiên âm, nghĩa, ví dụ, giọng đọc; lịch ôn theo mức nhớ                                               | Chưa nhớ: 10 phút; khó: một ngày; nhớ: tăng khoảng cách; đây là tự đánh giá |
+| Học từ rồi quên              | 68 thẻ có phiên âm, nghĩa, ví dụ, giọng đọc; lịch ôn theo mức nhớ                                               | Chưa nhớ: 10 phút; khó: một ngày; nhớ: tăng khoảng cách; đây là tự đánh giá |
 | Ngại viết và nói             | Nháp tự lưu, đếm từ, tiêu chí tự kiểm tra, bài viết mẫu; ghi âm, nghe lại, tải bản ghi                          | Không tự tạo điểm chấm cho văn bản hay bản ghi                              |
 | Lo thao tác và thời gian thi | Buổi rút gọn 51 phút hoặc đủ cấu trúc 172 phút; đồng hồ theo deadline tuyệt đối; lưu và chuyển phần khi hết giờ | Tách rõ hai chế độ, không quy đổi điểm sang chứng chỉ                       |
 | Mất tiến độ khi crash        | Ghi đồng bộ đáp án/nháp vào thiết bị; phục hồi đồng hồ; bản sao JSON; kho bản ghi IndexedDB                     | Dữ liệu hỏng không bị ghi đè; lỗi lưu được hiển thị                         |
@@ -23,7 +23,7 @@ Giao diện làm việc với thanh điều hướng, kế hoạch ngày và cô
 
 ## Nội dung và độ chân thực
 
-14 bài ngắn: 4 Đọc (20 câu), 4 Nghe (16 câu), 3 Viết và 3 Nói. Toàn bộ tự biên soạn. Nghe sử dụng speech synthesis trên thiết bị. Cấp B1/B2 là định hướng biên soạn, chưa phải kết quả chuẩn hoá khảo thí.
+42 bài ngắn: 12 Đọc, 12 Nghe (tổng 108 câu khách quan), 9 Viết và 9 Nói. Toàn bộ tự biên soạn. Nghe sử dụng speech synthesis trên thiết bị. Cấp B1/B2 là định hướng biên soạn, chưa phải kết quả chuẩn hoá khảo thí.
 
 Buổi mô phỏng dùng lại 2 bài Nghe, 2 Đọc, 1 email và phần Nói tương tác xã hội. Tổng 51 phút = 10 + 15 + 20 + 6. Đây là luyện thao tác và thời gian, không phải kiểm tra đầu vào vì bài đã có thể được học trước.
 

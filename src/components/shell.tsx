@@ -22,7 +22,7 @@ import {
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useStudy } from "./study-provider";
 import { watchErrors } from "@/lib/error-log";
-import { streak, daysUntil } from "@/lib/learning";
+import { streak, daysUntil, todayPlan } from "@/lib/learning";
 const nav = [
   { href: "/", label: "Góc học hôm nay", icon: LayoutDashboard },
   { href: "/journey", label: "Lộ trình của mình", icon: Route },
@@ -53,6 +53,29 @@ export function Shell({ children }: { children: ReactNode }) {
     if (document.readyState === "complete") register();
     else window.addEventListener("load", register, { once: true });
   }, []);
+  // Today's lessons are the pages she would actually lose on a train, and the
+  // worker cannot know which ones they are: the plan comes from her data. Sent
+  // once the worker is in charge, so the day's work opens with no network.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+    if (!ready || !("serviceWorker" in navigator)) return;
+    const paths = todayPlan(state).lessons.map(
+      (lesson) => `/practice/${lesson.id}`,
+    );
+    if (!paths.length) return;
+    let cancelled = false;
+    navigator.serviceWorker.ready
+      .then((registration) => {
+        if (!cancelled)
+          registration.active?.postMessage({ type: "may-warm", paths });
+      })
+      .catch(() => {
+        // No worker, no warming: every page still loads over the network.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, state]);
   useEffect(() => {
     if (!mobile) return;
     const previousOverflow = document.body.style.overflow;

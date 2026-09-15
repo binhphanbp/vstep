@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { allLessons } from "../../src/lib/full-exam-content";
-import { lessons } from "../../src/lib/content";
+import { lessons, vocabulary } from "../../src/lib/content";
+import { PLAN_MAX_LESSONS } from "../../src/lib/learning";
 import { questionNotes } from "../../src/lib/question-notes";
 import { bankGroups } from "../../src/lib/review-bank";
 
@@ -110,6 +111,42 @@ describe("the documents say what the code says", () => {
       /production build (\d+) route/,
     ))
       expect(stated).toBe(routes);
+  });
+  it("keeps the product brief in step with the bank and the planner", () => {
+    // PRODUCT.md was the one document no test read, and it had drifted the
+    // furthest: "14 bài ngắn" and "20 thẻ" against a bank of 42 lessons and 68
+    // cards, plus a plan cap of 3 that the second pass had raised to 6.
+    const brief = doc("PRODUCT.md");
+    const bySkill = (skill: string) =>
+      lessons.filter((lesson) => lesson.skill === skill).length;
+    for (const [
+      total,
+      reading,
+      listening,
+      questions,
+      writing,
+      speaking,
+    ] of figures(
+      brief,
+      /^(\d+) bài ngắn: (\d+) Đọc, (\d+) Nghe \(tổng (\d+) câu khách quan\), (\d+) Viết và (\d+) Nói/m,
+    ))
+      expect([total, reading, listening, questions, writing, speaking]).toEqual(
+        [
+          lessons.length,
+          bySkill("reading"),
+          bySkill("listening"),
+          lessons.reduce((sum, lesson) => sum + lesson.questions.length, 0),
+          bySkill("writing"),
+          bySkill("speaking"),
+        ],
+      );
+    for (const [cards] of figures(brief, /\| (\d+) thẻ có phiên âm/))
+      expect(cards).toBe(vocabulary.length);
+    for (const [cap] of figures(
+      brief,
+      /Chọn tối đa (\d+) bài vừa quỹ thời gian/,
+    ))
+      expect(cap).toBe(PLAN_MAX_LESSONS);
   });
   it("reports the real size of the question bank and its notes", () => {
     // A question carries its notes either in the shared notes file or, for
