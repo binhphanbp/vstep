@@ -442,6 +442,37 @@ test("library search, skill filter, and unknown route", async ({ page }) => {
     page.getByRole("heading", { name: "Hình như mình đi lạc một chút." }),
   ).toBeVisible();
 });
+test("the library can show what has not been studied yet", async ({ page }) => {
+  const state = freshState();
+  const lesson = lessons.find((item) => item.id === "reading-cafe")!;
+  state.attempts = [
+    {
+      id: "done-cafe",
+      lessonId: lesson.id,
+      skill: lesson.skill,
+      date: "2026-09-10T02:00:00.000Z",
+      answers: {},
+      correct: 0,
+      total: lesson.questions.length,
+      seconds: 600,
+      lessonRef: `${lesson.id}@v${lesson.version}`,
+    },
+  ];
+  state.library = { [`${lesson.id}@v${lesson.version}`]: lesson };
+  await page.addInitScript(
+    (value) => localStorage.setItem("may-study-v1", JSON.stringify(value)),
+    state,
+  );
+  await page.goto("/practice");
+  await expect(
+    page.getByText(`còn ${lessons.length - 1} bài chưa học`),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Chưa học", exact: true }).click();
+  await expect(page.locator(".lesson-card")).toHaveCount(lessons.length - 1);
+  await page.getByRole("button", { name: "Đã học", exact: true }).click();
+  await expect(page.locator(".lesson-card")).toHaveCount(1);
+  await expect(page.locator(".lesson-card")).toContainText(lesson.title);
+});
 test("timed exam continues through reload and finishes expired stages", async ({
   page,
 }) => {

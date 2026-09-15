@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 160 unit / 56 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 160 unit / 57 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -260,10 +260,16 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Nhãn đúng bản chất.** Khối mẫu của phần Nói ghi rõ: tự biên soạn, viết theo lối nói, là _một_ cách trả lời để đối chiếu — không phải đáp án duy nhất hay bài được giám khảo chứng nhận. Cùng chỗ với bộ tiêu chí tự kiểm tra, nên đọc mẫu là để soi từng tiêu chí chứ không phải để chép.
 - 1 ca unit mới khoá lại: mọi đề Nói phải có mẫu và mẫu phải dài ít nhất 120 từ (ca cũ về số từ tối thiểu của bài Viết được tách riêng, vì đề Nói không có `minWords`). Ca E2E ghi âm mở luôn khối mẫu và kiểm nhãn "viết theo lối nói".
 
+## Thư viện 42 bài: tìm được bài chưa học
+
+- Thư viện đã lên **42 bài**, và câu hỏi thường gặp nhất — "còn bài nào mình chưa học?" — không còn trả lời được bằng mắt trên một lưới thẻ. Thẻ có dấu "đã khám phá" nhưng không có cách lọc.
+- Thêm bộ lọc **Tất cả bài · Chưa học · Đã học** cạnh bộ lọc mức bài, và con số ngay ở đầu trang: "42 bài tự biên soạn · còn N bài chưa học" (học hết thì ghi "đã học hết"). Số đếm lấy từ lịch sử thật, không phải ước lượng.
+- 1 ca E2E mới: học một bài rồi kiểm cả ba trạng thái lọc và con số ở đầu trang.
+
 ## Bằng chứng kiểm tra
 
 - 160 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 56 kiểm thử Playwright trên bản production: 52 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 57 kiểm thử Playwright trên bản production: 53 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

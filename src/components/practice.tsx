@@ -50,11 +50,18 @@ export function PracticeLibrary() {
   );
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState("all");
+  // With 42 lessons, "which ones have I not done yet" stopped being something
+  // the eye can answer from a grid of cards.
+  const [status, setStatus] = useState<"all" | "new" | "done">("all");
   const { state } = useStudy();
+  const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
+  const unseen = lessons.filter((lesson) => !met.has(lesson.id)).length;
   const filtered = lessons.filter(
     (l) =>
       (skill === "all" || l.skill === skill) &&
       (level === "all" || l.level === level) &&
+      (status === "all" ||
+        (status === "new" ? !met.has(l.id) : met.has(l.id))) &&
       `${l.title} ${l.topic} ${l.subtitle}`
         .toLocaleLowerCase("vi")
         .includes(query.toLocaleLowerCase("vi")),
@@ -70,7 +77,10 @@ export function PracticeLibrary() {
           <h1>Mỗi kỹ năng, một chút vững vàng.</h1>
           <p>Chọn một bài vừa sức. Học chậm cũng được, miễn là mình hiểu.</p>
         </div>
-        <span className="pill">{lessons.length} bài tự biên soạn</span>
+        <span className="pill">
+          {lessons.length} bài tự biên soạn
+          {unseen ? ` · còn ${unseen} bài chưa học` : " · đã học hết"}
+        </span>
       </div>
       <div className="filters">
         {(["all", "listening", "reading", "writing", "speaking"] as const).map(
@@ -95,6 +105,23 @@ export function PracticeLibrary() {
         />
       </div>
       <div className="filters">
+        {(
+          [
+            ["all", "Tất cả bài"],
+            ["new", "Chưa học"],
+            ["done", "Đã học"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            type="button"
+            key={value}
+            className={`filter ${status === value ? "active" : ""}`}
+            onClick={() => setStatus(value)}
+            aria-pressed={status === value}
+          >
+            {label}
+          </button>
+        ))}
         <label
           className="field"
           style={{ flexDirection: "row", alignItems: "center" }}
