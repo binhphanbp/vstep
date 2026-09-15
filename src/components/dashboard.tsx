@@ -18,6 +18,7 @@ import {
 import { useStudy } from "./study-provider";
 import {
   todayPlan,
+  whatsNext,
   localDay,
   skillStats,
   dayOffset,
@@ -33,6 +34,9 @@ export function Dashboard() {
   const { state, update } = useStudy();
   const now = useNow();
   const plan = todayPlan(state, new Date(now));
+  // Only once there is nothing new left in the library; null the rest of the
+  // time, so it never nags.
+  const big = whatsNext(state);
   const today = localDay(new Date(now));
   const todayAttempts = state.attempts.filter(
     (a) => localDay(a.date) === today,
@@ -317,6 +321,15 @@ export function Dashboard() {
                 );
               })}
             </div>
+            {big ? (
+              <p className="next-step">
+                <strong>Bước lớn tiếp theo:</strong> {big.text}{" "}
+                <Link className="text-link" href={big.href}>
+                  {big.label}
+                  <ArrowRight size={15} />
+                </Link>
+              </p>
+            ) : null}
           </section>
           <section>
             <div className="section-heading">

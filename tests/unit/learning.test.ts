@@ -26,6 +26,7 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  whatsNext,
   attemptLesson,
   libraryKey,
   nextStep,
@@ -1493,5 +1494,77 @@ describe("the saved history stops paying for the same lesson twice", () => {
       version: lesson.version,
     });
     expect(stateSchema.safeParse(after).success).toBe(true);
+  });
+});
+
+describe("what to do once the library runs out", () => {
+  const finished = () => {
+    let state = freshState();
+    for (const [index, lesson] of lessons.entries())
+      state = recordAttempt(state, {
+        id: `done-${lesson.id}`,
+        lessonId: lesson.id,
+        skill: lesson.skill,
+        date: `2026-09-${String((index % 28) + 1).padStart(2, "0")}T10:00:00Z`,
+        correct: lesson.questions.length,
+        total: lesson.questions.length,
+        seconds: lesson.minutes * 60,
+        answers: Object.fromEntries(
+          lesson.questions.map((item) => [item.id, item.answer]),
+        ),
+      });
+    return state;
+  };
+  const sitting = (id: string, prefix: string): Attempt[] =>
+    ["listen-1", "read-1"].map((part) => ({
+      ...attempt("2026-09-20T02:00:00Z", {
+        id: `exam:${id}:${prefix}-${part}`,
+        lessonId: `${prefix}-${part}`,
+        skill: part.startsWith("listen") ? "listening" : "reading",
+        correct: 20,
+        total: 35,
+        seconds: 2400,
+      }),
+    }));
+  it("says nothing while there is still new material", () => {
+    expect(whatsNext(freshState())).toBe(null);
+  });
+  it("points at the timed room once every lesson has been met", () => {
+    const step = whatsNext(finished())!;
+    expect(step.href).toBe("/exam");
+    expect(step.text).toContain(String(lessons.length));
+  });
+  it("asks for the other paper when only one has been sat", () => {
+    const state = finished();
+    state.attempts = [...state.attempts, ...sitting("s1", "full")];
+    expect(whatsNext(state)?.text).toContain("chưa làm");
+    // Both papers sat: there is nothing left to point at, so it stays quiet.
+    const both = {
+      ...state,
+      attempts: [...state.attempts, ...sitting("s2", "exam2")],
+    };
+    expect(whatsNext(both)).toBe(null);
+  });
+});
+describe("the day of the exam", () => {
+  const onExamDay = (days: number) => {
+    const state = freshState();
+    state.profile = {
+      ...state.profile,
+      onboarded: true,
+      examDate: dayOffset(localDay(now), days),
+    };
+    return examWeekPlan(state, now);
+  };
+  it("does not ask for a full mock on the morning of the exam", () => {
+    const today = onExamDay(0)!;
+    expect(today.key).toBe("exam-day");
+    expect(today.thisWeek.join(" ")).not.toContain("đề đủ cấu trúc");
+    expect(today.thisWeek.join(" ")).toContain("giữ sức");
+    expect(today.focus).toContain(freshState().profile.name);
+  });
+  it("still rehearses the day before", () => {
+    expect(onExamDay(1)?.key).toBe("rehearsal");
+    expect(onExamDay(-1)).toBe(null);
   });
 });
