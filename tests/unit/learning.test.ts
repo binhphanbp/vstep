@@ -26,6 +26,8 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  nextStep,
+  TYPE_STEP_MINIMUM,
   openVocabulary,
   examSittings,
   compareSittings,
@@ -1302,5 +1304,84 @@ describe("the vocabulary garden grows out of the lessons", () => {
     expect(after.some((word) => word.id === first.id)).toBe(true);
     // Only that lesson's cards joined; the rest still wait.
     expect(after.length).toBeLessThan(vocabulary.length);
+  });
+});
+
+describe("what to do about a question just got wrong", () => {
+  const question = lessons
+    .find((lesson) => lesson.id === "reading-cafe")!
+    .questions.find((item) => item.tag === "Thông tin chi tiết")!;
+  it("names a lesson that trains the type once the type has evidence", () => {
+    const state = freshState();
+    // Two wrong answers of this type is the minimum before the app is
+    // willing to describe it as a weakness.
+    const sameType = lessons
+      .find((lesson) => lesson.id === "reading-cafe")!
+      .questions.filter((item) => item.tag === question.tag)
+      .map((item) => item.id);
+    expect(sameType.length).toBeGreaterThanOrEqual(TYPE_STEP_MINIMUM);
+    state.attempts = [
+      attempt("2026-09-07T10:00:00+07:00", {
+        id: "a1",
+        answers: missing(sameType),
+        correct: 5 - sameType.length,
+      }),
+    ];
+    const step = nextStep(state, question, "reading-cafe");
+    const wrong = questionTypeStats(state).find(
+      (entry) => entry.tag === question.tag,
+    )!;
+    expect(wrong.wrong).toBeGreaterThanOrEqual(TYPE_STEP_MINIMUM);
+    expect(step.text).toContain(question.tag);
+    expect(step.href.startsWith("/practice/")).toBe(true);
+    // It never sends her back to the lesson she is already looking at.
+    expect(step.href).not.toBe("/practice/reading-cafe");
+  });
+  it("says something true when there is not enough evidence yet", () => {
+    const step = nextStep(freshState(), question, "reading-cafe");
+    expect(step.href).toBe("/mistakes");
+    expect(step.text).toContain("Sổ lỗi");
+  });
+  it("treats a confident mistake as its own kind of step", () => {
+    const step = nextStep(freshState(), question, "reading-cafe", "sure");
+    expect(step.text).toContain("Rất chắc");
+    expect(step.href).toBe("/mistakes");
+  });
+});
+describe("a skill is not pinned to one lesson", () => {
+  it("offers a different lesson of the same skill the next day", () => {
+    let state = freshState();
+    const seen: string[] = [];
+    for (let day = 0; day < 6; day++) {
+      const now = new Date(
+        Date.parse("2026-09-15T08:00:00+07:00") + day * 86400000,
+      );
+      const plan = todayPlan(state, now);
+      const reading = plan.lessons.find((lesson) => lesson.skill === "reading");
+      if (reading) seen.push(reading.id);
+      for (const lesson of plan.lessons)
+        state = recordAttempt(state, {
+          id: `d${day}:${lesson.id}`,
+          lessonId: lesson.id,
+          skill: lesson.skill,
+          date: now.toISOString(),
+          // Half wrong, without claiming to have been certain.
+          correct: Math.floor(lesson.questions.length / 2),
+          total: lesson.questions.length,
+          seconds: lesson.minutes * 60,
+          answers: Object.fromEntries(
+            lesson.questions.map((item, index) => [
+              item.id,
+              index % 2 === 0
+                ? item.answer
+                : (item.answer + 1) % item.options.length,
+            ]),
+          ),
+        });
+    }
+    // Measured before this rule: the same Reading lesson six days running.
+    expect(new Set(seen).size).toBeGreaterThanOrEqual(3);
+    for (let index = 1; index < seen.length; index++)
+      expect(seen[index]).not.toBe(seen[index - 1]);
   });
 });

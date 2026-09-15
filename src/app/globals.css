@@ -1492,6 +1492,24 @@ textarea:focus-visible {
   font-size: 13px;
   margin: 8px 0 0;
 }
+.next-step {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid #f3d9e2;
+  background: #fdeef2;
+  font-size: 13px;
+  line-height: 1.8;
+  /* Measured 5.94:1 on this background, the same ink the quick session uses. */
+  color: #5d5560;
+}
+.next-step strong {
+  color: #a3305f;
+  font-weight: 600;
+}
+.next-step .text-link {
+  white-space: nowrap;
+}
 .answer-submit {
   display: flex;
   gap: 12px;

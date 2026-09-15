@@ -1004,8 +1004,58 @@ export function openVocabulary(state: StudyState): Vocabulary[] {
   const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
   return vocabulary.filter((word) => !word.source || met.has(word.source));
 }
+/**
+ * One concrete thing to do about a question just got wrong.
+ *
+ * The review loop explains the answer well, and then stops: "you were wrong,
+ * here is why" leaves the learner to invent her own next move at exactly the
+ * moment she is least sure what it should be. This picks a single step out of
+ * her own history — never a generic encouragement — and the interface shows
+ * it under the wrong answer.
+ *
+ * Nothing here invents evidence: the type line only appears once the same
+ * question type has gone wrong at least twice, which is the same honesty rule
+ * the weak-type diagnosis uses.
+ */
+export type NextStep = { text: string; href: string; label: string };
+export const TYPE_STEP_MINIMUM = 2;
+export function nextStep(
+  state: StudyState,
+  question: Question,
+  lessonId: string,
+  confidence?: Confidence,
+): NextStep {
+  const stat = questionTypeStats(state).find(
+    (entry) => entry.tag === question.tag,
+  );
+  if (stat && stat.wrong >= TYPE_STEP_MINIMUM) {
+    const lesson = lessonForType(state, question.tag);
+    const carries = lesson?.questions.filter(
+      (item) => item.tag === question.tag,
+    ).length;
+    if (lesson && lesson.id !== lessonId && carries)
+      return {
+        text: `Dạng “${question.tag}” đang sai ${stat.wrong}/${stat.asked} câu đã làm. Bài “${lesson.title}” có ${carries} câu cùng dạng.`,
+        href: `/practice/${lesson.id}`,
+        label: "Luyện dạng này",
+      };
+  }
+  if (confidence === "sure")
+    return {
+      text: `${state.profile.name} đã chọn “Rất chắc” mà vẫn sai, nên đây là chỗ hiểu lệch chứ không phải lỡ tay. Sổ lỗi hẹn lại câu này sớm hơn.`,
+      href: "/mistakes",
+      label: "Mở Sổ lỗi",
+    };
+  return {
+    text: "Câu này đã vào Sổ lỗi và sẽ quay lại theo lịch ôn; làm lại đúng thì nó rời sổ.",
+    href: "/mistakes",
+    label: "Mở Sổ lỗi",
+  };
+}
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;
+/** Points taken off a lesson worked yesterday, so a skill is not pinned. */
+export const REPEAT_DAY_PENALTY = 80;
 /** Minutes that must be left over before the plan offers a further lesson. */
 export const PLAN_EXTRA_MINUTES = 12;
 /** Lessons a single day is allowed to hold, however large the budget. */
@@ -1028,6 +1078,17 @@ export function todayPlan(state: StudyState, now = new Date()) {
   // of the plan uses `history`: today's plan should not move while she works.
   const phase = examWeekPlan(history, now);
   const dueMistakes = mistakes(history, now).filter((item) => item.due);
+  // What she worked yesterday. A learner answering badly used to be handed the
+  // same Reading lesson six days running: due mistakes pile up in the lesson
+  // she just got wrong, and the bonus for them outweighed everything else, so
+  // ten other Reading lessons stayed unreachable exactly while she needed a
+  // second angle on the same skill.
+  const recentDays = [dayOffset(today, -1), dayOffset(today, -2)];
+  const yesterday = new Set(
+    history.attempts
+      .filter((attempt) => recentDays.includes(localDay(attempt.date)))
+      .map((attempt) => attempt.lessonId),
+  );
   // The two kinds of question going wrong most often. Naming the type is what
   // makes the plan actionable: "weak at Reading" is not something to practise.
   const weakTypes = weakQuestionTypes(history).slice(0, 2);
@@ -1078,6 +1139,14 @@ export function todayPlan(state: StudyState, now = new Date()) {
         (rehearsing && lesson.level === "B2" ? 18 : 0) +
         (drilling && weakHere ? 10 : 0) +
         (state.profile.level === "starting" && lesson.level === "B1" ? 10 : 0) -
+        // A lesson worked in the last two days steps aside while another
+        // lesson of its skill fits today; its mistakes stay due, and the
+        // notebook keeps serving those exact questions in the meantime. A
+        // confident error is the exception: getting something wrong while
+        // certain is the one case worth returning to the next morning.
+        (yesterday.has(lesson.id) && !confidentErrors
+          ? REPEAT_DAY_PENALTY
+          : 0) -
         done.length * 4;
       const reasons: string[] = [];
       if (weakHere)
