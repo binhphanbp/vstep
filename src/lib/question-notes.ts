@@ -1689,4 +1689,336 @@ export const questionNotes: Record<string, QuestionNote> = {
       "Đúng: là một mối quan hệ tiếp diễn, cần chăm sóc liên tục.",
     ],
   },
+  e2l1: {
+    evidence: "the library will open at seven in the morning instead of eight",
+    optionNotes: [
+      "Giờ đóng cửa vẫn là mười giờ tối như thường lệ.",
+      "Đúng: mở sớm hơn một tiếng, từ tám giờ thành bảy giờ.",
+      "Quy định trả sách không đổi.",
+      "Hộp trả sách vẫn ở cạnh cửa chính.",
+    ],
+  },
+  e2l2: {
+    evidence: "the goods lift will be reserved between eight and eleven",
+    optionNotes: [
+      "Thông báo không yêu cầu ai đổi tầng làm việc.",
+      "Đúng: tránh thang hàng trong khung giờ đó, đi thang bộ hoặc thang khách.",
+      "Hành lang ngoài phòng họp hai chỉ bị chắn một lúc; không ai phải huỷ họp.",
+      "Việc dỡ ghế là của bên giao hàng.",
+    ],
+  },
+  e2l3: {
+    evidence:
+      "Cars left in bays one to twenty must be moved before Friday evening",
+    optionNotes: [
+      "Đúng: xe đỗ ở ô số một đến hai mươi.",
+      "Ô hai mươi mốt đến bốn mươi không bị ảnh hưởng.",
+      "Chỉ một nửa bãi bị ảnh hưởng.",
+      "Thông báo không phân biệt xe của khách tới thăm.",
+    ],
+  },
+  e2l4: {
+    evidence:
+      "Bring a list of any medicines you take, including ones bought without a prescription",
+    optionNotes: [
+      "Phòng khám đã giữ sẵn kết quả xét nghiệm cũ.",
+      "Đúng: mang danh sách thuốc đang dùng, kể cả thuốc mua không cần đơn.",
+      "Không nhắc tới giấy giới thiệu của bác sĩ.",
+      "Không nhắc tới việc trả tiền mặt.",
+    ],
+  },
+  e2l5: {
+    evidence:
+      "Photography is not permitted in the textile room, where the light damages the fabric",
+    optionNotes: [
+      "Lý do không phải vì phòng chật.",
+      "Đúng: ánh sáng làm hỏng vải.",
+      "Không ai nói hiện vật là đồ đi mượn.",
+      "Không có chi tiết nào về việc chắn lối đi.",
+    ],
+  },
+  e2l6: {
+    evidence: "the class moves to the training kitchen on the ground floor",
+    optionNotes: [
+      "Không nhắc tới việc đổi giáo viên.",
+      "Đúng: lớp chuyển xuống bếp thực hành ở tầng trệt.",
+      "Thông báo nói rõ giờ học giữ nguyên.",
+      "Lớp vẫn diễn ra bình thường.",
+    ],
+  },
+  e2l7: {
+    evidence:
+      "If the water is still cloudy the next morning, please tell the office rather than the workers",
+    optionNotes: [
+      "Thợ đã rời công trường từ trước.",
+      "Đúng: báo cho văn phòng ban quản lý.",
+      "Không có khuyến cáo nào về việc đun nước.",
+      "Không ai bảo chờ thêm một ngày nữa.",
+    ],
+  },
+  e2l8: {
+    evidence:
+      "Online sales open at ten tomorrow morning, an hour earlier than advertised on the posters",
+    optionNotes: [
+      "Mỗi người vẫn mua được bốn vé.",
+      "Đúng: giờ mở bán online sớm hơn áp phích một tiếng.",
+      "Mức giảm cho sinh viên không đổi; chỉ là phải mua ở quầy.",
+      "Ngày diễn ra buổi hoà nhạc không đổi.",
+    ],
+  },
+  e2l9: {
+    evidence: "I use about eight",
+    optionNotes: [
+      "Đúng: Nam dùng khoảng tám gigabyte mỗi tháng.",
+      "Mười gigabyte là dung lượng của gói rẻ hơn.",
+      "Không có con số mười hai nào trong hội thoại.",
+      "Ba mươi là dung lượng gói hiện tại, không phải mức dùng thật.",
+    ],
+  },
+  e2l10: {
+    evidence: "If you go over, it slows down rather than charging you extra",
+    optionNotes: [
+      "Kết nối không dừng hẳn: Lan vẫn nhắn tin và đọc email được.",
+      "Đúng: tốc độ giảm chứ không bị tính thêm tiền.",
+      "Không có khoản phí nào tự động cộng thêm.",
+      "Không có chuyện tự nâng lên gói lớn hơn.",
+    ],
+  },
+  e2l11: {
+    evidence:
+      "There is a monthly option, but it costs thirty thousand more and I would not bother unless you are moving abroad",
+    optionNotes: [
+      "Lan cho rằng phần lớn mọi người không đáng trả thêm.",
+      "Đúng: chỉ hợp lý nếu sắp ra nước ngoài.",
+      "Nó đắt hơn ba mươi nghìn mỗi tháng, nên cả năm cũng đắt hơn.",
+      "Giữ số không phụ thuộc vào loại hợp đồng.",
+    ],
+  },
+  e2l12: {
+    evidence: "as long as you change inside the same company",
+    optionNotes: [
+      "Không tự động trong mọi trường hợp: chuyển nhà mạng thì phải yêu cầu.",
+      "Đúng: trong cùng nhà mạng thì đơn giản, sang nhà mạng khác mất vài ngày.",
+      "Hết hợp đồng không làm mất số.",
+      "Không ai nói giữ số tốn thêm tiền.",
+    ],
+  },
+  e2l13: {
+    evidence: "the noise made conversation impossible",
+    optionNotes: [
+      "Chỗ đó từng nhận cả đoàn hai mươi người.",
+      "Đúng: quá ồn nên không trò chuyện được.",
+      "Không ai nói nó xa văn phòng.",
+      "Món chay là chuyện của quán trên phố Nguyen Du.",
+    ],
+  },
+  e2l14: {
+    evidence: "They only hold tables for an hour at lunchtime",
+    optionNotes: [
+      "Quán vẫn mở buổi trưa.",
+      "Đúng: chỉ giữ bàn một tiếng, trong khi nhóm cần ít nhất hai tiếng.",
+      "Vấn đề là thời gian giữ bàn, không phải chuyện không nhận đặt.",
+      "Giá cả không được đem ra so sánh.",
+    ],
+  },
+  e2l15: {
+    evidence: "Three dishes, and they will make more if we ask when booking",
+    optionNotes: [
+      "Đúng: muốn thêm món chay thì phải dặn ngay lúc đặt bàn.",
+      "Không nhắc tới đặt cọc online; quán còn không nhận thẻ.",
+      "Không có yêu cầu phải đến trước buổi trưa.",
+      "Không ai nói phải tự mang đồ uống.",
+    ],
+  },
+  e2l16: {
+    evidence: "Two people are away on Friday",
+    optionNotes: [
+      "Không ai nói quán đóng cửa thứ Sáu.",
+      "Đúng: hai đồng nghiệp vắng mặt hôm thứ Sáu.",
+      "Giá không phụ thuộc vào ngày trong tuần.",
+      "Không nhắc tới việc tan làm sớm.",
+    ],
+  },
+  e2l17: {
+    evidence: "We refund in full up to seven days before the first session",
+    optionNotes: [
+      "Chưa học buổi nào không phải điều kiện được nêu.",
+      "Đúng: khoá bắt đầu sau mười một ngày, tức còn hơn bảy ngày.",
+      "Lý do đổi ca không quyết định mức hoàn tiền.",
+      "Anh ấy không chuyển đi thành phố khác.",
+    ],
+  },
+  e2l18: {
+    evidence:
+      "Transfers are free at any time, even after the course begins, as long as there is a place",
+    optionNotes: [
+      "Chuyển nhóm không mất nửa học phí.",
+      "Đúng: miễn phí bất cứ lúc nào, miễn là còn chỗ.",
+      "Chuyển được cả sau khi khoá đã bắt đầu.",
+      "Không ai yêu cầu đơn viết tay.",
+    ],
+  },
+  e2l19: {
+    evidence: "I cannot hold a place without a booking",
+    optionNotes: [
+      "Chính sách hoàn tiền tính theo ngày khai giảng, không đổi vào ngày mai.",
+      "Đúng: hai chỗ của nhóm tối có thể hết ngay trong hôm nay.",
+      "Học phí hai nhóm như nhau.",
+      "Không ai nói văn phòng đóng cửa.",
+    ],
+  },
+  e2l20: {
+    evidence:
+      "You will need the camera for the second week rather than the first",
+    optionNotes: [
+      "Đúng: máy ảnh cần từ tuần thứ hai thay vì tuần đầu.",
+      "Nhân viên nói rõ học phí như nhau.",
+      "Không ai nói khoá tối ngắn hơn.",
+      "Nhóm tối vẫn có buổi thực hành, chỉ là bắt đầu trong nhà.",
+    ],
+  },
+  e2l21: {
+    evidence: "the number you report becomes the thing you are judged on",
+    optionNotes: [
+      "Người nói không đề nghị bỏ việc cho mượn sách.",
+      "Đúng: con số mình báo cáo trở thành thứ mình bị đánh giá.",
+      "Thư viện vẫn có người tới, chỉ là vì những việc khác.",
+      "Không ai đề xuất cấp kinh phí theo lượt khách.",
+    ],
+  },
+  e2l22: {
+    evidence: "the long questions rose fastest of all",
+    optionNotes: [
+      "Lượt ghé có tăng, nhưng không nhanh nhất.",
+      "Giờ dùng máy tính cũng tăng, nhưng không nhanh nhất.",
+      "Đúng: số câu hỏi dài đặt cho nhân viên tăng nhanh nhất.",
+      "Lượt mượn sách vẫn tiếp tục giảm.",
+    ],
+  },
+  e2l23: {
+    evidence: "because we have no comparable figures from before",
+    optionNotes: [
+      "Không ai nói số liệu do tình nguyện viên thu thập.",
+      "Đúng: không có số liệu tương đương của những năm trước để so.",
+      "Hội đồng không bác bỏ báo cáo.",
+      "Chính người nói bác bỏ việc coi lượt mượn là thước đo duy nhất.",
+    ],
+  },
+  e2l24: {
+    evidence: "The funding did not increase, but it stopped being cut",
+    optionNotes: [
+      "Kinh phí không tăng.",
+      "Đúng: kinh phí thôi bị cắt, và năm đó đã là kết quả tốt hơn.",
+      "Không có chuyện chuyển sang toà nhà lớn hơn.",
+      "Không nhắc tới việc giảm nhân sự.",
+    ],
+  },
+  e2l25: {
+    evidence: "we were counting the one activity that had moved online",
+    optionNotes: [
+      "Không ai nói số liệu bị ghi sai.",
+      "Đúng: nó đo đúng hoạt động đã chuyển lên mạng.",
+      "Giờ mở cửa không được nêu là nguyên nhân.",
+      "Lượt mượn vẫn giảm sau khi đổi cách đo.",
+    ],
+  },
+  e2l26: {
+    evidence:
+      "there was nowhere else to stop, and a delivery takes four minutes",
+    optionNotes: [
+      "Không ai nói xe buýt quá khổ so với làn.",
+      "Đúng: xe giao hàng không còn chỗ nào khác để dừng.",
+      "Người nói nói rõ tài xế không cố tình gây khó.",
+      "Màu sơn của làn đường không liên quan.",
+    ],
+  },
+  e2l27: {
+    evidence:
+      "putting buses in the middle means building islands for passengers to wait on",
+    optionNotes: [
+      "Đúng: phải xây đảo chờ cho hành khách.",
+      "Không nhắc tới việc mở rộng lòng đường.",
+      "Không nhắc tới việc mua thêm xe buýt.",
+      "Vỉa hè chỉ xuất hiện trong lời cảnh báo về phố hẹp.",
+    ],
+  },
+  e2l28: {
+    evidence:
+      "I would rather report both numbers than the first alone, because the second explains the first",
+    optionNotes: [
+      "Không phải vì hội đồng yêu cầu.",
+      "Đúng: con số thứ hai giải thích con số thứ nhất.",
+      "Không ai nói con số đầu không đáng tin.",
+      "Việc thu thập cùng lúc không phải lý do.",
+    ],
+  },
+  e2l29: {
+    evidence: "This worked on a wide street with space for islands",
+    optionNotes: [
+      "Đúng: thiết kế này cần một con phố đủ rộng.",
+      "Người nói không phản đối làn sơn nói chung.",
+      "Không ai đề nghị cấm hẳn việc giao hàng.",
+      "Thời gian hành trình vẫn đo được: đã giảm khoảng một phần năm.",
+    ],
+  },
+  e2l30: {
+    evidence:
+      "It is that a lane fails where the vehicles it excludes have nowhere else to go",
+    optionNotes: [
+      "Người nói nói rõ bài học không phải là đặt làn buýt vào giữa đường.",
+      "Đúng: làn đường thất bại khi loại xe bị loại trừ không còn chỗ nào khác.",
+      "Sơn rẻ hơn xây, nhưng đó không phải bài học được rút ra.",
+      "Bài nói không xếp hạng hai thứ đó hơn kém nhau.",
+    ],
+  },
+  e2l31: {
+    evidence:
+      "The trained team worked mornings; the untrained team worked nights",
+    optionNotes: [
+      "Đúng: hai nhóm làm hai ca khác nhau, nên phép so đo ca chứ không đo khoá học.",
+      "Độ dài khoá học không được nêu là vấn đề.",
+      "Không có chi tiết nào về cách ghi số lỗi.",
+      "Sáu tuần không phải điều bị chê.",
+    ],
+  },
+  e2l32: {
+    evidence:
+      "it disappeared after four months unless people had a short practical session in between",
+    optionNotes: [
+      "Vẫn có giảm, chỉ là ít hơn nhiều.",
+      "Đúng: mức giảm nhỏ hơn và mất dần nếu không có buổi thực hành xen giữa.",
+      "Mức giảm nhỏ hơn lần thử đầu tiên.",
+      "Kết quả không phân biệt nhân viên mới hay cũ.",
+    ],
+  },
+  e2l33: {
+    evidence:
+      "the only way to find out is to let someone who knows the work look at your design",
+    optionNotes: [
+      "Không ai nói ai trả tiền cho thử nghiệm.",
+      "Đúng: người hiểu công việc chính là người phát hiện lỗi thiết kế.",
+      "Khoá học không bị chê là thiết kế tệ.",
+      "Không có lời chỉ trích nào nhắm vào bộ phận đào tạo.",
+    ],
+  },
+  e2l34: {
+    evidence:
+      "That is a less exciting finding, and it is the one we published internally",
+    optionNotes: [
+      "Kết quả hấp dẫn không được coi là thứ đáng công bố hơn.",
+      "Đúng: chúng thường đến từ một phép so sánh đang đo nhầm thứ khác.",
+      "Người nói không nói nghiên cứu đào tạo không thể có kết quả hấp dẫn.",
+      "Không có chi tiết nào về thứ tự báo cáo cho quản lý.",
+    ],
+  },
+  e2l35: {
+    evidence:
+      "It is that the first version of almost any comparison is measuring something you did not intend",
+    optionNotes: [
+      "Người nói nói rõ cái chậm không nằm ở khâu chạy thử nghiệm.",
+      "Đúng: phiên bản đầu của hầu hết phép so sánh đang đo nhầm thứ khác.",
+      "Không nhắc tới việc nhân viên ngại bị quan sát.",
+      "Không có yêu cầu lặp lại ba lần.",
+    ],
+  },
 };
