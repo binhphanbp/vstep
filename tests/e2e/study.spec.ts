@@ -138,6 +138,22 @@ test("reading draft survives reload, scoring is correct, mistakes get reviewed",
   await expect(page.locator(".option-notes").first()).toContainText(
     `Vì sao ${letter(key("rc1"))} đúng:`,
   );
+  // A wrong answer now ends with one concrete thing to do about it. With no
+  // earlier history the honest step is the notebook, not a diagnosis.
+  const step = page
+    .locator(".question")
+    .filter({ has: page.locator('input[name="rc1"]') })
+    .locator(".next-step");
+  await expect(step).toContainText("Bước tiếp theo:");
+  await expect(step).toContainText("Rất chắc");
+  await expect(step.getByRole("link", { name: "Mở Sổ lỗi" })).toBeVisible();
+  // The questions she answered right carry no suggestion at all.
+  await expect(
+    page
+      .locator(".question")
+      .filter({ has: page.locator('input[name="rc2"]') })
+      .locator(".next-step"),
+  ).toHaveCount(0);
   await page.getByRole("link", { name: "Mở sổ tay lỗi sai" }).click();
   await expect(page.getByText("1 câu đang cần sửa")).toBeVisible();
   await expect(page.getByText("Ưu tiên · Đã rất chắc")).toBeVisible();

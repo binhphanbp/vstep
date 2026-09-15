@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 146 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 150 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -211,9 +211,17 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Một chỗ chứa cho phần Nghe.** Đề 02 vốn viết chú giải ngay cạnh ngữ liệu; helper `ask()` nay đọc thêm từ `question-notes.ts`, nên toàn bộ chú giải phần Nghe của cả hai đề nằm cùng một chỗ với thư viện. Chú giải là lớp mô tả nội dung đã phát hành nên **không** tạo version mới — đúng quy ước cũ.
 - **Phủ 176 → 258/258 câu.** Kiểm thử sẵn có đối chiếu từng trích dẫn với transcript nên một trích dẫn sai chính tả là đỏ ngay; thêm một ca mới chặn mọi câu hỏi thiếu bằng chứng hoặc thiếu đủ bốn ghi chú, để mức phủ này không tụt lại.
 
+## Sau kế hoạch: một bước đi tiếp sau mỗi lỗi, và kế hoạch không ghim vào một bài
+
+- **Vòng chữa bài dừng ở chỗ giải thích.** Nay mỗi câu trả lời sai kết bằng đúng một việc cụ thể, lấy từ lịch sử của chính người học: dạng câu đang sai bao nhiêu trên bao nhiêu và bài nào có nhiều câu cùng dạng nhất (kèm liên kết), hoặc — khi chưa đủ bằng chứng — nói thẳng câu này đã vào Sổ lỗi và sẽ quay lại theo lịch. Câu đã chọn "Rất chắc" mà sai được gọi đúng tên: chỗ hiểu lệch, không phải lỡ tay. Ngưỡng `TYPE_STEP_MINIMUM = 2` giữ đúng quy tắc cũ: không chẩn đoán khi chưa đủ dữ liệu. Đây là phần **"gợi ý bước luyện tiếp"** còn treo của P1-03.
+- **Kế hoạch ngày từng bị ghim vào một bài.** Đo bằng mô phỏng 14 ngày của một người trả lời sai một nửa: `reading-cafe` được đề nghị **6 ngày liên tiếp**, và trong cả hai tuần chỉ **2 bài Đọc** xuất hiện trong khi 10 bài khác không bao giờ tới lượt — lỗi đến hạn dồn vào đúng bài vừa sai, và điểm thưởng cho chúng át mọi thứ khác.
+- **Sửa:** bài đã học trong hai ngày gần nhất bị trừ `REPEAT_DAY_PENALTY = 80` điểm, trừ khi nó chứa câu sai dù đã chọn "Rất chắc" — loại lỗi đó vẫn đáng quay lại ngay sáng hôm sau. Lỗi trong bài bị hoãn không mất đi: Sổ lỗi vẫn phục vụ đúng những câu ấy mỗi ngày.
+- **Đo lại cùng mô phỏng:** không còn bài nào lặp hai ngày liền; số bài Đọc khác nhau trong 14 ngày **2 → 5**, Nghe 12, Nói 9.
+- 4 ca unit mới: bước tiếp theo chỉ chẩn đoán dạng câu khi đã đủ bằng chứng và không chỉ ngược về bài đang làm; khi chưa đủ thì nói đúng chuyện Sổ lỗi; câu "Rất chắc" có lời riêng; và kế hoạch không đưa cùng một bài Đọc hai ngày liền. Ca E2E của vòng chữa bài kiểm thêm khối "Bước tiếp theo" và kiểm rằng câu làm đúng thì không có khối ấy.
+
 ## Bằng chứng kiểm tra
 
-- 146 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 150 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 54 kiểm thử Playwright trên bản production: 50 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

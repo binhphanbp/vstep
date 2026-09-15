@@ -21,11 +21,13 @@ import {
   type Skill,
 } from "@/lib/content";
 import {
+  nextStep,
   objectiveInsights,
   scoreAnswers,
   wordCount,
   type Attempt,
   type Confidence,
+  type NextStep,
 } from "@/lib/learning";
 import { provenanceFor, provenanceLabel } from "@/lib/provenance";
 import {
@@ -177,6 +179,7 @@ export function QuestionCard({
   confidence,
   onConfidence,
   skill,
+  step,
 }: {
   question: Question;
   index: number;
@@ -186,6 +189,8 @@ export function QuestionCard({
   confidence?: Confidence;
   onConfidence?: (value: Confidence) => void;
   skill?: Skill;
+  /** One concrete thing to do about this question, shown only when wrong. */
+  step?: NextStep;
 }) {
   const notes = question.optionNotes;
   const others = notes
@@ -301,6 +306,15 @@ export function QuestionCard({
             </details>
           )}
         </div>
+      )}
+      {submitted && step && chosen !== question.answer && (
+        <p className="next-step">
+          <strong>Bước tiếp theo:</strong> {step.text}{" "}
+          <Link className="text-link" href={step.href}>
+            {step.label}
+            <ArrowRight size={15} />
+          </Link>
+        </p>
       )}
     </fieldset>
   );
@@ -655,6 +669,14 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               submitted={Boolean(result)}
               skill={lesson.skill}
               confidence={confidence[q.id]}
+              // The suggestion reads the history as it was before this
+              // session was filed, so it never cites the attempt she is
+              // looking at as evidence about herself.
+              step={
+                result
+                  ? nextStep(state, q, lesson.id, confidence[q.id])
+                  : undefined
+              }
               onChoose={(value) => {
                 update((s) => {
                   const current = readQuizDraft(

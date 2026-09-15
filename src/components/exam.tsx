@@ -9,7 +9,12 @@ import {
   Timer,
 } from "lucide-react";
 import { useStudy } from "./study-provider";
-import { advanceExam, getExamStages, wordCount } from "@/lib/learning";
+import {
+  advanceExam,
+  getExamStages,
+  nextStep,
+  wordCount,
+} from "@/lib/learning";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
@@ -427,6 +432,7 @@ export function ExamPage() {
                     chosen={exam.answers[q.id]}
                     submitted
                     skill={lesson.skill}
+                    step={nextStep(state, q, lesson.id)}
                     onChoose={() => {}}
                   />
                 ))}
