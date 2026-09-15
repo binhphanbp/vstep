@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
+import { allLessons } from "../../src/lib/full-exam-content";
 /** Read the keys from the content so a change of option order cannot lie. */
 const question = (id: string) => {
   const found = lessons
@@ -843,4 +844,41 @@ test("a lost phone: export, wipe everything, import, history intact", async ({
   await expect(page.locator("textarea")).toHaveValue(
     "Hi Alex, I am still writing this.",
   );
+});
+
+test("a bad paper does not turn the notebook into a wall", async ({ page }) => {
+  // One full paper answered badly files 75 cards at once. The notebook shows
+  // the ones worth doing first and asks before unrolling the rest.
+  const state = freshState();
+  const paper = allLessons.filter(
+    (lesson) => lesson.id.startsWith("full-") && lesson.questions.length,
+  );
+  state.attempts = paper.map((lesson) => ({
+    id: `exam:s1:${lesson.id}`,
+    lessonId: lesson.id,
+    skill: lesson.skill,
+    date: "2026-09-10T02:00:00.000Z",
+    answers: Object.fromEntries(
+      lesson.questions.map((q) => [q.id, (q.answer + 1) % q.options.length]),
+    ),
+    correct: 0,
+    total: lesson.questions.length,
+    seconds: 600,
+    lessonRef: `${lesson.id}@v${lesson.version}`,
+  }));
+  state.library = Object.fromEntries(
+    paper.map((lesson) => [`${lesson.id}@v${lesson.version}`, lesson]),
+  );
+  await page.addInitScript(
+    (value) => localStorage.setItem("may-study-v1", JSON.stringify(value)),
+    state,
+  );
+  await page.goto("/mistakes");
+  await expect(page.getByText("75 câu đang cần sửa")).toBeVisible();
+  const cards = page
+    .locator(".stack > .panel")
+    .filter({ hasText: "Mở bài gốc" });
+  await expect(cards).toHaveCount(10);
+  await page.getByRole("button", { name: /Xem thêm 10 câu/ }).click();
+  await expect(cards).toHaveCount(20);
 });

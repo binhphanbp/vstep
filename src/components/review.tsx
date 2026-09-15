@@ -394,9 +394,20 @@ function WeakSpots() {
     </section>
   );
 }
+/**
+ * How many cards the notebook shows before asking whether to show more.
+ *
+ * One full paper answered badly files seventy-five cards at once — measured,
+ * not guessed — and the page rendered every one of them, each carrying its own
+ * passage or transcript. On a phone that is a wall rather than a notebook. The
+ * order is unchanged (confident mistakes first, then the ones repeated most),
+ * so the ones worth doing first are the ones on screen.
+ */
+const MISTAKE_PAGE = 10;
 export function MistakesPage() {
   const { state, update, toast } = useStudy();
   const [filter, setFilter] = useState<"due" | "all">("due");
+  const [shown, setShown] = useState(MISTAKE_PAGE);
   const [now, setNow] = useState(() => Date.now());
   const [chosen, setChosen] = useState<Record<string, number>>({});
   const [revealed, setRevealed] = useState<string[]>([]);
@@ -470,7 +481,7 @@ export function MistakesPage() {
       </div>
       {filtered.length ? (
         <div className="stack">
-          {filtered.map((item, i) => {
+          {filtered.slice(0, shown).map((item, i) => {
             const seen = revealed.includes(item.key);
             return (
               <section className="panel" key={item.key}>
@@ -585,6 +596,21 @@ export function MistakesPage() {
               </section>
             );
           })}
+          {filtered.length > shown ? (
+            <div className="panel" style={{ textAlign: "center" }}>
+              <p className="help-copy">
+                Đang hiện {shown} trong {filtered.length} câu. Sổ xếp câu sai dù
+                đã chọn “Rất chắc” lên trước, rồi tới câu sai nhiều lần nhất.
+              </p>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => setShown((count) => count + MISTAKE_PAGE)}
+              >
+                Xem thêm {Math.min(MISTAKE_PAGE, filtered.length - shown)} câu
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="empty-state">
