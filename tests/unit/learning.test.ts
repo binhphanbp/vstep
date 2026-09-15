@@ -26,6 +26,8 @@ import {
   stateSchema,
   streak,
   todayPlan,
+  attemptLesson,
+  libraryKey,
   nextStep,
   TYPE_STEP_MINIMUM,
   openVocabulary,
@@ -453,12 +455,16 @@ describe("adaptive plan and memory scheduling", () => {
       lesson.questions[0].answer = (originalAnswer + 1) % 4;
       lesson.title = "A later editorial title";
       expect(mistakes(saved)).toHaveLength(0);
-      expect(saved.attempts[0].lessonSnapshot).toMatchObject({
+      // The copy now lives once in the shared library and the attempt points
+      // at it; what it must still guarantee is unchanged.
+      const kept = attemptLesson(saved, saved.attempts[0])!;
+      expect(kept).toMatchObject({
         version: lesson.version,
         title: originalTitle,
       });
-      expect(saved.attempts[0].lessonSnapshot?.questions[0].answer).toBe(
-        originalAnswer,
+      expect(kept.questions[0].answer).toBe(originalAnswer);
+      expect(saved.attempts[0].lessonRef).toBe(
+        libraryKey("reading-cafe", lesson.version),
       );
     } finally {
       lesson.questions[0].answer = originalAnswer;
@@ -473,11 +479,23 @@ describe("adaptive plan and memory scheduling", () => {
         correct: 4,
       }),
     ).attempts[0];
-    const second = structuredClone(first);
-    second.id = "version-two";
-    second.lessonSnapshot!.version = first.lessonSnapshot!.version + 1;
+    const saved = recordAttempt(
+      freshState(),
+      attempt(now.toISOString(), { answers: missing(["rc1"]), correct: 4 }),
+    );
+    const worked = attemptLesson(saved, first)!;
+    const newer = { ...structuredClone(worked), version: worked.version + 1 };
+    const second = {
+      ...structuredClone(first),
+      id: "version-two",
+      lessonRef: libraryKey(newer.id, newer.version),
+    };
     const s = freshState();
     s.attempts = [first, second];
+    s.library = {
+      ...saved.library,
+      [libraryKey(newer.id, newer.version)]: newer,
+    };
     const errors = mistakes(s);
     expect(errors).toHaveLength(2);
     expect(new Set(errors.map((item) => item.key)).size).toBe(2);
@@ -749,22 +767,44 @@ describe("content and backup integrity", () => {
   });
   it("rejects inconsistent lesson snapshots in imported history", () => {
     const saved = recordAttempt(freshState(), attempt(now.toISOString()));
+    const ref = saved.attempts[0].lessonRef!;
+    const shared = () => saved.library![ref];
+    expect(stateSchema.safeParse(saved).success).toBe(true);
+
     const invalidAnswer = structuredClone(saved);
-    invalidAnswer.attempts[0].lessonSnapshot!.questions[0].answer = 7;
+    invalidAnswer.library![ref].questions[0].answer = 7;
     expect(stateSchema.safeParse(invalidAnswer).success).toBe(false);
 
+    // A backup that points an attempt at another lesson is rejected, whether
+    // the copy travels on the attempt or in the shared library.
     const mismatchedLesson = structuredClone(saved);
-    mismatchedLesson.attempts[0].lessonSnapshot!.id = "another-lesson";
+    mismatchedLesson.library![ref].id = "another-lesson";
     expect(stateSchema.safeParse(mismatchedLesson).success).toBe(false);
 
     const mismatchedScore = structuredClone(saved);
     mismatchedScore.attempts[0].correct = 0;
     expect(stateSchema.safeParse(mismatchedScore).success).toBe(false);
 
+    const shortened = structuredClone(saved);
+    shortened.library![ref].questions.pop();
+    expect(stateSchema.safeParse(shortened).success).toBe(false);
+
     const duplicateOption = structuredClone(saved);
-    duplicateOption.attempts[0].lessonSnapshot!.questions[0].options[1] =
-      duplicateOption.attempts[0].lessonSnapshot!.questions[0].options[0];
+    duplicateOption.library![ref].questions[0].options[1] =
+      shared().questions[0].options[0];
     expect(stateSchema.safeParse(duplicateOption).success).toBe(false);
+
+    // And an attempt carrying its own copy, as every older one does, is still
+    // checked exactly as before.
+    const legacy = structuredClone(saved);
+    legacy.attempts[0] = {
+      ...legacy.attempts[0],
+      lessonRef: undefined,
+      lessonSnapshot: structuredClone(shared()),
+    };
+    expect(stateSchema.safeParse(legacy).success).toBe(true);
+    legacy.attempts[0].lessonSnapshot!.id = "another-lesson";
+    expect(stateSchema.safeParse(legacy).success).toBe(false);
   });
   it("upgrades compatible legacy history and active exams to frozen content", () => {
     const legacy = freshState();
@@ -779,7 +819,7 @@ describe("content and backup integrity", () => {
       finished: false,
     };
     const upgraded = personalizeLegacyState(legacy);
-    expect(upgraded.attempts[0].lessonSnapshot).toMatchObject({
+    expect(attemptLesson(upgraded, upgraded.attempts[0])).toMatchObject({
       id: "reading-cafe",
       version: lessons.find((item) => item.id === "reading-cafe")!.version,
     });
@@ -1383,5 +1423,75 @@ describe("a skill is not pinned to one lesson", () => {
     expect(new Set(seen).size).toBeGreaterThanOrEqual(3);
     for (let index = 1; index < seen.length; index++)
       expect(seen[index]).not.toBe(seen[index - 1]);
+  });
+});
+
+describe("the saved history stops paying for the same lesson twice", () => {
+  const study = (days: number) => {
+    let state = freshState();
+    for (let day = 0; day < days; day++) {
+      const at = new Date(
+        Date.parse("2026-09-15T08:00:00+07:00") + day * 86400000,
+      );
+      for (const lesson of todayPlan(state, at).lessons)
+        state = recordAttempt(state, {
+          id: `d${day}:${lesson.id}`,
+          lessonId: lesson.id,
+          skill: lesson.skill,
+          date: at.toISOString(),
+          correct: lesson.questions.length,
+          total: lesson.questions.length,
+          seconds: lesson.minutes * 60,
+          answers: Object.fromEntries(
+            lesson.questions.map((item) => [item.id, item.answer]),
+          ),
+        });
+    }
+    return state;
+  };
+  it("files each lesson version once, however often it is worked", () => {
+    const state = study(30);
+    const worked = new Set(state.attempts.map((a) => a.lessonRef));
+    expect(state.attempts.length).toBeGreaterThan(worked.size);
+    expect(Object.keys(state.library ?? {}).length).toBe(worked.size);
+    // Measured before this: 306 KB after a month, 980 KB after three, on a
+    // 5 MB localStorage budget.
+    expect(JSON.stringify(state).length).toBeLessThan(250000);
+    expect(stateSchema.safeParse(state).success).toBe(true);
+  });
+  it("still shows each attempt the material it was worked on", () => {
+    const state = study(3);
+    for (const filed of state.attempts) {
+      const lesson = attemptLesson(state, filed)!;
+      expect(lesson.id).toBe(filed.lessonId);
+      expect(lesson.questions.length).toBe(filed.total);
+    }
+  });
+  it("compacts a history that still carries its own copies", () => {
+    const legacy = freshState();
+    const lesson = lessons.find((item) => item.id === "reading-cafe")!;
+    legacy.attempts = [
+      attempt("2026-09-05T10:00:00Z", {
+        id: "one",
+        lessonSnapshot: structuredClone(lesson),
+      }),
+      attempt("2026-09-06T10:00:00Z", {
+        id: "two",
+        lessonSnapshot: structuredClone(lesson),
+      }),
+    ];
+    const before = JSON.stringify(legacy).length;
+    const after = personalizeLegacyState(legacy);
+    expect(after.attempts.every((item) => !item.lessonSnapshot)).toBe(true);
+    expect(Object.keys(after.library ?? {})).toEqual([
+      libraryKey("reading-cafe", lesson.version),
+    ]);
+    expect(JSON.stringify(after).length).toBeLessThan(before);
+    // Nothing about what she did changed.
+    expect(attemptLesson(after, after.attempts[0])).toMatchObject({
+      id: "reading-cafe",
+      version: lesson.version,
+    });
+    expect(stateSchema.safeParse(after).success).toBe(true);
   });
 });

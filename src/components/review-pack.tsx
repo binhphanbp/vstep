@@ -5,9 +5,8 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, Printer } from "lucide-react";
 import { useStudy } from "./study-provider";
 import { criteriaFor, SELF_CHECK_DISCLAIMER } from "@/lib/criteria";
-import { allLessons } from "@/lib/full-exam-content";
 import { skillNames } from "@/lib/content";
-import type { Attempt } from "@/lib/learning";
+import { attemptLesson, type Attempt } from "@/lib/learning";
 /**
  * One page a teacher can mark by hand.
  *
@@ -24,9 +23,7 @@ export function ReviewPackPage() {
   const params = useSearchParams();
   const id = params.get("attempt") ?? "";
   const attempt = state.attempts.find((item) => item.id === id);
-  const lesson =
-    attempt?.lessonSnapshot ??
-    allLessons.find((item) => item.id === attempt?.lessonId);
+  const lesson = attempt ? attemptLesson(state, attempt) : undefined;
   if (!attempt || !lesson)
     return (
       <div className="page">
