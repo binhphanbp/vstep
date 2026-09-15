@@ -1,5 +1,11 @@
 import * as z from "zod/mini";
-import { lessons, vocabulary, type Question, type Skill } from "./content";
+import {
+  lessons,
+  vocabulary,
+  type Question,
+  type Skill,
+  type Vocabulary,
+} from "./content";
 import { allLessons, fullListening, fullReading } from "./full-exam-content";
 import {
   fullListening2,
@@ -619,7 +625,7 @@ export function examWeekPlan(
   const weeks = Math.ceil(days / 7);
   const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
   const unseen = lessons.filter((lesson) => !met.has(lesson.id)).length;
-  const dueWords = vocabulary.filter((word) => {
+  const dueWords = openVocabulary(state).filter((word) => {
     const review = state.reviews[word.id];
     return !review || Date.parse(review.due) <= now.getTime();
   }).length;
@@ -808,7 +814,7 @@ export function quickSession(
       );
     })[0] ?? null;
   if (!lesson) return null;
-  const words = vocabulary
+  const words = openVocabulary(state)
     .filter((word) => {
       const review = state.reviews[word.id];
       return !review || Date.parse(review.due) <= now.getTime();
@@ -984,6 +990,19 @@ export function compareSittings(state: StudyState): SittingComparison | null {
     // is the difference between a measurement and a flattering number.
     comparable: before.paper !== after.paper,
   };
+}
+/**
+ * The cards she can meet today.
+ *
+ * Most cards now quote a sentence from a particular lesson. Showing such a
+ * card before she has read that lesson turns a remembered sentence back into
+ * an isolated word, so a sourced card waits until its lesson has been worked
+ * at least once. The twenty cards written before this have no source and are
+ * always in the deck.
+ */
+export function openVocabulary(state: StudyState): Vocabulary[] {
+  const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
+  return vocabulary.filter((word) => !word.source || met.has(word.source));
 }
 /** Days a lesson too long for the daily budget waits before being offered. */
 const LONG_SESSION_REST_DAYS = 14;

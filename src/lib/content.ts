@@ -2118,6 +2118,14 @@ export type Vocabulary = {
   meaning: string;
   example: string;
   topic: string;
+  /**
+   * The lesson this word was taken from, when it was. The example is then the
+   * sentence she actually met, quoted exactly, and the card only joins the
+   * deck once she has worked that lesson — a card for a passage she has never
+   * read is a flashcard, not a memory. Cards written before this existed have
+   * no source and are always available.
+   */
+  source?: string;
 };
 export const vocabulary: Vocabulary[] = [
   {
@@ -2280,6 +2288,480 @@ export const vocabulary: Vocabulary[] = [
     meaning: "giữ liên lạc",
     example: "We keep in touch even though we live in different cities.",
     topic: "Cuộc sống Sài Gòn",
+  },
+  {
+    id: "v21",
+    word: "realised",
+    ipa: "/ˈrɪəlaɪzd/",
+    meaning: "đã nhận ra",
+    example:
+      "Linh realised that she was offering more than coffee: she was providing a place to learn.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "reading-cafe",
+  },
+  {
+    id: "v22",
+    word: "reserve",
+    ipa: "/rɪˈzɜːv/",
+    meaning: "dành riêng, giữ chỗ",
+    example:
+      "She decided to reserve the upstairs room for quiet study between two and six in the afternoon.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "reading-cafe",
+  },
+  {
+    id: "v23",
+    word: "congestion",
+    ipa: "/kənˈdʒestʃən/",
+    meaning: "tình trạng tắc nghẽn",
+    example:
+      "For years, urban planners assumed that adding more roads would solve congestion.",
+    topic: "Giao thông",
+    source: "reading-commute",
+  },
+  {
+    id: "v24",
+    word: "alternatives",
+    ipa: "/ɔːlˈtɜːnətɪvz/",
+    meaning: "những lựa chọn thay thế",
+    example:
+      "A lasting solution, they argue, requires attractive alternatives rather than simply more space for cars.",
+    topic: "Giao thông",
+    source: "reading-commute",
+  },
+  {
+    id: "v25",
+    word: "familiarity",
+    ipa: "/fəˌmɪliˈærəti/",
+    meaning: "cảm giác quen thuộc",
+    example:
+      "But familiarity is not the same as the ability to recall information later.",
+    topic: "Giáo dục",
+    source: "reading-memory",
+  },
+  {
+    id: "v26",
+    word: "retrieval",
+    ipa: "/rɪˈtriːvl/",
+    meaning: "việc gọi lại thông tin từ trí nhớ",
+    example: "Retrieval practice takes the opposite approach.",
+    topic: "Giáo dục",
+    source: "reading-memory",
+  },
+  {
+    id: "v27",
+    word: "permission",
+    ipa: "/pəˈmɪʃn/",
+    meaning: "sự cho phép",
+    example:
+      "They asked the building manager for permission and agreed to keep a clear path for emergency access.",
+    topic: "Môi trường",
+    source: "reading-garden",
+  },
+  {
+    id: "v28",
+    word: "permanent",
+    ipa: "/ˈpɜːmənənt/",
+    meaning: "lâu dài, cố định",
+    example:
+      "The manager approved a six-month trial rather than a permanent arrangement.",
+    topic: "Môi trường",
+    source: "reading-garden",
+  },
+  {
+    id: "v29",
+    word: "dawn",
+    ipa: "/dɔːn/",
+    meaning: "rạng sáng",
+    example:
+      "Far less is written about the people who keep a hospital running between midnight and dawn.",
+    topic: "Công việc",
+    source: "reading-nightshift",
+  },
+  {
+    id: "v30",
+    word: "equipment",
+    ipa: "/ɪˈkwɪpmənt/",
+    meaning: "thiết bị",
+    example:
+      "In a medium-sized hospital in Da Nang, the night team is five people: two nurses, a pharmacist, a cleaner, and a technician who repairs equipment when it fails at the worst possible moment.",
+    topic: "Công việc",
+    source: "reading-nightshift",
+  },
+  {
+    id: "v31",
+    word: "questioned",
+    ipa: "/ˈkwestʃənd/",
+    meaning: "đặt dấu hỏi, nghi ngờ",
+    example:
+      "For years Mrs Tam sold vegetables on this schedule and never questioned it.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "reading-market",
+  },
+  {
+    id: "v32",
+    word: "crowded",
+    ipa: "/ˈkraʊdɪd/",
+    meaning: "đông đúc",
+    example:
+      "By six the aisles are crowded; by eleven many stalls are quiet again.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "reading-market",
+  },
+  {
+    id: "v33",
+    word: "criticisms",
+    ipa: "/ˈkrɪtɪsɪzəmz/",
+    meaning: "lời chê, ý kiến phê bình",
+    example:
+      "The comments were friendly but repeated the same criticisms: breakfast was slow, and the family seemed tired.",
+    topic: "Du lịch",
+    source: "reading-homestay",
+  },
+  {
+    id: "v34",
+    word: "survive",
+    ipa: "/səˈvaɪv/",
+    meaning: "tồn tại, trụ được",
+    example:
+      "The family did not complain, because they believed a small homestay had to please everyone in order to survive.",
+    topic: "Du lịch",
+    source: "reading-homestay",
+  },
+  {
+    id: "v35",
+    word: "assumption",
+    ipa: "/əˈsʌmpʃn/",
+    meaning: "giả định",
+    example:
+      "For shift workers, parents of small children and students who study after work, that assumption rarely holds.",
+    topic: "Sức khoẻ",
+    source: "reading-sleep",
+  },
+  {
+    id: "v36",
+    word: "cancelled",
+    ipa: "/ˈkænsld/",
+    meaning: "đã bị huỷ",
+    example:
+      "Meetings before ten in the morning were cancelled unless a client insisted.",
+    topic: "Sức khoẻ",
+    source: "reading-sleep",
+  },
+  {
+    id: "v37",
+    word: "underlined",
+    ipa: "/ˌʌndəˈlaɪnd/",
+    meaning: "được gạch chân",
+    example:
+      "Instead of a new sheet each week, students received their own work from the previous week with three sentences underlined.",
+    topic: "Giáo dục",
+    source: "reading-tutor",
+  },
+  {
+    id: "v38",
+    word: "complaints",
+    ipa: "/kəmˈpleɪnts/",
+    meaning: "lời phàn nàn",
+    example:
+      "Quyen let them keep both for a fortnight, and slowly the complaints changed shape: students began arguing with one another about why a sentence had been marked.",
+    topic: "Giáo dục",
+    source: "reading-tutor",
+  },
+  {
+    id: "v39",
+    word: "weaknesses",
+    ipa: "/ˈwiːknəsɪz/",
+    meaning: "điểm yếu",
+    example: "Volunteer measurements have obvious weaknesses.",
+    topic: "Môi trường",
+    source: "reading-river",
+  },
+  {
+    id: "v40",
+    word: "clarity",
+    ipa: "/ˈklærəti/",
+    meaning: "độ trong (của nước); sự rõ ràng",
+    example:
+      "In twenty minutes they record water temperature, clarity and two chemical readings, then send a photograph of the page to a shared folder.",
+    topic: "Môi trường",
+    source: "reading-river",
+  },
+  {
+    id: "v41",
+    word: "junction",
+    ipa: "/ˈdʒʌŋkʃn/",
+    meaning: "ngã giao, nút giao thông",
+    example:
+      "To enter the lane, a rider had to cross two lanes of traffic; to leave it, they had to stop at a junction with no space to wait.",
+    topic: "Giao thông",
+    source: "reading-bikes",
+  },
+  {
+    id: "v42",
+    word: "pavement",
+    ipa: "/ˈpeɪvmənt/",
+    meaning: "vỉa hè",
+    example:
+      "Six months later, counts showed fewer than thirty riders a day, while the pavement beside it was crowded with people pushing bicycles.",
+    topic: "Giao thông",
+    source: "reading-bikes",
+  },
+  {
+    id: "v43",
+    word: "candidates",
+    ipa: "/ˈkændɪdəts/",
+    meaning: "ứng viên",
+    example:
+      "A small logistics company became interested in the last few minutes instead, when candidates are invited to ask questions of their own.",
+    topic: "Công việc",
+    source: "reading-interview",
+  },
+  {
+    id: "v44",
+    word: "confirming",
+    ipa: "/kənˈfɜːmɪŋ/",
+    meaning: "xác nhận (điều đã nghĩ sẵn)",
+    example:
+      "The company had noticed that its interviewers formed an opinion quickly and spent the rest of the hour confirming it.",
+    topic: "Công việc",
+    source: "reading-interview",
+  },
+  {
+    id: "v45",
+    word: "forecast",
+    ipa: "/ˈfɔːkɑːst/",
+    meaning: "được dự báo",
+    example:
+      "If heavy rain is forecast, we will send you a cancellation email by seven on Saturday morning.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "listening-weekend",
+  },
+  {
+    id: "v46",
+    word: "originally",
+    ipa: "/əˈrɪdʒənəli/",
+    meaning: "ban đầu",
+    example:
+      "We were originally going to meet outside the city museum at eight thirty, but the museum entrance is being repaired.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "listening-weekend",
+  },
+  {
+    id: "v47",
+    word: "reserved",
+    ipa: "/rɪˈzɜːvd/",
+    meaning: "đã được giữ chỗ trước",
+    example: "You cannot renew a book if another reader has reserved it.",
+    topic: "Giáo dục",
+    source: "listening-library",
+  },
+  {
+    id: "v48",
+    word: "willingness",
+    ipa: "/ˈwɪlɪŋnəs/",
+    meaning: "sự sẵn lòng",
+    example:
+      "You do not need to bring a finished story, just a notebook and a willingness to share ideas.",
+    topic: "Giáo dục",
+    source: "listening-library",
+  },
+  {
+    id: "v49",
+    word: "donations",
+    ipa: "/dəʊˈneɪʃnz/",
+    meaning: "khoản đóng góp",
+    example: "Most events are free, although donations help pay for materials.",
+    topic: "Môi trường",
+    source: "listening-repair",
+  },
+  {
+    id: "v50",
+    word: "encouraged",
+    ipa: "/ɪnˈkʌrɪdʒd/",
+    meaning: "được khuyến khích",
+    example:
+      "Owners are encouraged to take part so that they understand the repair and can attempt similar work in future.",
+    topic: "Môi trường",
+    source: "listening-repair",
+  },
+  {
+    id: "v51",
+    word: "productivity",
+    ipa: "/ˌprɒdʌkˈtɪvəti/",
+    meaning: "năng suất",
+    example:
+      "Productivity remained roughly unchanged, which surprised managers who had expected it to fall.",
+    topic: "Công việc",
+    source: "listening-flexible",
+  },
+  {
+    id: "v52",
+    word: "contracted",
+    ipa: "/kənˈtræktɪd/",
+    meaning: "theo hợp đồng",
+    example:
+      "Employees could begin any time between seven and ten, provided they attended core meetings from ten to three and completed their contracted hours.",
+    topic: "Công việc",
+    source: "listening-flexible",
+  },
+  {
+    id: "v53",
+    word: "appointment",
+    ipa: "/əˈpɔɪntmənt/",
+    meaning: "lịch hẹn",
+    example:
+      "Unfortunately the doctor you asked for is away that day, so we have moved your appointment to Friday at ten o'clock.",
+    topic: "Sức khoẻ",
+    source: "listening-clinic",
+  },
+  {
+    id: "v54",
+    word: "check-up",
+    ipa: "/ˈtʃek ʌp/",
+    meaning: "buổi khám sức khoẻ",
+    example: "You booked a check-up for Thursday at half past nine.",
+    topic: "Sức khoẻ",
+    source: "listening-clinic",
+  },
+  {
+    id: "v55",
+    word: "roadworks",
+    ipa: "/ˈrəʊdwɜːks/",
+    meaning: "việc thi công đường",
+    example:
+      "Because of roadworks, buses will not stop at the hospital stop this week.",
+    topic: "Giao thông",
+    source: "listening-bus",
+  },
+  {
+    id: "v56",
+    word: "inconvenience",
+    ipa: "/ˌɪnkənˈviːniəns/",
+    meaning: "sự bất tiện",
+    example:
+      "We are sorry for the inconvenience and we expect the roadworks to finish on schedule.",
+    topic: "Giao thông",
+    source: "listening-bus",
+  },
+  {
+    id: "v57",
+    word: "refund",
+    ipa: "/ˈriːfʌnd/",
+    meaning: "hoàn tiền",
+    example:
+      "Fees can be paid monthly, and if you have to leave the course for medical reasons we refund the remaining weeks.",
+    topic: "Giáo dục",
+    source: "listening-course",
+  },
+  {
+    id: "v58",
+    word: "submit",
+    ipa: "/səbˈmɪt/",
+    meaning: "nộp bài",
+    example:
+      "You are expected to submit one piece of writing a week; if you miss two in a row, we will contact you, because people who stop submitting usually stop attending soon afterwards.",
+    topic: "Giáo dục",
+    source: "listening-course",
+  },
+  {
+    id: "v59",
+    word: "separating",
+    ipa: "/ˈsepəreɪtɪŋ/",
+    meaning: "việc phân loại riêng ra",
+    example:
+      "Separating it has cut the bill in Block B by about a fifth, and that money goes back into the building fund.",
+    topic: "Môi trường",
+    source: "listening-recycling",
+  },
+  {
+    id: "v60",
+    word: "containers",
+    ipa: "/kənˈteɪnəz/",
+    meaning: "hộp, vật đựng",
+    example: "We are not asking anyone to wash containers or remove labels.",
+    topic: "Môi trường",
+    source: "listening-recycling",
+  },
+  {
+    id: "v61",
+    word: "reception",
+    ipa: "/rɪˈsepʃn/",
+    meaning: "quầy lễ tân",
+    example:
+      "The storage room is behind reception and it is locked; we will give you a numbered ticket, so please keep it somewhere safe.",
+    topic: "Du lịch",
+    source: "listening-hotel",
+  },
+  {
+    id: "v62",
+    word: "shuttle",
+    ipa: "/ˈʃʌtl/",
+    meaning: "xe đưa đón chạy tuyến cố định",
+    example:
+      "I should mention one change: the airport shuttle now leaves at a quarter past five in the morning, not half past five as printed in your confirmation.",
+    topic: "Du lịch",
+    source: "listening-hotel",
+  },
+  {
+    id: "v63",
+    word: "supply",
+    ipa: "/səˈplaɪ/",
+    meaning: "nguồn cung cấp",
+    example:
+      "The water supply will be switched off on Thursday from seven in the morning until about one in the afternoon while the pump on the roof is replaced.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "listening-water",
+  },
+  {
+    id: "v64",
+    word: "rely",
+    ipa: "/rɪˈlaɪ/",
+    meaning: "trông cậy vào",
+    example:
+      "If the work finishes early, we will send a message to the group, but please do not rely on that: assume one o'clock.",
+    topic: "Cuộc sống Sài Gòn",
+    source: "listening-water",
+  },
+  {
+    id: "v65",
+    word: "outcome",
+    ipa: "/ˈaʊtkʌm/",
+    meaning: "kết quả cuối cùng",
+    example:
+      "First, write the outcome in the ticket before you close it, not in a message to the team; a message disappears.",
+    topic: "Công việc",
+    source: "listening-handover",
+  },
+  {
+    id: "v66",
+    word: "optional",
+    ipa: "/ˈɒpʃənl/",
+    meaning: "không bắt buộc",
+    example:
+      "Training is on Friday afternoon and it is not optional, although you can join the second half online if you are on the road.",
+    topic: "Công việc",
+    source: "listening-handover",
+  },
+  {
+    id: "v67",
+    word: "packaging",
+    ipa: "/ˈpækɪdʒɪŋ/",
+    meaning: "bao bì",
+    example:
+      "Please leave tablets in their original packaging so that staff can see what they are, but remove any label with your name and address if you would prefer.",
+    topic: "Sức khoẻ",
+    source: "listening-pharmacy",
+  },
+  {
+    id: "v68",
+    word: "embarrassed",
+    ipa: "/ɪmˈbærəst/",
+    meaning: "ngại ngùng",
+    example:
+      "That last point matters, because in the first month people were embarrassed and the boxes stayed empty.",
+    topic: "Sức khoẻ",
+    source: "listening-pharmacy",
   },
 ];
 export const sources = [

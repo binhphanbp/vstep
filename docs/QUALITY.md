@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 139 unit / 53 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 146 unit / 54 E2E / 98 route / 14 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -196,10 +196,18 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 - **Bài mẫu để đối chiếu, không phải để chép.** Mỗi đề Viết mới có bài mẫu dài hơn số từ tối thiểu (Task 1: 157–164 từ; Task 2: 290–303 từ). Có test khoá điều này cho mọi đề Viết trong thư viện.
 - 4 ca unit mới: đủ số đề cho cả hai task và cả ba phần Nói, mỗi đề nhận đúng bộ tiêu chí tự kiểm tra (w1/w2/s1/s2/s3), mọi đề Viết có bài mẫu dài hơn yêu cầu, và mô phỏng 14 ngày ở nhịp 30 phút không lặp đề Nói lần nào.
 
+## Đợt 3 của kế hoạch tiếp theo: thẻ từ mọc từ bài học, và một khoá chống tài liệu trôi
+
+- **Bộ thẻ cũ không dính gì tới bài học.** 20 thẻ ban đầu là từ rời. Thêm **48 thẻ lấy từ chính 24 bài Đọc/Nghe**, hai thẻ mỗi bài: phiên âm, nghĩa tiếng Việt, mã bài nguồn và ví dụ là **đúng câu trong bài** — có kiểm thử đối chiếu nguyên văn với `lesson.text`, nên không thể viết một câu "trông giống" bài học. Bộ thẻ: 20 → **68**.
+- **Thẻ mở theo tiến độ.** `openVocabulary(state)` chỉ trả thẻ không có nguồn hoặc thẻ có bài nguồn đã học ít nhất một lần; trang Từ vựng, trang chính và buổi 10 phút đều dùng hàm này. Vườn từ nói thẳng còn bao nhiêu thẻ đang chờ và vì sao. Một câu chưa từng đọc thì không phải là ký ức, nên thẻ của nó chưa vào bộ ôn.
+- **Ba dòng tài liệu cũ đã được sửa.** `PRODUCTION-ROADMAP.md` vẫn nói app chưa có siêu dữ liệu biên tập (F06), tài liệu còn dùng số 57/40 (F09) và chưa có offline (F10) — cả ba đã làm xong từ đợt 6 của kế hoạch 14/09.
+- **Và một khoá để không lệch lần thứ tư.** `tests/unit/documents.test.ts` đọc HANDOVER, STATUS, QUALITY và PRODUCTION-ROADMAP rồi đối chiếu từng con số hiện hành với mã nguồn: số unit đếm từ `tests/unit`, số E2E đếm từ `tests/e2e` (có nhân ba cho spec chạy trên cả ba engine), số route, tổng số câu hỏi, số câu đã có chú giải và số bài trong thư viện. Sửa một con số mà quên chỗ khác thì CI đỏ ngay.
+- 10 ca unit và 1 ca E2E mới: thẻ trích nguyên văn, thẻ chờ đúng bài của nó, kích thước bộ thẻ, và ba nhóm đối chiếu tài liệu.
+
 ## Bằng chứng kiểm tra
 
-- 139 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 53 kiểm thử Playwright trên bản production: 49 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 146 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 54 kiểm thử Playwright trên bản production: 50 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 14 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 13/09/2026. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

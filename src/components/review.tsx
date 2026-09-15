@@ -9,7 +9,7 @@ import {
   RotateCcw,
   Volume2,
 } from "lucide-react";
-import { vocabulary } from "@/lib/content";
+
 import {
   addSavedWord,
   lessonForType,
@@ -20,7 +20,9 @@ import {
   scheduleReview,
   TYPE_EVIDENCE_MINIMUM,
   wordCardFor,
+  openVocabulary,
 } from "@/lib/learning";
+import { vocabulary } from "@/lib/content";
 import { useStudy } from "./study-provider";
 import { QuestionCard } from "./practice";
 import { AudioPlayer } from "./audio-tools";
@@ -33,7 +35,9 @@ export function VocabularyPage() {
   // Cards she added from her own vocabulary mistakes sit in the same deck and
   // follow the same schedule; only the label says where they came from.
   const mine = savedWords(state);
-  const deck = [...vocabulary, ...mine];
+  // Cards quoting a lesson appear once that lesson has been worked.
+  const deck = [...openVocabulary(state), ...mine];
+  const waiting = vocabulary.length - openVocabulary(state).length;
   const added = new Set(mine.map((word) => word.id));
   const due = deck
     .filter(
@@ -233,6 +237,13 @@ export function VocabularyPage() {
         </div>
       ) : (
         <>
+          {waiting > 0 ? (
+            <p className="help-copy">
+              Còn {waiting} thẻ nữa đang chờ: mỗi thẻ đó lấy đúng một câu trong
+              một bài Đọc hoặc Nghe, nên nó chỉ vào vườn khi{" "}
+              {state.profile.name} đã học bài ấy.
+            </p>
+          ) : null}
           <input
             className="search-input"
             aria-label="Tìm từ vựng"
