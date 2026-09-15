@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { allLessons } from "../../src/lib/full-exam-content";
 import { lessons } from "../../src/lib/content";
 import { questionNotes } from "../../src/lib/question-notes";
+import { bankGroups } from "../../src/lib/review-bank";
 
 /**
  * The documents are checked against the code, not against memory.
@@ -49,12 +50,12 @@ const crossBrowserTests = cases(
 );
 const e2eTests = chromiumTests + crossBrowserTests * 2;
 /**
- * Pages `next build` prerenders: one per lesson, plus the fifteen entries the
- * build lists beside them (fourteen fixed routes and the `/practice/[id]`
- * row itself).
+ * Pages `next build` prerenders: one per lesson, one per review-pack group,
+ * plus the seventeen entries the build lists beside them (fifteen fixed routes
+ * and the `/practice/[id]` and `/review-pack/bank/[group]` rows themselves).
  */
-const NON_LESSON_ROUTES = 15;
-const routes = allLessons.length + NON_LESSON_ROUTES;
+const NON_LESSON_ROUTES = 17;
+const routes = allLessons.length + bankGroups.length + NON_LESSON_ROUTES;
 const questions = allLessons.reduce(
   (sum, lesson) => sum + lesson.questions.length,
   0,

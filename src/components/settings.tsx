@@ -1,6 +1,8 @@
 "use client";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ClipboardCheck,
   Cloud,
   Download,
   HardDrive,
@@ -8,6 +10,7 @@ import {
   LifeBuoy,
   LogOut,
   Save,
+  Send,
   Trash2,
   Upload,
   UserRound,
@@ -38,7 +41,13 @@ import {
   recordingUsage,
   type RecordingUsage,
 } from "@/lib/recordings";
-import { buildErrorReport, clearErrors, recentErrors } from "@/lib/error-log";
+import {
+  buildErrorReport,
+  clearErrors,
+  errorReportText,
+  recentErrors,
+  sendErrorReport,
+} from "@/lib/error-log";
 export function downloadJson(data: unknown, name: string) {
   downloadText(JSON.stringify(data, null, 2), name);
 }
@@ -295,15 +304,36 @@ export function SettingsPage() {
               <h2>Khi có gì đó hỏng</h2>
             </div>
             <p className="help-copy">
-              Tải một file mô tả tình trạng máy và{" "}
+              Bấm <strong>Gửi báo lỗi</strong> để chép sẵn một bản mô tả tình
+              trạng máy và{" "}
               {recentErrors().length
                 ? `${recentErrors().length} lỗi gần nhất`
-                : "các lỗi gần nhất nếu có"}{" "}
-              rồi gửi cho người dựng ứng dụng. File <strong>không chứa</strong>{" "}
-              bài viết, bản ghi âm hay nội dung đã gõ — chỉ có thông tin máy, số
-              lượng dữ liệu và thông báo lỗi.
+                : "các lỗi gần nhất nếu có"}
+              , rồi dán vào tin nhắn gửi cho người dựng ứng dụng. Bản mô tả{" "}
+              <strong>không chứa</strong> bài viết, bản ghi âm hay nội dung đã
+              gõ — chỉ có thông tin máy, số lượng dữ liệu và thông báo lỗi.
             </p>
             <div className="button-row">
+              <button
+                type="button"
+                className="button primary"
+                onClick={() => {
+                  void sendErrorReport(
+                    errorReportText(buildErrorReport(state, storageError)),
+                  ).then((how) => {
+                    if (how === "share") toast("Đã mở chỗ gửi báo lỗi.");
+                    else if (how === "copy")
+                      toast("Đã chép báo lỗi. Dán vào tin nhắn và gửi đi.");
+                    else
+                      toast(
+                        "Máy này không chép được. Tải file báo lỗi giúp mình.",
+                      );
+                  });
+                }}
+              >
+                <Send size={15} />
+                Gửi báo lỗi
+              </button>
               <button
                 type="button"
                 className="button secondary"
@@ -329,6 +359,24 @@ export function SettingsPage() {
                 <Trash2 size={15} />
                 Xoá danh sách lỗi
               </button>
+            </div>
+          </section>
+          <section className="panel">
+            <div className="section-title">
+              <ClipboardCheck size={20} />
+              <h2>Nhờ giáo viên duyệt học liệu</h2>
+            </div>
+            <p className="help-copy">
+              Toàn bộ bài học trong Mây do người dựng ứng dụng tự biên soạn và
+              chưa có giáo viên nào duyệt. Ở đây in được từng gói tài liệu — ngữ
+              liệu, câu hỏi, đáp án đang dùng và ô trống để người chấm ghi nhận
+              xét — để gửi đi nhờ xem giúp.
+            </p>
+            <div className="button-row">
+              <Link className="button secondary" href="/review-pack/bank">
+                <ClipboardCheck size={15} />
+                Mở gói duyệt học liệu
+              </Link>
             </div>
           </section>
           <StoragePanel />

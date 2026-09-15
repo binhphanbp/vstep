@@ -9,6 +9,18 @@
 5. Workflow `Smoke production` tự chạy sau deployment Production. Nó chờ alias phục vụ đúng SHA ghi trong metadata `may-release`, rồi kiểm tra Settings, một bài Reading, một bài Listening, mobile overflow, lỗi runtime, security headers và HTTP 404. Có thể chạy thủ công với URL preview/production và SHA hiện tại.
 6. Với thay đổi dữ liệu/Auth, chạy UAT cloud và backup theo `PRODUCTION-ROADMAP.md`. Không dùng dữ liệu duy nhất của người học làm dữ liệu thử nếu chưa xuất backup.
 
+## Cổng chặn build production
+
+Mặc định Vercel dựng production ngay khi `main` đổi, tức là trước khi GitHub chấm xong cùng commit đó. `scripts/vercel-ignore-build.mjs` đóng khoảng trống này: nó hỏi GitHub kết quả check của đúng SHA, chỉ cho build khi workflow `Validate Mây` đã đạt, và **chặn khi không chắc** — chưa có token, hỏi không được, CI đỏ hoặc chờ quá 20 phút đều là không build. Preview không bị chặn.
+
+Cần làm một lần trên Vercel (ngoài repo, chủ website tự làm):
+
+1. Settings → Git → **Ignored Build Step**: điền `node scripts/vercel-ignore-build.mjs`.
+2. Settings → Environment Variables → thêm `MAY_CI_TOKEN` cho môi trường Production: một GitHub token chỉ cần quyền đọc repo này (fine-grained, `Contents: Read` và `Checks: Read`).
+3. Push một commit bất kỳ và xem log của Vercel: phải thấy dòng `CI "Validate Mây" đã đạt ở <sha>` trước khi build chạy.
+
+Khi bị chặn mà CI sau đó xanh, vào Vercel bấm **Redeploy** đúng commit; gate sẽ chạy lại và cho qua. Nếu quên bước 2, mọi bản production sẽ bị bỏ qua và log ghi rõ thiếu `MAY_CI_TOKEN`.
+
 ## Khi release có lỗi
 
 1. Ghi SHA, URL, thời điểm, route và thao tác gây lỗi. Không chép token, mật khẩu, nội dung bài viết hoặc bản ghi âm vào issue/log.

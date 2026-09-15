@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 13/09/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **160 unit, 57 E2E**, build 98 route, axe trên 14 màn. Xem STATUS.md và QUALITY.md.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **169 unit, 59 E2E**, build 106 route, axe trên 16 màn. Xem STATUS.md và QUALITY.md.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,9 +10,11 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 và hai đợt đầu của kế hoạch tiếp theo đạt 160 unit và 57 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 và hai đợt đầu của kế hoạch tiếp theo đạt 169 unit và 59 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
-Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, mới có một đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
+Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, đã có hai đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
+
+Ba việc vẫn cần người quyết định nhưng nay mỗi việc chỉ còn một thao tác. `/review-pack/bank` in ra sáu tập hồ sơ học liệu để nhờ giáo viên duyệt: ngữ liệu, câu hỏi, đáp án đang dùng có đánh dấu, câu trích dẫn làm căn cứ và bảng trống cho người chấm; kết quả duyệt chỉ vào được `provenance.ts` bằng tay, với tên và ngày thật. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. `scripts/vercel-ignore-build.mjs` chặn build production khi CI của đúng SHA chưa xanh và chặn cả khi không chắc, nhưng còn chờ hai ô cấu hình trên Vercel. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy.
 
 Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã áp dụng và hậu kiểm thành công trên production ngày 13/09/2026. Nghiệm thu thiết bị thật, cổng bắt buộc chờ CI trước deploy, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
 
@@ -197,7 +199,7 @@ Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
 | TypeScript            | Đạt                | Type generation và `tsc --noEmit`                                                                  |
 | Vitest                | 57/57 đạt          | Logic học, snapshot học liệu, draft version, planner, lịch ôn, timer, store, speech, đề và SQL/RLS |
 | Playwright production | 40/40 đạt          | 36 ca Chromium; 2 Firefox; 2 WebKit; Reading, Listening, cloud resilience, backup và responsive    |
-| axe WCAG A/AA         | Đạt trên 14 màn    | Lỗi accessibility có thể tự động phát hiện                                                         |
+| axe WCAG A/AA         | Đạt trên 16 màn    | Lỗi accessibility có thể tự động phát hiện                                                         |
 | Production build      | Đạt                | 86 route tĩnh/SSG được sinh thành công, gồm web app manifest                                       |
 | Dependency audit      | 0 lỗ hổng được báo | `npm audit --omit=dev` ngày 13/09/2026                                                             |
 | GitHub Actions        | Đạt                | Run `34733331145` cho release `6cdbbfe`; smoke production run `34733348658` cũng đạt               |

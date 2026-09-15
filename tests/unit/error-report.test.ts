@@ -1,9 +1,11 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   buildErrorReport,
   clearErrors,
+  errorReportText,
   recentErrors,
   recordError,
+  sendErrorReport,
 } from "../../src/lib/error-log";
 import { freshState } from "../../src/lib/learning";
 
@@ -47,5 +49,61 @@ describe("the bug report file", () => {
   it("reports damaged storage so the report explains an empty state", () => {
     expect(buildErrorReport(freshState(), "Hỏng").storageError).toBe("Hỏng");
     expect(buildErrorReport(freshState(), "").storageError).toBeNull();
+  });
+  it("writes the same facts as text that can be pasted into a chat", () => {
+    const state = freshState();
+    state.drafts = { "quiz:writing-email": "Dear Alex, I am writing to you" };
+    state.savedWords = { deadline: { addedAt: "2026-09-08" } };
+    recordError("Boom", "window:12");
+    const text = errorReportText(buildErrorReport(state, "Hỏng"));
+    expect(text).toContain("Mây — báo lỗi");
+    expect(text).toContain("1 bài nháp");
+    expect(text).toContain("1 từ đã lưu");
+    expect(text).toContain("Lưu trữ: Hỏng");
+    expect(text).toContain("Boom");
+    // The text travels through a chat app, so it obeys the same rule as the file.
+    expect(text).not.toContain("Dear Alex");
+  });
+  it("says so plainly when nothing went wrong", () => {
+    const text = errorReportText(buildErrorReport(freshState(), ""));
+    expect(text).toContain("Lưu trữ: không báo lỗi");
+    expect(text).toContain("không có lỗi nào được ghi lại");
+  });
+});
+
+describe("handing the report to the device", () => {
+  const original = globalThis.navigator;
+  afterEach(() => {
+    Object.defineProperty(globalThis, "navigator", {
+      value: original,
+      configurable: true,
+    });
+  });
+  function stub(value: unknown) {
+    Object.defineProperty(globalThis, "navigator", {
+      value,
+      configurable: true,
+    });
+  }
+  it("prefers the share sheet a phone offers", async () => {
+    const shared: unknown[] = [];
+    stub({ share: (data: unknown) => (shared.push(data), Promise.resolve()) });
+    await expect(sendErrorReport("xin chào")).resolves.toBe("share");
+    expect(shared).toHaveLength(1);
+  });
+  it("falls back to the clipboard when sharing is refused", async () => {
+    const copied: string[] = [];
+    stub({
+      share: () => Promise.reject(new Error("cancelled")),
+      clipboard: {
+        writeText: (text: string) => (copied.push(text), Promise.resolve()),
+      },
+    });
+    await expect(sendErrorReport("xin chào")).resolves.toBe("copy");
+    expect(copied).toEqual(["xin chào"]);
+  });
+  it("admits it could do neither so the file stays the answer", async () => {
+    stub({});
+    await expect(sendErrorReport("xin chào")).resolves.toBe("none");
   });
 });
