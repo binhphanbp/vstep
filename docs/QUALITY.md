@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 170 unit / 61 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 175 unit / 61 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -291,9 +291,19 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - `docs/PRODUCT.md` là tệp duy nhất không có ca kiểm thử nào đọc, và nó trôi xa nhất: ghi "14 bài ngắn" và "20 thẻ" trong khi thực tế là 42 bài và 68 thẻ, cùng mức trần kế hoạch 3 bài trong khi lượt hai đã nâng lên 6.
 - Đã sửa cả ba con số, và mở rộng `documents.test.ts` để đọc luôn tệp này: số bài theo từng kỹ năng, tổng câu khách quan, số thẻ từ vựng và mức trần `PLAN_MAX_LESSONS` nay đều phải khớp mã nguồn, nếu không thì CI đỏ.
 
+## Ngân sách lớn: trần 6 bài khiến một buổi tối bị bỏ nửa
+
+- **Lỗi đo được.** Mô phỏng người học đã học 10 ngày, đặt nhịp học 90 phút: kế hoạch chỉ tiêu **58 phút, bỏ phí 32 (36%)**; ở 120 phút bỏ **52%**; ở 180 phút bỏ **68%**. Và ở 120 phút, phần **Đọc chỉ được 1 bài** — kỹ năng app đặt ưu tiên cao nhất.
+- **Nguyên nhân.** Kế hoạch chỉ nhận tối đa 2 bài mỗi kỹ năng, nhưng `PLAN_MAX_LESSONS = 6` chạm trước, nên luật 2-bài-mỗi-kỹ-năng không bao giờ đạt được. Trần 6 nghe có vẻ thoáng nhưng thực chất chốt ngày học ở 58 phút học liệu.
+- **Sửa.** Trần lên **8** (đúng 2 bài × 4 kỹ năng). Đo lại: 90 phút bỏ phí **36% → 2%**, Đọc từ 1 lên **2 bài**, và phân bổ thành đều bốn kỹ năng `{nghe 2, đọc 2, viết 2, nói 2}`.
+- **Phần dư còn lại nay được nói ra.** Thư viện chỉ chứa khoảng 88 phút học liệu mới cho một ngày, nên ai đặt 2 tiếng vẫn còn thời gian thật mà kế hoạch không tiêu được. Trước đây `spare` được tính rồi **không hiển thị ở đâu cả** — ngày trông như đã lên kế hoạch trong khi nửa ngân sách không ai nhắc. `spareStep()` nay nói đúng con số và gọi tên **một** việc thật vừa khít, lấy từ dữ liệu của chính người học: đủ 51 phút thì mời vào buổi thi thử rút gọn; không đủ thì sổ tay nếu có câu đến hạn; rồi đến thẻ từ vựng; hết thì **trả về null** chứ không bày việc cho có.
+- **Bỏ ba con số viết cứng.** Phòng thi in "51 phút" và "172 phút" thành literal ở ba chỗ, trong khi đó là tổng của các chặng ngay trong mã. Sửa một chặng đi một phút là giao diện âm thầm hứa sai — đúng loại trôi số từng để bìa báo cáo ghi sai số test suốt ba release. Nay có `examMinutes(mode)` cộng từ chính chặng đó, và một ca kiểm thử buộc nó khớp.
+- 5 ca unit mới: trần không còn là thứ làm bỏ phí buổi tối; `tiêu + spare = budget`; phần dư được nói ra kèm việc vừa khít; im lặng khi phần dư chỉ là số lẻ; và thời lượng đề cộng từ chặng chứ không phải literal.
+- Ca chống trôi tài liệu bắt ngay `PRODUCT.md` còn ghi "tối đa 6 bài" khi trần đã thành 8 — nó làm đúng việc của nó ở lần chạy đầu.
+
 ## Bằng chứng kiểm tra
 
-- 170 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 175 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 61 kiểm thử Playwright trên bản production: 57 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

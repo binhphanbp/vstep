@@ -1,44 +1,50 @@
 import { describe, expect, it } from "vitest";
 import {
+  MINI_EXAM_MINUTES,
+  PLAN_EXTRA_MINUTES,
+  PLAN_MAX_LESSONS,
+  SPARE_WORTH_SAYING,
+  TYPE_EVIDENCE_MINIMUM,
+  TYPE_STEP_MINIMUM,
+  addSavedWord,
   advanceExam,
+  attemptLesson,
+  compareSittings,
   dayOffset,
   daysUntil,
+  examMinutes,
+  examSittings,
   examStages,
   examWeekPlan,
   freshState,
+  getExamStages,
+  libraryKey,
   localDay,
-  mistakeReviewKey,
   milestones,
+  mistakeReviewKey,
   mistakes,
-  questionTypeStats,
-  quickSession,
-  addSavedWord,
-  removeSavedWord,
-  savedWords,
-  wordCardFor,
+  nextStep,
   objectiveInsights,
+  openVocabulary,
   personalizeLegacyState,
   profileSchema,
+  questionTypeStats,
+  quickSession,
   recordAttempt,
+  removeSavedWord,
+  savedWords,
   scheduleReview,
   scoreAnswers,
   skillStats,
+  spareStep,
   stateSchema,
   streak,
   todayPlan,
-  whatsNext,
-  attemptLesson,
-  libraryKey,
-  nextStep,
-  TYPE_STEP_MINIMUM,
-  openVocabulary,
-  examSittings,
-  compareSittings,
-  PLAN_EXTRA_MINUTES,
-  TYPE_EVIDENCE_MINIMUM,
-  weakQuestionTypes,
-  wordCount,
   type Attempt,
+  weakQuestionTypes,
+  whatsNext,
+  wordCardFor,
+  wordCount,
 } from "../../src/lib/learning";
 import { lessons, vocabulary } from "../../src/lib/content";
 import { readQuizDraft } from "../../src/lib/quiz-draft";
@@ -1575,5 +1581,119 @@ describe("the day of the exam", () => {
   it("still rehearses the day before", () => {
     expect(onExamDay(1)?.key).toBe("rehearsal");
     expect(onExamDay(-1)).toBe(null);
+  });
+});
+
+describe("the minutes the plan cannot fill", () => {
+  // The library holds at most two lessons per skill a day. A learner who sets
+  // aside two hours therefore has real time left over, and before this the
+  // plan recorded it in `spare` and showed nothing.
+  it("fills a large budget once the lesson cap stops binding", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 90;
+    // Ten days of history, so "unseen lesson" bonuses are not what decides.
+    state.attempts = Array.from({ length: 10 }, (_, index) => {
+      const lesson = lessons[(index * 3) % lessons.length];
+      return {
+        id: `seed${index}`,
+        lessonId: lesson.id,
+        skill: lesson.skill,
+        date: `${dayOffset(localDay(), -index - 3)}T03:00:00.000Z`,
+        lessonRef: `${lesson.id}@v${lesson.version}`,
+        answers: Object.fromEntries(
+          lesson.questions.map((question) => [question.id, question.answer]),
+        ),
+        correct: lesson.questions.length,
+        total: lesson.questions.length,
+        seconds: lesson.minutes * 60,
+      };
+    });
+    const plan = todayPlan(state);
+    const spent = plan.lessons.reduce(
+      (sum, lesson) =>
+        sum +
+        (plan.longer.includes(lesson.id)
+          ? Math.round(lesson.minutes / 2)
+          : lesson.minutes),
+      0,
+    );
+    expect(plan.lessons.length).toBeLessThanOrEqual(PLAN_MAX_LESSONS);
+    expect(spent).toBeLessThanOrEqual(plan.budget);
+    // Measured at the old cap of six: 58 minutes of 90, and Reading got one
+    // lesson. The cap must not be what wastes half an evening.
+    expect(spent).toBeGreaterThan(80);
+    const reading = plan.lessons.filter(
+      (lesson) => lesson.skill === "reading",
+    ).length;
+    expect(reading).toBeGreaterThan(1);
+    expect(spent + plan.spare).toBe(plan.budget);
+  });
+  it("says the leftover out loud, and offers something that fits it", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 180;
+    const step = spareStep(state);
+    expect(step).not.toBeNull();
+    expect(step!.minutes).toBeGreaterThanOrEqual(SPARE_WORTH_SAYING);
+    expect(step!.text).toContain(`Còn ${step!.minutes} phút`);
+    // The only thing that uses a long stretch as one piece is a timed sitting.
+    expect(step!.href).toBe("/exam");
+    expect(step!.text).toContain(`${MINI_EXAM_MINUTES} phút`);
+  });
+  it("stays silent when the leftover is rounding, not an evening", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 30;
+    const plan = todayPlan(state);
+    expect(plan.spare).toBeLessThan(SPARE_WORTH_SAYING);
+    expect(spareStep(state)).toBeNull();
+  });
+  it("offers the notebook when the leftover is too short for a sitting", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 60;
+    const lesson = lessons.find((item) => item.skill === "reading")!;
+    const missed = lesson.questions[0];
+    state.attempts = [
+      {
+        id: "wrong",
+        lessonId: lesson.id,
+        skill: lesson.skill,
+        date: `${dayOffset(localDay(), -4)}T03:00:00.000Z`,
+        lessonRef: `${lesson.id}@v${lesson.version}`,
+        answers: Object.fromEntries(
+          lesson.questions.map((question) => [
+            question.id,
+            question.id === missed.id
+              ? (question.answer + 1) % question.options.length
+              : question.answer,
+          ]),
+        ),
+        correct: lesson.questions.length - 1,
+        total: lesson.questions.length,
+        seconds: lesson.minutes * 60,
+      },
+    ];
+    state.library = { [`${lesson.id}@v${lesson.version}`]: lesson };
+    const plan = todayPlan(state);
+    const step = spareStep(state);
+    if (plan.spare >= SPARE_WORTH_SAYING && plan.spare < MINI_EXAM_MINUTES) {
+      expect(step?.href).toBe("/mistakes");
+      expect(step?.text).toContain("đến lịch ôn");
+    } else {
+      // The plan filled the evening; nothing to offer is the correct answer.
+      expect(plan.spare < SPARE_WORTH_SAYING || step?.href === "/exam").toBe(
+        true,
+      );
+    }
+  });
+  it("counts a sitting's length from its own stages, not a literal", () => {
+    // "51 phút" and "172 phút" used to be typed into the exam room by hand.
+    expect(examMinutes("mini")).toBe(MINI_EXAM_MINUTES);
+    expect(examMinutes("full")).toBe(examMinutes("full2"));
+    for (const mode of ["mini", "full", "full2"] as const)
+      expect(examMinutes(mode)).toBe(
+        Math.round(
+          getExamStages(mode).reduce((sum, stage) => sum + stage.seconds, 0) /
+            60,
+        ),
+      );
   });
 });
