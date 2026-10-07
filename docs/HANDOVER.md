@@ -134,7 +134,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 
 | Thành phần      | Công nghệ                                          | Vai trò                                                  |
 | --------------- | -------------------------------------------------- | -------------------------------------------------------- |
-| Web framework   | Next.js 16.3.4 App Router                          | Routing, metadata, SSG và production build               |
+| Web framework   | Next.js 16.4.0 App Router                          | Routing, metadata, SSG và production build               |
 | UI runtime      | React 19.2.8, TypeScript                           | Component và trạng thái giao diện                        |
 | Styling         | Tailwind CSS 4, CSS variables và component classes | Theme, responsive và trạng thái tương tác                |
 | Icon            | Lucide React                                       | Hệ icon nhất quán                                        |
