@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 175 unit / 61 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 175 unit / 62 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -301,10 +301,18 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - 5 ca unit mới: trần không còn là thứ làm bỏ phí buổi tối; `tiêu + spare = budget`; phần dư được nói ra kèm việc vừa khít; im lặng khi phần dư chỉ là số lẻ; và thời lượng đề cộng từ chặng chứ không phải literal.
 - Ca chống trôi tài liệu bắt ngay `PRODUCT.md` còn ghi "tối đa 6 bài" khi trần đã thành 8 — nó làm đúng việc của nó ở lần chạy đầu.
 
+## Dùng thử như Gùa trên desktop: một lỗi nhìn thấy được
+
+- **Cách làm.** Mở bản production vào trình duyệt sạch ở 1440×900, đi qua 13 màn, rồi làm trọn một bài Đọc (chọn đáp án, chọn độ chắc chắn, xem kết quả) và quay lại trang chủ, sổ tay, tiến bộ. Có chụp màn hình và đọc từng ảnh. 13 màn đều mở được, không có lỗi trình duyệt nào, màn kết quả đủ nội dung (điểm, phản hồi theo dạng câu, câu trích dẫn làm căn cứ, bước làm tiếp), chuỗi ngày và số thẻ từ vựng cập nhật đúng sau khi học.
+- **Lỗi tìm ra.** Chấm của **ngày hôm nay** trong dải tuần, sau khi học xong, có dấu tick **trắng trên nền gần trắng**: tỉ lệ tương phản đo được **1,10:1**. Dấu tick có trong trang nhưng không nhìn thấy, ở đúng chỗ Gùa liếc vào để thấy "mình đã học hôm nay". Các ngày trước đó không bị.
+- **Nguyên nhân.** Chấm hôm nay vừa là `.today` vừa là `.complete`. Hai luật cùng độ ưu tiên, `.today` khai báo sau nên thắng và phủ nền gần trắng lên nền hồng. Axe không bắt được vì nó chỉ kiểm chữ, không kiểm biểu tượng.
+- **Sửa.** Thêm luật `.day-dot.today.complete` giữ nền hồng. Đo lại: nền `rgb(195,162,173)`, tương phản **2,2:1**, bằng đúng độ tương phản của các ngày trước.
+- **Ca kiểm thử.** 1 ca E2E mới đo tỉ lệ tương phản thật của chấm hôm nay sau khi học. Đã chạy thử trên bản **chưa sửa**: ca đỏ với đúng 1,098:1; trên bản đã sửa: xanh.
+
 ## Bằng chứng kiểm tra
 
 - 175 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 61 kiểm thử Playwright trên bản production: 57 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 62 kiểm thử Playwright trên bản production: 58 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
