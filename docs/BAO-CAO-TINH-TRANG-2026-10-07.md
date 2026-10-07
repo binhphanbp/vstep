@@ -1,12 +1,12 @@
 # Báo cáo tình trạng Mây VSTEP ngày 07/10/2026
 
-Báo cáo này ghi trạng thái bản sáu đề tại thời điểm chuẩn bị phát hành. Nó giúp chủ dự án đối chiếu nội dung, kiểm thử và những việc cần xác nhận sau khi bản mới lên HTTPS. Các release trước được lưu trong `HANDOVER.md` và `QUALITY.md`.
+Báo cáo này ghi trạng thái bản sáu đề sau khi phát hành lên HTTPS ngày 07/10/2026. Nó giúp chủ dự án đối chiếu nội dung, bằng chứng triển khai và những việc còn cần xác nhận. Các release trước được lưu trong `HANDOVER.md` và `QUALITY.md`.
 
 ## 1. Kết luận
 
 Bộ dữ liệu trên máy có **sáu đề thi thử**, không phải năm đề tổng cộng. Năm đề **132, 133, 134, 135 và Review 13/09** có đủ 75 khóa đáp án Nghe/Đọc mỗi đề. Đề **131** có nội dung bốn kỹ năng nhưng thiếu toàn bộ khóa đáp án và transcript nên chỉ dùng để luyện, không chấm Nghe/Đọc. Không quy đổi số câu đúng thành bậc B1/B2/C1.
 
-Bản tích hợp đã qua kiểm tra local và sẵn sàng đưa qua CI. Bằng chứng production cần đối chiếu đúng SHA trên `vstep-turtle.vercel.app` sau khi merge; kiểm thử local không chứng minh bản HTTPS đã cập nhật.
+Bản tích hợp đã qua kiểm tra local, CI và smoke production. PR [#38](https://github.com/binhphanbp/vstep/pull/38) được merge thành commit ứng dụng `ff8faef61864460ee6cd6bce9889c6291c96c085`. Vercel Production phục vụ đúng SHA đó trên [website của Gùa](https://vstep-turtle.vercel.app); cả smoke trực tiếp và workflow tự động đều đạt. Một commit chỉ sửa tài liệu sau mốc này không thay đổi mã ứng dụng hay dữ liệu đề.
 
 ## 2. Phạm vi đã tích hợp
 
@@ -23,7 +23,7 @@ Bản tích hợp đã qua kiểm tra local và sẵn sàng đưa qua CI. Bằng
 
 Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs` kiểm tra cấu trúc, đáp án và audio trước khi tạo bản nhập. File `de-thi-thu-vstep-135_attempt.json` là lượt làm đã lưu, không phải đề thứ bảy. Nguồn ghi Hapio Class; học liệu chưa được giáo viên của Mây thẩm định.
 
-## 3. Bằng chứng kiểm tra trước phát hành
+## 3. Bằng chứng kiểm tra và triển khai
 
 | Phép kiểm tra | Kết quả local |
 | --- | --- |
@@ -34,16 +34,15 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Build tĩnh | 112 trang, gồm sáu route đề nhập |
 | Dependency production | `npm audit --omit=dev` báo 0 lỗ hổng |
 
-Trong lượt đầy đủ gần nhất, 70/71 ca đạt. Ca offline còn lại chờ tiêu đề kho đề cũ sau khi đổi microcopy; cập nhật kỳ vọng và chạy lại riêng trên bản production đạt. Kịch bản mới kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, file backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo. CI trên GitHub phải chạy lại toàn bộ 71 ca từ checkout sạch.
+Trong lượt local đầy đủ gần nhất, 70/71 ca đạt. Ca offline còn lại chờ tiêu đề kho đề cũ sau khi đổi microcopy; cập nhật kỳ vọng và chạy lại riêng đạt. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
 
-## 4. Quy trình phát hành
+## 4. Kết quả phát hành
 
-1. Đẩy thay đổi lên nhánh và mở pull request; chờ workflow **Validate Mây** đạt cho đúng commit.
-2. Merge vào `main` khi CI xanh. Vercel tự triển khai từ `main` theo cấu hình Git hiện có.
-3. Xác nhận thẻ `may-release` trên HTTPS khớp SHA merge, mở `/papers` và `/papers/review-1309`, tải manifest/JSON/audio, kiểm tra security headers và 404.
-4. Đọc kết quả workflow **Smoke production** của đúng deployment. Nếu sai SHA hoặc thiếu dữ liệu, dừng bàn giao bản mới và dùng runbook để quay lại bản tốt.
+1. PR #38 đã merge vào `main` sau khi CI xanh. Vercel tạo deployment Production cho SHA `ff8faef`.
+2. Thẻ `may-release` trên HTTPS khớp đủ SHA merge. Smoke mở `/papers`, `/papers/review-1309`, tải manifest, Review JSON và MP3, kiểm tra security headers, chiều rộng 390 px, lỗi runtime và 404; tất cả đạt.
+3. [Workflow Smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) của đúng deployment đạt. Kết quả trực tiếp trên URL production cũng là `Production smoke passed`.
 
-Script `scripts/smoke-https.mjs` đã được mở rộng để kiểm tra kho sáu đề, file Review và một MP3. Repository hiện có script cổng chờ CI cho Vercel nhưng chủ website đã chọn **không bật**; vì vậy quy trình phát hành dựa trên CI xanh của pull request trước merge.
+Script `scripts/smoke-https.mjs` kiểm tra kho sáu đề, file Review và một MP3. Chủ website đã chọn **không bật** cổng chờ CI trên Vercel; quy trình dựa trên CI xanh của pull request trước merge và smoke sau deploy.
 
 ## 5. Giới hạn và việc còn cần người xác nhận
 

@@ -355,7 +355,7 @@ def add_cover(doc):
         + figures["routes"]
         + " route và axe trên "
         + figures["screens"]
-        + " màn. Migration gia cố quyền ghi cloud đã áp dụng trên Supabase production. Bản HTTPS cần đối chiếu đúng SHA và smoke sau merge; đồng bộ hai thiết bị, micro thật, quyền công bố bộ đề và thẩm định học liệu vẫn cần xác nhận.",
+        + " màn. Migration gia cố quyền ghi cloud đã áp dụng trên Supabase production. PR #38 và smoke HTTPS đã đạt cho commit ứng dụng ff8faef; đồng bộ hai thiết bị, micro thật, quyền công bố bộ đề và thẩm định học liệu vẫn cần xác nhận.",
         11,
         INK,
     )
