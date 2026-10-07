@@ -198,7 +198,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 194/194 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 76 ca trên bản production local: 72 Chromium, 2 Firefox, 2 WebKit. Sau khi thêm phòng thi mô phỏng, lượt Chromium đầy đủ đạt 71/71; Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 194/194 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 76 ca trên bản production local: 72 Chromium, 2 Firefox, 2 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 72/72; Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
