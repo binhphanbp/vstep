@@ -27,6 +27,7 @@ import {
   nextPlanned,
   nextStep,
   objectiveInsights,
+  insightAdvice,
   openVocabulary,
   personalizeLegacyState,
   profileSchema,
@@ -51,6 +52,8 @@ import {
 } from "../../src/lib/learning";
 import { lessons, vocabulary } from "../../src/lib/content";
 import { readQuizDraft } from "../../src/lib/quiz-draft";
+import { allLessons } from "../../src/lib/full-exam-content";
+import { wordCards } from "../../src/lib/word-cards";
 import {
   allCriteria,
   criteriaFor,
@@ -434,6 +437,31 @@ describe("scoring and honest progress", () => {
       correct: 0,
       total: 1,
     });
+  });
+  it("gives advice that fits the result, errors before praise", () => {
+    const questions = lessons.find(
+      (lesson) => lesson.id === "reading-cafe",
+    )!.questions;
+    const wrong = Object.fromEntries(
+      questions.map((q) => [q.id, (q.answer + 1) % q.options.length]),
+    );
+    const right = Object.fromEntries(questions.map((q) => [q.id, q.answer]));
+    const all = (level: "sure" | "unsure") =>
+      Object.fromEntries(questions.map((q) => [q.id, level]));
+    // 0/5, every answer marked "not sure": this used to be praised.
+    const unsure = objectiveInsights(questions, wrong, all("unsure"));
+    expect(unsure.unsureErrors).toBe(5);
+    expect(insightAdvice(unsure)).toContain("chưa chắc");
+    expect(insightAdvice(unsure)).not.toContain("rất tốt");
+    expect(
+      insightAdvice(objectiveInsights(questions, wrong, all("sure"))),
+    ).toContain("sai dù đã rất chắc");
+    expect(
+      insightAdvice(objectiveInsights(questions, right, all("unsure"))),
+    ).toContain("đúng nhưng còn phân vân");
+    expect(
+      insightAdvice(objectiveInsights(questions, right, all("sure"))),
+    ).toContain("rất tốt");
   });
   it("stores a mistake only once even across repeated errors", () => {
     const s = freshState();
@@ -1034,6 +1062,18 @@ describe("a ten-minute session for a day with no time in it", () => {
 });
 
 describe("word cards that grow out of her own mistakes", () => {
+  it("quotes the sentence she met, as it stands in the passage", () => {
+    // The card says the example is the sentence from her lesson. One quoted an
+    // earlier wording the passage no longer has; a card may stop early, but
+    // what it quotes must be there word for word.
+    for (const [id, card] of Object.entries(wordCards)) {
+      const lesson = allLessons.find((item) =>
+        item.questions.some((question) => question.id === id),
+      );
+      expect(lesson, id).toBeDefined();
+      expect(lesson!.text, id).toContain(card.example.replace(/[.!?]$/, ""));
+    }
+  });
   it("only offers a card for a question one was written for", () => {
     expect(wordCardFor("rk4")?.word).toBe("doubtful");
     expect(wordCardFor("rk1")).toBeUndefined();

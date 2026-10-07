@@ -24,6 +24,7 @@ import {
   nextPlanned,
   nextStep,
   objectiveInsights,
+  insightAdvice,
   scoreAnswers,
   wordCount,
   type Attempt,
@@ -665,13 +666,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               </div>
             ))}
           </div>
-          <p className="help-copy">
-            {insights.confidentErrors
-              ? "Ưu tiên xem lại câu sai dù đã rất chắc: đây thường là chỗ mình đang hiểu nhầm, không chỉ là thiếu tập trung."
-              : insights.fragileCorrect
-                ? "Các câu đúng nhưng còn phân vân vẫn đáng xem lại bằng chứng để lần sau trả lời chắc hơn."
-                : "Đáp án và độ chắc chắn đang khớp nhau rất tốt. Hãy giữ cách tìm bằng chứng này ở bài tiếp theo."}
-          </p>
+          <p className="help-copy">{insightAdvice(insights)}</p>
         </section>
       )}
       <div className="practice-layout">
@@ -694,7 +689,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               {result && (
                 <details open>
                   <summary>Bản chép lời</summary>
-                  <div className="passage">{lesson.text}</div>
+                  <div className="passage" lang="en">
+                    {lesson.text}
+                  </div>
                 </details>
               )}
             </>

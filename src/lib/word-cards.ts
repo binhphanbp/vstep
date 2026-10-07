@@ -33,7 +33,7 @@ export const wordCards: Record<string, WordCard> = {
     ipa: "/ˈdjʊərəbl/",
     meaning: "bền, giữ được lâu",
     example:
-      "Reviewing material across several days generally produces more durable learning than a single long session.",
+      "Reviewing material across several days generally produces more durable learning than repeating it many times in one sitting.",
     topic: "Giáo dục",
   },
   rk4: {
