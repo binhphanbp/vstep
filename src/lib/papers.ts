@@ -86,6 +86,71 @@ export function paperStageTotal(paper: Paper, stage: number) {
     : section.slots.length;
 }
 
+/** The sections a sitting covers, in order: all four, or a single skill. */
+export function runStages(run: Pick<PaperRun, "only">): number[] {
+  return run.only === undefined ? [0, 1, 2, 3] : [run.only];
+}
+
+/** True when closing this section ends the sitting. */
+export function isFinalStage(run: Pick<PaperRun, "only" | "stage">) {
+  return run.only !== undefined || run.stage === 3;
+}
+
+/**
+ * Minutes used on each section of a finished sitting, from the times its
+ * sections closed. Sittings saved before the log existed have none.
+ */
+export function stageMinutes(run: PaperRun) {
+  const ends = run.stageEnds ?? [];
+  return runStages(run)
+    .map((stage, index) => {
+      const end = ends[index];
+      if (end === undefined) return undefined;
+      const start = index ? ends[index - 1] : run.startedAt;
+      return { stage, minutes: Math.max(0, (end - start) / 60_000) };
+    })
+    .filter((entry) => entry !== undefined);
+}
+
+export type ItemStatus = "correct" | "wrong" | "blank" | "ungraded";
+export function itemStatus(item: PaperItem, run: PaperRun): ItemStatus {
+  const chosen = run.answers[item.id];
+  if (item.answer === null) return "ungraded";
+  if (chosen === undefined) return "blank";
+  return chosen === item.answer ? "correct" : "wrong";
+}
+
+/** Correct, wrong and blank counts for each part of Listening and Reading. */
+export function partBreakdown(paper: Paper, run: PaperRun, stage: 0 | 1) {
+  const parts = new Map<
+    string,
+    {
+      part: string;
+      correct: number;
+      wrong: number;
+      blank: number;
+      total: number;
+    }
+  >();
+  for (const slot of paper.sections[stage].slots) {
+    const entry = parts.get(slot.part) ?? {
+      part: slot.part,
+      correct: 0,
+      wrong: 0,
+      blank: 0,
+      total: 0,
+    };
+    for (const item of slot.items) {
+      const status = itemStatus(item, run);
+      if (status === "ungraded") continue;
+      entry[status]++;
+      entry.total++;
+    }
+    parts.set(slot.part, entry);
+  }
+  return [...parts.values()];
+}
+
 /** Deadline stays absolute across reloads, background tabs and sleep. */
 export function advancePaperRun(
   run: PaperRun,
@@ -96,8 +161,10 @@ export function advancePaperRun(
   if (run.finishedAt || (!force && now < run.deadline)) return run;
   let next = { ...run };
   while (!next.finishedAt && (force || now >= next.deadline)) {
-    if (next.stage === paper.sections.length - 1) {
-      next.finishedAt = new Date(Math.min(now, next.deadline)).toISOString();
+    const closed = Math.min(now, next.deadline);
+    next.stageEnds = [...(next.stageEnds ?? []), closed].slice(0, 4);
+    if (isFinalStage(next)) {
+      next.finishedAt = new Date(closed).toISOString();
       break;
     }
     const base = force ? now : next.deadline;

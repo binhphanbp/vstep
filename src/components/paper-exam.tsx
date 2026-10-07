@@ -11,6 +11,7 @@ import {
 import {
   LISTENING_READ_SECONDS,
   SPEAKING_PARTS,
+  isFinalStage,
   paperAnswered,
   paperStageTotal,
   readingPalette,
@@ -111,14 +112,22 @@ async function micPeak(seconds = 3): Promise<number> {
 export function ExamCheckIn({
   name,
   paper,
+  only,
   disabled,
   onStart,
 }: {
   name: string;
   paper: Paper;
+  /** Set when only one section is sat. */
+  only?: 0 | 1 | 2 | 3;
   disabled: boolean;
   onStart: () => void;
 }) {
+  const stages = only === undefined ? [0, 1, 2, 3] : [only];
+  const minutes = stages.reduce(
+    (sum, stage) => sum + paper.sections[stage].minutes,
+    0,
+  );
   const [agreed, setAgreed] = useState(false);
   const [mic, setMic] = useState<"idle" | "testing" | "ok" | "quiet" | "error">(
     "idle",
@@ -146,8 +155,8 @@ export function ExamCheckIn({
         <div>
           <dt>Các phần</dt>
           <dd>
-            {paper.sections
-              .map((s, i) => `${sectionNames[i]} ${s.minutes}′`)
+            {stages
+              .map((i) => `${sectionNames[i]} ${paper.sections[i].minutes}′`)
               .join(" · ")}
           </dd>
         </div>
@@ -216,7 +225,7 @@ export function ExamCheckIn({
           checked={agreed}
           onChange={(event) => setAgreed(event.target.checked)}
         />
-        Tôi đã đeo tai nghe, đã kiểm tra micro và có đủ 172 phút liên tục.
+        Tôi đã đeo tai nghe, đã kiểm tra micro và có đủ {minutes} phút liên tục.
       </label>
       <button
         type="button"
@@ -832,7 +841,9 @@ export function ExamRoom({
         </div>
         <div className="exam-where">
           <strong>
-            Phần {run.stage + 1}/4 · {sectionNames[run.stage]}
+            {run.only === undefined
+              ? `Phần ${run.stage + 1}/4 · ${sectionNames[run.stage]}`
+              : `Luyện riêng · ${sectionNames[run.stage]}`}
           </strong>
           <span>
             {answered}/{total} đã làm
@@ -853,7 +864,7 @@ export function ExamRoom({
               onClick={onSubmit}
               disabled={Boolean(storageError)}
             >
-              Nộp phần này
+              {isFinalStage(run) ? "Nộp bài" : "Nộp phần này"}
             </button>
           )}
           <Link
