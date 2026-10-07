@@ -9,7 +9,7 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 - Lượt làm lưu đáp án, bài Viết, phần Nói đã làm, phần thi và deadline vào cùng JSON backup/cloud snapshot. File ghi âm của micro vẫn ở IndexedDB, phải tải riêng. Đề tĩnh có version và dấu băm nguồn để không đối chiếu lượt cũ với khóa đáp án đã đổi. Hai tab cùng mở một lượt không được nộp chồng phần tiếp theo.
 - Kiểm tra tự động: 192 unit, 75 Playwright trên bản build production (71 Chromium, hai Firefox, hai WebKit), 112 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
 - Lượt chạy đầu đạt 68/70; hai ca WebKit không khởi chạy vì máy thiếu `libevent-2.1.so.7`. Sau khi nạp thư viện tạm từ `/tmp` vào môi trường test, chạy lại đúng hai ca WebKit đều đạt. Sau khi mở phần bản dịch, chạy lại ba ca E2E của kho đề đều đạt.
-- Sau khi thêm Review 13/09, lượt đầy đủ đạt 70/71. Ca offline còn lại chỉ chờ tiêu đề kho đề cũ; cập nhật kỳ vọng và chạy lại riêng ca này trên bản production: đạt. Như vậy cả 71 ca đều đã đạt qua các lượt chạy, nhưng chưa có một lượt đầy đủ duy nhất xanh sau thay đổi câu chữ của test.
+- Sau khi thêm phòng thi mô phỏng, lượt Chromium đầy đủ đạt 71/71 trên bản production local (lint và TypeScript sạch, 192/192 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm phòng thi; chưa có CI hoặc HTTPS của bản mới.
 
 ## Phòng thi mô phỏng cho kho đề nhập — bản làm việc ngày 07/10/2026
 
