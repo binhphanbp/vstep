@@ -1107,3 +1107,54 @@ test("a corrected question says when it comes back in words, not a timestamp", a
   // No seconds and no raw time-of-day.
   await expect(note).not.toContainText(/\d{1,2}:\d{2}/);
 });
+
+test("a listening passage plays again from its first sentence once it has finished", async ({
+  page,
+}) => {
+  // After a full listen the pointer sat on the last sentence, and the play
+  // button resumes from the pointer: "play again" spoke that one sentence and
+  // stopped. A fake voice that finishes each sentence lets the test run a
+  // whole passage, which headless Chromium's real synthesis never does.
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { __spoken: string[] }).__spoken = spoken;
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        speak(utterance: SpeechSynthesisUtterance) {
+          spoken.push(utterance.text);
+          setTimeout(() => utterance.onend?.(new Event("end") as never), 10);
+        },
+        cancel() {},
+        pause() {},
+        resume() {},
+        getVoices: () => [],
+      },
+    });
+  });
+  await page.goto("/practice/listening-weekend");
+  await expect(page.locator(".audio-panel")).toBeVisible();
+  const total = Number(
+    (await page.locator(".audio-position").innerText()).split("/")[1],
+  );
+  expect(total).toBeGreaterThan(5);
+  const play = page.locator(".audio-controls button").first();
+  const spoken = () =>
+    page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken);
+  async function listenThrough() {
+    await play.click();
+    // Back to a play button, not "Dừng": the passage reached its end.
+    await expect(play).not.toContainText("Dừng");
+  }
+  await listenThrough();
+  const first = await spoken();
+  expect(first).toHaveLength(total);
+  await page.evaluate(() => {
+    (window as unknown as { __spoken: string[] }).__spoken.length = 0;
+  });
+  await listenThrough();
+  const second = await spoken();
+  // The whole passage again, beginning with the sentence it began with.
+  expect(second).toHaveLength(total);
+  expect(second[0]).toBe(first[0]);
+});

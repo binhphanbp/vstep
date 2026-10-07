@@ -89,6 +89,10 @@ export function AudioPlayer({
 }) {
   const [playing, setPlaying] = useState(false);
   const [paused, setPaused] = useState(false);
+  // True once the passage has played to its last sentence. Without it the play
+  // button resumed from the pointer, and the pointer sits on the last sentence
+  // after a full listen: "play again" then spoke that one sentence and stopped.
+  const [finished, setFinished] = useState(false);
   const [at, setAt] = useState(0);
   const [rate, setRate] = useState(1);
   const [error, setError] = useState("");
@@ -125,6 +129,7 @@ export function AudioPlayer({
     window.speechSynthesis.cancel();
     speechOwner = owner.current;
     setError("");
+    setFinished(false);
     const voices = window.speechSynthesis.getVoices();
     const englishVoices = voices
       .filter((v) => v.lang.startsWith("en"))
@@ -142,6 +147,7 @@ export function AudioPlayer({
       if (index >= parts.length) {
         if (speechOwner === owner.current) speechOwner = null;
         setPlaying(false);
+        setFinished(true);
         setAt(parts.length ? parts.length - 1 : 0);
         return;
       }
@@ -226,11 +232,17 @@ export function AudioPlayer({
         <button
           type="button"
           className="button primary"
-          onClick={playing ? stop : () => play(at)}
-          aria-label={playing ? "Dừng bài nghe" : "Phát bài nghe"}
+          onClick={playing ? stop : () => play(finished ? 0 : at)}
+          aria-label={
+            playing
+              ? "Dừng bài nghe"
+              : finished
+                ? "Nghe lại từ đầu"
+                : "Phát bài nghe"
+          }
         >
           {playing ? <Square size={15} /> : <Play size={15} />}{" "}
-          {playing ? "Dừng" : "Phát bài nghe"}
+          {playing ? "Dừng" : finished ? "Nghe lại từ đầu" : "Phát bài nghe"}
         </button>
         <button
           type="button"
