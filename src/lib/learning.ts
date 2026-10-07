@@ -378,6 +378,20 @@ export const stateSchema = z
         );
       });
       const runs = state.paperRuns ?? [];
+      runs.forEach((run, index) => {
+        if (run.only !== undefined && run.stage !== run.only)
+          ctx.addIssue({
+            code: "custom",
+            path: ["paperRuns", index, "stage"],
+            message: "Lượt luyện một kỹ năng phải ở đúng phần của nó.",
+          });
+        if ((run.stageEnds?.length ?? 0) > (run.only === undefined ? 4 : 1))
+          ctx.addIssue({
+            code: "custom",
+            path: ["paperRuns", index, "stageEnds"],
+            message: "Nhật ký thời gian có nhiều phần hơn lượt thi.",
+          });
+      });
       if (new Set(runs.map((run) => run.id)).size !== runs.length)
         ctx.addIssue({
           code: "custom",

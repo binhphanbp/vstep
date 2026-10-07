@@ -450,3 +450,109 @@ test("one section can be sat on its own, then reviewed part by part and retried"
   await expect(attempts.nth(0)).toContainText("1/40");
   await expect(attempts.nth(1)).toContainText("Chỉ Viết");
 });
+
+test("a single section ends the sitting when its time runs out", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Chỉ Viết/ }).check();
+  // The rules speak of Writing only, and of the sitting ending.
+  await expect(page.locator(".exam-rules")).toContainText("Viết:");
+  await expect(page.locator(".exam-rules")).not.toContainText("Nghe:");
+  await expect(page.locator(".exam-rules")).toContainText(
+    "lượt luyện kết thúc",
+  );
+  await page.getByRole("checkbox", { name: /đủ 60 phút/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await page
+    .getByRole("textbox", { name: /Bài viết Task 1/ })
+    .fill("Dear Jo, practise every day.");
+  await page.clock.fastForward("01:00:05");
+  await expect(
+    page.getByText("ĐỀ 132 · ĐÃ HOÀN THÀNH · CHỈ VIẾT"),
+  ).toBeVisible();
+  await expect(page.locator(".sidebar")).toBeVisible();
+  await expect(
+    page.getByRole("row", { name: /^Viết 60 phút 60 phút$/ }),
+  ).toBeVisible();
+  await expect(page.getByText("Dear Jo, practise every day.")).toBeHidden();
+  await page.locator(".paper-review details summary").first().click();
+  await expect(page.getByText("Dear Jo, practise every day.")).toBeVisible();
+});
+
+test("paper 131 sat as one section has no marks, tables or retry", async ({
+  page,
+}) => {
+  await page.goto("/papers/131");
+  await page.getByRole("radio", { name: /Chỉ Đọc/ }).check();
+  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
+  await page.getByRole("checkbox", { name: /đủ 60 phút/ }).check();
+  await page.getByRole("button", { name: /Bắt đầu đề 131 · chỉ Đọc/ }).click();
+  await page.locator(".paper-question input").first().check();
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Kết thúc buổi luyện" }).click();
+  await expect(
+    page.getByText("ĐỀ 131 · ĐÃ HOÀN THÀNH · CHỈ ĐỌC"),
+  ).toBeVisible();
+  await expect(page.locator(".stat-card")).toHaveCount(0);
+  await expect(page.getByText(/không có khóa đáp án/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Làm lại \d+ câu/ }),
+  ).toHaveCount(0);
+  await expect(page.locator(".review-filter")).toHaveCount(0);
+  await expect(page.locator(".review-mark")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Kết quả theo từng phần" }),
+  ).toHaveCount(0);
+  // The time used is still true of an unmarked paper.
+  await expect(
+    page.getByRole("heading", { name: "Thời gian đã dùng" }),
+  ).toBeVisible();
+});
+
+test("a sitting saved before the time log existed still opens and reviews", async ({
+  page,
+}) => {
+  const paper = JSON.parse(await readFile("public/papers/132.json", "utf8"));
+  const first = paper.sections[0].slots[0].items[0];
+  await page.goto("/papers/132");
+  // Start any sitting so the app has written its state, then swap in one
+  // like an older version saved: no mode, no log, in its last section, with
+  // its time long gone.
+  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
+  await page.getByRole("checkbox", { name: /đủ 172 phút/ }).check();
+  await page.getByRole("button", { name: /Bắt đầu đề 132/ }).click();
+  await expect(page.locator(".paper-clock")).toBeVisible();
+  await page.evaluate(
+    ({ id, hash, version }) => {
+      const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+      state.paperRuns = [
+        {
+          id: "old-1",
+          paperId: "132",
+          version,
+          sourceHash: hash,
+          startedAt: Date.now() - 3 * 3600_000,
+          stage: 3,
+          deadline: Date.now() - 1000,
+          material: 0,
+          answers: { [id]: 0 },
+          essays: {},
+          spoken: [],
+        },
+      ];
+      localStorage.setItem("may-study-v1", JSON.stringify(state));
+    },
+    { id: first.id, hash: paper.sourceHash, version: paper.version },
+  );
+  await page.reload();
+  await expect(page.getByText("ĐỀ 132 · ĐÃ HOÀN THÀNH")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Kết quả theo từng phần" }),
+  ).toBeVisible();
+  // No log was kept, so no time is shown against a section it may not belong to.
+  await expect(
+    page.getByRole("heading", { name: "Thời gian đã dùng" }),
+  ).toHaveCount(0);
+});
