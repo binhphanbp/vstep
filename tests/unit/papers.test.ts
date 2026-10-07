@@ -5,9 +5,14 @@ import {
   LISTENING_READ_SECONDS,
   SPEAKING_PARTS,
   advancePaperRun,
+  isFinalStage,
+  itemStatus,
   paperCatalog,
   paperScore,
+  partBreakdown,
   readingPalette,
+  runStages,
+  stageMinutes,
   type Paper,
 } from "../../src/lib/papers";
 
@@ -174,5 +179,98 @@ describe("imported exam papers", () => {
         paper.sections[1].slots.length - 1,
       );
     }
+  });
+
+  it("ends a single-skill sitting after its one section and logs when sections close", () => {
+    const paper = papers[1];
+    const start = 1000;
+    const reading: PaperRun = {
+      ...firstRun(paper),
+      stage: 1,
+      only: 1,
+      deadline: start + 60 * 60_000,
+    };
+    expect(runStages(reading)).toEqual([1]);
+    expect(isFinalStage(reading)).toBe(true);
+    // Submitted after 25 minutes.
+    const early = advancePaperRun(reading, paper, start + 25 * 60_000, true);
+    expect(early.finishedAt).toBe(new Date(start + 25 * 60_000).toISOString());
+    expect(early.stage).toBe(1);
+    expect(stageMinutes(early)).toEqual([{ stage: 1, minutes: 25 }]);
+    // Left open long after time ran out: closed at the deadline, not later.
+    const late = advancePaperRun(reading, paper, start + 5 * 60 * 60_000);
+    expect(late.stageEnds).toEqual([reading.deadline]);
+    expect(stageMinutes(late)).toEqual([{ stage: 1, minutes: 60 }]);
+
+    // A whole paper that ran out of time twice logs both closings.
+    const whole = firstRun(paper);
+    expect(isFinalStage(whole)).toBe(false);
+    const two = advancePaperRun(whole, paper, whole.deadline + 60 * 60_000);
+    expect(two.stage).toBe(2);
+    expect(two.stageEnds).toEqual([
+      whole.deadline,
+      whole.deadline + 60 * 60_000,
+    ]);
+    expect(stageMinutes(two).map((entry) => entry.minutes)).toEqual([40, 60]);
+    // Sittings saved before the log existed simply have no timings.
+    expect(stageMinutes({ ...two, stageEnds: undefined })).toEqual([]);
+
+    const state = {
+      ...freshState(),
+      paperRuns: [early, { ...two, id: "test-whole" }],
+    };
+    expect(
+      stateSchema.safeParse(JSON.parse(JSON.stringify(state))).success,
+    ).toBe(true);
+    const bad = (run: object) =>
+      stateSchema.safeParse({ ...freshState(), paperRuns: [run] }).success;
+    expect(bad({ ...early, only: 4 })).toBe(false);
+    expect(bad({ ...early, stageEnds: [1, 2, 3, 4, 5] })).toBe(false);
+  });
+
+  it("marks each answer and counts every part of Listening and Reading", () => {
+    const paper = papers[1];
+    const [first, second, third] = paper.sections[1].slots[0].items;
+    const run: PaperRun = {
+      ...firstRun(paper),
+      answers: {
+        [first.id]: first.answer!,
+        [second.id]: (second.answer! + 1) % 4,
+      },
+    };
+    expect(itemStatus(first, run)).toBe("correct");
+    expect(itemStatus(second, run)).toBe("wrong");
+    expect(itemStatus(third, run)).toBe("blank");
+    const reading = partBreakdown(paper, run, 1);
+    expect(reading.map((part) => part.part)).toEqual([
+      "Passage 1",
+      "Passage 2",
+      "Passage 3",
+      "Passage 4",
+    ]);
+    expect(reading[0]).toEqual({
+      part: "Passage 1",
+      correct: 1,
+      wrong: 1,
+      blank: 8,
+      total: 10,
+    });
+    const listening = partBreakdown(paper, run, 0);
+    expect(listening.map((part) => [part.part, part.total])).toEqual([
+      ["Part 1", 8],
+      ["Part 2", 12],
+      ["Part 3", 15],
+    ]);
+    // Paper 131 has no key: nothing is marked right or wrong.
+    const unkeyed = papers[0];
+    const item = unkeyed.sections[0].slots[0].items[0];
+    expect(
+      itemStatus(item, { ...firstRun(unkeyed), answers: { [item.id]: 0 } }),
+    ).toBe("ungraded");
+    expect(
+      partBreakdown(unkeyed, firstRun(unkeyed), 0).every(
+        (part) => part.total === 0,
+      ),
+    ).toBe(true);
   });
 });

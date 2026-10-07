@@ -12,16 +12,16 @@ export function PaperBank() {
           <div className="eyebrow">BỘ ĐỀ ĐÃ NHẬP</div>
           <h1>Năm đề có đáp án và một đề tự luyện.</h1>
           <p>
-            Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói.
-            Tiến độ nằm trong bản sao dữ liệu Mây; bản ghi âm cần sao lưu riêng.
+            Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Tiến
+            độ nằm trong bản sao dữ liệu Mây; bản ghi âm cần sao lưu riêng.
           </p>
         </div>
       </div>
       <div className="notice">
-        Các đề được nhập từ bộ dữ liệu người dùng cung cấp. Đề 131 không có đáp án
-        và transcript nên chỉ dùng để luyện, không chấm Nghe/Đọc. Đề 132–135
-        cùng Review 13/09 có đáp án gốc nhưng chưa được Mây hoặc giáo viên thẩm định; kết quả chỉ là
-        số câu đúng, không quy đổi sang bậc VSTEP.
+        Các đề được nhập từ bộ dữ liệu người dùng cung cấp. Đề 131 không có đáp
+        án và transcript nên chỉ dùng để luyện, không chấm Nghe/Đọc. Đề 132–135
+        cùng Review 13/09 có đáp án gốc nhưng chưa được Mây hoặc giáo viên thẩm
+        định; kết quả chỉ là số câu đúng, không quy đổi sang bậc VSTEP.
       </div>
       <div className="paper-grid">
         {paperCatalog.map((paper) => {
@@ -36,7 +36,8 @@ export function PaperBank() {
               </span>
               <h2>{paper.title}</h2>
               <p className="help-copy">
-                172 phút · Nghe có audio · Đọc đủ bài · Viết và Nói tự luyện
+                172 phút cả đề, hoặc luyện riêng từng kỹ năng có giờ · Nghe có
+                audio · Viết và Nói tự luyện
               </p>
               <p className="help-copy">
                 {paper.graded
@@ -47,7 +48,9 @@ export function PaperBank() {
                 <p className="help-copy">
                   {latest.finishedAt
                     ? `Đã làm ${runs.filter((run) => run.finishedAt).length} lượt`
-                    : `Đang làm · phần ${latest.stage + 1}/4`}
+                    : latest.only === undefined
+                      ? `Đang làm · phần ${latest.stage + 1}/4`
+                      : `Đang luyện riêng ${["Nghe", "Đọc", "Viết", "Nói"][latest.stage]}`}
                 </p>
               )}
               <Link className="button primary" href={`/papers/${paper.id}`}>

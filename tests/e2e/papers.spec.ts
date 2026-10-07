@@ -343,3 +343,110 @@ test("every exam-room screen passes the automatic WCAG A/AA check", async ({
   await page.getByRole("button", { name: /^Bắt đầu Part 1/ }).click();
   await audit("speaking talk");
 });
+
+test("one section can be sat on its own, then reviewed part by part and retried", async ({
+  page,
+}) => {
+  const paper = JSON.parse(await readFile("public/papers/132.json", "utf8"));
+  const [first, second] = paper.sections[1].slots[0].items;
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Chỉ Đọc/ }).check();
+  // The check-in speaks of this section alone, not of 172 minutes.
+  await expect(page.locator(".exam-facts")).toContainText("Đọc 60′");
+  await expect(page.locator(".exam-facts")).not.toContainText("Nghe");
+  await page.getByRole("checkbox", { name: /đủ 60 phút/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await expect(page.locator(".exam-where")).toContainText("Luyện riêng · Đọc");
+  await expect(page.locator(".exam-palette button")).toHaveCount(40);
+  // One right, one wrong, the rest left blank.
+  await page.locator(`input[name="${first.id}"]`).nth(first.answer).check();
+  await page
+    .locator(`input[name="${second.id}"]`)
+    .nth((second.answer + 1) % 4)
+    .check();
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Nộp bài" }).click();
+
+  // The review covers Reading only, with time used and a part breakdown.
+  await expect(
+    page.getByText("ĐỀ 132 · ĐÃ HOÀN THÀNH · CHỈ ĐỌC"),
+  ).toBeVisible();
+  await expect(page.locator(".stat-card")).toHaveCount(1);
+  await expect(page.locator(".stat-card strong")).toHaveText("1/40");
+  await expect(page.getByRole("heading", { name: "1. Nghe" })).toHaveCount(0);
+  await expect(
+    page.getByRole("row", { name: /^Đọc dưới 1 phút 60 phút$/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("row", { name: /^Đọc · Passage 1 1\/10 1 8$/ }),
+  ).toBeVisible();
+  const audit = async (where: string) => {
+    const result = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze();
+    expect(
+      result.violations.map((v) => ({
+        id: v.id,
+        nodes: v.nodes.map((n) => n.target),
+      })),
+      where,
+    ).toEqual([]);
+  };
+  await audit("review");
+  // Only the missed questions: the right one disappears.
+  await page
+    .getByRole("radio", { name: /Chỉ câu sai và bỏ trống \(39\)/ })
+    .check();
+  await page.locator(".paper-review details summary").first().click();
+  await expect(page.getByText(`1. ${first.text}`)).toHaveCount(0);
+  await expect(
+    page.locator(".paper-review-item").first().locator(".review-mark"),
+  ).toHaveText("✗ Sai");
+
+  // Retry the 39, with the answer shown straight away.
+  await page
+    .getByRole("button", { name: "Làm lại 39 câu sai và bỏ trống" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Làm lại câu sai · 1/39" }),
+  ).toBeVisible();
+  await page
+    .locator(".retry-drill .paper-option input")
+    .nth(second.answer)
+    .check();
+  await expect(page.locator(".retry-drill .review-mark")).toHaveText("✓ Đúng");
+  await audit("retry");
+  await expect(
+    page.locator(".retry-drill .paper-option input").first(),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Câu tiếp theo" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Làm lại câu sai · 2/39" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Dừng làm lại" }).click();
+  // The saved result is the result of the sitting, not of the retry.
+  await expect(page.locator(".stat-card strong")).toHaveText("1/40");
+  const runs = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns,
+  );
+  expect(runs).toHaveLength(1);
+  expect(runs[0].only).toBe(1);
+  expect(runs[0].stageEnds).toHaveLength(1);
+  expect(Object.keys(runs[0].answers)).toHaveLength(2);
+
+  // A second sitting shows up beside the first.
+  await page.getByRole("button", { name: "Làm lại đề này" }).click();
+  await page.getByRole("radio", { name: /Chỉ Viết/ }).check();
+  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
+  await page.getByRole("checkbox", { name: /đủ 60 phút/ }).check();
+  await page.getByRole("button", { name: /Bắt đầu đề 132 · chỉ Viết/ }).click();
+  await page.getByRole("button", { name: "Kết thúc buổi luyện" }).click();
+  await expect(
+    page.getByText("ĐỀ 132 · ĐÃ HOÀN THÀNH · CHỈ VIẾT"),
+  ).toBeVisible();
+  const attempts = page.locator(".review-attempts tbody tr");
+  await expect(attempts).toHaveCount(2);
+  await expect(attempts.nth(0)).toContainText("Chỉ Đọc");
+  await expect(attempts.nth(0)).toContainText("1/40");
+  await expect(attempts.nth(1)).toContainText("Chỉ Viết");
+});

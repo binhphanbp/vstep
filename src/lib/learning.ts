@@ -300,6 +300,12 @@ export const paperRunSchema = z.object({
   // Exam-room fields. All optional: a sitting saved before the exam room
   // existed has none of them and is read as a practice sitting.
   mode: z.optional(z.enum(["exam", "practice"])),
+  /** A single-skill sitting: only this section, then the sitting ends. */
+  only: z.optional(boundedInteger(0, 3)),
+  /** When each section of the sitting closed, in the order they were sat. */
+  stageEnds: z.optional(
+    z.array(boundedNumber(0, 10000000000000)).check(z.maxLength(4)),
+  ),
   /** Listening recordings already played; in the exam room they play once. */
   heard: z.optional(z.array(limitedString(100)).check(z.maxLength(14))),
   /** Where the current Speaking part stands, as absolute times. */
