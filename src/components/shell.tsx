@@ -32,6 +32,15 @@ const nav = [
   { href: "/mistakes", label: "Sổ tay lỗi sai", icon: NotebookPen },
   { href: "/progress", label: "Nhìn lại tiến bộ", icon: ChartNoAxesCombined },
 ];
+// Pages outside the main navigation; anything else is an error page and must
+// not borrow another page's name.
+function otherLabel(pathname: string) {
+  if (pathname.startsWith("/guide")) return "Cẩm nang VSTEP";
+  if (pathname.startsWith("/settings")) return "Cài đặt của mình";
+  if (pathname.startsWith("/review-pack")) return "Gói ôn tập";
+  if (pathname.startsWith("/offline")) return "Đang ngoại tuyến";
+  return "Không tìm thấy trang";
+}
 export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { state, ready, storageError } = useStudy();
@@ -230,10 +239,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <span>Không gian học tập</span>
             <ChevronRight size={14} />
             <strong>
-              {current?.label ??
-                (pathname === "/settings"
-                  ? "Cài đặt của mình"
-                  : "Cẩm nang VSTEP")}
+              {current?.label ?? otherLabel(pathname)}
             </strong>
           </div>
           <div className="topbar-right">
