@@ -1,3 +1,4 @@
+import Link from "next/link";
 export const metadata = { title: "Đang ngoại tuyến" };
 export default function Page() {
   return (
@@ -18,6 +19,9 @@ export default function Page() {
           Khi có mạng lại, mở lại trang là mọi thứ trở về bình thường. Bài đang
           làm dở và bản nháp vẫn nằm nguyên trên thiết bị này.
         </p>
+        <Link href="/" prefetch={false} className="button primary">
+          Về góc học hôm nay
+        </Link>
       </div>
     </div>
   );

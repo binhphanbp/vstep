@@ -329,7 +329,18 @@ test("the app still opens when the network is gone", async ({
   // The plain "no network" page is always reachable.
   await page.goto("/offline");
   await expect(page.locator("main h1")).toContainText("Mạng đang không ổn");
+  // An error page keeps its own name in the top bar and offers a way out.
+  await expect(page.locator(".breadcrumb strong")).toHaveText(
+    "Đang ngoại tuyến",
+  );
+  await expect(
+    page.getByRole("link", { name: "Về góc học hôm nay" }).last(),
+  ).toBeVisible();
   await context.setOffline(false);
+  await page.goto("/khong-co-trang-nay");
+  await expect(page.locator(".breadcrumb strong")).toHaveText(
+    "Không tìm thấy trang",
+  );
 });
 
 test("every page of the app opens with the network gone, not just the last one visited", async ({
