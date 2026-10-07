@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 175 unit / 62 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 175 unit / 63 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -309,10 +309,17 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - **Sửa.** Thêm luật `.day-dot.today.complete` giữ nền hồng. Đo lại: nền `rgb(195,162,173)`, tương phản **2,2:1**, bằng đúng độ tương phản của các ngày trước.
 - **Ca kiểm thử.** 1 ca E2E mới đo tỉ lệ tương phản thật của chấm hôm nay sau khi học. Đã chạy thử trên bản **chưa sửa**: ca đỏ với đúng 1,098:1; trên bản đã sửa: xanh.
 
+## Dùng thử như Gùa, lượt hai: tên người học dính liền với chữ bên cạnh
+
+- **Lỗi.** Trang Lộ trình hiện "…theo kết quả và thời gian **Gùacó**." Mã JSX ngắt dòng giữa `{state.profile.name}` và chữ `có`, mà JSX bỏ khoảng trắng ở chỗ ngắt dòng đó. Lint, typecheck, axe và các ca kiểm thử trước đều không thấy được, vì chỉ có chữ **đã hiển thị** mới lộ ra.
+- **Sửa.** Thêm `{" "}` tường minh. Quét mã tìm cùng kiểu ở nơi khác không ra chỗ nào, nhưng quét mã vốn yếu với loại lỗi này nên không dựa vào đó.
+- **Ca kiểm thử.** 1 ca E2E mới đi qua 13 trang (9 trang chính và 4 bài học đại diện cho bốn kỹ năng) và báo lỗi nếu "Gùa" dính liền với một chữ cái ở bên nào. Đã chạy thử trên bản **chưa sửa**: đỏ ở `/journey`; trên bản đã sửa: xanh.
+- **Một lưu ý về cách làm.** Lượt chụp màn hình toàn trang đầu tiên ra trang **không có CSS**. Nguyên nhân là tiến trình `next-server` cũ còn sống sau khi build lại và trỏ tới file CSS đã bị xoá, không phải lỗi sản phẩm: production không dính chuyện này vì mỗi lần deploy là một bản bất biến. Ghi lại để lần sau không ai hoảng vì ảnh trần.
+
 ## Bằng chứng kiểm tra
 
 - 175 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 62 kiểm thử Playwright trên bản production: 58 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 63 kiểm thử Playwright trên bản production: 59 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
