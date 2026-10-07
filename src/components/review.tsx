@@ -49,6 +49,12 @@ export function VocabularyPage() {
     );
   const card = due[0];
   const learned = deck.filter((v) => state.reviews[v.id]).length;
+  // "Chưa nhớ" brings a card back in ten minutes; an empty deck should say so
+  // rather than read like the end of the day.
+  const returning = deck.filter((v) => {
+    const review = state.reviews[v.id];
+    return review && review.interval < 1 && Date.parse(review.due) > now;
+  }).length;
   useEffect(() => {
     const tick = setInterval(() => setNow(Date.now()), 30000);
     return () => {
@@ -191,7 +197,7 @@ export function VocabularyPage() {
                   </div>
                 ) : (
                   <p className="help-copy" style={{ textAlign: "center" }}>
-                    Lật thẻ rồi chọn mức nhớ thật của bạn để xếp lần ôn tiếp
+                    Lật thẻ rồi chọn mức nhớ thật của mình để xếp lần ôn tiếp
                     theo.
                   </p>
                 )}
@@ -201,8 +207,10 @@ export function VocabularyPage() {
                 <CheckCircle2 size={38} />
                 <h2>Vườn từ đã được chăm rồi!</h2>
                 <p>
-                  Hôm nay bạn đã ôn hết những từ đến hạn. Lịch ôn sẽ tự mở lại
-                  khi tới lượt.
+                  Hôm nay {state.profile.name} đã ôn hết những từ đến hạn.{" "}
+                  {returning
+                    ? `${returning} từ vừa chọn “Chưa nhớ” sẽ quay lại sau ít phút, ngay trên trang này.`
+                    : "Lịch ôn sẽ tự mở lại khi tới lượt."}
                 </p>
                 <Link href="/practice" className="button primary">
                   Khám phá một bài mới
@@ -217,7 +225,7 @@ export function VocabularyPage() {
               <ul className="tips-list">
                 <li>Chưa nhớ: gặp lại sau 10 phút.</li>
                 <li>Hơi khó: ôn lại sau một ngày.</li>
-                <li>Nhớ tốt: khoảng cách tăng theo các lần ôn.</li>
+                <li>Nhớ rồi, Rất dễ: khoảng cách tăng dần theo các lần ôn.</li>
                 <li>
                   Đặt một câu liên quan đến chính mình giúp từ có ý nghĩa hơn.
                 </li>

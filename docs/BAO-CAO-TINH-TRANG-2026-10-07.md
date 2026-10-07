@@ -27,7 +27,7 @@ Chưa làm: mở lại trang production bằng mắt sau PR #34 (chỉ dựa và
 
 | Số liệu | Giá trị |
 | --- | --- |
-| Kiểm thử unit (Vitest) | 184 |
+| Kiểm thử unit (Vitest) | 186 |
 | Kiểm thử E2E (Playwright, bản production) | 67 = 63 Chromium + 2 Firefox + 2 WebKit |
 | Route được dựng sẵn | 106 |
 | Màn được quét axe | 16 |
@@ -56,6 +56,8 @@ Cách làm: mở bản production dựng sẵn, thao tác như người học (t
 Đợt rà ba đường trên desktop (đổi hồ sơ giữa chừng, mô phỏng 56 ngày, hai đề đủ cấu trúc làm trọn): kế hoạch, giai đoạn tuần thi và phần so sánh hai lần thi đều đúng; một lỗi duy nhất, **trang Tiến bộ dựng mọi lượt đã học không giới hạn**, nay hiện 20 buổi mới nhất và xem thêm từng 20. Chi tiết trong `docs/QUALITY.md`, mục "Rà ba đường chưa đi".
 
 Đợt rà các đường hiếm trên desktop (mất mạng giữa lúc nộp, bấm nộp hai lần, Back/Forward, qua nửa đêm, múi giờ khác, tên lạ): ba lỗi nhỏ đã sửa, gồm ảnh đại diện vỡ khi tên bắt đầu bằng emoji, "Gùa" gõ bằng dấu tổ hợp mất nhãn "Rùa nhỏ", và giờ ở lịch sử lệch giờ Việt Nam khi máy ở múi giờ khác. Chi tiết trong `docs/QUALITY.md`, mục "Rà các đường hiếm".
+
+Đợt rà toàn bộ bốn luồng chính (dữ liệu, 42 bài trên trình duyệt, trình phát Nghe, từ vựng, phòng thi, ba độ rộng desktop): ba lỗi đã sửa — "Nghe lại câu này" đọc tới hết bài, lời khen sai sau bài làm sai hết, và một thẻ từ trích câu không còn trong bài. Một vấn đề lớn về chất lượng đề còn mở: đáp án đúng thường là phương án dài nhất (chọn dài nhất được 58–74%). Chi tiết trong `docs/QUALITY.md`, mục "Rà toàn bộ bốn luồng chính".
 
 Trước đó trong cùng đợt: #27 (trần 6 bài/ngày bỏ phí 36–68% ngân sách, nay trần 8 và phần dư được nói ra), #26 (mất mạng chỉ mở được 1/9 trang, nay 9/9 và bài của hôm nay mở được).
 

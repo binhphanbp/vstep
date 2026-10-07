@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 184 unit / 67 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 186 unit / 67 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -364,9 +364,24 @@ Phạm vi: desktop. Thao tác thật trên bản production dựng sẵn, đồn
 - 1 ca unit mới (đã chạy thử trên hàm cũ: đỏ với "Expected 8/10/2026 · 00:03, Received 7/10/2026 · 17:03") và phần mở rộng ca E2E tên người học (đã chạy thử trên bản cũ: đỏ với "Expected 🐢, Received �"). Không đổi số ca E2E.
 - **Chưa kiểm được ở đây:** thời gian luyện qua nửa đêm (giờ giả của Playwright chỉ nhảy một lần nên bộ đếm giây không chạy), và việc đổi đồng hồ hệ thống giữa lúc thi.
 
+## Rà toàn bộ bốn luồng chính, 07/10/2026
+
+Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp: dữ liệu học liệu đọc bằng script, từng bài trên bản production dựng sẵn, và các màn còn lại ở 1024, 1280 và 1920 px.
+
+- **Dữ liệu, đã đúng.** 42 bài và 2 đề: mã bài và mã câu không trùng; cả 258 câu khách quan đều có 4 phương án, đáp án nằm trong phạm vi, không có hai phương án trùng chữ, câu bằng chứng không lộ trong đề bài. 11 bài mẫu Viết đều đủ số từ tối thiểu. Thời lượng đề: rút gọn 10+15+20+6 = 51 phút; Đề 01 và Đề 02 đều 40+60+60+12 = 172 phút. Bài Nghe không có chỗ cắt câu làm hỏng giờ hay chữ viết tắt; hội thoại đổi giọng đúng người nói.
+- **Từng bài trên trình duyệt, đã đúng.** Cả 42 bài mở, nộp và lưu đúng một lượt. 12 bài Đọc và 12 bài Nghe chấm đúng điểm, mỗi câu có câu bằng chứng và phân tích phương án; bài Nghe mở bản chép lời chỉ sau khi nộp. 9 bài Viết lưu bài làm và có bài mẫu; 9 bài Nói lưu bản ghi và có câu trả lời mẫu. Không có lỗi trình duyệt.
+- **Trình phát bài Nghe, đã đúng.** Với danh sách giọng giả lập Chrome trên Windows, app chọn "Google UK English Female"; tốc độ 0,8 áp dụng; tạm dừng và tiếp tục; nghe hết thì nút thành "Nghe lại từ đầu"; nút nghe lại câu bằng chứng đọc đúng một câu.
+- **Vườn từ vựng, đã đúng.** Người mới có 20 thẻ, 48 thẻ còn lại chờ bài nguồn; bốn mức nhớ ra 10 phút, 1, 1 và 4 ngày; ôn hết cả bộ, tải lại vẫn giữ; tab "Tất cả từ vựng" và ô tìm kiếm chạy. Trang chủ có lời ghi nhận khi xong kế hoạch ngày. 14 màn không tràn ngang ở cả ba độ rộng.
+- **Lỗi 1: "Nghe lại câu này" đọc tới hết bài.** Dừng ở câu 3/11 rồi bấm: app đọc câu 3 đến câu 11 (9 câu). Nay đọc đúng một câu rồi dừng, con trỏ giữ ở câu đó. Ca E2E nghe bài sẵn có được mở rộng; đã chạy thử trên bản cũ: đỏ (nhận 2 câu thay vì 1).
+- **Lỗi 2: lời khen sai sau một bài làm sai.** Làm 0/5 và chọn "Chưa chắc" cả năm câu, màn kết quả viết "Đáp án và độ chắc chắn đang khớp nhau rất tốt. Hãy giữ cách tìm bằng chứng này". Nay có thêm trường hợp câu sai mà chưa chắc, và lời khuyên xét câu sai trước lời khen (`insightAdvice`).
+- **Lỗi 3: một thẻ từ trích câu không còn trong bài.** Thẻ "durable" ghi "...than a single long session" trong khi bài Đọc viết "...than repeating it many times in one sitting". Đã sửa theo đúng bài, và thêm ca kiểm thử bắt mọi thẻ từ phải trích đúng nguyên văn bài (đã chạy thử trên thẻ cũ: đỏ).
+- **Sửa nhỏ.** Vườn từ hết thẻ nay gọi tên người học và nói số từ "Chưa nhớ" sẽ quay lại sau ít phút; chú thích bên phải dùng đúng tên nút ("Nhớ rồi, Rất dễ"); bản chép lời bài Nghe được đánh dấu tiếng Anh cho trình đọc màn hình.
+- 2 ca unit mới (184 → 186), 1 ca E2E mở rộng, không đổi số ca E2E. Toàn bộ 186 unit và 63 ca E2E Chromium chạy lại đều đạt.
+- **Còn mở, không sửa trong đợt này:** (a) đáp án đúng thường dài nhất trong bốn phương án: chọn phương án dài nhất được 63% ở thư viện Đọc, 59% thư viện Nghe, 58% Đề 01 và 74% Đề 02, trong khi đoán bừa là 25%; sửa cần viết lại phương án nhiễu của nhiều câu và tăng version học liệu. (b) Thẻ "manageable" có ở cả bộ thẻ sẵn và thẻ thêm từ câu sai của Đề 01, nên có thể xuất hiện hai lần. (c) Giọng đọc mạng của Chrome từng có lỗi dừng giữa câu dài; câu dài nhất là 205 ký tự, chưa kiểm được trên máy thật.
+
 ## Bằng chứng kiểm tra
 
-- 184 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 186 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 67 kiểm thử Playwright trên bản production: 63 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

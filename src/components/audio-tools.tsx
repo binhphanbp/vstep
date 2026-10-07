@@ -120,7 +120,8 @@ export function AudioPlayer({
     setPlaying(false);
     setPaused(false);
   }
-  function play(from = 0) {
+  /** `once` speaks the sentence at `from` and stops, for "Nghe lại câu này". */
+  function play(from = 0, once = false) {
     if (!("speechSynthesis" in window)) {
       setError("Trình duyệt chưa hỗ trợ giọng đọc. Hãy thử Chrome hoặc Edge.");
       return;
@@ -140,15 +141,20 @@ export function AudioPlayer({
     setNoVoice(voices.length > 0 && englishVoices.length === 0);
     const id = run.current;
     let index = Math.max(0, Math.min(from, parts.length - 1));
+    const end = once ? Math.min(index + 1, parts.length) : parts.length;
     setPlaying(true);
     setPaused(false);
     const next = () => {
       if (id !== run.current) return;
-      if (index >= parts.length) {
+      if (index >= end) {
         if (speechOwner === owner.current) speechOwner = null;
         setPlaying(false);
-        setFinished(true);
-        setAt(parts.length ? parts.length - 1 : 0);
+        // A single replay leaves the pointer on its sentence; only reaching
+        // the last one means the passage has been heard to the end.
+        if (end === parts.length) {
+          setFinished(true);
+          setAt(parts.length ? parts.length - 1 : 0);
+        }
         return;
       }
       const part = parts[index];
@@ -292,7 +298,7 @@ export function AudioPlayer({
             <button
               type="button"
               className="button secondary small"
-              onClick={() => play(at)}
+              onClick={() => play(at, true)}
               aria-label="Nghe lại câu này"
             >
               <RotateCcw size={14} />

@@ -1665,6 +1665,7 @@ export function objectiveInsights(
 ) {
   const tags = new Map<string, { correct: number; total: number }>();
   let confidentErrors = 0;
+  let unsureErrors = 0;
   let fragileCorrect = 0;
   let secureCorrect = 0;
 
@@ -1676,6 +1677,7 @@ export function objectiveInsights(
     tags.set(question.tag, current);
 
     if (!isCorrect && confidence[question.id] === "sure") confidentErrors += 1;
+    if (!isCorrect && confidence[question.id] !== "sure") unsureErrors += 1;
     if (isCorrect && confidence[question.id] !== "sure") fragileCorrect += 1;
     if (isCorrect && confidence[question.id] === "sure") secureCorrect += 1;
   }
@@ -1683,9 +1685,29 @@ export function objectiveInsights(
   return {
     byTag: [...tags].map(([tag, score]) => ({ tag, ...score })),
     confidentErrors,
+    unsureErrors,
     fragileCorrect,
     secureCorrect,
   };
+}
+
+/**
+ * The one line of advice under a short lesson's result.
+ *
+ * Errors come first: a 0/5 answered "not sure" throughout used to fall through
+ * to "your answers and your confidence match very well, keep doing this",
+ * which praised the one habit that had just failed five times.
+ */
+export function insightAdvice(
+  insights: ReturnType<typeof objectiveInsights>,
+): string {
+  if (insights.confidentErrors)
+    return "Ưu tiên xem lại câu sai dù đã rất chắc: đây thường là chỗ mình đang hiểu nhầm, không chỉ là thiếu tập trung.";
+  if (insights.unsureErrors)
+    return "Câu sai đều là câu mình đã thấy chưa chắc, tức là mình nhận ra đúng chỗ đang yếu. Đọc câu bằng chứng của từng câu sai bên dưới để lần sau tìm ra nhanh hơn.";
+  if (insights.fragileCorrect)
+    return "Các câu đúng nhưng còn phân vân vẫn đáng xem lại bằng chứng để lần sau trả lời chắc hơn.";
+  return "Đáp án và độ chắc chắn đang khớp nhau rất tốt. Hãy giữ cách tìm bằng chứng này ở bài tiếp theo.";
 }
 
 export function recordAttempt(state: StudyState, attempt: Attempt): StudyState {

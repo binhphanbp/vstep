@@ -1140,6 +1140,8 @@ test("a listening passage plays again from its first sentence once it has finish
       value: {
         speak(utterance: SpeechSynthesisUtterance) {
           spoken.push(utterance.text);
+          // A held voice never finishes, so the test can stop mid-passage.
+          if ((window as unknown as { __hold?: boolean }).__hold) return;
           setTimeout(() => utterance.onend?.(new Event("end") as never), 10);
         },
         cancel() {},
@@ -1174,6 +1176,29 @@ test("a listening passage plays again from its first sentence once it has finish
   // The whole passage again, beginning with the sentence it began with.
   expect(second).toHaveLength(total);
   expect(second[0]).toBe(first[0]);
+  // "Nghe lại câu này" repeats one sentence. It used to carry on from there to
+  // the end of the passage, which is not what anyone pressing it wants.
+  await page.evaluate(() => {
+    (window as unknown as { __hold: boolean }).__hold = true;
+  });
+  await page.getByRole("button", { name: "Câu trước" }).click();
+  await expect(play).toContainText("Dừng");
+  await play.click();
+  await expect(page.locator(".audio-position")).toHaveText(
+    `Câu ${total - 1}/${total}`,
+  );
+  await page.evaluate(() => {
+    const probe = window as unknown as { __hold: boolean; __spoken: string[] };
+    probe.__hold = false;
+    probe.__spoken.length = 0;
+  });
+  await page.getByRole("button", { name: "Nghe lại câu này" }).click();
+  await expect(play).not.toContainText("Dừng");
+  const once = await spoken();
+  expect(once).toEqual([first[total - 2]]);
+  await expect(page.locator(".audio-position")).toHaveText(
+    `Câu ${total - 1}/${total}`,
+  );
 });
 
 test("the history writes a date she can read, and the chart panel is not stretched", async ({
