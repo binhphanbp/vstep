@@ -286,6 +286,8 @@ export const examSchema = z
   );
 export const paperRunSchema = z.object({
   id: limitedString(100),
+  // "131" was withdrawn from the bank, but a backup that holds a sitting of it
+  // must still restore, so it stays a valid id; no screen lists it any more.
   paperId: z.enum(["131", "132", "133", "134", "135", "review-1309"]),
   version: boundedInteger(1, 100),
   sourceHash: z.optional(limitedString(64)),

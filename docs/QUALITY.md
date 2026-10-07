@@ -2,14 +2,23 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Gỡ đề 131 khỏi kho — 07/10/2026
+
+- **Quyết định của chủ dự án:** bỏ đề 131 cho đỡ rối. Đề này thiếu toàn bộ 75 khóa đáp án và transcript nên chỉ luyện được, không chấm được; mọi chỗ trong giao diện, màn kết quả và tài liệu phải kể riêng về nó.
+- **Đã gỡ:** `public/papers/131.json`, mục của nó trong `manifest.json`, 21 file MP3 chỉ đề này dùng (không file nào dùng chung với đề khác, kiểm bằng cách đối chiếu tham chiếu của cả sáu đề), dòng của nó trong `scripts/import-papers.mjs`, ngoại lệ "131 không có khóa" trong script nhập và trong `scripts/smoke-https.mjs` (nay đòi đúng năm đề, cả năm chấm được), và mọi câu chữ nhắc đề 131 trên giao diện. Kho còn năm đề, 105 MP3 (70 bài Nghe và 35 bài mẫu), khoảng 67 MB, 111 route.
+- **Dữ liệu đã lưu được giữ, không bị xóa:** mã `131` vẫn là mã hợp lệ trong schema, vì bản sao lưu hoặc thiết bị của Gùa có thể đã chứa một lượt làm đề này; nếu bỏ mã, bản sao lưu đó sẽ bị từ chối khi khôi phục. Các màn hình không liệt kê lượt đó nữa (trang Tiến bộ chỉ hiện lượt của đề còn trong kho). Đây là quyết định nên xác nhận với chủ dự án nếu muốn xóa hẳn dữ liệu cũ.
+- **Mã đề không còn trong kho:** `/papers/131` hiện trang "Hình như mình đi lạc một chút", giống mọi mã không có (trình duyệt vẫn nhận mã trạng thái 200 do trang được dựng theo yêu cầu; đó là hành vi có sẵn của mọi mã sai, không riêng đề này).
+- **Mã giữ lại cho đề không có khóa:** giao diện vẫn xử lý đúng một đề không có khóa đáp án (không đánh dấu đúng/sai, không bảng theo phần, không nút làm lại), nhưng không đề nào trong kho cần đến. Được kiểm bằng unit test với một đề giả lập bỏ hết khóa, không còn E2E cho nhánh này.
+- Kiểm tra: unit giữ nguyên cho nhánh không khóa (dùng đề giả lập) và thêm một ca xác nhận không còn dấu vết của 131 mà bản sao lưu cũ vẫn khôi phục được; E2E mới xác nhận kho còn đúng năm thẻ, `/papers/131` ra trang lạc đường, và một thiết bị đã lưu lượt đề 131 vẫn chạy bình thường, không hiện lượt đó ở Tiến bộ, không mất dữ liệu.
+
 ## Nhập sáu đề 131–135 và Review 13/09 — bản làm việc ngày 07/10/2026
 
 - Nguồn thực tế trên máy là `../vstep/data`, gồm sáu JSON đề và audio; file `_attempt` của 135 là lượt làm, không nhập thành đề thứ bảy. Script `scripts/import-papers.mjs` kiểm tra cấu trúc từng đề, bốn phương án của từng câu, khóa đáp án nhất quán và sự tồn tại của file audio rồi tạo JSON tĩnh cùng 126 file MP3 (84 bài Nghe và 42 bài mẫu) trong `public/papers`. Tổng khoảng 79 MB.
 - Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Bản dịch câu hỏi, lựa chọn, bài đọc, transcript và đề bài có trong nguồn được mở sau khi hoàn thành. Đề 132–135 và Review 13/09 có đủ 375 đáp án và lời giải; đề 131 không có đáp án hoặc transcript trong nguồn, nên giao diện giữ 75 lựa chọn người học nhưng không tạo điểm hoặc lời giải.
 - Lượt làm lưu đáp án, bài Viết, phần Nói đã làm, phần thi và deadline vào cùng JSON backup/cloud snapshot. File ghi âm của micro vẫn ở IndexedDB, phải tải riêng. Đề tĩnh có version và dấu băm nguồn để không đối chiếu lượt cũ với khóa đáp án đã đổi. Hai tab cùng mở một lượt không được nộp chồng phần tiếp theo.
-- Kiểm tra tự động: 196 unit, 83 Playwright trên bản build production (79 Chromium, hai Firefox, hai WebKit), 112 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
+- Kiểm tra tự động: 197 unit, 82 Playwright trên bản build production (78 Chromium, hai Firefox, hai WebKit), 111 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
 - Lượt chạy đầu đạt 68/70; hai ca WebKit không khởi chạy vì máy thiếu `libevent-2.1.so.7`. Sau khi nạp thư viện tạm từ `/tmp` vào môi trường test, chạy lại đúng hai ca WebKit đều đạt. Sau khi mở phần bản dịch, chạy lại ba ca E2E của kho đề đều đạt.
-- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 79/79 trên bản production local (lint và TypeScript sạch, 196/196 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
+- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 78/78 trên bản production local (lint và TypeScript sạch, 197/197 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
 
 ## Công cụ luyện đề: luyện riêng từng kỹ năng, chữa đề theo phần, làm lại câu sai — 07/10/2026
 
@@ -219,7 +228,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 196 unit / 83 E2E / 112 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 197 unit / 82 E2E / 111 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -428,8 +437,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 196 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 83 kiểm thử Playwright trên bản production: 79 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 197 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 82 kiểm thử Playwright trên bản production: 78 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

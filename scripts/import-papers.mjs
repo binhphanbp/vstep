@@ -1,5 +1,5 @@
 /**
- * Import the six locally collected papers into a small, versioned format.
+ * Import the five locally collected papers into a small, versioned format.
  * Run with: node scripts/import-papers.mjs /path/to/vstep/data
  * The source directory is intentionally external to this repository.
  */
@@ -18,7 +18,7 @@ const target = resolve("public/papers");
 const audioTarget = join(target, "audio");
 const copiedAudio = new Set();
 const sources = [
-  ...[131, 132, 133, 134, 135].map((number) => ({
+  ...[132, 133, 134, 135].map((number) => ({
     id: String(number),
     file: `de-thi-thu-vstep-${number}.json`,
   })),
@@ -148,7 +148,7 @@ for (const { id: paperId, file } of sources) {
     section.slots.flatMap((slot) => slot.items),
   );
   const graded = items.every((item) => item.answer !== null);
-  if (paperId === "131" ? graded : !graded)
+  if (!graded)
     throw Error(`Paper ${paperId}: unexpected answer-key completeness`);
   const paper = {
     id: paperId,

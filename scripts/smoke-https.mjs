@@ -66,11 +66,11 @@ try {
   if (!catalogResponse.ok()) throw Error("Imported paper catalog is unavailable.");
   const catalog = await catalogResponse.json();
   if (
-    catalog.length !== 6 ||
+    catalog.length !== 5 ||
     catalog.filter((paper) => paper.graded).length !== 5 ||
     !catalog.some((paper) => paper.id === "review-1309" && paper.graded)
   )
-    throw Error("Imported paper catalog does not contain five graded papers and 131.");
+    throw Error("Imported paper catalog does not contain the five graded papers.");
   const reviewResponse = await page.request.get(
     new URL("/papers/review-1309.json", baseURL).href,
   );

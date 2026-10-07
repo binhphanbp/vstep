@@ -34,9 +34,8 @@ const firstRun = (paper: Paper): PaperRun => ({
 });
 
 describe("imported exam papers", () => {
-  it("contains six distinct complete four-skill papers and every local audio", () => {
+  it("contains five distinct complete four-skill papers and every local audio", () => {
     expect(papers.map((paper) => paper.id)).toEqual([
-      "131",
       "132",
       "133",
       "134",
@@ -85,14 +84,20 @@ describe("imported exam papers", () => {
     }
   });
 
-  it("never invents a key or score for paper 131", () => {
-    const paper = papers[0];
-    expect(paper.graded).toBe(false);
-    expect(paper.sections[0].slots.every((slot) => !slot.transcript)).toBe(
-      true,
-    );
+  it("never invents a key or score for a paper that has none", () => {
+    // No paper in the bank lacks a key now, so build one that does.
+    const keyed = papers[0];
+    const unkeyed: Paper = {
+      ...structuredClone(keyed),
+      graded: false,
+    };
+    for (const section of unkeyed.sections)
+      for (const slot of section.slots) {
+        slot.transcript = "";
+        for (const item of slot.items) item.answer = null;
+      }
     expect(
-      paper.sections
+      unkeyed.sections
         .slice(0, 2)
         .flatMap((section) =>
           section.slots.flatMap((slot) =>
@@ -100,14 +105,33 @@ describe("imported exam papers", () => {
           ),
         ),
     ).toEqual(Array(75).fill(null));
+    const run = firstRun(unkeyed);
+    const item = unkeyed.sections[0].slots[0].items[0];
+    run.answers[item.id] = 0;
+    expect(paperScore(unkeyed, run).map((part) => part.total)).toEqual([0, 0]);
+    expect(paperScore(unkeyed, run).map((part) => part.correct)).toEqual([
+      0, 0,
+    ]);
+    // Nothing is marked right or wrong, and no part is counted.
+    expect(itemStatus(item, run)).toBe("ungraded");
     expect(
-      paperScore(paper, firstRun(paper)).map((part) => part.total),
-    ).toEqual([0, 0]);
+      partBreakdown(unkeyed, run, 0).every((part) => part.total === 0),
+    ).toBe(true);
+  });
+
+  it("holds no trace of the withdrawn paper 131", () => {
+    expect(paperCatalog.map((entry) => entry.id)).not.toContain("131");
+    expect(existsSync("public/papers/131.json")).toBe(false);
+    // A backup that still holds a sitting of it restores all the same.
+    const old: PaperRun = { ...firstRun(papers[0]), paperId: "131" };
+    expect(
+      stateSchema.safeParse({ ...freshState(), paperRuns: [old] }).success,
+    ).toBe(true);
   });
 
   it("has an internally consistent answer key for all 375 gradable items", () => {
-    expect(papers[5].title).toContain("Review 13/09");
-    for (const paper of papers.slice(1)) {
+    expect(papers[4].title).toContain("Review 13/09");
+    for (const paper of papers) {
       expect(paper.graded).toBe(true);
       const run = firstRun(paper);
       for (const section of paper.sections.slice(0, 2))
@@ -129,7 +153,7 @@ describe("imported exam papers", () => {
     const old = freshState();
     delete old.paperRuns;
     expect(stateSchema.safeParse(old).success).toBe(true);
-    const paper = papers[1];
+    const paper = papers[0];
     const run = firstRun(paper);
     const advanced = advancePaperRun(run, paper, run.deadline + 1000);
     expect(advanced.stage).toBe(1);
@@ -144,7 +168,7 @@ describe("imported exam papers", () => {
   });
 
   it("accepts exam-room fields, rejects bad ones and keeps old runs valid", () => {
-    const paper = papers[1];
+    const paper = papers[0];
     const old = { ...freshState(), paperRuns: [firstRun(paper)] };
     expect(stateSchema.safeParse(old).success).toBe(true);
     const sitting: PaperRun = {
@@ -182,7 +206,7 @@ describe("imported exam papers", () => {
   });
 
   it("ends a single-skill sitting after its one section and logs when sections close", () => {
-    const paper = papers[1];
+    const paper = papers[0];
     const start = 1000;
     const reading: PaperRun = {
       ...firstRun(paper),
@@ -229,7 +253,7 @@ describe("imported exam papers", () => {
   });
 
   it("marks each answer and counts every part of Listening and Reading", () => {
-    const paper = papers[1];
+    const paper = papers[0];
     const [first, second, third] = paper.sections[1].slots[0].items;
     const run: PaperRun = {
       ...firstRun(paper),
@@ -261,21 +285,10 @@ describe("imported exam papers", () => {
       ["Part 2", 12],
       ["Part 3", 15],
     ]);
-    // Paper 131 has no key: nothing is marked right or wrong.
-    const unkeyed = papers[0];
-    const item = unkeyed.sections[0].slots[0].items[0];
-    expect(
-      itemStatus(item, { ...firstRun(unkeyed), answers: { [item.id]: 0 } }),
-    ).toBe("ungraded");
-    expect(
-      partBreakdown(unkeyed, firstRun(unkeyed), 0).every(
-        (part) => part.total === 0,
-      ),
-    ).toBe(true);
   });
 
   it("never shows a section's time against the wrong section for a sitting that began before the log", () => {
-    const paper = papers[1];
+    const paper = papers[0];
     // Saved by an older version: already in Reading, with no log at all.
     const legacy: PaperRun = { ...firstRun(paper), stage: 1 };
     const next = advancePaperRun(legacy, paper, legacy.deadline + 1000);
@@ -298,7 +311,7 @@ describe("imported exam papers", () => {
   });
 
   it("rejects a backup whose single-skill sitting contradicts itself", () => {
-    const paper = papers[1];
+    const paper = papers[0];
     const bad = (run: object) =>
       stateSchema.safeParse({ ...freshState(), paperRuns: [run] }).success;
     const reading = { ...firstRun(paper), only: 1, stage: 1 };
