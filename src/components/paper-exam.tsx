@@ -360,8 +360,9 @@ function ListeningSlot({
       ? "Bản ghi âm của phần này đã phát và không phát lại được."
       : "Bản ghi âm đã kết thúc.",
     blocked: "Trình duyệt chưa cho phát tự động.",
-    failed:
-      "Không phát được bản ghi âm. Kiểm tra kết nối và tai nghe rồi bấm thử lại.",
+    failed: alreadyHeard
+      ? "Bản ghi âm bị gián đoạn và không phát lại được. Bạn có thể làm tiếp và bấm Tiếp theo."
+      : "Không phát được bản ghi âm. Kiểm tra kết nối và tai nghe rồi bấm thử lại.",
   }[phase];
   return (
     <div className="exam-slot">
@@ -396,7 +397,11 @@ function ListeningSlot({
         <button
           type="button"
           className="button primary"
-          disabled={phase === "reading" || phase === "playing"}
+          // "blocked" is a recording not yet played: it has to be started first.
+          // A recording that fails outright must not trap the sitting, though.
+          disabled={
+            phase === "reading" || phase === "playing" || phase === "blocked"
+          }
           onClick={onNext}
         >
           {isLast ? "Nộp phần Nghe" : "Tiếp theo"}
@@ -581,39 +586,49 @@ function useCapture(id: string) {
   // microphone then knows it is stale and must not start recording behind a
   // part that has already ended.
   const generation = useRef(0);
-  const start = useCallback(async (): Promise<CaptureResult> => {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder)
-      return "unsupported";
-    const mine = ++generation.current;
-    try {
-      const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (mine !== generation.current) {
-        media.getTracks().forEach((track) => track.stop());
-        return "cancelled";
+  const start = useCallback(
+    async (onLost?: () => void): Promise<CaptureResult> => {
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder)
+        return "unsupported";
+      const mine = ++generation.current;
+      try {
+        const media = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        if (mine !== generation.current) {
+          media.getTracks().forEach((track) => track.stop());
+          return "cancelled";
+        }
+        stream.current = media;
+        const type = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(
+          (candidate) => MediaRecorder.isTypeSupported(candidate),
+        );
+        const next = new MediaRecorder(
+          media,
+          type ? { mimeType: type } : undefined,
+        );
+        chunks.current = [];
+        next.ondataavailable = (event) => {
+          if (event.data.size) chunks.current.push(event.data);
+        };
+        // A take that stops on its own (microphone unplugged or taken by another
+        // app) is not one that finish() stopped, and finish() clears the ref first.
+        next.onstop = next.onerror = () => {
+          if (recorder.current === next) onLost?.();
+        };
+        recorder.current = next;
+        beep();
+        next.start(1000);
+        return "ok";
+      } catch (error) {
+        stream.current?.getTracks().forEach((track) => track.stop());
+        return error instanceof DOMException && error.name === "NotAllowedError"
+          ? "denied"
+          : "error";
       }
-      stream.current = media;
-      const type = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(
-        (candidate) => MediaRecorder.isTypeSupported(candidate),
-      );
-      const next = new MediaRecorder(
-        media,
-        type ? { mimeType: type } : undefined,
-      );
-      chunks.current = [];
-      next.ondataavailable = (event) => {
-        if (event.data.size) chunks.current.push(event.data);
-      };
-      recorder.current = next;
-      beep();
-      next.start(1000);
-      return "ok";
-    } catch (error) {
-      stream.current?.getTracks().forEach((track) => track.stop());
-      return error instanceof DOMException && error.name === "NotAllowedError"
-        ? "denied"
-        : "error";
-    }
-  }, []);
+    },
+    [],
+  );
   /** Stops the take and files it under this part; true when it was kept. */
   const finish = useCallback((): Promise<boolean> => {
     generation.current++;
@@ -621,25 +636,28 @@ function useCapture(id: string) {
     const media = stream.current;
     recorder.current = null;
     stream.current = null;
-    if (!active || active.state !== "recording") {
+    if (!active) {
       media?.getTracks().forEach((track) => track.stop());
       return Promise.resolve(false);
     }
+    // Whatever was recorded is kept, including a take that stopped by itself.
+    const keep = async () => {
+      media?.getTracks().forEach((track) => track.stop());
+      const blob = new Blob(chunks.current, { type: active.mimeType });
+      if (!blob.size) return false;
+      try {
+        await saveRecording(id, blob);
+        window.dispatchEvent(
+          new CustomEvent("may-recording-saved", { detail: id }),
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    if (active.state !== "recording") return keep();
     return new Promise((resolve) => {
-      active.onstop = async () => {
-        media?.getTracks().forEach((track) => track.stop());
-        const blob = new Blob(chunks.current, { type: active.mimeType });
-        if (!blob.size) return resolve(false);
-        try {
-          await saveRecording(id, blob);
-          window.dispatchEvent(
-            new CustomEvent("may-recording-saved", { detail: id }),
-          );
-          resolve(true);
-        } catch {
-          resolve(false);
-        }
-      };
+      active.onstop = () => void keep().then(resolve);
       active.stop();
     });
   }, [id]);
@@ -681,15 +699,23 @@ function SpeakingRoom({
     const runId = run.id;
     const slotId = slot.id;
     let live = true;
-    void capture.start().then((result) => {
-      if (live && result === "ok") setMicReady(true);
-      if (!live || result === "ok" || result === "cancelled") return;
-      setMicProblem(
-        result === "denied"
-          ? "Chưa được cấp quyền micro. Cho phép micro ở thanh địa chỉ, hoặc tiếp tục không ghi âm."
-          : "Không ghi âm được trên thiết bị này. Bạn vẫn có thể trả lời thành tiếng và tiếp tục.",
-      );
-    });
+    void capture
+      .start(() => {
+        if (!live) return;
+        setMicReady(false);
+        setMicProblem(
+          "Micro bị ngắt giữa chừng. Phần đã ghi được giữ lại; bạn vẫn có thể nói tiếp và bấm kết thúc.",
+        );
+      })
+      .then((result) => {
+        if (live && result === "ok") setMicReady(true);
+        if (!live || result === "ok" || result === "cancelled") return;
+        setMicProblem(
+          result === "denied"
+            ? "Chưa được cấp quyền micro. Cho phép micro ở thanh địa chỉ, hoặc tiếp tục không ghi âm."
+            : "Không ghi âm được trên thiết bị này. Bạn vẫn có thể trả lời thành tiếng và tiếp tục.",
+        );
+      });
     return () => {
       live = false;
       setMicReady(false);
@@ -890,7 +916,9 @@ export function ExamRoom({
             onClick={(event) => {
               if (
                 !window.confirm(
-                  "Thoát phòng thi? Đồng hồ vẫn chạy và bài làm được giữ.",
+                  run.stage === 0
+                    ? "Thoát phòng thi? Đồng hồ vẫn chạy và bài làm được giữ, nhưng bản ghi âm đang phát sẽ không phát lại khi bạn quay về."
+                    : "Thoát phòng thi? Đồng hồ vẫn chạy và bài làm được giữ.",
                 )
               )
                 event.preventDefault();
@@ -921,11 +949,7 @@ export function ExamRoom({
             onFinish={onFinish}
           />
         )}
-        {storageError && (
-          <p role="alert" className="notice error">
-            {storageError}
-          </p>
-        )}
+        {/* A failed save is announced once, by the app shell above. */}
       </div>
     </div>
   );

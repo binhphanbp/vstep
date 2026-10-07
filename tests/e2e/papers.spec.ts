@@ -556,3 +556,164 @@ test("a sitting saved before the time log existed still opens and reviews", asyn
     page.getByRole("heading", { name: "Thời gian đã dùng" }),
   ).toHaveCount(0);
 });
+
+// ── Rare paths of the exam room ────────────────────────────────────────────
+test("a recording the browser will not autoplay, or loses part-way, never traps the sitting", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let calls = 0;
+    HTMLMediaElement.prototype.play = function () {
+      calls++;
+      // First try: the browser refuses to autoplay. After that it plays, and
+      // the second recording breaks off after it has started.
+      if (calls === 1)
+        return Promise.reject(new DOMException("blocked", "NotAllowedError"));
+      this.dispatchEvent(new Event("playing"));
+      setTimeout(
+        () => this.dispatchEvent(new Event(calls === 2 ? "ended" : "error")),
+        20,
+      );
+      return Promise.resolve();
+    };
+  });
+  await page.clock.install();
+  await page.goto("/papers/132");
+  await page.getByRole("checkbox", { name: /Tôi đã đeo tai nghe/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await page.clock.runFor("00:09");
+  await expect(page.locator(".exam-audio-status")).toContainText(
+    "chưa cho phát tự động",
+  );
+  const next = page.getByRole("button", { name: "Tiếp theo" });
+  await expect(next).toBeDisabled();
+  // One press starts it, and it still only plays once.
+  await page.getByRole("button", { name: /Phát bản ghi âm/ }).click();
+  await expect(page.locator(".exam-audio-status")).toContainText("đã kết thúc");
+  await expect(
+    page.getByRole("button", { name: /Phát bản ghi âm/ }),
+  ).toHaveCount(0);
+  await next.click();
+  // The next recording starts, then fails: no retry that cannot work, and the
+  // way forward stays open.
+  await page.clock.runFor("00:09");
+  await expect(page.locator(".exam-audio-status")).toContainText(
+    "bị gián đoạn và không phát lại được",
+  );
+  await expect(
+    page.getByRole("button", { name: /Phát bản ghi âm/ }),
+  ).toHaveCount(0);
+  await expect(next).toBeEnabled();
+  // Leaving in the middle of Listening warns that the recording will not return.
+  const messages: string[] = [];
+  page.on("dialog", (dialog) => {
+    messages.push(dialog.message());
+    void dialog.dismiss();
+  });
+  await page.getByRole("link", { name: "Thoát" }).click();
+  expect(messages.join(" ")).toContain("không phát lại khi bạn quay về");
+});
+
+test("Speaking keeps what was recorded when the microphone drops, the page reloads or time runs out", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const Real = window.MediaRecorder;
+    const seen: MediaRecorder[] = [];
+    (window as unknown as { __recs: MediaRecorder[] }).__recs = seen;
+    class Spy extends Real {
+      constructor(...args: ConstructorParameters<typeof MediaRecorder>) {
+        super(...args);
+        seen.push(this);
+      }
+    }
+    window.MediaRecorder = Spy as typeof MediaRecorder;
+  });
+  const spoken = () =>
+    page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns[0].spoken,
+    );
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Chỉ Nói/ }).check();
+  await page.getByRole("checkbox", { name: /Tôi đã đeo tai nghe/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await page.getByRole("button", { name: /^Bắt đầu Part 1/ }).click();
+  await expect(page.locator(".exam-speak-clock")).toContainText("Đang ghi âm");
+  await page.waitForTimeout(1500);
+  // The microphone drops: the label stops claiming to record, and says why.
+  await page.evaluate(() =>
+    (window as unknown as { __recs: MediaRecorder[] }).__recs.at(-1)!.stop(),
+  );
+  await expect(page.locator(".exam-speak-clock")).toContainText(
+    "Không ghi âm được",
+  );
+  await expect(page.locator(".notice.error")).toContainText("Micro bị ngắt");
+  await page.getByRole("button", { name: "Kết thúc phần này" }).click();
+  await expect.poll(spoken).toEqual(["132-speaking-1"]);
+
+  // Reload in the middle of Part 2's talk: the clock carries on from where it
+  // was, and the part still counts.
+  await page.getByRole("button", { name: /^Bắt đầu Part 2/ }).click();
+  await page.getByRole("button", { name: "Bắt đầu nói ngay" }).click();
+  await expect(page.locator(".exam-speak-clock")).toContainText("Đang ghi âm");
+  await page.waitForTimeout(1500);
+  await page.reload();
+  await expect(page.locator(".exam-speak-clock")).toContainText(
+    /Đang (ghi âm|mở micro) · 0[12]:/,
+  );
+  await expect(page.locator(".exam-speak-clock")).toContainText("Đang ghi âm");
+  await page.waitForTimeout(1500);
+  await page.getByRole("button", { name: "Kết thúc phần này" }).click();
+  await expect.poll(spoken).toEqual(["132-speaking-1", "132-speaking-2"]);
+});
+
+test("Speaking keeps the take in progress when the section's own time runs out", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Chỉ Nói/ }).check();
+  await page.getByRole("checkbox", { name: /Tôi đã đeo tai nghe/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await page.getByRole("button", { name: /^Bắt đầu Part 1/ }).click();
+  await expect(page.locator(".exam-speak-clock")).toContainText("Đang ghi âm");
+  await page.waitForTimeout(1500);
+  await page.clock.fastForward("12:05");
+  await expect(
+    page.getByText("ĐỀ 132 · ĐÃ HOÀN THÀNH · CHỈ NÓI"),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns[0].spoken,
+      ),
+    )
+    .toEqual(["132-speaking-1"]);
+});
+
+test("the back button returns the app's own screens, and a full disk is announced once", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Chỉ Viết/ }).check();
+  await page.getByRole("checkbox", { name: /Tôi đã đeo tai nghe/ }).check();
+  await page.getByRole("button", { name: "Chấp nhận và bắt đầu thi" }).click();
+  await expect(page.locator(".sidebar")).toBeHidden();
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException("Storage full", "QuotaExceededError");
+    };
+  });
+  const box = page.getByRole("textbox", { name: /Bài viết Task 1/ });
+  await box.fill("Dear Jo, the page keeps what I type.");
+  await expect(box).toHaveValue("Dear Jo, the page keeps what I type.");
+  const alerts = page.locator("[role=alert]", { hasText: "Không lưu được" });
+  await expect(alerts).toHaveCount(1);
+  await expect(alerts).toBeVisible();
+  await page.goBack();
+  await expect(page.locator(".sidebar")).toBeVisible();
+  await expect(page.locator("body")).not.toHaveClass(/exam-immersive/);
+});
