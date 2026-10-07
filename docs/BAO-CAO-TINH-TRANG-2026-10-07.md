@@ -28,13 +28,13 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Phép kiểm tra | Kết quả local |
 | --- | --- |
 | ESLint và TypeScript | Đạt |
-| Vitest | 190/190 |
-| Playwright trên production build | 71 ca: 67 Chromium, hai Firefox, hai WebKit; mọi ca đã đạt qua các lượt chạy |
+| Vitest | 192/192 |
+| Playwright trên production build | 75 ca: 71 Chromium, hai Firefox, hai WebKit; lượt Chromium đầy đủ mới nhất đạt 71/71 |
 | Accessibility tự động | Axe WCAG A/AA trên 19 màn, có kho đề và Review 13/09 |
 | Build tĩnh | 112 trang, gồm sáu route đề nhập |
 | Dependency production | `npm audit --omit=dev` báo 0 lỗ hổng |
 
-Trong lượt local đầy đủ gần nhất, 70/71 ca đạt. Ca offline còn lại chờ tiêu đề kho đề cũ sau khi đổi microcopy; cập nhật kỳ vọng và chạy lại riêng đạt. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
+Sau khi thêm phòng thi mô phỏng, lượt Chromium đầy đủ đạt 71/71 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
 
 ## 4. Kết quả phát hành
 

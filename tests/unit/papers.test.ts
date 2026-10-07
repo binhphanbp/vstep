@@ -2,14 +2,18 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { freshState, stateSchema, type PaperRun } from "../../src/lib/learning";
 import {
+  LISTENING_READ_SECONDS,
+  SPEAKING_PARTS,
   advancePaperRun,
   paperCatalog,
   paperScore,
+  readingPalette,
   type Paper,
 } from "../../src/lib/papers";
 
-const papers = paperCatalog.map((entry) =>
-  JSON.parse(readFileSync(`public/papers/${entry.id}.json`, "utf8")) as Paper,
+const papers = paperCatalog.map(
+  (entry) =>
+    JSON.parse(readFileSync(`public/papers/${entry.id}.json`, "utf8")) as Paper,
 );
 const firstRun = (paper: Paper): PaperRun => ({
   id: `test-${paper.id}`,
@@ -48,9 +52,11 @@ describe("imported exam papers", () => {
         14, 4, 2, 3,
       ]);
       expect(
-        paper.sections.slice(0, 2).map((section) =>
-          section.slots.reduce((count, slot) => count + slot.items.length, 0),
-        ),
+        paper.sections
+          .slice(0, 2)
+          .map((section) =>
+            section.slots.reduce((count, slot) => count + slot.items.length, 0),
+          ),
       ).toEqual([35, 40]);
       const ids = paper.sections.flatMap((section) =>
         section.slots.flatMap((slot) => slot.items.map((item) => item.id)),
@@ -62,7 +68,9 @@ describe("imported exam papers", () => {
       }
       for (const slot of paper.sections[1].slots)
         expect(slot.passage.length).toBeGreaterThan(500);
-      for (const slot of paper.sections.slice(2).flatMap((section) => section.slots)) {
+      for (const slot of paper.sections
+        .slice(2)
+        .flatMap((section) => section.slots)) {
         expect(slot.prompt || slot.cues.length).toBeTruthy();
         expect(slot.samples.length).toBeGreaterThan(0);
         for (const sample of slot.samples)
@@ -75,15 +83,21 @@ describe("imported exam papers", () => {
   it("never invents a key or score for paper 131", () => {
     const paper = papers[0];
     expect(paper.graded).toBe(false);
-    expect(paper.sections[0].slots.every((slot) => !slot.transcript)).toBe(true);
+    expect(paper.sections[0].slots.every((slot) => !slot.transcript)).toBe(
+      true,
+    );
     expect(
-      paper.sections.slice(0, 2).flatMap((section) =>
-        section.slots.flatMap((slot) => slot.items.map((item) => item.answer)),
-      ),
+      paper.sections
+        .slice(0, 2)
+        .flatMap((section) =>
+          section.slots.flatMap((slot) =>
+            slot.items.map((item) => item.answer),
+          ),
+        ),
     ).toEqual(Array(75).fill(null));
-    expect(paperScore(paper, firstRun(paper)).map((part) => part.total)).toEqual([
-      0, 0,
-    ]);
+    expect(
+      paperScore(paper, firstRun(paper)).map((part) => part.total),
+    ).toEqual([0, 0]);
   });
 
   it("has an internally consistent answer key for all 375 gradable items", () => {
@@ -115,10 +129,50 @@ describe("imported exam papers", () => {
     const advanced = advancePaperRun(run, paper, run.deadline + 1000);
     expect(advanced.stage).toBe(1);
     expect(advanced.deadline).toBe(run.deadline + 60 * 60_000);
-    expect(advancePaperRun(advanced, paper, advanced.deadline + 1).stage).toBe(2);
-    const state = { ...freshState(), paperRuns: [advanced] };
-    expect(stateSchema.safeParse(JSON.parse(JSON.stringify(state))).success).toBe(
-      true,
+    expect(advancePaperRun(advanced, paper, advanced.deadline + 1).stage).toBe(
+      2,
     );
+    const state = { ...freshState(), paperRuns: [advanced] };
+    expect(
+      stateSchema.safeParse(JSON.parse(JSON.stringify(state))).success,
+    ).toBe(true);
+  });
+
+  it("accepts exam-room fields, rejects bad ones and keeps old runs valid", () => {
+    const paper = papers[1];
+    const old = { ...freshState(), paperRuns: [firstRun(paper)] };
+    expect(stateSchema.safeParse(old).success).toBe(true);
+    const sitting: PaperRun = {
+      ...firstRun(paper),
+      mode: "exam",
+      heard: ["132-listening-1"],
+      speak: { slot: "132-speaking-2", phase: "talk", until: 5000 },
+    };
+    const state = { ...freshState(), paperRuns: [sitting] };
+    expect(
+      stateSchema.safeParse(JSON.parse(JSON.stringify(state))).success,
+    ).toBe(true);
+    const bad = (run: object) =>
+      stateSchema.safeParse({ ...freshState(), paperRuns: [run] }).success;
+    expect(bad({ ...sitting, mode: "relaxed" })).toBe(false);
+    expect(
+      bad({ ...sitting, speak: { slot: "x", phase: "later", until: 1 } }),
+    ).toBe(false);
+    expect(bad({ ...sitting, heard: Array(15).fill("a") })).toBe(false);
+  });
+
+  it("models the exam-room timings and the reading question palette", () => {
+    expect(LISTENING_READ_SECONDS).toBeGreaterThan(0);
+    expect(SPEAKING_PARTS.map((part) => part.talkSeconds)).toEqual([
+      180, 120, 180,
+    ]);
+    expect(SPEAKING_PARTS.map((part) => part.prepSeconds)).toEqual([0, 60, 60]);
+    for (const paper of papers) {
+      const palette = readingPalette(paper);
+      expect(palette).toHaveLength(40);
+      expect(palette.at(-1)!.slotIndex).toBe(
+        paper.sections[1].slots.length - 1,
+      );
+    }
   });
 });
