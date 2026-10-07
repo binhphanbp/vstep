@@ -1188,4 +1188,21 @@ test("the history writes a date she can read, and the chart panel is not stretch
     .locator(".panel", { hasText: "Bức tranh từng kỹ năng" })
     .boundingBox();
   expect(chart!.height).toBeLessThan(skills!.height);
+  // Months of study must not become one endless page: the newest twenty are
+  // shown and the rest come on request.
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+    const first = state.attempts[0];
+    for (let i = 0; i < 44; i++)
+      state.attempts.push({ ...first, id: `copy-${i}` });
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+  });
+  await page.reload();
+  const sessions = page.locator(".history-row small", { hasText: " phút" });
+  await expect(sessions).toHaveCount(20);
+  await page.getByRole("button", { name: "Xem thêm 20 buổi" }).click();
+  await expect(sessions).toHaveCount(40);
+  await page.getByRole("button", { name: "Xem thêm 5 buổi" }).click();
+  await expect(sessions).toHaveCount(45);
+  await expect(page.getByRole("button", { name: /Xem thêm/ })).toHaveCount(0);
 });

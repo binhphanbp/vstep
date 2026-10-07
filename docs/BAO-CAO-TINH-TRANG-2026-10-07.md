@@ -53,6 +53,8 @@ Cách làm: mở bản production dựng sẵn, thao tác như người học (t
 | #33 | Ngày giờ có giây và giờ đứng trước ngày; khung biểu đồ tuần kéo cao gần 600px; báo lỗi đếm "4 bài nháp" cho người không có nháp | `whenLabel()` dùng chung ("7/10/2026 · 03:36"); căn trên khung biểu đồ; chỉ đếm bản nháp có chữ |
 | #34 | Thanh trên cùng ghi "Cẩm nang VSTEP" ở trang 404 và offline; trang offline không có lối ra | Tên đúng theo từng trang; thêm nút "Về góc học hôm nay" |
 
+Đợt rà ba đường trên desktop (đổi hồ sơ giữa chừng, mô phỏng 56 ngày, hai đề đủ cấu trúc làm trọn): kế hoạch, giai đoạn tuần thi và phần so sánh hai lần thi đều đúng; một lỗi duy nhất, **trang Tiến bộ dựng mọi lượt đã học không giới hạn**, nay hiện 20 buổi mới nhất và xem thêm từng 20. Chi tiết trong `docs/QUALITY.md`, mục "Rà ba đường chưa đi".
+
 Trước đó trong cùng đợt: #27 (trần 6 bài/ngày bỏ phí 36–68% ngân sách, nay trần 8 và phần dư được nói ra), #26 (mất mạng chỉ mở được 1/9 trang, nay 9/9 và bài của hôm nay mở được).
 
 ### 4.2 Đã kiểm và đúng, không đổi gì
@@ -96,7 +98,7 @@ Theo thứ tự nên làm:
 
 1. **Quan sát Gùa dùng thật vài ngày**, ghi lại chỗ vướng. Đây là nguồn lỗi đáng tin hơn mọi vòng tự kiểm tra tiếp theo.
 2. **Chốt chuyện tên "Mây"** (giữ hoặc đổi). Nếu đổi, mình làm đồng bộ ở mọi nơi rồi chạy lại toàn bộ kiểm thử và merge theo quy trình cũ.
-3. **Rà tiếp trên desktop:** học thử thêm các đường chưa đi (đổi mục tiêu giữa chừng, nhiều tuần dữ liệu, đề đủ cấu trúc làm trọn từ đầu đến cuối). Điện thoại để sau, khi nào cần thì dùng danh sách 20 mục `docs/UAT-DIEN-THOAI.md`.
+3. **Rà tiếp trên desktop:** ba đường (đổi hồ sơ, nhiều tuần dữ liệu, hai đề đủ cấu trúc) đã rà xong; còn lại là các đường hiếm hơn như hết mạng giữa lúc nộp và hai thiết bị đồng bộ. Điện thoại để sau, khi nào cần thì dùng danh sách 20 mục `docs/UAT-DIEN-THOAI.md`.
 4. **Gửi bộ hồ sơ học liệu cho giáo viên**; khi có kết quả, ghi vào `provenance.ts`.
 5. Việc mình có thể làm tiếp mà không cần chờ ai (chỉ làm khi được yêu cầu): thêm học liệu mới (thư viện hiện đủ khoảng 88 phút mới mỗi ngày, khoảng sáu tuần là gặp hết 42 bài), rà soát thêm các đường hiếm (hết mạng giữa lúc nộp, hai thiết bị đồng bộ), và cập nhật báo cáo Word.
 
