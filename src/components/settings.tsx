@@ -96,7 +96,13 @@ export function SettingsPage() {
   ];
   function save(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = profileSchema.safeParse({ ...profile, onboarded: true });
+    // One spelling of the name: the same "Gùa" typed with a combining accent is
+    // a different string, and would miss the nickname the app keys on.
+    const parsed = profileSchema.safeParse({
+      ...profile,
+      name: profile.name.normalize("NFC"),
+      onboarded: true,
+    });
     if (!parsed.success) {
       setError(
         "Kiểm tra tên gọi, ngày thi và thời lượng học từ 10 đến 120 phút nhé.",

@@ -210,7 +210,8 @@ export function Shell({ children }: { children: ReactNode }) {
             onClick={() => setMobile(false)}
           >
             <span className="avatar">
-              {state.profile.name[0].toUpperCase()}
+              {/* By code point: an emoji first letter is two UTF-16 units. */}
+              {(Array.from(state.profile.name)[0] ?? "").toUpperCase()}
             </span>
             <span>
               <strong>{state.profile.name}</strong>
@@ -238,9 +239,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </button>
             <span>Không gian học tập</span>
             <ChevronRight size={14} />
-            <strong>
-              {current?.label ?? otherLabel(pathname)}
-            </strong>
+            <strong>{current?.label ?? otherLabel(pathname)}</strong>
           </div>
           <div className="topbar-right">
             <span className="streak-pill">
