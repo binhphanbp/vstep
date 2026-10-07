@@ -27,7 +27,7 @@ Chưa làm: mở lại trang production bằng mắt sau PR #34 (chỉ dựa và
 
 | Số liệu | Giá trị |
 | --- | --- |
-| Kiểm thử unit (Vitest) | 183 |
+| Kiểm thử unit (Vitest) | 184 |
 | Kiểm thử E2E (Playwright, bản production) | 67 = 63 Chromium + 2 Firefox + 2 WebKit |
 | Route được dựng sẵn | 106 |
 | Màn được quét axe | 16 |
