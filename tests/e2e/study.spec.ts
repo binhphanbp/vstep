@@ -974,3 +974,44 @@ test("the question bank can be printed for a teacher, keys and all", async ({
     "Đáp án đúng chưa",
   );
 });
+
+test("the dot for today shows a tick she can actually see once she has studied", async ({
+  page,
+}) => {
+  // Today's dot is both "today" and, after a lesson, "complete". The two rules
+  // fought and the near-white one won, leaving a white tick on a near-white
+  // ground: present in the page, invisible on the screen.
+  await page.goto("/practice/reading-market");
+  for (const id of ["rk1", "rk2", "rk3", "rk4", "rk5"]) {
+    await page.locator(`input[name="${id}"][value="${key(id)}"]`).check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await page.goto("/");
+  const dot = page.locator(".day-dot.today.complete");
+  await expect(dot).toBeVisible();
+  const [tick, ground] = await dot.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.color, style.backgroundColor];
+  });
+  const luminance = (rgb: string) => {
+    const [r, g, b] = (rgb.match(/\d+/g) ?? ["0", "0", "0"])
+      .slice(0, 3)
+      .map((value) => {
+        const channel = Number(value) / 255;
+        return channel <= 0.03928
+          ? channel / 12.92
+          : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [light, dark] = [luminance(tick), luminance(ground)].sort(
+    (a, b) => b - a,
+  );
+  // The broken state measured 1.09:1; the same pink the earlier days use is 2.2.
+  expect((light + 0.05) / (dark + 0.05)).toBeGreaterThan(2);
+});

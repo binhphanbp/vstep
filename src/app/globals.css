@@ -1015,6 +1015,13 @@ textarea:focus-visible {
   border: 1px solid #b8909d;
   background: #f8f3f5;
 }
+/* Today's dot is also the one that turns complete once she has studied. Both
+   rules are one class deep and `.today` comes second, so it used to win and
+   paint a near-white ground under the white tick: the tick was there and
+   invisible, on the one dot she looks at to see "I studied today". */
+.day-dot.today.complete {
+  background: #c3a2ad;
+}
 .day-dot.today > span {
   width: 5px;
   height: 5px;
