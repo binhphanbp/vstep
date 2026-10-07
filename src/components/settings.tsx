@@ -22,6 +22,7 @@ import {
   profileSchema,
   stateSchema,
   type Profile,
+  whenLabel,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
 import {
@@ -567,7 +568,7 @@ function CloudSettings({ storageError }: { storageError: string }) {
         const parsed = result.data;
         if (
           !window.confirm(
-            `Tải bản sao ngày ${new Date(data.updated_at).toLocaleString("vi-VN")} (${parsed.attempts.length} lượt học)? Bản thiết bị hiện tại được xuất trước khi thay thế.`,
+            `Tải bản sao ngày ${whenLabel(data.updated_at)} (${parsed.attempts.length} lượt học)? Bản thiết bị hiện tại được xuất trước khi thay thế.`,
           )
         )
           return;

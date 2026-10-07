@@ -1158,3 +1158,34 @@ test("a listening passage plays again from its first sentence once it has finish
   expect(second).toHaveLength(total);
   expect(second[0]).toBe(first[0]);
 });
+
+test("the history writes a date she can read, and the chart panel is not stretched", async ({
+  page,
+}) => {
+  await page.goto("/practice/reading-market");
+  for (const id of ["rk1", "rk2", "rk3", "rk4", "rk5"]) {
+    await page.locator(`input[name="${id}"][value="${key(id)}"]`).check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await page.goto("/progress");
+  // The skills column reuses `.history-row`; a session row is the one with minutes.
+  const row = page.locator(".history-row small", { hasText: " phút" }).first();
+  await expect(row).toBeVisible();
+  // "7/10/2026 · 03:36", not "03:36:27 7/10/2026".
+  await expect(row).toContainText(/\d{1,2}\/\d{1,2}\/\d{4} · \d{2}:\d{2}/);
+  await expect(row).not.toContainText(/\d{2}:\d{2}:\d{2}/);
+  // The 7-day chart is a fixed 180px: its panel must not be stretched to the
+  // height of the skills column beside it, leaving a tall empty box.
+  const chart = await page
+    .locator(".panel", { has: page.locator(".activity-chart") })
+    .boundingBox();
+  const skills = await page
+    .locator(".panel", { hasText: "Bức tranh từng kỹ năng" })
+    .boundingBox();
+  expect(chart!.height).toBeLessThan(skills!.height);
+});

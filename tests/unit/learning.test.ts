@@ -45,6 +45,7 @@ import {
   type Attempt,
   weakQuestionTypes,
   whatsNext,
+  whenLabel,
   wordCardFor,
   wordCount,
 } from "../../src/lib/learning";
@@ -1753,5 +1754,17 @@ describe("saying when a card comes back, and what comes next", () => {
     expect(finished.remaining).toBe(0);
     // And from any earlier lesson the only thing left is the last one.
     expect(nextPlanned(state, plan.lessons[0].id).next?.id).toBe(last.id);
+  });
+});
+
+describe("a date and time for a history row", () => {
+  it("writes the date first and drops the seconds", () => {
+    const label = whenLabel("2026-10-07T03:36:27.000Z");
+    // Day, month, year, then hours and minutes - never "03:36:27 7/10/2026".
+    expect(label).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4} · \d{2}:\d{2}$/);
+    expect(label).not.toMatch(/\d{2}:\d{2}:\d{2}/);
+  });
+  it("says nothing rather than 'Invalid Date' for a broken value", () => {
+    expect(whenLabel("không phải ngày")).toBe("");
   });
 });

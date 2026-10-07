@@ -17,6 +17,7 @@ import {
   skillStats,
   streak,
   type StudyState,
+  whenLabel,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
 import { allLessons as lessons } from "@/lib/full-exam-content";
@@ -93,7 +94,10 @@ export function ProgressPage() {
           </small>
         </div>
       </div>
-      <div className="content-grid">
+      {/* Top-aligned: the chart is a fixed 180px, and stretching its panel to
+          the height of the skills column left a tall empty box for anyone with
+          no minutes logged yet. */}
+      <div className="content-grid" style={{ alignItems: "start" }}>
         <section className="panel">
           <div className="panel-heading">
             <h2>Nhịp học 7 ngày gần nhất</h2>
@@ -196,8 +200,7 @@ export function ProgressPage() {
                         </h3>
                       </Link>
                       <small>
-                        {new Date(a.date).toLocaleString("vi-VN")} ·{" "}
-                        {Math.round(a.seconds / 60)} phút
+                        {whenLabel(a.date)} · {Math.round(a.seconds / 60)} phút
                         {a.id.startsWith("exam:") ? " · Luyện có giờ" : ""}
                       </small>
                     </div>

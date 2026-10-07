@@ -108,7 +108,11 @@ export function buildErrorReport(state: StudyState, storageError: string) {
       attempts: state.attempts.length,
       reviews: Object.keys(state.reviews).length,
       mistakeReviews: Object.keys(state.mistakeReviews).length,
-      drafts: Object.keys(state.drafts).length,
+      // A draft is cleared to "" when its session is filed, and the key stays:
+      // counting keys reported four drafts for a learner with none.
+      drafts: Object.values(state.drafts).filter(
+        (draft) => typeof draft === "string" && draft.trim(),
+      ).length,
       savedWords: Object.keys(state.savedWords ?? {}).length,
       examOpen: Boolean(state.exam),
     },
