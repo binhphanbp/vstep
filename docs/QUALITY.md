@@ -345,6 +345,14 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - 3 ca unit mới (định dạng ngày giờ, giá trị hỏng, số bản nháp) và 1 ca E2E mới (lịch sử viết ngày đọc được và khung biểu đồ không bị kéo).
 - **Hai lần em tưởng lỗi, hoá ra do script.** Ảnh chụp toàn trang không có CSS là do tiến trình server cũ còn sống sau khi build lại; và `.history-row` được dùng cả cho hàng kỹ năng nên locator của em khớp nhầm.
 
+## Rà ba đường chưa đi, 07/10/2026
+
+Phạm vi: desktop, mạng ổn. Ba đường chưa từng đi trọn: đổi hồ sơ giữa chừng, dùng nhiều tuần liền, và làm trọn hai đề đủ cấu trúc.
+
+- **Mô phỏng 56 ngày** (dữ liệu giả tất định, đúng 60%): ngày nghỉ, ngày "Hơi mệt", đổi mục tiêu B2 → C1, đổi ngày thi hai lần, bỏ ngày thi, rồi đặt ngày thi là ngày mai; ngân sách đổi 45 → 20 phút và trọng tâm đổi sang Viết. Mỗi ngày kiểm: kế hoạch không rỗng, không trùng bài, không vượt 1,6 lần ngân sách, không giống hệt ngày học trước, hồ sơ vẫn qua schema. Kết quả: **không vi phạm nào**. 117 lượt, hồ sơ 187 KiB, sổ lỗi 74 thẻ. Quét giai đoạn tuần thi từ 100 ngày về 0: xây nền, luyện dạng đang sai (còn 42 ngày), tập nhịp thi (còn 14 ngày), ngày thi; sau ngày thi trả null; kế hoạch ngày không rỗng ở mọi mốc.
+- **Hai đề đủ cấu trúc làm trọn trên trình duyệt** (Đề 01 rồi Đề 02, đủ 35 câu Nghe, 40 câu Đọc, 2 bài Viết, 3 phần Nói mỗi đề): màn kết thúc, trang Tiến bộ và phần so sánh khớp nhau từng con số (Nghe 11/35 → 5/35 là -17 điểm phần trăm, Đọc 8/40 → 10/40 là +5), câu so sánh nói đúng "hai đề khác nhau". Không lỗi trình duyệt.
+- **Lỗi tìm được: lịch sử không có trần.** Trang Tiến bộ dựng mọi lượt đã học, mỗi lượt kèm bài viết, bản ghi và nhận xét có thể mở ra. Sau hai đề đủ cấu trúc đã là 46 dòng (trang cao 5.670 px); sau vài tháng là hàng trăm. Nay hiện 20 buổi mới nhất, nói rõ "Đang hiện 20 trong N buổi", kèm nút xem thêm từng 20, theo cách Sổ lỗi đã làm. Thêm vào ca E2E lịch sử sẵn có (không đổi số ca): 45 lượt, hiện 20, bấm hai lần thành 40 rồi 45, hết nút. Đã chạy thử trên bản chưa sửa: đỏ với "Expected: 20, Received: 45".
+
 ## Bằng chứng kiểm tra
 
 - 183 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.

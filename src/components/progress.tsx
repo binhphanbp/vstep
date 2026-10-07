@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChartNoAxesCombined, Sparkles } from "lucide-react";
 import {
@@ -23,8 +24,12 @@ import { skillNames, type Skill } from "@/lib/content";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { RecordingHistory } from "./audio-tools";
+// A learner who studies for months has hundreds of rows; the newest are what
+// she came to look at, and the rest are one tap away.
+const HISTORY_PAGE = 20;
 export function ProgressPage() {
   const { state } = useStudy();
+  const [shown, setShown] = useState(HISTORY_PAGE);
   const totalMinutes = Math.round(
     state.attempts.reduce((s, a) => s + a.seconds, 0) / 60,
   );
@@ -185,84 +190,104 @@ export function ProgressPage() {
         </div>
         {state.attempts.length ? (
           <div className="panel">
-            {[...state.attempts].reverse().map((a) => {
-              const lesson = lessons.find((l) => l.id === a.lessonId);
-              return (
-                <div key={a.id}>
-                  <div className="history-row">
-                    <SkillIcon skill={a.skill} />
-                    <div>
-                      <Link href={`/practice/${a.lessonId}`}>
-                        <h3>
-                          {attemptLesson(state, a)?.title ??
-                            lesson?.title ??
-                            "Bài luyện đã lưu"}
-                        </h3>
-                      </Link>
-                      <small>
-                        {whenLabel(a.date)} · {Math.round(a.seconds / 60)} phút
-                        {a.id.startsWith("exam:") ? " · Luyện có giờ" : ""}
-                      </small>
-                    </div>
-                    <strong>
-                      {a.total ? `${a.correct}/${a.total}` : "Đã thực hành"}
-                    </strong>
-                  </div>
-                  {a.text && (
-                    <details>
-                      <summary>Xem lại bài viết đã nộp</summary>
-                      <div className="passage" lang="en">
-                        {a.text}
+            {[...state.attempts]
+              .reverse()
+              .slice(0, shown)
+              .map((a) => {
+                const lesson = lessons.find((l) => l.id === a.lessonId);
+                return (
+                  <div key={a.id}>
+                    <div className="history-row">
+                      <SkillIcon skill={a.skill} />
+                      <div>
+                        <Link href={`/practice/${a.lessonId}`}>
+                          <h3>
+                            {attemptLesson(state, a)?.title ??
+                              lesson?.title ??
+                              "Bài luyện đã lưu"}
+                          </h3>
+                        </Link>
+                        <small>
+                          {whenLabel(a.date)} · {Math.round(a.seconds / 60)}{" "}
+                          phút
+                          {a.id.startsWith("exam:") ? " · Luyện có giờ" : ""}
+                        </small>
                       </div>
-                    </details>
-                  )}
-                  {a.recordingId && <RecordingHistory id={a.recordingId} />}
-                  {(a.skill === "writing" || a.skill === "speaking") && (
-                    <Link
-                      className="text-link"
-                      href={`/review-pack?attempt=${a.id}`}
-                    >
-                      In gói gửi giáo viên
-                      <ArrowRight size={14} />
-                    </Link>
-                  )}
-                  {a.feedback && (
-                    <details>
-                      <summary>Nhận xét của người chấm</summary>
-                      <p className="help-copy">{a.feedback}</p>
-                    </details>
-                  )}
-                  {a.selfCheck && Object.keys(a.selfCheck).length > 0 && (
-                    <details>
-                      <summary>Mình đã tự chấm theo tiêu chí</summary>
-                      <ul className="tips-list">
-                        {Object.entries(a.selfCheck).map(([id, level]) => (
-                          <li key={id}>
-                            {allCriteria.find((item) => item.id === id)
-                              ?.label ?? id}
-                            :{" "}
-                            {selfCheckLevels.find(
-                              (item) => item.value === level,
-                            )?.label ?? level}
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="help-copy">{SELF_CHECK_DISCLAIMER}</p>
-                    </details>
-                  )}
-                  {a.reflection && a.reflection.length > 0 && (
-                    <details>
-                      <summary>Điều mình đã tự kiểm tra</summary>
-                      <ul className="tips-list">
-                        {a.reflection.map((r) => (
-                          <li key={r}>{r}</li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
-                </div>
-              );
-            })}
+                      <strong>
+                        {a.total ? `${a.correct}/${a.total}` : "Đã thực hành"}
+                      </strong>
+                    </div>
+                    {a.text && (
+                      <details>
+                        <summary>Xem lại bài viết đã nộp</summary>
+                        <div className="passage" lang="en">
+                          {a.text}
+                        </div>
+                      </details>
+                    )}
+                    {a.recordingId && <RecordingHistory id={a.recordingId} />}
+                    {(a.skill === "writing" || a.skill === "speaking") && (
+                      <Link
+                        className="text-link"
+                        href={`/review-pack?attempt=${a.id}`}
+                      >
+                        In gói gửi giáo viên
+                        <ArrowRight size={14} />
+                      </Link>
+                    )}
+                    {a.feedback && (
+                      <details>
+                        <summary>Nhận xét của người chấm</summary>
+                        <p className="help-copy">{a.feedback}</p>
+                      </details>
+                    )}
+                    {a.selfCheck && Object.keys(a.selfCheck).length > 0 && (
+                      <details>
+                        <summary>Mình đã tự chấm theo tiêu chí</summary>
+                        <ul className="tips-list">
+                          {Object.entries(a.selfCheck).map(([id, level]) => (
+                            <li key={id}>
+                              {allCriteria.find((item) => item.id === id)
+                                ?.label ?? id}
+                              :{" "}
+                              {selfCheckLevels.find(
+                                (item) => item.value === level,
+                              )?.label ?? level}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="help-copy">{SELF_CHECK_DISCLAIMER}</p>
+                      </details>
+                    )}
+                    {a.reflection && a.reflection.length > 0 && (
+                      <details>
+                        <summary>Điều mình đã tự kiểm tra</summary>
+                        <ul className="tips-list">
+                          {a.reflection.map((r) => (
+                            <li key={r}>{r}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
+                  </div>
+                );
+              })}
+            {state.attempts.length > shown ? (
+              <div style={{ textAlign: "center", padding: "18px 0 6px" }}>
+                <p className="help-copy">
+                  Đang hiện {shown} trong {state.attempts.length} buổi, mới nhất
+                  trước.
+                </p>
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => setShown((count) => count + HISTORY_PAGE)}
+                >
+                  Xem thêm{" "}
+                  {Math.min(HISTORY_PAGE, state.attempts.length - shown)} buổi
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="empty-state">
