@@ -21,6 +21,7 @@ import {
   type Skill,
 } from "@/lib/content";
 import {
+  nextPlanned,
   nextStep,
   objectiveInsights,
   scoreAnswers,
@@ -390,6 +391,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     });
   }, [lesson, update]);
   const [error, setError] = useState("");
+  // What is left of today's plan, asked only once a lesson is filed: the end of
+  // a lesson is when "what now?" comes back.
+  const upNext = result ? nextPlanned(state, lesson.id) : null;
   const insights = result?.total
     ? objectiveInsights(lesson.questions, result.answers, result.confidence)
     : null;
@@ -577,6 +581,22 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                 : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm của giáo viên hoặc AI."}
             </p>
             <div className="result-actions">
+              {upNext?.next && (
+                <Link
+                  className="button primary small"
+                  href={`/practice/${upNext.next.id}`}
+                >
+                  Bài tiếp theo hôm nay
+                  <ArrowRight size={14} />
+                </Link>
+              )}
+              <Link
+                className={`button small ${upNext?.next ? "secondary" : "primary"}`}
+                href={result.total ? "/mistakes" : "/progress"}
+              >
+                {result.total ? "Mở sổ tay lỗi sai" : "Xem lịch sử"}
+                <ArrowRight size={14} />
+              </Link>
               <button
                 type="button"
                 className="button secondary small"
@@ -584,14 +604,19 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               >
                 Luyện lại
               </button>
-              <Link
-                className="button primary small"
-                href={result.total ? "/mistakes" : "/progress"}
-              >
-                {result.total ? "Mở sổ tay lỗi sai" : "Xem lịch sử"}
-                <ArrowRight size={14} />
-              </Link>
             </div>
+            {upNext && (
+              <p className="help-copy">
+                {upNext.next
+                  ? `${upNext.next.title} · ${upNext.next.minutes} phút. Hôm nay còn ${upNext.remaining} bài trong kế hoạch.`
+                  : `Kế hoạch hôm nay đã xong. Nghỉ một chút cũng là học.`}{" "}
+                {!upNext.next && (
+                  <Link className="text-link" href="/">
+                    Về góc học hôm nay
+                  </Link>
+                )}
+              </p>
+            )}
           </div>
         </div>
       )}

@@ -12,6 +12,7 @@ import {
   compareSittings,
   dayOffset,
   daysUntil,
+  dueLabel,
   examMinutes,
   examSittings,
   examStages,
@@ -23,6 +24,7 @@ import {
   milestones,
   mistakeReviewKey,
   mistakes,
+  nextPlanned,
   nextStep,
   objectiveInsights,
   openVocabulary,
@@ -1695,5 +1697,61 @@ describe("the minutes the plan cannot fill", () => {
             60,
         ),
       );
+  });
+});
+
+describe("saying when a card comes back, and what comes next", () => {
+  // 7 Oct 2026, 10:00 in Vietnam.
+  const now = new Date("2026-10-07T03:00:00.000Z");
+  const after = (ms: number) => new Date(now.getTime() + ms).toISOString();
+  it("says minutes, today, tomorrow, days, then a date", () => {
+    expect(dueLabel(after(10 * 60_000), now)).toBe("10 phút nữa");
+    expect(dueLabel(after(20_000), now)).toBe("1 phút nữa");
+    expect(dueLabel(after(5 * 3_600_000), now)).toBe("hôm nay");
+    expect(dueLabel(after(24 * 3_600_000), now)).toBe("ngày mai");
+    expect(dueLabel(after(3 * 86_400_000), now)).toBe("3 ngày nữa");
+    expect(dueLabel(after(20 * 86_400_000), now)).toBe("ngày 27/10");
+  });
+  it("counts tomorrow by the calendar in Vietnam, not by 24 hours", () => {
+    // 23:30 local: eight hours later is already the next calendar day.
+    const lateNight = new Date("2026-10-07T16:30:00.000Z");
+    const eightHours = new Date(lateNight.getTime() + 8 * 3_600_000);
+    expect(dueLabel(eightHours.toISOString(), lateNight)).toBe("ngày mai");
+  });
+  it("does not pretend an overdue or broken date is in the future", () => {
+    expect(dueLabel(after(-60_000), now)).toBe("đã đến lượt ôn");
+    expect(dueLabel("không phải ngày", now)).toBe("");
+  });
+  it("offers the next lesson of today's plan she has not done", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 60;
+    const plan = todayPlan(state);
+    expect(plan.lessons.length).toBeGreaterThan(1);
+    const first = nextPlanned(state, plan.lessons[0].id);
+    expect(first.next?.id).toBe(plan.lessons[1].id);
+    expect(first.remaining).toBe(plan.lessons.length - 1);
+  });
+  it("skips lessons already done today and says so when none are left", () => {
+    const state = freshState();
+    state.profile.dailyMinutes = 45;
+    const plan = todayPlan(state);
+    // Everything but the last lesson is already filed today.
+    state.attempts = plan.lessons.slice(0, -1).map((lesson, index) => ({
+      id: `done${index}`,
+      lessonId: lesson.id,
+      skill: lesson.skill,
+      date: new Date().toISOString(),
+      answers: {},
+      correct: 0,
+      total: 0,
+      seconds: 60,
+    }));
+    const last = plan.lessons.at(-1)!;
+    // Finishing the last one leaves nothing: the plan is done, not extended.
+    const finished = nextPlanned(state, last.id);
+    expect(finished.next).toBeNull();
+    expect(finished.remaining).toBe(0);
+    // And from any earlier lesson the only thing left is the last one.
+    expect(nextPlanned(state, plan.lessons[0].id).next?.id).toBe(last.id);
   });
 });
