@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản chuẩn bị phát hành bổ sung sáu đề nhập và đạt **190 unit, 71 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên không chấm. Kết quả kiểm thử local và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc CI và smoke trước đó, không phải bản sáu đề.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` và đạt **190 unit, 71 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên không chấm. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -14,9 +14,9 @@ Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch họ
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
-Ba việc vẫn cần người quyết định nhưng nay mỗi việc chỉ còn một thao tác. `/review-pack/bank` in ra sáu tập hồ sơ học liệu để nhờ giáo viên duyệt: ngữ liệu, câu hỏi, đáp án đang dùng có đánh dấu, câu trích dẫn làm căn cứ và bảng trống cho người chấm; kết quả duyệt chỉ vào được `provenance.ts` bằng tay, với tên và ngày thật. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. `scripts/vercel-ignore-build.mjs` chặn build production khi CI của đúng SHA chưa xanh và chặn cả khi không chắc, nhưng còn chờ hai ô cấu hình trên Vercel. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy.
+Ba việc vẫn cần người quyết định nhưng nay mỗi việc chỉ còn một thao tác. `/review-pack/bank` in ra sáu tập hồ sơ học liệu để nhờ giáo viên duyệt: ngữ liệu, câu hỏi, đáp án đang dùng có đánh dấu, câu trích dẫn làm căn cứ và bảng trống cho người chấm; kết quả duyệt chỉ vào được `provenance.ts` bằng tay, với tên và ngày thật. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. Chủ website đã chọn không bật cổng chờ CI của Vercel; quy trình phát hành yêu cầu CI xanh trước merge và smoke sau deploy. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy.
 
-Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã áp dụng và hậu kiểm thành công trên production ngày 13/09/2026. Nghiệm thu thiết bị thật, cổng bắt buộc chờ CI trước deploy, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
+Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã áp dụng và hậu kiểm thành công trên production ngày 13/09/2026. Nghiệm thu thiết bị thật, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
 
 ## 2. Mục tiêu sản phẩm và hướng đi
 
@@ -198,7 +198,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản chuẩn bị phát hành ngày 07/10/2026: ESLint, TypeScript, 190/190 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 71 ca trên bản production local: 67 Chromium, 2 Firefox, 2 WebKit. Lượt đầy đủ gần nhất đạt 70/71; ca offline còn lại chỉ dùng tiêu đề cũ, đã sửa kỳ vọng và chạy lại riêng đạt. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. GitHub CI và HTTPS smoke phải được xác nhận theo đúng commit khi phát hành; kết quả local không thay thế bằng chứng đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 190/190 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 71 ca trên bản production local: 67 Chromium, 2 Firefox, 2 WebKit. Lượt đầy đủ gần nhất đạt 70/71; ca offline còn lại chỉ dùng tiêu đề cũ, đã sửa kỳ vọng và chạy lại riêng đạt. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
