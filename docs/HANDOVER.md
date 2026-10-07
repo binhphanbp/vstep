@@ -229,7 +229,7 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 | Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production             |
 | Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt           |
 | Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                             |
-| Ngân hàng đề độc lập                   | Có hai đề Mây và sáu đề nhập | Năm đề nhập có đáp án; nội dung và quyền sử dụng cần thẩm định                  |
+| Ngân hàng đề độc lập                   | Có hai đề Mây và sáu đề nhập | Năm đề nhập có đáp án; nội dung cần thẩm định; dùng học cá nhân                        |
 | Bản thu người nói cho Nghe             | Có MP3 ở sáu đề nhập      | Hai đề Mây vẫn dùng speech synthesis của thiết bị                               |
 | Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu               |
 | Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
