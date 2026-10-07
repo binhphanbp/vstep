@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Printer } from "lucide-react";
 import { useStudy } from "./study-provider";
 import { criteriaFor, SELF_CHECK_DISCLAIMER } from "@/lib/criteria";
 import { skillNames } from "@/lib/content";
-import { attemptLesson, type Attempt } from "@/lib/learning";
+import { attemptLesson, whenLabel, type Attempt } from "@/lib/learning";
 /**
  * One page a teacher can mark by hand.
  *
@@ -54,7 +54,7 @@ export function ReviewPackPage() {
       </div>
     );
   const criteria = criteriaFor(lesson);
-  const date = new Date(attempt.date).toLocaleString("vi-VN");
+  const date = whenLabel(attempt.date);
   return (
     <div className="page review-pack">
       <div className="no-print">

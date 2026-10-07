@@ -1172,6 +1172,23 @@ const LONG_SESSION_REST_DAYS = 14;
  * once, from counts rather than encouragement.
  */
 /**
+ * A date and time for a history row: "7/10/2026 · 03:36".
+ *
+ * `toLocaleString("vi-VN")` prints "03:36:27 7/10/2026" - seconds nobody reads,
+ * and the clock before the date, which is not how anyone writes it down. The
+ * history, the teacher pack and the restore prompt all used it.
+ */
+export function whenLabel(iso: string): string {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return "";
+  const time = at.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${at.toLocaleDateString("vi-VN")} · ${time}`;
+}
+
+/**
  * When a card comes back, said the way a person would say it.
  *
  * The notebook and the word list printed the raw timestamp - "02:54:06

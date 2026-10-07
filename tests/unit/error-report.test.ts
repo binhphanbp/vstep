@@ -106,4 +106,15 @@ describe("handing the report to the device", () => {
     stub({});
     await expect(sendErrorReport("xin chào")).resolves.toBe("none");
   });
+  it("does not count a draft that was cleared when its session was filed", () => {
+    // Filing a session writes "" over its draft but leaves the key, so counting
+    // keys told the learner's helper about drafts she did not have.
+    const state = freshState();
+    state.drafts = {
+      "quiz:writing-email": "",
+      "quiz:reading-cafe": "   ",
+      "writing-email": "Dear Alex, a real draft",
+    };
+    expect(buildErrorReport(state, "").counts.drafts).toBe(1);
+  });
 });
