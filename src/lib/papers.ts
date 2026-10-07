@@ -102,6 +102,8 @@ export function isFinalStage(run: Pick<PaperRun, "only" | "stage">) {
  */
 export function stageMinutes(run: PaperRun) {
   const ends = run.stageEnds ?? [];
+  // A log that stops short of the sections sat cannot be lined up with them.
+  if (run.finishedAt && ends.length !== runStages(run).length) return [];
   return runStages(run)
     .map((stage, index) => {
       const end = ends[index];
@@ -162,7 +164,12 @@ export function advancePaperRun(
   let next = { ...run };
   while (!next.finishedAt && (force || now >= next.deadline)) {
     const closed = Math.min(now, next.deadline);
-    next.stageEnds = [...(next.stageEnds ?? []), closed].slice(0, 4);
+    // The log is positional: entry n belongs to the n-th section of the
+    // sitting. A sitting begun before the log existed would put a Reading
+    // time in Listening's place, so it simply keeps no log.
+    const logged = next.stageEnds?.length ?? 0;
+    if (logged === runStages(next).indexOf(next.stage))
+      next.stageEnds = [...(next.stageEnds ?? []), closed];
     if (isFinalStage(next)) {
       next.finishedAt = new Date(closed).toISOString();
       break;

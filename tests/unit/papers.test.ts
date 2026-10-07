@@ -273,4 +273,40 @@ describe("imported exam papers", () => {
       ),
     ).toBe(true);
   });
+
+  it("never shows a section's time against the wrong section for a sitting that began before the log", () => {
+    const paper = papers[1];
+    // Saved by an older version: already in Reading, with no log at all.
+    const legacy: PaperRun = { ...firstRun(paper), stage: 1 };
+    const next = advancePaperRun(legacy, paper, legacy.deadline + 1000);
+    expect(next.stage).toBe(2);
+    // Better no timings than "Nghe: 100 phút" for what was Reading.
+    expect(stageMinutes(next)).toEqual([]);
+    const done = advancePaperRun(next, paper, next.deadline + 60 * 60_000);
+    expect(done.finishedAt).toBeDefined();
+    expect(stageMinutes(done)).toEqual([]);
+    // A complete log still shows every section.
+    const whole = advancePaperRun(
+      firstRun(paper),
+      paper,
+      1000 + 172 * 60_000 + 1000,
+    );
+    expect(whole.finishedAt).toBeDefined();
+    expect(stageMinutes(whole).map((entry) => entry.stage)).toEqual([
+      0, 1, 2, 3,
+    ]);
+  });
+
+  it("rejects a backup whose single-skill sitting contradicts itself", () => {
+    const paper = papers[1];
+    const bad = (run: object) =>
+      stateSchema.safeParse({ ...freshState(), paperRuns: [run] }).success;
+    const reading = { ...firstRun(paper), only: 1, stage: 1 };
+    expect(bad(reading)).toBe(true);
+    // Says "Reading only" yet sits in Speaking.
+    expect(bad({ ...reading, stage: 3 })).toBe(false);
+    // More section closings than a one-section sitting can have.
+    expect(bad({ ...reading, stageEnds: [5000, 6000] })).toBe(false);
+    expect(bad({ ...reading, stageEnds: [5000] })).toBe(true);
+  });
 });

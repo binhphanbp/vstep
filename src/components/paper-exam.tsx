@@ -192,23 +192,40 @@ export function ExamCheckIn({
       </p>
       <h2>Quy định trong phòng thi mô phỏng</h2>
       <ul className="exam-rules">
+        {stages.includes(0) && (
+          <li>
+            <strong>Nghe:</strong> mỗi đoạn ghi âm chỉ phát{" "}
+            <strong>một lần</strong>, tự động, sau một khoảng ngắn để đọc câu
+            hỏi. Không tạm dừng, không tua, không nghe lại, không quay lại đoạn
+            trước.
+          </li>
+        )}
+        {stages.includes(1) && (
+          <li>
+            <strong>Đọc:</strong> bài đọc ở bên trái, câu hỏi ở bên phải. Bạn có
+            thể chuyển giữa các bài trong phần Đọc.
+          </li>
+        )}
+        {(stages.includes(2) || stages.includes(3)) && (
+          <li>
+            {stages.includes(2) && (
+              <>
+                <strong>Viết:</strong> gõ trực tiếp, có đếm số từ.{" "}
+              </>
+            )}
+            {stages.includes(3) && (
+              <>
+                <strong>Nói:</strong> máy ghi âm theo giờ từng phần; Part 2 và
+                Part 3 có 1 phút chuẩn bị.
+              </>
+            )}
+          </li>
+        )}
         <li>
-          <strong>Nghe:</strong> mỗi đoạn ghi âm chỉ phát{" "}
-          <strong>một lần</strong>, tự động, sau một khoảng ngắn để đọc câu hỏi.
-          Không tạm dừng, không tua, không nghe lại, không quay lại đoạn trước.
-        </li>
-        <li>
-          <strong>Đọc:</strong> bài đọc ở bên trái, câu hỏi ở bên phải. Bạn có
-          thể chuyển giữa các bài trong phần Đọc.
-        </li>
-        <li>
-          <strong>Viết:</strong> gõ trực tiếp, có đếm số từ.{" "}
-          <strong>Nói:</strong> máy ghi âm theo giờ từng phần; Part 2 và Part 3
-          có 1 phút chuẩn bị.
-        </li>
-        <li>
-          Hết giờ một phần, bài làm tự lưu và chuyển sang phần tiếp theo. Phần
-          đã nộp không mở lại được. Đồng hồ vẫn chạy khi tải lại hoặc rời trang.
+          {only === undefined
+            ? "Hết giờ một phần, bài làm tự lưu và chuyển sang phần tiếp theo. Phần đã nộp không mở lại được."
+            : "Hết giờ, bài làm tự lưu và lượt luyện kết thúc. Bài đã nộp không mở lại được."}{" "}
+          Đồng hồ vẫn chạy khi tải lại hoặc rời trang.
         </li>
         <li>Kết quả chỉ là số câu đúng, không quy đổi sang bậc VSTEP.</li>
       </ul>
