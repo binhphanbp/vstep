@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 183 unit / 67 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 184 unit / 67 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -353,9 +353,20 @@ Phạm vi: desktop, mạng ổn. Ba đường chưa từng đi trọn: đổi h�
 - **Hai đề đủ cấu trúc làm trọn trên trình duyệt** (Đề 01 rồi Đề 02, đủ 35 câu Nghe, 40 câu Đọc, 2 bài Viết, 3 phần Nói mỗi đề): màn kết thúc, trang Tiến bộ và phần so sánh khớp nhau từng con số (Nghe 11/35 → 5/35 là -17 điểm phần trăm, Đọc 8/40 → 10/40 là +5), câu so sánh nói đúng "hai đề khác nhau". Không lỗi trình duyệt.
 - **Lỗi tìm được: lịch sử không có trần.** Trang Tiến bộ dựng mọi lượt đã học, mỗi lượt kèm bài viết, bản ghi và nhận xét có thể mở ra. Sau hai đề đủ cấu trúc đã là 46 dòng (trang cao 5.670 px); sau vài tháng là hàng trăm. Nay hiện 20 buổi mới nhất, nói rõ "Đang hiện 20 trong N buổi", kèm nút xem thêm từng 20, theo cách Sổ lỗi đã làm. Thêm vào ca E2E lịch sử sẵn có (không đổi số ca): 45 lượt, hiện 20, bấm hai lần thành 40 rồi 45, hết nút. Đã chạy thử trên bản chưa sửa: đỏ với "Expected: 20, Received: 45".
 
+## Rà các đường hiếm, 07/10/2026
+
+Phạm vi: desktop. Thao tác thật trên bản production dựng sẵn, đồng hồ trình duyệt giả khi cần.
+
+- **Đã đúng, không đụng tới.** Mất mạng giữa bài Đọc rồi nộp khi đang offline (lượt được lưu 2/5, có mạng lại vẫn còn); bấm nộp hai lần liền (vẫn một lượt, tải lại không thêm lượt); nút Back và Forward quanh trang Viết (bản nháp còn nguyên); làm bài qua nửa đêm giờ Việt Nam (lượt ghi vào ngày mới, streak 0 → 1, dấu tick đúng ngày); tên có HTML (hiện nguyên chữ, không chạy); tên 40 ký tự; tên có khoảng trắng hai đầu.
+- **Lỗi 1: tên bắt đầu bằng emoji.** Ảnh đại diện lấy `name[0]`, mà emoji là hai đơn vị UTF-16 nên in nửa ký tự ("�"). Gùa gõ "🐢 Gùa" là chuyện có thể xảy ra. Nay lấy theo code point.
+- **Lỗi 2: "Gùa" gõ bằng dấu tổ hợp.** Cùng chữ "Gùa" nhưng gõ dấu rời (NFD) là một chuỗi khác, nên mất nhãn "Rùa nhỏ" mà ứng dụng gắn theo đúng chuỗi "Gùa". Nay chuẩn hoá NFC khi lưu hồ sơ.
+- **Lỗi 3: ngày giờ ở lịch sử theo múi giờ của máy, còn mọi ngày khác theo giờ Việt Nam.** Trình duyệt đặt ở New York, học lúc 03:00 ngày 8/10 giờ Việt Nam: dải tuần đánh dấu ngày 8/10 nhưng dòng lịch sử ghi "7/10/2026 · 16:00". Nay `whenLabel` cũng đọc theo giờ Việt Nam. Với người học ở Việt Nam không có gì đổi.
+- 1 ca unit mới (đã chạy thử trên hàm cũ: đỏ với "Expected 8/10/2026 · 00:03, Received 7/10/2026 · 17:03") và phần mở rộng ca E2E tên người học (đã chạy thử trên bản cũ: đỏ với "Expected 🐢, Received �"). Không đổi số ca E2E.
+- **Chưa kiểm được ở đây:** thời gian luyện qua nửa đêm (giờ giả của Playwright chỉ nhảy một lần nên bộ đếm giây không chạy), và việc đổi đồng hồ hệ thống giữa lúc thi.
+
 ## Bằng chứng kiểm tra
 
-- 183 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 184 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 67 kiểm thử Playwright trên bản production: 63 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.

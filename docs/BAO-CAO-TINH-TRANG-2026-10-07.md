@@ -27,7 +27,7 @@ Chưa làm: mở lại trang production bằng mắt sau PR #34 (chỉ dựa và
 
 | Số liệu | Giá trị |
 | --- | --- |
-| Kiểm thử unit (Vitest) | 183 |
+| Kiểm thử unit (Vitest) | 184 |
 | Kiểm thử E2E (Playwright, bản production) | 67 = 63 Chromium + 2 Firefox + 2 WebKit |
 | Route được dựng sẵn | 106 |
 | Màn được quét axe | 16 |
@@ -54,6 +54,8 @@ Cách làm: mở bản production dựng sẵn, thao tác như người học (t
 | #34 | Thanh trên cùng ghi "Cẩm nang VSTEP" ở trang 404 và offline; trang offline không có lối ra | Tên đúng theo từng trang; thêm nút "Về góc học hôm nay" |
 
 Đợt rà ba đường trên desktop (đổi hồ sơ giữa chừng, mô phỏng 56 ngày, hai đề đủ cấu trúc làm trọn): kế hoạch, giai đoạn tuần thi và phần so sánh hai lần thi đều đúng; một lỗi duy nhất, **trang Tiến bộ dựng mọi lượt đã học không giới hạn**, nay hiện 20 buổi mới nhất và xem thêm từng 20. Chi tiết trong `docs/QUALITY.md`, mục "Rà ba đường chưa đi".
+
+Đợt rà các đường hiếm trên desktop (mất mạng giữa lúc nộp, bấm nộp hai lần, Back/Forward, qua nửa đêm, múi giờ khác, tên lạ): ba lỗi nhỏ đã sửa, gồm ảnh đại diện vỡ khi tên bắt đầu bằng emoji, "Gùa" gõ bằng dấu tổ hợp mất nhãn "Rùa nhỏ", và giờ ở lịch sử lệch giờ Việt Nam khi máy ở múi giờ khác. Chi tiết trong `docs/QUALITY.md`, mục "Rà các đường hiếm".
 
 Trước đó trong cùng đợt: #27 (trần 6 bài/ngày bỏ phí 36–68% ngân sách, nay trần 8 và phần dư được nói ra), #26 (mất mạng chỉ mở được 1/9 trang, nay 9/9 và bài của hôm nay mở được).
 
@@ -98,7 +100,7 @@ Theo thứ tự nên làm:
 
 1. **Quan sát Gùa dùng thật vài ngày**, ghi lại chỗ vướng. Đây là nguồn lỗi đáng tin hơn mọi vòng tự kiểm tra tiếp theo.
 2. **Chốt chuyện tên "Mây"** (giữ hoặc đổi). Nếu đổi, mình làm đồng bộ ở mọi nơi rồi chạy lại toàn bộ kiểm thử và merge theo quy trình cũ.
-3. **Rà tiếp trên desktop:** ba đường (đổi hồ sơ, nhiều tuần dữ liệu, hai đề đủ cấu trúc) đã rà xong; còn lại là các đường hiếm hơn như hết mạng giữa lúc nộp và hai thiết bị đồng bộ. Điện thoại để sau, khi nào cần thì dùng danh sách 20 mục `docs/UAT-DIEN-THOAI.md`.
+3. **Rà tiếp trên desktop:** ba đường (đổi hồ sơ, nhiều tuần dữ liệu, hai đề đủ cấu trúc) đã rà xong; các đường hiếm cũng đã rà; còn lại là thời gian luyện qua nửa đêm và đổi đồng hồ hệ thống giữa lúc thi (chưa kiểm được bằng công cụ hiện có). Điện thoại để sau, khi nào cần thì dùng danh sách 20 mục `docs/UAT-DIEN-THOAI.md`.
 4. **Gửi bộ hồ sơ học liệu cho giáo viên**; khi có kết quả, ghi vào `provenance.ts`.
 5. Việc mình có thể làm tiếp mà không cần chờ ai (chỉ làm khi được yêu cầu): thêm học liệu mới (thư viện hiện đủ khoảng 88 phút mới mỗi ngày, khoảng sáu tuần là gặp hết 42 bài), rà soát thêm các đường hiếm (hết mạng giữa lúc nộp, hai thiết bị đồng bộ), và cập nhật báo cáo Word.
 

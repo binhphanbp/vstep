@@ -1181,11 +1181,15 @@ const LONG_SESSION_REST_DAYS = 14;
 export function whenLabel(iso: string): string {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return "";
+  // Vietnam time, like every other day in the app: a history row must not say
+  // 7/10 while the week strip has already moved on to 8/10 for the same session.
+  const zone = { timeZone: "Asia/Ho_Chi_Minh" };
   const time = at.toLocaleTimeString("vi-VN", {
+    ...zone,
     hour: "2-digit",
     minute: "2-digit",
   });
-  return `${at.toLocaleDateString("vi-VN")} · ${time}`;
+  return `${at.toLocaleDateString("vi-VN", zone)} · ${time}`;
 }
 
 /**

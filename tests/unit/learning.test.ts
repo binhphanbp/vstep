@@ -1764,6 +1764,10 @@ describe("a date and time for a history row", () => {
     expect(label).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4} · \d{2}:\d{2}$/);
     expect(label).not.toMatch(/\d{2}:\d{2}:\d{2}/);
   });
+  it("reads in Vietnam time whatever the device's zone, like the day buckets", () => {
+    // 17:03 UTC on the 7th is 00:03 on the 8th in Vietnam.
+    expect(whenLabel("2026-10-07T17:03:00.000Z")).toBe("8/10/2026 · 00:03");
+  });
   it("says nothing rather than 'Invalid Date' for a broken value", () => {
     expect(whenLabel("không phải ngày")).toBe("");
   });

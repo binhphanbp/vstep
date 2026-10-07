@@ -1045,6 +1045,23 @@ test("her name never runs into the word beside it on any page", async ({
     // punctuation, are legitimate neighbours; letters are not.
     expect(text.match(/\p{L}Gùa|Gùa\p{L}/gu), route).toBeNull();
   }
+  // Names people really type. An emoji first letter is two UTF-16 units and
+  // used to print half a character in the avatar; "Gùa" typed with a combining
+  // accent is another string and missed the nickname the app keys on.
+  const rename = async (name: string) => {
+    await page.goto("/settings");
+    await page.getByPlaceholder("Tên hoặc biệt danh").fill(name);
+    await page.getByRole("button", { name: "Lưu nhịp học của mình" }).click();
+    await page.goto("/");
+    await expect(page.locator(".profile-link")).toContainText(
+      name.trim().normalize("NFC"),
+    );
+  };
+  await rename("🐢 Linh");
+  await expect(page.locator(".avatar").first()).toHaveText("🐢");
+  await rename("Gùa".normalize("NFD"));
+  await expect(page.locator(".avatar").first()).toHaveText("G");
+  await expect(page.locator(".profile-link")).toContainText("Rùa nhỏ");
 });
 
 test("finishing a lesson points at the next one of today's plan", async ({
