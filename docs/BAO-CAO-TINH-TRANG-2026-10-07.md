@@ -21,7 +21,7 @@ Bản tích hợp đã qua kiểm tra local, CI và smoke production. PR [#38](h
 | Ghi âm | Blob micro vẫn nằm trong IndexedDB; cần tải riêng khi chuyển thiết bị |
 | Dữ liệu tĩnh | Sáu JSON đề và manifest; toàn bộ thư mục `public/papers` khoảng 79 MB |
 
-Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs` kiểm tra cấu trúc, đáp án và audio trước khi tạo bản nhập. File `de-thi-thu-vstep-135_attempt.json` là lượt làm đã lưu, không phải đề thứ bảy. Nguồn ghi Hapio Class; học liệu chưa được giáo viên của Mây thẩm định.
+Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs` kiểm tra cấu trúc, đáp án và audio trước khi tạo bản nhập. File `de-thi-thu-vstep-135_attempt.json` là lượt làm đã lưu, không phải đề thứ bảy. Đây là bộ đề của chủ dự án, dùng cho học cá nhân; học liệu chưa được giáo viên của Mây thẩm định.
 
 ## 3. Bằng chứng kiểm tra và triển khai
 
@@ -50,6 +50,6 @@ Script `scripts/smoke-https.mjs` kiểm tra kho sáu đề, file Review và mộ
 - Viết và Nói lưu bài, có mẫu đối chiếu, chưa chấm tự động. Số câu đúng của năm đề chưa được hiệu chuẩn để suy ra bậc VSTEP.
 - Bản ghi micro không đi vào JSON hoặc Supabase snapshot; audio đề nhập không được tải sẵn để dùng offline.
 - Chưa nghiệm thu đăng nhập và đồng bộ trên HTTPS bằng hai thiết bị thật, micro/tai nghe và Safari hoặc Android thật.
-- Nguồn nội dung từ Hapio Class do chủ dự án cung cấp; quyền sử dụng và công bố học liệu cần được chủ dự án xác nhận.
+- Sáu đề nhập là bộ đề của chủ dự án. Chủ dự án xác nhận ngày 07/10/2026 rằng chỉ dùng để học cá nhân, không chia sẻ hay kinh doanh. Địa chỉ trang hiện công khai với ai biết link; nếu muốn chỉ riêng Gùa vào được thì cần bật bảo vệ truy cập trên Vercel.
 
 Để tiếp tục, xem `README.md` để chạy ứng dụng, `QUALITY.md` để tra ca kiểm thử, `HANDOVER.md` cho kiến trúc và `RELEASE-RUNBOOK.md` cho quy trình khôi phục.

@@ -153,7 +153,7 @@ for (const { id: paperId, file } of sources) {
   const paper = {
     id: paperId,
     version: 1,
-    source: "Hapio Class, bản xuất cục bộ do chủ dự án cung cấp",
+    source: "Bộ đề của chủ dự án, dùng cho học cá nhân",
     sourceHash: createHash("sha256").update(raw).digest("hex"),
     title: input.exam.title,
     graded,
