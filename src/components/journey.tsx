@@ -71,7 +71,7 @@ export function JourneyPage() {
             .
           </h1>
           <p>
-            Lộ trình linh hoạt theo kết quả và thời gian {state.profile.name}
+            Lộ trình linh hoạt theo kết quả và thời gian {state.profile.name}{" "}
             có. Không có ngày nào bị bỏ lại phía sau.
           </p>
         </div>

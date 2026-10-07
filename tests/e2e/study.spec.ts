@@ -1015,3 +1015,34 @@ test("the dot for today shows a tick she can actually see once she has studied",
   // The broken state measured 1.09:1; the same pink the earlier days use is 2.2.
   expect((light + 0.05) / (dark + 0.05)).toBeGreaterThan(2);
 });
+
+test("her name never runs into the word beside it on any page", async ({
+  page,
+}) => {
+  // JSX drops the space when a line ends on `{name}` and the next line starts
+  // with text. It showed on the journey page as "thời gian Gùacó", which no
+  // type check, lint rule or contrast test can see: only the rendered text can.
+  const routes = [
+    "/",
+    "/journey",
+    "/practice",
+    "/exam",
+    "/vocabulary",
+    "/mistakes",
+    "/progress",
+    "/settings",
+    "/guide",
+    "/practice/reading-cafe",
+    "/practice/listening-weekend",
+    "/practice/writing-email",
+    "/practice/speaking-social",
+  ];
+  for (const route of routes) {
+    await page.goto(route);
+    await expect(page.locator("main h1")).toBeVisible();
+    const text = await page.locator("body").innerText();
+    // "Gùa" glued to a letter on either side. Straight and curly quotes, and
+    // punctuation, are legitimate neighbours; letters are not.
+    expect(text.match(/\p{L}Gùa|Gùa\p{L}/gu), route).toBeNull();
+  }
+});
