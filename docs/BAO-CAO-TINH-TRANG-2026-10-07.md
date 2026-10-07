@@ -28,8 +28,8 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Phép kiểm tra | Kết quả local |
 | --- | --- |
 | ESLint và TypeScript | Đạt |
-| Vitest | 190/190 |
-| Playwright trên production build | 71 ca: 67 Chromium, hai Firefox, hai WebKit; mọi ca đã đạt qua các lượt chạy |
+| Vitest | 192/192 |
+| Playwright trên production build | 75 ca: 71 Chromium, hai Firefox, hai WebKit; mọi ca đã đạt qua các lượt chạy |
 | Accessibility tự động | Axe WCAG A/AA trên 19 màn, có kho đề và Review 13/09 |
 | Build tĩnh | 112 trang, gồm sáu route đề nhập |
 | Dependency production | `npm audit --omit=dev` báo 0 lỗ hổng |

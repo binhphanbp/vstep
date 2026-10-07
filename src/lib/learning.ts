@@ -297,6 +297,19 @@ export const paperRunSchema = z.object({
   essays: z.record(z.string(), limitedString(30000)),
   spoken: z.array(limitedString(100)).check(z.maxLength(3)),
   finishedAt: z.optional(z.iso.datetime()),
+  // Exam-room fields. All optional: a sitting saved before the exam room
+  // existed has none of them and is read as a practice sitting.
+  mode: z.optional(z.enum(["exam", "practice"])),
+  /** Listening recordings already played; in the exam room they play once. */
+  heard: z.optional(z.array(limitedString(100)).check(z.maxLength(14))),
+  /** Where the current Speaking part stands, as absolute times. */
+  speak: z.optional(
+    z.object({
+      slot: limitedString(100),
+      phase: z.enum(["prep", "talk"]),
+      until: boundedNumber(0, 10000000000000),
+    }),
+  ),
 });
 export const stateSchema = z
   .object({

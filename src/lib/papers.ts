@@ -111,3 +111,27 @@ export function advancePaperRun(
   }
   return next;
 }
+
+/**
+ * How the exam room paces the parts.
+ *
+ * These come from public descriptions by test centres and prep sites, not from
+ * an official specification, and the app says so on the check-in screen:
+ * Listening recordings play once; Speaking is Part 1 about three minutes, Part
+ * 2 one minute to prepare and two to talk, Part 3 one minute to prepare and
+ * three to talk. The pause before a recording starts is the app's own choice.
+ */
+export const LISTENING_READ_SECONDS = 8;
+export const SPEAKING_PARTS = [
+  { prepSeconds: 0, talkSeconds: 180 },
+  { prepSeconds: 60, talkSeconds: 120 },
+  { prepSeconds: 60, talkSeconds: 180 },
+] as const;
+
+/** Where each reading question sits, for the question palette. */
+export function readingPalette(paper: Paper) {
+  const section = paper.sections[1];
+  return section.slots.flatMap((slot, slotIndex) =>
+    slot.items.map((item) => ({ item, slotIndex })),
+  );
+}

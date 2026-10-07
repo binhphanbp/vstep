@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Recorder } from "./audio-tools";
+import { ExamCheckIn, ExamRoom, PaperText } from "./paper-exam";
 import { useStudy } from "./study-provider";
 import {
   advancePaperRun,
@@ -16,11 +17,7 @@ import { wordCount, type PaperRun, type StudyState } from "@/lib/learning";
 const sectionNames = ["Nghe", "Đọc", "Viết", "Nói"];
 
 function PlainText({ text }: { text: string }) {
-  return (
-    <div className="paper-text" lang="en">
-      {text}
-    </div>
-  );
+  return <PaperText text={text} />;
 }
 
 function Translation({ label, text }: { label: string; text: string }) {
@@ -28,7 +25,9 @@ function Translation({ label, text }: { label: string; text: string }) {
   return (
     <details>
       <summary>{label}</summary>
-      <div className="paper-text" lang="vi">{text}</div>
+      <div className="paper-text" lang="vi">
+        {text}
+      </div>
     </details>
   );
 }
@@ -41,7 +40,9 @@ function SampleAnswers({ slot }: { slot: PaperSlot }) {
       {slot.samples.map((sample, index) => (
         <section key={index} className="paper-sample">
           <h4>{sample.title || `Bài mẫu ${index + 1}`}</h4>
-          {sample.band && <p className="help-copy">Nhãn nguồn: {sample.band}</p>}
+          {sample.band && (
+            <p className="help-copy">Nhãn nguồn: {sample.band}</p>
+          )}
           <PlainText text={sample.text} />
           {sample.translation && (
             <details>
@@ -84,6 +85,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
   );
   const [now, setNow] = useState(() => Date.now());
   const [agreed, setAgreed] = useState(false);
+  const [mode, setMode] = useState<"exam" | "practice">("exam");
 
   useEffect(() => {
     let alive = true;
@@ -98,7 +100,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         if (alive) setPaper(data);
       })
       .catch(() => {
-        if (alive) setLoadError("Không tải được đề. Kiểm tra kết nối và thử lại.");
+        if (alive)
+          setLoadError("Không tải được đề. Kiểm tra kết nối và thử lại.");
       });
     return () => {
       alive = false;
@@ -121,9 +124,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       update((current) => ({
         ...current,
         paperRuns: (current.paperRuns ?? []).map((entry) =>
-          entry.id === active.id
-            ? advancePaperRun(entry, paper, time)
-            : entry,
+          entry.id === active.id ? advancePaperRun(entry, paper, time) : entry,
         ),
       }));
     };
@@ -139,8 +140,18 @@ export function PaperRunner({ paperId }: { paperId: string }) {
     return () => window.removeEventListener("beforeunload", leave);
   }, [active]);
 
-  function createRun() {
-    if (!paper || !agreed || storageError) return;
+  // The exam room takes over the screen: no sidebar, top bar or footer.
+  const immersive = Boolean(
+    run && !run.finishedAt && run.mode === "exam" && run.id === active?.id,
+  );
+  useEffect(() => {
+    document.body.classList.toggle("exam-immersive", immersive);
+    return () => document.body.classList.remove("exam-immersive");
+  }, [immersive]);
+
+  function createRun(chosen: "exam" | "practice") {
+    if (!paper || storageError) return;
+    if (chosen === "practice" && !agreed) return;
     const time = Date.now();
     const next: PaperRun = {
       id: crypto.randomUUID(),
@@ -154,6 +165,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       answers: {},
       essays: {},
       spoken: [],
+      mode: chosen,
     };
     update((current) => ({
       ...current,
@@ -191,7 +203,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
     }));
   }
 
-  function submitStage() {
+  function submitStage(skipConfirm = false) {
     if (!paper || !run || run.finishedAt) return;
     const answered = paperAnswered(paper, run, run.stage);
     const total = paperStageTotal(paper, run.stage);
@@ -201,13 +213,11 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       (run.stage === 3
         ? "Kết thúc và lưu lượt thi này?"
         : "Nộp phần này và chuyển sang phần tiếp theo? Bạn sẽ không thể quay lại sửa.");
-    if (!window.confirm(message)) return;
+    if (!skipConfirm && !window.confirm(message)) return;
     update((current) => ({
       ...current,
       paperRuns: (current.paperRuns ?? []).map((entry) =>
-        entry.id === run.id &&
-        !entry.finishedAt &&
-        entry.stage === run.stage
+        entry.id === run.id && !entry.finishedAt && entry.stage === run.stage
           ? advancePaperRun(entry, paper, Date.now(), true)
           : entry,
       ),
@@ -226,7 +236,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
     );
   if (!paper || !ready)
     return <div className="loading-state">Đang mở đề {paperId}…</div>;
-  const shortLabel = paper.id === "review-1309" ? "REVIEW 13/09" : `ĐỀ ${paper.id}`;
+  const shortLabel =
+    paper.id === "review-1309" ? "REVIEW 13/09" : `ĐỀ ${paper.id}`;
 
   if (!run)
     return (
@@ -247,7 +258,9 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             <div className="stack paper-stage-list">
               {paper.sections.map((section, index) => (
                 <div className="history-row" key={section.skill}>
-                  <strong>{index + 1}. {sectionNames[index]}</strong>
+                  <strong>
+                    {index + 1}. {sectionNames[index]}
+                  </strong>
                   <span>{section.minutes} phút</span>
                 </div>
               ))}
@@ -255,29 +268,70 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             <p className="notice">
               {paper.graded
                 ? "Đề có khóa đáp án cho Nghe/Đọc; chưa có giáo viên của Mây thẩm định. Viết và Nói lưu bài làm nhưng không chấm tự động."
-                : "Đề 131 thiếu toàn bộ khóa đáp án và transcript trong dữ liệu gốc. Bạn có thể luyện đủ bốn phần, nhưng Nghe/Đọc sẽ không được chấm."}
-              {" "}Đồng hồ vẫn chạy khi tải lại hoặc rời trang. Audio cần kết nối
+                : "Đề 131 thiếu toàn bộ khóa đáp án và transcript trong dữ liệu gốc. Bạn có thể luyện đủ bốn phần, nhưng Nghe/Đọc sẽ không được chấm."}{" "}
+              Đồng hồ vẫn chạy khi tải lại hoặc rời trang. Audio cần kết nối
               trong lần mở đầu tiên. Kết quả không quy đổi sang B1/B2/C1.
             </p>
-            <label className="paper-agree">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(event) => setAgreed(event.target.checked)}
-              />
-              Tôi đã chuẩn bị tai nghe, micro và đủ 172 phút.
-            </label>
-            <button
-              type="button"
-              className="button primary"
-              disabled={!agreed || Boolean(storageError)}
-              onClick={createRun}
-            >
-              {paper.id === "review-1309" ? "Bắt đầu Review 13/09" : `Bắt đầu đề ${paper.id}`}
-            </button>
+            <fieldset className="exam-modes">
+              <legend>Chế độ làm đề</legend>
+              <label className="paper-option">
+                <input
+                  type="radio"
+                  name="paper-mode"
+                  checked={mode === "exam"}
+                  onChange={() => setMode("exam")}
+                />
+                <span>
+                  <strong>Phòng thi mô phỏng</strong> (khuyên dùng): giao diện
+                  toàn màn hình, nghe một lần, Nói có giờ và ghi âm tự động.
+                </span>
+              </label>
+              <label className="paper-option">
+                <input
+                  type="radio"
+                  name="paper-mode"
+                  checked={mode === "practice"}
+                  onChange={() => setMode("practice")}
+                />
+                <span>
+                  <strong>Luyện thoải mái</strong>: nghe lại và chuyển phần tự
+                  do, ghi âm bằng tay.
+                </span>
+              </label>
+            </fieldset>
+            {mode === "practice" && (
+              <>
+                <label className="paper-agree">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(event) => setAgreed(event.target.checked)}
+                  />
+                  Tôi đã chuẩn bị tai nghe, micro và đủ 172 phút.
+                </label>
+                <button
+                  type="button"
+                  className="button primary"
+                  disabled={!agreed || Boolean(storageError)}
+                  onClick={() => createRun("practice")}
+                >
+                  {paper.id === "review-1309"
+                    ? "Bắt đầu Review 13/09"
+                    : `Bắt đầu đề ${paper.id}`}
+                </button>
+              </>
+            )}
             {storageError && <p role="alert">{storageError}</p>}
           </section>
         </div>
+        {mode === "exam" && (
+          <ExamCheckIn
+            name={state.profile.name}
+            paper={paper}
+            disabled={Boolean(storageError)}
+            onStart={() => createRun("exam")}
+          />
+        )}
       </div>
     );
 
@@ -300,8 +354,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         </div>
         {!sameMaterial && (
           <p className="notice error">
-            Học liệu của đề đã đổi từ khi làm lượt này. Giữ nguyên đáp án đã lưu;
-            chưa đối chiếu điểm với khóa đáp án hiện tại.
+            Học liệu của đề đã đổi từ khi làm lượt này. Giữ nguyên đáp án đã
+            lưu; chưa đối chiếu điểm với khóa đáp án hiện tại.
           </p>
         )}
         {paper.graded && sameMaterial ? (
@@ -309,8 +363,12 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             {scores.map((score) => (
               <div className="stat-card" key={score.skill}>
                 <span>{score.skill === "listening" ? "Nghe" : "Đọc"}</span>
-                <strong>{score.correct}/{score.total}</strong>
-                <small>Đã chọn {score.answered}/{score.total} câu · chưa quy đổi bậc</small>
+                <strong>
+                  {score.correct}/{score.total}
+                </strong>
+                <small>
+                  Đã chọn {score.answered}/{score.total} câu · chưa quy đổi bậc
+                </small>
               </div>
             ))}
           </div>
@@ -336,7 +394,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             >
               {runs.map((entry, index) => (
                 <option key={entry.id} value={entry.id}>
-                  Lượt {index + 1} · {new Date(entry.startedAt).toLocaleDateString("vi-VN")}
+                  Lượt {index + 1} ·{" "}
+                  {new Date(entry.startedAt).toLocaleDateString("vi-VN")}
                 </option>
               ))}
             </select>
@@ -344,52 +403,94 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         </div>
         {paper.sections.map((section, index) => (
           <section className="panel paper-review" key={section.skill}>
-            <h2>{index + 1}. {sectionNames[index]}</h2>
+            <h2>
+              {index + 1}. {sectionNames[index]}
+            </h2>
             {section.slots.map((slot) => (
               <details key={slot.id}>
-                <summary>{slot.part} · {slot.title}</summary>
+                <summary>
+                  {slot.part} · {slot.title}
+                </summary>
                 {slot.passage && <PlainText text={slot.passage} />}
-                <Translation label="Bản dịch bài đọc" text={slot.passageTranslation} />
+                <Translation
+                  label="Bản dịch bài đọc"
+                  text={slot.passageTranslation}
+                />
                 {slot.transcript && (
                   <details>
                     <summary>Bản chép lời bài nghe</summary>
                     <PlainText text={slot.transcript} />
-                    <Translation label="Bản dịch bài nghe" text={slot.transcriptTranslation} />
+                    <Translation
+                      label="Bản dịch bài nghe"
+                      text={slot.transcriptTranslation}
+                    />
                   </details>
                 )}
                 {slot.prompt && <PlainText text={slot.prompt} />}
-                <Translation label="Bản dịch đề bài" text={slot.promptTranslation} />
+                <Translation
+                  label="Bản dịch đề bài"
+                  text={slot.promptTranslation}
+                />
                 {slot.cues.length > 0 && (
-                  <ul>{slot.cues.map((cue, i) => <li key={i}>{cue}</li>)}</ul>
+                  <ul>
+                    {slot.cues.map((cue, i) => (
+                      <li key={i}>{cue}</li>
+                    ))}
+                  </ul>
                 )}
                 {slot.items.map((item) => (
                   <div className="paper-review-item" key={item.id}>
-                    <strong>{item.number}. {item.text}</strong>
+                    <strong>
+                      {item.number}. {item.text}
+                    </strong>
                     <p>
-                      Đã chọn: {run.answers[item.id] === undefined
+                      Đã chọn:{" "}
+                      {run.answers[item.id] === undefined
                         ? "Bỏ trống"
                         : `${"ABCD"[run.answers[item.id]]}. ${item.options[run.answers[item.id]].text}`}
                     </p>
-                    {(item.translation || item.options.some((option) => option.translation)) && (
+                    {(item.translation ||
+                      item.options.some((option) => option.translation)) && (
                       <details>
                         <summary>Bản dịch câu hỏi và lựa chọn</summary>
-                        {item.translation && <p lang="vi">{item.translation}</p>}
+                        {item.translation && (
+                          <p lang="vi">{item.translation}</p>
+                        )}
                         <ul lang="vi">
-                          {item.options.map((option, optionIndex) =>
-                            option.translation && (
-                              <li key={optionIndex}>{"ABCD"[optionIndex]}. {option.translation}</li>
-                            ),
+                          {item.options.map(
+                            (option, optionIndex) =>
+                              option.translation && (
+                                <li key={optionIndex}>
+                                  {"ABCD"[optionIndex]}. {option.translation}
+                                </li>
+                              ),
                           )}
                         </ul>
                       </details>
                     )}
                     {sameMaterial && item.answer !== null && (
                       <>
-                        <p>Đáp án: {"ABCD"[item.answer]}. {item.options[item.answer].text}</p>
+                        <p>
+                          Đáp án: {"ABCD"[item.answer]}.{" "}
+                          {item.options[item.answer].text}
+                        </p>
                         {item.explanation && <p>{item.explanation}</p>}
-                        {item.evidence && <p className="help-copy">Dẫn chứng nguồn: {item.evidence}</p>}
+                        {item.evidence && (
+                          <p className="help-copy">
+                            Dẫn chứng nguồn: {item.evidence}
+                          </p>
+                        )}
                         {item.notes.some(Boolean) && (
-                          <ul>{item.notes.map((note, i) => note && <li key={i}>{"ABCD"[i]}: {note}</li>)}</ul>
+                          <ul>
+                            {item.notes.map(
+                              (note, i) =>
+                                note && (
+                                  <li key={i}>
+                                    {"ABCD"[i]}: {note}
+                                  </li>
+                                ),
+                            )}
+                          </ul>
                         )}
                       </>
                     )}
@@ -398,12 +499,15 @@ export function PaperRunner({ paperId }: { paperId: string }) {
                 {section.skill === "writing" && (
                   <>
                     <h4>Bài viết của bạn</h4>
-                    <PlainText text={run.essays[slot.id] || "Chưa có bài làm"} />
+                    <PlainText
+                      text={run.essays[slot.id] || "Chưa có bài làm"}
+                    />
                   </>
                 )}
-                {section.skill === "speaking" && run.spoken.includes(slot.id) && (
-                  <Recorder id={`paper-${run.id}-${slot.id}`} readOnly />
-                )}
+                {section.skill === "speaking" &&
+                  run.spoken.includes(slot.id) && (
+                    <Recorder id={`paper-${run.id}-${slot.id}`} readOnly />
+                  )}
                 <SampleAnswers slot={slot} />
               </details>
             ))}
@@ -413,6 +517,21 @@ export function PaperRunner({ paperId }: { paperId: string }) {
     );
   }
 
+  if (run.mode === "exam")
+    return (
+      <ExamRoom
+        paper={paper}
+        run={run}
+        now={now}
+        name={state.profile.name}
+        edit={editRun}
+        markRecorded={markRecorded}
+        onSubmit={() => submitStage()}
+        onFinish={() => submitStage(true)}
+        storageError={storageError}
+      />
+    );
+
   const section = paper.sections[run.stage];
   const slot = section.slots[Math.min(run.material, section.slots.length - 1)];
   const seconds = Math.max(0, Math.ceil((run.deadline - now) / 1000));
@@ -420,21 +539,36 @@ export function PaperRunner({ paperId }: { paperId: string }) {
   const total = paperStageTotal(paper, run.stage);
   return (
     <div className="page">
-      <Link href="/papers" className="help-copy">← Kho đề</Link>
+      <Link href="/papers" className="help-copy">
+        ← Kho đề
+      </Link>
       <div className="study-header">
         <div>
-          <div className="eyebrow">{shortLabel} · PHẦN {run.stage + 1}/4</div>
+          <div className="eyebrow">
+            {shortLabel} · PHẦN {run.stage + 1}/4
+          </div>
           <h1>{sectionNames[run.stage]}</h1>
-          <p>{answered}/{total} mục đã làm</p>
+          <p>
+            {answered}/{total} mục đã làm
+          </p>
         </div>
-        <div className="paper-clock" role="timer" aria-label="Thời gian còn lại">
-          {Math.floor(seconds / 60).toString().padStart(2, "0")}:
-          {(seconds % 60).toString().padStart(2, "0")}
+        <div
+          className="paper-clock"
+          role="timer"
+          aria-label="Thời gian còn lại"
+        >
+          {Math.floor(seconds / 60)
+            .toString()
+            .padStart(2, "0")}
+          :{(seconds % 60).toString().padStart(2, "0")}
         </div>
       </div>
       <div className="paper-stage-strip" aria-label="Tiến độ các phần">
         {paper.sections.map((part, index) => (
-          <span key={part.skill} className={index === run.stage ? "current" : ""}>
+          <span
+            key={part.skill}
+            className={index === run.stage ? "current" : ""}
+          >
             {index + 1}. {sectionNames[index]}
           </span>
         ))}
@@ -459,10 +593,14 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             ))}
           </select>
         </label>
-        <h2>{slot.part} · {slot.title}</h2>
+        <h2>
+          {slot.part} · {slot.title}
+        </h2>
         {section.skill === "listening" && slot.audio && (
           <div className="paper-audio-wrap">
-            <p className="help-copy">Audio gốc của bộ dữ liệu · có thể phát lại khi luyện.</p>
+            <p className="help-copy">
+              Audio gốc của bộ dữ liệu · có thể phát lại khi luyện.
+            </p>
             <audio
               key={slot.audio}
               className="paper-audio"
@@ -476,7 +614,9 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         {section.skill === "reading" && <PlainText text={slot.passage} />}
         {slot.items.map((item) => (
           <fieldset className="paper-question" key={item.id}>
-            <legend>{item.number}. {item.text}</legend>
+            <legend>
+              {item.number}. {item.text}
+            </legend>
             {item.options.map((option, index) => (
               <label className="paper-option" key={index}>
                 <input
@@ -491,7 +631,9 @@ export function PaperRunner({ paperId }: { paperId: string }) {
                     }))
                   }
                 />
-                <span>{"ABCD"[index]}. {option.text}</span>
+                <span>
+                  {"ABCD"[index]}. {option.text}
+                </span>
               </label>
             ))}
           </fieldset>
@@ -513,7 +655,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
               }}
             />
             <p className="help-copy">
-              {wordCount(run.essays[slot.id] ?? "")} từ · yêu cầu trong đề: ít nhất {slot.wordMin} từ
+              {wordCount(run.essays[slot.id] ?? "")} từ · yêu cầu trong đề: ít
+              nhất {slot.wordMin} từ
             </p>
           </>
         )}
@@ -521,7 +664,11 @@ export function PaperRunner({ paperId }: { paperId: string }) {
           <>
             {slot.prompt && <PlainText text={slot.prompt} />}
             {slot.cues.length > 0 && (
-              <ul>{slot.cues.map((cue, index) => <li key={index}>{cue}</li>)}</ul>
+              <ul>
+                {slot.cues.map((cue, index) => (
+                  <li key={index}>{cue}</li>
+                ))}
+              </ul>
             )}
             <Recorder
               key={slot.id}
@@ -553,13 +700,17 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         <button
           type="button"
           className="button primary"
-          onClick={submitStage}
+          onClick={() => submitStage()}
           disabled={Boolean(storageError)}
         >
           {run.stage === 3 ? "Kết thúc buổi luyện" : "Nộp phần này & tiếp tục"}
         </button>
       </div>
-      {storageError && <p role="alert" className="notice error">{storageError}</p>}
+      {storageError && (
+        <p role="alert" className="notice error">
+          {storageError}
+        </p>
+      )}
     </div>
   );
 }
