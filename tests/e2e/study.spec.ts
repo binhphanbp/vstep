@@ -1046,3 +1046,64 @@ test("her name never runs into the word beside it on any page", async ({
     expect(text.match(/\p{L}Gùa|Gùa\p{L}/gu), route).toBeNull();
   }
 });
+
+test("finishing a lesson points at the next one of today's plan", async ({
+  page,
+}) => {
+  // Every lesson used to end with "practise again" and "open the notebook", so
+  // each one meant a trip back to the front page to find the next card.
+  await page.goto("/");
+  const plan = page.locator(".plan-list a[href^='/practice/']");
+  await expect(plan.first()).toBeVisible();
+  const hrefs = await plan.evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href")),
+  );
+  expect(hrefs.length).toBeGreaterThan(1);
+  // The first lesson of a fresh plan is a Listening one: answer by the first
+  // option, which is enough to file it.
+  await page.goto(hrefs[0]!);
+  const count = await page.locator(".question").count();
+  expect(count, "the first planned lesson should be an objective one").toBe(4);
+  for (let index = 0; index < count; index++) {
+    const card = page.locator(".question").nth(index);
+    await card.locator('input[type="radio"]').first().check();
+    await card.getByRole("button", { name: "Chưa chắc" }).click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  const next = page.getByRole("link", { name: "Bài tiếp theo hôm nay" });
+  await expect(next).toBeVisible();
+  await expect(next).toHaveAttribute("href", hrefs[1]!);
+  await expect(page.locator(".result-banner")).toContainText(
+    `Hôm nay còn ${hrefs.length - 1} bài trong kế hoạch`,
+  );
+  await next.click();
+  await page.waitForURL(`**${hrefs[1]}`);
+});
+
+test("a corrected question says when it comes back in words, not a timestamp", async ({
+  page,
+}) => {
+  await page.goto("/practice/reading-cafe");
+  // Everything right except rc1, so the notebook holds exactly one card.
+  for (const id of ["rc1", "rc2", "rc3", "rc4", "rc5"]) {
+    await page
+      .locator(
+        `input[name="${id}"][value="${id === "rc1" ? missed(id) : key(id)}"]`,
+      )
+      .check();
+    await page
+      .locator(".question")
+      .filter({ has: page.locator(`input[name="${id}"]`) })
+      .getByRole("button", { name: "Chưa chắc" })
+      .click();
+  }
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  await page.goto("/mistakes");
+  await page.locator(`input[name="rc1"][value="${key("rc1")}"]`).check();
+  await page.getByRole("button", { name: "Kiểm tra lại" }).first().click();
+  const note = page.getByText(/Đã xếp lịch ôn tiếp:/);
+  await expect(note).toBeVisible();
+  await expect(note).toContainText("ngày mai");
+  // No seconds and no raw time-of-day.
+  await expect(note).not.toContainText(/\d{1,2}:\d{2}/);
+});

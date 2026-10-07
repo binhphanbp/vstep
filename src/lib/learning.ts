@@ -1172,6 +1172,61 @@ const LONG_SESSION_REST_DAYS = 14;
  * once, from counts rather than encouragement.
  */
 /**
+ * When a card comes back, said the way a person would say it.
+ *
+ * The notebook and the word list printed the raw timestamp - "02:54:06
+ * 8/10/2026" - for "see you tomorrow". Nobody plans around seconds. The day is
+ * counted in Vietnam time like the rest of the app, so "tomorrow" means the
+ * next calendar day there, not "24 hours from now".
+ */
+export function dueLabel(due: string, now = new Date()): string {
+  const target = new Date(due);
+  const gap = target.getTime() - now.getTime();
+  if (Number.isNaN(gap)) return "";
+  if (gap <= 0) return "đã đến lượt ôn";
+  if (gap < 3_600_000)
+    return `${Math.max(1, Math.round(gap / 60_000))} phút nữa`;
+  const noon = (day: string) => Date.parse(`${day}T12:00:00+07:00`);
+  const days = Math.round(
+    (noon(localDay(target)) - noon(localDay(now))) / 86_400_000,
+  );
+  if (days <= 0) return "hôm nay";
+  if (days === 1) return "ngày mai";
+  if (days < 7) return `${days} ngày nữa`;
+  const [, month, day] = localDay(target).split("-");
+  return `ngày ${Number(day)}/${Number(month)}`;
+}
+
+/**
+ * The next lesson of today's plan she has not done, once she finishes one.
+ *
+ * Finishing a lesson used to offer "practise again" and "open the notebook",
+ * so every lesson ended with a trip back to the front page to find the next
+ * card. The plan is the app's answer to "what do I do today"; the end of a
+ * lesson is exactly when that question comes back.
+ *
+ * `next` is null when nothing is left, and the interface then says the plan is
+ * done instead of inventing another task.
+ */
+export function nextPlanned(
+  state: StudyState,
+  currentLessonId: string,
+  now = new Date(),
+) {
+  const today = localDay(now);
+  const done = new Set(
+    state.attempts
+      .filter((attempt) => localDay(attempt.date) === today)
+      .map((attempt) => attempt.lessonId),
+  );
+  done.add(currentLessonId);
+  const pending = todayPlan(state, now).lessons.filter(
+    (lesson) => !done.has(lesson.id),
+  );
+  return { next: pending[0] ?? null, remaining: pending.length };
+}
+
+/**
  * What to do with the minutes the plan could not fill.
  *
  * The library holds at most two lessons per skill a day - about 88 minutes -

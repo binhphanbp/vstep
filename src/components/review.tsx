@@ -12,6 +12,7 @@ import {
 
 import {
   addSavedWord,
+  dueLabel,
   lessonForType,
   mistakes,
   questionTypeStats,
@@ -272,7 +273,7 @@ export function VocabularyPage() {
                     </small>
                     <small>
                       {state.reviews[v.id]
-                        ? `Lần ôn tiếp: ${new Date(state.reviews[v.id].due).toLocaleString("vi-VN")}`
+                        ? `Lần ôn tiếp: ${dueLabel(state.reviews[v.id].due)}`
                         : "Chưa ôn"}
                     </small>
                     <p className="help-copy" lang="en">
@@ -587,10 +588,7 @@ export function MistakesPage() {
                 ) : (
                   <p className="help-copy">
                     Đã xếp lịch ôn tiếp:{" "}
-                    {new Date(
-                      state.mistakeReviews[item.key].due,
-                    ).toLocaleString("vi-VN")}
-                    .
+                    {dueLabel(state.mistakeReviews[item.key].due)}.
                   </p>
                 )}
               </section>
