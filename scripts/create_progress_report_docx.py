@@ -36,7 +36,7 @@ def main() -> None:
             break
 
     doc.core_properties.title = "Báo cáo tình trạng Mây VSTEP"
-    doc.core_properties.subject = "Bản sáu đề nhập, kiểm thử và phát hành"
+    doc.core_properties.subject = "Bản năm đề nhập, kiểm thử và phát hành"
     doc.core_properties.author = "Dự án Mây VSTEP"
     doc.save(OUTPUT)
     print(OUTPUT)

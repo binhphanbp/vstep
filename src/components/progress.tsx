@@ -30,6 +30,10 @@ import { paperCatalog } from "@/lib/papers";
 const HISTORY_PAGE = 20;
 export function ProgressPage() {
   const { state } = useStudy();
+  // A sitting of a paper that is no longer in the bank has nowhere to open.
+  const sittings = (state.paperRuns ?? []).filter((run) =>
+    paperCatalog.some((paper) => paper.id === run.paperId),
+  );
   const [shown, setShown] = useState(HISTORY_PAGE);
   const totalMinutes = Math.round(
     state.attempts.reduce((s, a) => s + a.seconds, 0) / 60,
@@ -181,14 +185,14 @@ export function ProgressPage() {
         </section>
       </div>
       <ExamSittings state={state} />
-      {(state.paperRuns ?? []).length > 0 && (
+      {sittings.length > 0 && (
         <section className="panel" style={{ marginTop: 25 }}>
           <h2>Kho đề nhập đã luyện</h2>
           <p className="help-copy">
-            Mở từng đề để xem bài làm và đáp án. Đề 131 không có khóa đáp án nên
-            không hiển thị điểm; Viết/Nói của mọi đề chưa được chấm.
+            Mở từng đề để xem bài làm và đáp án. Viết/Nói của mọi đề chưa được
+            chấm.
           </p>
-          {[...(state.paperRuns ?? [])].reverse().map((run) => (
+          {[...sittings].reverse().map((run) => (
             <div className="history-row" key={run.id}>
               <div>
                 <h3>
@@ -197,10 +201,15 @@ export function ProgressPage() {
                 </h3>
                 <small>
                   {whenLabel(new Date(run.startedAt).toISOString())} ·{" "}
-                  {run.finishedAt ? "Đã hoàn thành" : `Đang làm phần ${run.stage + 1}/4`}
+                  {run.finishedAt
+                    ? "Đã hoàn thành"
+                    : `Đang làm phần ${run.stage + 1}/4`}
                 </small>
               </div>
-              <Link className="text-link" href={`/papers/${run.paperId}?run=${run.id}`}>
+              <Link
+                className="text-link"
+                href={`/papers/${run.paperId}?run=${run.id}`}
+              >
                 Mở đề <ArrowRight size={15} />
               </Link>
             </div>

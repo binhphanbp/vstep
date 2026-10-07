@@ -20,7 +20,7 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 - Kế hoạch ngày giải thích lý do chọn bài theo năng lượng, lỗi đến hạn, mức chắc chắn, kết quả, recency và ngày thi; hành trình, thống kê theo giờ Việt Nam.
 - 42 bài luyện ngắn bốn kỹ năng, giải thích câu hỏi, nháp Viết tự lưu, bài mẫu và tiêu chí tự kiểm tra.
 - Sau khi nộp, 258 câu Nghe/Đọc tự biên soạn có chú giải bằng chứng và phân tích từng lựa chọn; bài Nghe phát lại riêng câu đó.
-- Buổi rút gọn 51 phút, hai đề tự biên soạn đủ cấu trúc và sáu đề nhập từ dữ liệu chủ dự án cung cấp. Mỗi đề đủ cấu trúc dài 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
+- Buổi rút gọn 51 phút, hai đề tự biên soạn đủ cấu trúc và năm đề nhập từ dữ liệu chủ dự án cung cấp. Mỗi đề đủ cấu trúc dài 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
 - Sổ câu sai ưu tiên lỗi “sai nhưng rất chắc”, số lần sai, subskill, luyện nhớ lại và lịch ôn; 68 thẻ từ có ví dụ, phiên âm và phát âm.
 - Ghi âm, nghe lại, tải âm thanh; bản Nói đã hoàn thành có bản lưu riêng trong lịch sử.
 - Sao lưu/nhập JSON có kiểm tra; dữ liệu hỏng được giữ để phục hồi. Snapshot Supabase thủ công có kiểm tra phiên bản.
@@ -30,11 +30,11 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 Phân tích nỗi đau, UX và ranh giới sản phẩm: [docs/PRODUCT.md](docs/PRODUCT.md).
 Báo cáo bàn giao đầy đủ: [docs/HANDOVER.md](docs/HANDOVER.md).
 
-## Sáu đề nhập: 131–135 và Review 13/09
+## Năm đề nhập: 132–135 và Review 13/09
 
-Vào **Phòng thi thử → Mở kho đề 131–135 và Review 13/09** hoặc `/papers`. Mỗi đề có 14 ngữ liệu Nghe với file MP3 trên máy chủ, bốn bài Đọc, hai đề Viết, ba phần Nói và bài mẫu để đối chiếu sau khi hoàn thành. Bản dịch có trong nguồn được mở ở màn đối chiếu sau khi nộp. Đáp án, bài viết và trạng thái của từng lượt được lưu trong cùng bản sao JSON/Supabase của Mây; bản ghi micro vẫn ở IndexedDB và phải tải riêng khi cần chuyển thiết bị.
+Vào **Phòng thi thử → Mở kho đề 132–135 và Review 13/09** hoặc `/papers`. Mỗi đề có 14 ngữ liệu Nghe với file MP3 trên máy chủ, bốn bài Đọc, hai đề Viết, ba phần Nói và bài mẫu để đối chiếu sau khi hoàn thành. Bản dịch có trong nguồn được mở ở màn đối chiếu sau khi nộp. Đáp án, bài viết và trạng thái của từng lượt được lưu trong cùng bản sao JSON/Supabase của Mây; bản ghi micro vẫn ở IndexedDB và phải tải riêng khi cần chuyển thiết bị.
 
-Đề 132–135 và Review 13/09 có khóa đáp án cho đủ 75 câu/đề: **năm đề chấm được**. Đề 131 thiếu toàn bộ khóa đáp án và transcript trong dữ liệu nguồn, nên vẫn làm được nhưng **không chấm Nghe/Đọc**. Các đề nhập chưa được Mây hoặc giáo viên thẩm định; không quy đổi kết quả thành bậc VSTEP. Audio và JSON của đề được tải khi mở, vì vậy cần kết nối lần đầu; chúng không được cam kết dùng offline trước khi tải.
+Đề 132–135 và Review 13/09 có khóa đáp án cho đủ 75 câu/đề: **cả năm đề đều chấm được**. Đề 131 từng có trong kho nhưng thiếu toàn bộ khóa đáp án và transcript nên đã được gỡ ra. Các đề nhập chưa được Mây hoặc giáo viên thẩm định; không quy đổi kết quả thành bậc VSTEP. Audio và JSON của đề được tải khi mở, vì vậy cần kết nối lần đầu; chúng không được cam kết dùng offline trước khi tải.
 
 Dữ liệu nguồn nằm ngoài repository tại `../vstep/data` trên máy hiện tại. Nếu cần tái tạo bản nhập sau khi nguồn đổi, chạy `node scripts/import-papers.mjs ../vstep/data` và rà lại 75 câu, audio và phiên bản học liệu trước khi phát hành. Bản nhập hiện dùng `version: 1`; lượt đã làm giữ mã phiên bản và dấu băm nguồn để phát hiện học liệu đổi.
 

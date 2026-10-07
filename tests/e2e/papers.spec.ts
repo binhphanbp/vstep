@@ -112,26 +112,6 @@ test("an old paper tab cannot submit the next section", async ({
   ).toBe(1);
 });
 
-test("paper 131 is usable without inventing a score", async ({ page }) => {
-  await page.goto("/papers/131");
-  await expect(
-    page.getByText(/Đề 131 thiếu toàn bộ khóa đáp án/),
-  ).toBeVisible();
-  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Bắt đầu đề 131" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Nghe", exact: true }),
-  ).toBeVisible();
-  await page.locator('.paper-question input[type="radio"]').first().check();
-  page.on("dialog", (dialog) => dialog.accept());
-  for (let section = 0; section < 3; section++)
-    await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
-  await page.getByRole("button", { name: "Kết thúc buổi luyện" }).click();
-  await expect(page.getByText(/Đề 131 không có khóa đáp án/)).toBeVisible();
-  await expect(page.getByText("0/75")).toHaveCount(0);
-});
-
 test("Review 13/09 is a separate gradable paper", async ({ page }) => {
   await page.goto("/papers/review-1309");
   await expect(
@@ -481,36 +461,6 @@ test("a single section ends the sitting when its time runs out", async ({
   await expect(page.getByText("Dear Jo, practise every day.")).toBeVisible();
 });
 
-test("paper 131 sat as one section has no marks, tables or retry", async ({
-  page,
-}) => {
-  await page.goto("/papers/131");
-  await page.getByRole("radio", { name: /Chỉ Đọc/ }).check();
-  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
-  await page.getByRole("checkbox", { name: /đủ 60 phút/ }).check();
-  await page.getByRole("button", { name: /Bắt đầu đề 131 · chỉ Đọc/ }).click();
-  await page.locator(".paper-question input").first().check();
-  page.on("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "Kết thúc buổi luyện" }).click();
-  await expect(
-    page.getByText("ĐỀ 131 · ĐÃ HOÀN THÀNH · CHỈ ĐỌC"),
-  ).toBeVisible();
-  await expect(page.locator(".stat-card")).toHaveCount(0);
-  await expect(page.getByText(/không có khóa đáp án/)).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /Làm lại \d+ câu/ }),
-  ).toHaveCount(0);
-  await expect(page.locator(".review-filter")).toHaveCount(0);
-  await expect(page.locator(".review-mark")).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Kết quả theo từng phần" }),
-  ).toHaveCount(0);
-  // The time used is still true of an unmarked paper.
-  await expect(
-    page.getByRole("heading", { name: "Thời gian đã dùng" }),
-  ).toBeVisible();
-});
-
 test("a sitting saved before the time log existed still opens and reviews", async ({
   page,
 }) => {
@@ -716,4 +666,55 @@ test("the back button returns the app's own screens, and a full disk is announce
   await page.goBack();
   await expect(page.locator(".sidebar")).toBeVisible();
   await expect(page.locator("body")).not.toHaveClass(/exam-immersive/);
+});
+
+test("the bank holds five papers, and a saved sitting of the withdrawn 131 breaks nothing", async ({
+  page,
+}) => {
+  await page.goto("/papers");
+  await expect(page.locator(".paper-card")).toHaveCount(5);
+  await expect(page.getByText("Đề 131", { exact: true })).toHaveCount(0);
+  // Like any id that is not in the bank, it lands on the "lost" page.
+  await page.goto("/papers/131");
+  await expect(
+    page.getByRole("heading", { name: /đi lạc một chút/ }),
+  ).toBeVisible();
+  // A device that already held a sitting of it keeps working.
+  await page.goto("/papers/132");
+  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
+  await page.getByRole("checkbox", { name: /đủ 172 phút/ }).check();
+  await page.getByRole("button", { name: /Bắt đầu đề 132/ }).click();
+  await expect(page.locator(".paper-clock")).toBeVisible();
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+    state.paperRuns.push({
+      id: "old-131",
+      paperId: "131",
+      version: 1,
+      startedAt: Date.now() - 86_400_000,
+      stage: 3,
+      deadline: Date.now() - 1000,
+      material: 0,
+      answers: {},
+      essays: {},
+      spoken: [],
+      finishedAt: new Date(Date.now() - 3_600_000).toISOString(),
+    });
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+  });
+  await page.goto("/progress");
+  await expect(
+    page.getByRole("heading", { name: "Kho đề nhập đã luyện" }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".history-row", { hasText: "Đề thi thử VSTEP 132" }),
+  ).toHaveCount(1);
+  await expect(page.getByText("Đề 131")).toHaveCount(0);
+  // Her saved data is not thrown away by the app.
+  const kept = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns.map(
+      (run: { paperId: string }) => run.paperId,
+    ),
+  );
+  expect(kept).toContain("131");
 });

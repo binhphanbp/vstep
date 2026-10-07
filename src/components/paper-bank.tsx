@@ -10,7 +10,7 @@ export function PaperBank() {
       <div className="page-heading">
         <div>
           <div className="eyebrow">BỘ ĐỀ ĐÃ NHẬP</div>
-          <h1>Năm đề có đáp án và một đề tự luyện.</h1>
+          <h1>Năm đề có đáp án để luyện và đối chiếu.</h1>
           <p>
             Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Tiến
             độ nằm trong bản sao dữ liệu Mây; bản ghi âm cần sao lưu riêng.
@@ -18,10 +18,9 @@ export function PaperBank() {
         </div>
       </div>
       <div className="notice">
-        Các đề được nhập từ bộ dữ liệu người dùng cung cấp. Đề 131 không có đáp
-        án và transcript nên chỉ dùng để luyện, không chấm Nghe/Đọc. Đề 132–135
-        cùng Review 13/09 có đáp án gốc nhưng chưa được Mây hoặc giáo viên thẩm
-        định; kết quả chỉ là số câu đúng, không quy đổi sang bậc VSTEP.
+        Các đề được nhập từ bộ dữ liệu người dùng cung cấp. Đề 132–135 cùng
+        Review 13/09 có đáp án gốc nhưng chưa được Mây hoặc giáo viên thẩm định;
+        kết quả chỉ là số câu đúng, không quy đổi sang bậc VSTEP.
       </div>
       <div className="paper-grid">
         {paperCatalog.map((paper) => {

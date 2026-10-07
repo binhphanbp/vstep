@@ -386,7 +386,7 @@ export function PaperReview({
       )}
       {!paper.graded && objective.length > 0 && (
         <p className="notice">
-          Đề 131 không có khóa đáp án. Đáp án bạn đã chọn vẫn được lưu, nhưng
+          Đề này không có khóa đáp án. Đáp án bạn đã chọn vẫn được lưu, nhưng
           không có điểm hoặc lời giải để đối chiếu.
         </p>
       )}

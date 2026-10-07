@@ -310,7 +310,7 @@ def add_cover(doc):
     figures = current_figures()
     metadata = [
         ("Ngày cập nhật", figures["updated"]),
-        ("Mốc đánh giá", "Bản sáu đề nhập 07/10/2026"),
+        ("Mốc đánh giá", "Bản năm đề nhập 07/10/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
@@ -347,7 +347,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code có sáu đề nhập đủ bốn kỹ năng và hai đề tự biên soạn. Năm đề nhập có 375 khóa đáp án Nghe/Đọc; đề 131 thiếu đáp án và transcript nên chỉ luyện, không chấm. 126 MP3 được đóng gói cùng ứng dụng. Viết và Nói lưu bài nhưng chưa được chấm tự động; bản ghi micro cần tải riêng. Bộ kiểm thử local trước khi phát hành gồm "
+        "Bản code có năm đề nhập đủ bốn kỹ năng và hai đề tự biên soạn. Cả năm đề nhập có 375 khóa đáp án Nghe/Đọc; đề 131 thiếu đáp án và transcript nên đã được gỡ. 105 MP3 được đóng gói cùng ứng dụng. Viết và Nói lưu bài nhưng chưa được chấm tự động; bản ghi micro cần tải riêng. Bộ kiểm thử local trước khi phát hành gồm "
         + figures["unit"]
         + " unit test và "
         + figures["e2e"]

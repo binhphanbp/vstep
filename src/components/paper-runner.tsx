@@ -231,7 +231,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             <p className="notice">
               {paper.graded
                 ? "Đề có khóa đáp án cho Nghe/Đọc; chưa có giáo viên của Mây thẩm định. Viết và Nói lưu bài làm nhưng không chấm tự động."
-                : "Đề 131 thiếu toàn bộ khóa đáp án và transcript trong dữ liệu gốc. Bạn có thể luyện đủ bốn phần, nhưng Nghe/Đọc sẽ không được chấm."}{" "}
+                : "Đề này không có khóa đáp án trong dữ liệu gốc. Bạn có thể luyện đủ bốn phần, nhưng Nghe/Đọc sẽ không được chấm."}{" "}
               Đồng hồ vẫn chạy khi tải lại hoặc rời trang. Audio cần kết nối
               trong lần mở đầu tiên. Kết quả không quy đổi sang B1/B2/C1.
             </p>
