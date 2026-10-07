@@ -172,7 +172,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 180 unit / 65 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 180 unit / 66 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -325,10 +325,20 @@ Ba khoảng trống lớn nhất của dự án đều nằm ngoài code — ch�
 - 5 ca unit mới (nhãn lịch ôn kể cả ca biên đêm khuya và ngày hỏng; bài kế tiếp kể cả ca hết kế hoạch) và 2 ca E2E mới (xong bài thì có đường sang bài kế tiếp đúng thứ tự của kế hoạch; sổ tay ghi "ngày mai" chứ không ghi giờ).
 - **Một nhận xét của em đã sai trong lúc kiểm.** Em nói bài Viết dưới 120 từ nộp được mà không cảnh báo. Thực ra có cảnh báo ngay dưới ô gõ; script của em chỉ không đọc đoạn đó. Ghi lại để không ai sửa một thứ vốn đã đúng.
 
+## Bài Nghe và phòng thi: kiểm từng nút, một lỗi
+
+- **Cách làm.** Với bài Nghe, thay giọng đọc của trình duyệt bằng một giọng giả ghi lại từng câu được phát (headless không có giọng thật, và giọng thật không bao giờ "đọc xong" trong thử nghiệm). Với phòng thi, làm trọn một buổi rút gọn bằng thao tác thật rồi tua đồng hồ qua từng hạn chót.
+- **Lỗi tìm ra: nghe xong rồi nghe lại chỉ ra một câu.** Khi bài phát tới hết, con trỏ đặt ở câu cuối; nút "Phát bài nghe" lại tiếp tục từ con trỏ. Nghe trọn 11 câu rồi bấm phát lần nữa thì chỉ phát đúng câu 11 ("We look forward to seeing you.") rồi dừng. Muốn nghe lại cả bài phải bấm "Câu trước" mười lần. Với một trình luyện nghe thì "nghe lại từ đầu" là thao tác cơ bản nhất.
+- **Sửa.** Thêm trạng thái "đã nghe hết": lúc đó nút đổi nhãn thành **"Nghe lại từ đầu"** và phát từ câu 1. Dừng giữa chừng rồi phát tiếp vẫn tiếp tục từ câu đang dở, như trước.
+- **Ca kiểm thử.** 1 ca E2E mới nghe trọn bài hai lần liền và đòi lần hai phát đủ số câu, bắt đầu từ câu đầu. Đã chạy thử trên bản **chưa sửa**: đỏ với `Expected length: 11, Received length: 1`; trên bản đã sửa: xanh.
+- **Đã đúng, không đụng tới (bài Nghe).** Lời thoại không lộ trước khi nộp và hiện sau khi nộp kèm 4 nút nghe lại câu căn cứ. "Câu trước"/"Câu sau" chặn đúng ở câu đầu và câu cuối. Tạm dừng bị khoá khi chưa phát, đổi nhãn "Tiếp tục" và gọi `pause` thật của trình duyệt. Chọn tốc độ bị khoá khi đang phát và 1,2× được áp dụng thật vào giọng đọc.
+- **Đã đúng, không đụng tới (phòng thi).** Tải lại giữa chừng giữ đáp án và đồng hồ (10:00 → 9:58). Nộp phần còn bỏ trống có hỏi xác nhận kèm số câu chưa trả lời. **Hết giờ tự chuyển phần** Nghe → Đọc → Viết → Nói → màn kết thúc mà không bật hộp thoại nào, bài Viết đang gõ được lưu, và buổi thi ghi vào Tiến bộ. Phần bỏ trống hoàn toàn không được lưu, đúng như hộp thoại đã nói trước.
+- **Hai lần em tưởng là lỗi, hoá ra do thí nghiệm của em.** Giọng giả trả về object thường làm trình duyệt ném lỗi khi gán `utterance.voice`; và gắn giọng giả sau khi tạo trang thì không áp dụng. Cả hai đều ở script, không ở sản phẩm.
+
 ## Bằng chứng kiểm tra
 
 - 180 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 65 kiểm thử Playwright trên bản production: 61 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 66 kiểm thử Playwright trên bản production: 62 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
