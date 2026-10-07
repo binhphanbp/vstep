@@ -4,10 +4,11 @@ Tài liệu để mở phiên làm việc tiếp theo mà không phải đọc l
 
 ## 1. Tóm tắt
 
+- **Phạm vi hiện tại: desktop, mạng tốt.** Điện thoại để sau; chưa phải việc cần làm lúc này.
 - Website đang chạy ở **https://vstep-turtle.vercel.app** và Gùa đã được gửi link để dùng thật.
 - Bản đang chạy là commit `0d9f5cc` (PR #34 trên `main`). CI `check` xanh trên bản đó và workflow "Smoke production" (lần chạy 93) đạt.
 - Trong hôm nay đã học thử như một người học thật qua gần hết các màn, tìm và sửa các lỗi nhìn thấy được (mục 4). Không còn lỗi nào đã biết mà chưa sửa, trừ hai điểm nhỏ cố ý để nguyên (mục 4.3).
-- Phần còn mở **không còn nằm ở code**: học liệu chưa có giáo viên duyệt, chưa thử trên điện thoại thật của Gùa, chưa có nguồn chính thức cho số liệu F12 và rubric C1. Mục 6 nêu rõ.
+- Phần còn mở **không còn nằm ở code**: học liệu chưa có giáo viên duyệt, chưa có nguồn chính thức cho số liệu F12 và rubric C1. Mục 6 nêu rõ.
 
 ## 2. Đang chạy ở đâu
 
@@ -74,7 +75,6 @@ Thiết lập lần đầu và Cài đặt; kiểm tra khi nộp bài; Sổ lỗ
 
 | Việc | Vì sao mình không tự làm |
 | --- | --- |
-| Thử trên điện thoại thật của Gùa (20 mục trong `docs/UAT-DIEN-THOAI.md`) | Cần thiết bị thật; chưa ai chạy |
 | Nhờ giáo viên duyệt học liệu (in sáu tập tại `/review-pack/bank`) | Nội dung hoàn toàn tự biên soạn, chưa bài nào qua thẩm định; kết quả duyệt chỉ ghi vào `provenance.ts` bằng tay |
 | Cung cấp số liệu F12 của ULIS và rubric C1 chính thức | Không tự bịa số liệu hay thang chấm |
 | Mua tên miền riêng, quyết định đổi tên | Cần tài khoản và quyết định của chủ |
@@ -88,7 +88,7 @@ Thiết lập lần đầu và Cài đặt; kiểm tra khi nộp bài; Sổ lỗ
 - Không có chấm Viết/Nói bằng AI hay giáo viên; không gửi nội dung học đến dịch vụ AI bên ngoài.
 - Bài Nghe dùng giọng tổng hợp của thiết bị; thiết bị thiếu giọng tiếng Anh sẽ được báo rõ.
 - Backup JSON và đám mây không chứa audio; bản ghi tải riêng. File báo lỗi không kèm bài viết, bản nháp hay bản ghi.
-- Chưa nghiệm thu trên iOS/Android thật.
+- Chưa nghiệm thu trên điện thoại thật (iOS/Android). Hoãn có chủ đích: phạm vi hiện tại là desktop.
 
 ## 8. Đề xuất việc tiếp theo
 
@@ -96,7 +96,7 @@ Theo thứ tự nên làm:
 
 1. **Quan sát Gùa dùng thật vài ngày**, ghi lại chỗ vướng. Đây là nguồn lỗi đáng tin hơn mọi vòng tự kiểm tra tiếp theo.
 2. **Chốt chuyện tên "Mây"** (giữ hoặc đổi). Nếu đổi, mình làm đồng bộ ở mọi nơi rồi chạy lại toàn bộ kiểm thử và merge theo quy trình cũ.
-3. **UAT trên điện thoại Gùa** theo danh sách 20 mục; mình sửa các lỗi phát sinh.
+3. **Rà tiếp trên desktop:** học thử thêm các đường chưa đi (đổi mục tiêu giữa chừng, nhiều tuần dữ liệu, đề đủ cấu trúc làm trọn từ đầu đến cuối). Điện thoại để sau, khi nào cần thì dùng danh sách 20 mục `docs/UAT-DIEN-THOAI.md`.
 4. **Gửi bộ hồ sơ học liệu cho giáo viên**; khi có kết quả, ghi vào `provenance.ts`.
 5. Việc mình có thể làm tiếp mà không cần chờ ai (chỉ làm khi được yêu cầu): thêm học liệu mới (thư viện hiện đủ khoảng 88 phút mới mỗi ngày, khoảng sáu tuần là gặp hết 42 bài), rà soát thêm các đường hiếm (hết mạng giữa lúc nộp, hai thiết bị đồng bộ), và cập nhật báo cáo Word.
 
