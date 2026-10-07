@@ -24,6 +24,7 @@ import { skillNames, type Skill } from "@/lib/content";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { RecordingHistory } from "./audio-tools";
+import { paperCatalog } from "@/lib/papers";
 // A learner who studies for months has hundreds of rows; the newest are what
 // she came to look at, and the rest are one tap away.
 const HISTORY_PAGE = 20;
@@ -180,6 +181,32 @@ export function ProgressPage() {
         </section>
       </div>
       <ExamSittings state={state} />
+      {(state.paperRuns ?? []).length > 0 && (
+        <section className="panel" style={{ marginTop: 25 }}>
+          <h2>Kho đề nhập đã luyện</h2>
+          <p className="help-copy">
+            Mở từng đề để xem bài làm và đáp án. Đề 131 không có khóa đáp án nên
+            không hiển thị điểm; Viết/Nói của mọi đề chưa được chấm.
+          </p>
+          {[...(state.paperRuns ?? [])].reverse().map((run) => (
+            <div className="history-row" key={run.id}>
+              <div>
+                <h3>
+                  {paperCatalog.find((paper) => paper.id === run.paperId)
+                    ?.title ?? `Đề ${run.paperId}`}
+                </h3>
+                <small>
+                  {whenLabel(new Date(run.startedAt).toISOString())} ·{" "}
+                  {run.finishedAt ? "Đã hoàn thành" : `Đang làm phần ${run.stage + 1}/4`}
+                </small>
+              </div>
+              <Link className="text-link" href={`/papers/${run.paperId}?run=${run.id}`}>
+                Mở đề <ArrowRight size={15} />
+              </Link>
+            </div>
+          ))}
+        </section>
+      )}
       <section style={{ marginTop: 25 }}>
         <div className="section-heading">
           <h2>Những bước chân đã qua</h2>

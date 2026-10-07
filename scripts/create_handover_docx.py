@@ -310,7 +310,7 @@ def add_cover(doc):
     figures = current_figures()
     metadata = [
         ("Ngày cập nhật", figures["updated"]),
-        ("Mốc đánh giá", "Release Reading và Listening 6cdbbfe"),
+        ("Mốc đánh giá", "Bản sáu đề nhập 07/10/2026"),
         ("Nhánh", "main"),
         ("Repository", "https://github.com/binhphanbp/vstep"),
         ("HTTPS pilot", "https://vstep-turtle.vercel.app"),
@@ -347,7 +347,7 @@ def add_cover(doc):
     p.paragraph_format.line_spacing = 1.35
     add_inline(
         p,
-        "Bản code hiện đủ để Gùa pilot hằng ngày trên URL HTTPS hoặc local. Reading và Listening có phản hồi theo dạng câu cùng độ chắc chắn; transcript chỉ mở sau khi nộp. Viết và Nói có bộ tiêu chí tự kiểm tra của Mây kèm gói in được để gửi người chấm; đây không phải thang chấm của hội đồng thi. Phòng thi có hai đề đủ cấu trúc độc lập nên đo lại được sau một giai đoạn học. App mở lại được khi mất mạng, và mỗi bài học hiện rõ chưa qua thẩm định của giáo viên. Bộ kiểm thử production gồm "
+        "Bản code có sáu đề nhập đủ bốn kỹ năng và hai đề tự biên soạn. Năm đề nhập có 375 khóa đáp án Nghe/Đọc; đề 131 thiếu đáp án và transcript nên chỉ luyện, không chấm. 126 MP3 được đóng gói cùng ứng dụng. Viết và Nói lưu bài nhưng chưa được chấm tự động; bản ghi micro cần tải riêng. Bộ kiểm thử local trước khi phát hành gồm "
         + figures["unit"]
         + " unit test và "
         + figures["e2e"]
@@ -355,7 +355,7 @@ def add_cover(doc):
         + figures["routes"]
         + " route và axe trên "
         + figures["screens"]
-        + " màn. Migration gia cố quyền ghi cloud đã áp dụng và hậu kiểm thành công trên Supabase production. Các điều kiện còn thiếu để nghiệm thu vận hành là đăng nhập và đồng bộ trên bản host, micro và thiết bị thật, thử đồng bộ hai thiết bị, cổng phát hành chờ CI cùng thẩm định học liệu bởi giáo viên VSTEP.",
+        + " màn. Migration gia cố quyền ghi cloud đã áp dụng trên Supabase production. Bản HTTPS cần đối chiếu đúng SHA và smoke sau merge; đồng bộ hai thiết bị, micro thật, quyền công bố bộ đề và thẩm định học liệu vẫn cần xác nhận.",
         11,
         INK,
     )

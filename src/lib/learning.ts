@@ -284,6 +284,20 @@ export const examSchema = z
       });
     }),
   );
+export const paperRunSchema = z.object({
+  id: limitedString(100),
+  paperId: z.enum(["131", "132", "133", "134", "135", "review-1309"]),
+  version: boundedInteger(1, 100),
+  sourceHash: z.optional(limitedString(64)),
+  startedAt: boundedNumber(0, 10000000000000),
+  stage: boundedInteger(0, 3),
+  deadline: boundedNumber(0, 10000000000000),
+  material: boundedInteger(0, 13),
+  answers: z.record(z.string(), boundedInteger(0, 3)),
+  essays: z.record(z.string(), limitedString(30000)),
+  spoken: z.array(limitedString(100)).check(z.maxLength(3)),
+  finishedAt: z.optional(z.iso.datetime()),
+});
 export const stateSchema = z
   .object({
     version: z.literal(1),
@@ -308,6 +322,9 @@ export const stateSchema = z
      */
     library: z.optional(z.record(z.string(), lessonSnapshotSchema)),
     exam: z.nullable(examSchema),
+    // Imported papers keep responses in the same backup/cloud snapshot as all
+    // other study data. The question bank itself stays in versioned static files.
+    paperRuns: z.optional(z.array(paperRunSchema).check(z.maxLength(100))),
     updatedAt: z.iso.datetime(),
   })
   .check(
@@ -341,6 +358,13 @@ export const stateSchema = z
           ["attempts", index],
         );
       });
+      const runs = state.paperRuns ?? [];
+      if (new Set(runs.map((run) => run.id)).size !== runs.length)
+        ctx.addIssue({
+          code: "custom",
+          path: ["paperRuns"],
+          message: "Mỗi lượt thi phải có mã riêng.",
+        });
     }),
   );
 export type Profile = z.infer<typeof profileSchema>;
@@ -349,6 +373,7 @@ export type Confidence = z.infer<typeof confidenceSchema>;
 export type Review = z.infer<typeof reviewSchema>;
 export type StudyState = z.infer<typeof stateSchema>;
 export type ExamSession = z.infer<typeof examSchema>;
+export type PaperRun = z.infer<typeof paperRunSchema>;
 
 export const DEFAULT_LEARNER_NAME = "Gùa";
 
@@ -443,6 +468,7 @@ export function freshState(): StudyState {
     mood: {},
     savedWords: {},
     exam: null,
+    paperRuns: [],
     updatedAt: new Date().toISOString(),
   };
 }

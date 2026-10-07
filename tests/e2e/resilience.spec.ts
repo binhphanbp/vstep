@@ -366,6 +366,7 @@ test("every page of the app opens with the network gone, not just the last one v
     ["/practice", "Mỗi kỹ năng"],
     ["/journey", "Đường đến B2"],
     ["/exam", "Tập bình tĩnh"],
+    ["/papers", "Năm đề có đáp án"],
     ["/vocabulary", "Gieo một từ"],
     ["/mistakes", "Không phải lỗi"],
     ["/progress", "Tiến bộ đôi khi"],
@@ -379,7 +380,11 @@ test("every page of the app opens with the network gone, not just the last one v
   // The document alone is not enough: a page whose route chunk is missing
   // renders the app's error screen instead. This is what CI caught.
   const chunks = await page.evaluate(async () => {
-    const cache = await caches.open("may-v2-shell");
+    const shell = (await caches.keys()).find((name) =>
+      /^may-v\d+-shell$/.test(name),
+    );
+    if (!shell) return 0;
+    const cache = await caches.open(shell);
     return (await cache.keys())
       .map((request) => new URL(request.url).pathname)
       .filter((path) => path.startsWith("/_next/static/chunks/")).length;

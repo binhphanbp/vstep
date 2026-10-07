@@ -24,7 +24,7 @@
  * recover from. Hence the precache list below covers every fixed page, and the
  * app asks this worker to store today's lessons as well.
  */
-const VERSION = "may-v2";
+const VERSION = "may-v3";
 const SHELL = `${VERSION}-shell`;
 const PAGES = `${VERSION}-pages`;
 const OFFLINE = "/offline";
@@ -38,6 +38,7 @@ const PRECACHE = [
   "/journey",
   "/practice",
   "/exam",
+  "/papers",
   "/vocabulary",
   "/mistakes",
   "/progress",

@@ -35,6 +35,7 @@ const nav = [
 // Pages outside the main navigation; anything else is an error page and must
 // not borrow another page's name.
 function otherLabel(pathname: string) {
+  if (pathname.startsWith("/papers")) return "Kho đề luyện";
   if (pathname.startsWith("/guide")) return "Cẩm nang VSTEP";
   if (pathname.startsWith("/settings")) return "Cài đặt của mình";
   if (pathname.startsWith("/review-pack")) return "Gói ôn tập";

@@ -168,6 +168,9 @@ export function ExamPage() {
         </div>
         <div className="content-grid">
           <section className="panel">
+            <div className="notice" style={{ marginBottom: 20 }}>
+              Đã có thêm 6 đề được nhập từ bộ dữ liệu của bạn. <Link href="/papers">Mở kho đề 131–135 và Review 13/09</Link> để làm với audio và lưu tiến độ riêng từng lượt.
+            </div>
             <div className="filters">
               <button
                 type="button"

@@ -1,8 +1,8 @@
 # Báo cáo bàn giao website Mây VSTEP
 
-**Ngày cập nhật báo cáo:** 13/09/2026
+**Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 14/09/2026:** mốc phát hành có đủ bằng chứng CI và smoke là `32422fa` (81 unit, 44 E2E) sau bốn đợt sửa F20, F14–F19, F13. Nhánh chính đã đi tiếp qua sáu đợt của [kế hoạch 14/09](PLAN-2026-09-14.md) và đạt **186 unit, 67 E2E**, build 106 route, axe trên 16 màn. Xem STATUS.md và QUALITY.md.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản chuẩn bị phát hành bổ sung sáu đề nhập và đạt **190 unit, 71 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên không chấm. Kết quả kiểm thử local và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc CI và smoke trước đó, không phải bản sáu đề.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,9 +10,9 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn và hai đề đủ cấu trúc độc lập, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening đã có phản hồi theo dạng câu và độ chắc chắn; phần thi có giờ cảnh báo câu bỏ trống và chỉ mở transcript Listening sau khi hoàn thành. Mỗi lượt học và đề đang làm lưu bản chụp học liệu có phiên bản, nên kết quả cũ không đổi khi ngân hàng câu hỏi được chỉnh sửa. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Nhánh chính sau sáu đợt của kế hoạch 14/09 và hai đợt đầu của kế hoạch tiếp theo đạt 186 unit và 67 E2E trên cùng ba engine. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và sáu đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Năm đề 132–135 và Review 13/09 có đáp án; đề 131 thiếu khóa đáp án và transcript nên không chấm. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 190 unit và 71 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
-Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Nội dung đang là nội dung tự biên soạn, đã có hai đề đủ cấu trúc, bài Nghe dùng giọng tổng hợp và bài Viết hoặc Nói chưa có chấm điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
+Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
 Ba việc vẫn cần người quyết định nhưng nay mỗi việc chỉ còn một thao tác. `/review-pack/bank` in ra sáu tập hồ sơ học liệu để nhờ giáo viên duyệt: ngữ liệu, câu hỏi, đáp án đang dùng có đánh dấu, câu trích dẫn làm căn cứ và bảng trống cho người chấm; kết quả duyệt chỉ vào được `provenance.ts` bằng tay, với tên và ngày thật. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. `scripts/vercel-ignore-build.mjs` chặn build production khi CI của đúng SHA chưa xanh và chặn cả khi không chắc, nhưng còn chờ hai ô cấu hình trên Vercel. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy.
 
@@ -70,7 +70,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 
 ### 4.4 Thư viện luyện bốn kỹ năng
 
-- 30 bài luyện ngắn gồm 12 bài Đọc, 12 bài Nghe, 3 bài Viết và 3 bài Nói.
+- 42 bài luyện ngắn gồm 12 bài Đọc, 12 bài Nghe, 9 bài Viết và 9 bài Nói.
 - Bài Đọc/Nghe có câu hỏi, đáp án, giải thích, chấm điểm chính xác và chẩn đoán theo dạng câu cùng mức chắc chắn.
 - Bài Viết có đề, giới hạn thời gian gợi ý, đếm từ, nháp tự lưu, bộ tiêu chí tự kiểm tra ba mức (của Mây, không phải thang chấm hội đồng thi), bài mẫu để đối chiếu và gói in được để gửi người chấm.
 - Bài Nói có đề, gợi ý cấu trúc, ghi âm qua MediaRecorder, nghe lại, tải file và lưu bản ghi theo lượt học.
@@ -86,9 +86,15 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Tự chuyển phần khi hết giờ; có điều kiện chống tab cũ nộp nhầm phần mới và chống tạo lượt nộp trùng.
 - Kết quả tách rõ điểm câu hỏi khách quan với phần Viết/Nói chưa được chấm.
 
+### 4.5b Kho sáu đề nhập
+
+- `/papers` có sáu đề 131–135 và Review 13/09. Mỗi đề gồm 35 câu Nghe, 40 câu Đọc, hai bài Viết, ba phần Nói và 172 phút; 126 file MP3 đi kèm gồm 84 bài Nghe và 42 bài mẫu.
+- Năm đề 132–135 và Review 13/09 có đủ 375 khóa đáp án cùng lời giải. Đề 131 thiếu 75 khóa đáp án và transcript trong nguồn; giao diện cho làm bài nhưng không tạo điểm Nghe/Đọc.
+- Dữ liệu lượt làm lưu cùng bản sao JSON và Supabase, theo version và dấu băm nguồn; bản ghi micro ở IndexedDB, phải tải riêng. Bản dịch chỉ mở sau khi nộp; kết quả không quy đổi sang bậc VSTEP.
+
 ### 4.6 Từ vựng và sổ lỗi sai
 
-- 20 từ có IPA, nghĩa tiếng Việt, ví dụ và chủ đề, cộng các thẻ người học tự thêm từ chính câu "từ vựng trong ngữ cảnh" đã làm sai (10 thẻ đã viết sẵn nghĩa tiếng Việt và IPA).
+- 68 thẻ có IPA, nghĩa tiếng Việt, ví dụ và chủ đề, cộng các thẻ người học tự thêm từ chính câu "từ vựng trong ngữ cảnh" đã làm sai.
 - Phát âm bằng giọng tổng hợp của thiết bị.
 - Lịch ôn thay đổi theo bốn mức: chưa nhớ, khó, nhớ rồi và rất chắc.
 - Câu sai từ bài luyện và đề thi được gom một lần vào sổ lỗi.
@@ -105,11 +111,12 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Tổng phút luyện, số lượt, số bài khác nhau, chuỗi ngày và biểu đồ bảy ngày.
 - Thống kê riêng cho bốn kỹ năng; độ chính xác chỉ hiển thị cho bài có câu hỏi khách quan.
 - Lưu nội dung bài Viết, phần tự đánh giá và bản ghi Nói đã hoàn thành.
+- Lượt làm sáu đề nhập hiện riêng trong Tiến bộ, mở lại được đáp án, bài Viết và phần Nói đã làm.
 - Lượt học mới lưu bản chụp tiêu đề, câu hỏi, đáp án và giải thích của đúng phiên bản học liệu đã làm; sổ lỗi và lịch sử ưu tiên bản chụp này thay vì nội dung hiện tại.
 
 ### 4.8 Sao lưu và khôi phục
 
-- Xuất toàn bộ state học tập ra JSON.
+- Xuất toàn bộ state học tập, gồm lượt làm đề nhập, ra JSON.
 - Nhập JSON có kiểm tra schema bằng Zod, giới hạn 10 MB, kiểm tra điểm bất khả thi và ID lượt học trùng.
 - Trước khi nhập hoặc tải từ cloud, hệ thống tự tải bản thiết bị hiện tại làm bản dự phòng.
 - Khi localStorage hỏng, ứng dụng không ghi đè bản gốc và báo lỗi để người dùng xử lý.
@@ -126,7 +133,7 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Con trỏ tùy biến dùng chấm và vòng hồng, chỉ bật với thiết bị chuột chính xác. Nó tự tắt trong ô nhập liệu, trên thiết bị cảm ứng và khi người dùng bật reduced motion.
 - Animation tuân theo `prefers-reduced-motion`.
 - Microcopy được viết theo hướng nhẹ nhàng, không dùng bảng xếp hạng, popup gây áp lực hoặc thành tích ảo.
-- Có web app manifest, màu theme và metadata cho màn hình chính; chưa có service worker nên không cam kết offline đầy đủ.
+- Có web app manifest, màu theme, metadata và service worker. Trang cố định cùng bài trong kế hoạch hôm nay được lưu cho lúc mất mạng; audio của đề nhập không được tải sẵn.
 
 ## 6. Kiến trúc kỹ thuật
 
@@ -162,7 +169,7 @@ flowchart LR
 
 ### 6.3 Mô hình state
 
-State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy và thời điểm cập nhật. Lượt học và phiên thi mới kèm snapshot học liệu có `version`; dữ liệu cũ tương thích được nâng cấp sang snapshot phiên bản 1 khi đọc hoặc nhập. Phiên thi mới giữ cả snapshot bài lẫn cấu trúc từng phần; lịch ôn lỗi dùng khóa theo bài và version. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
+State phiên bản 1 gồm hồ sơ, lượt học, lịch ôn từ, lịch ôn lỗi, nháp, tâm trạng theo ngày, phiên thi đang chạy, `paperRuns` của kho đề nhập và thời điểm cập nhật. Lượt học và phiên thi mới kèm snapshot học liệu có `version`; dữ liệu cũ tương thích được nâng cấp sang snapshot phiên bản 1 khi đọc hoặc nhập. `paperRuns` là trường tùy chọn để backup cũ vẫn đọc được; mỗi lượt giữ mã đề, version, dấu băm nguồn, đáp án và bài tự luận, còn nội dung đề nằm trong JSON tĩnh. `useSyncExternalStore` cung cấp snapshot nhất quán cho React. Mỗi mutation tăng `updatedAt`; ứng dụng đọc lại bản mới hơn trước khi ghi để giảm nguy cơ tab cũ ghi đè.
 
 Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp để nhét vào localStorage hoặc snapshot JSON. Vì vậy, đồng bộ Supabase và file backup chỉ đồng bộ dữ liệu học dạng JSON, không đồng bộ audio.
 
@@ -191,7 +198,9 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Trạng thái kiểm tra local sau vòng cải tiến theo báo cáo:
+Bản chuẩn bị phát hành ngày 07/10/2026: ESLint, TypeScript, 190/190 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 71 ca trên bản production local: 67 Chromium, 2 Firefox, 2 WebKit. Lượt đầy đủ gần nhất đạt 70/71; ca offline còn lại chỉ dùng tiêu đề cũ, đã sửa kỳ vọng và chạy lại riêng đạt. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. GitHub CI và HTTPS smoke phải được xác nhận theo đúng commit khi phát hành; kết quả local không thay thế bằng chứng đó.
+
+Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
 | Nhóm kiểm tra         | Kết quả            | Phạm vi chính                                                                                      |
 | --------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
@@ -220,13 +229,13 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 | Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production             |
 | Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt           |
 | Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                             |
-| Ngân hàng đề độc lập                   | Mới có một đề đủ cấu trúc | Dùng lâu dài sẽ gặp lại ngữ liệu và đề Viết/Nói                                  |
-| Bản thu người nói cho Nghe             | Chưa làm                  | Speech synthesis khác điều kiện thi và chất lượng phụ thuộc thiết bị             |
+| Ngân hàng đề độc lập                   | Có hai đề Mây và sáu đề nhập | Năm đề nhập có đáp án; nội dung và quyền sử dụng cần thẩm định                  |
+| Bản thu người nói cho Nghe             | Có MP3 ở sáu đề nhập      | Hai đề Mây vẫn dùng speech synthesis của thiết bị                               |
 | Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu               |
 | Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
 | Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                      |
 | Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                                 |
-| PWA/offline đầy đủ                     | Chưa làm                  | Không có service worker; chỉ dữ liệu đã tải có thể còn trong cache trình duyệt   |
+| PWA/offline đầy đủ                     | Một phần                  | Service worker giữ trang cố định và bài hôm nay; audio đề nhập không tải sẵn     |
 | Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                     |
 | C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                                |
 | Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại                                            |
@@ -328,10 +337,13 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `src/components/dashboard.tsx`                 | Góc học hôm nay và kế hoạch ngày                             |
 | `src/components/practice.tsx`                  | Thư viện và phiên luyện kỹ năng                              |
 | `src/components/exam.tsx`                      | Luồng mini/full exam và điều phối phần thi                   |
+| `src/app/papers`, `src/components/paper-runner.tsx` | Kho đề nhập và luồng làm sáu đề                           |
+| `src/lib/papers.ts`, `public/papers`            | Kiểu dữ liệu, JSON đề và 126 file MP3                       |
+| `scripts/import-papers.mjs`                    | Nhập lại bộ đề từ dữ liệu nguồn ngoài repository             |
 | `src/components/audio-tools.tsx`               | Speech synthesis, ghi âm, phát và tải audio                  |
 | `src/components/review.tsx`                    | Từ vựng và sổ lỗi sai                                        |
 | `src/components/settings.tsx`                  | Hồ sơ, backup, Auth và cloud sync                            |
-| `src/lib/content.ts`                           | 14 bài ngắn, 20 từ và nguồn tham khảo                        |
+| `src/lib/content.ts`                           | Học liệu ngắn và nguồn tham khảo                             |
 | `src/lib/full-exam-content.ts`                 | Ngữ liệu đề đủ cấu trúc                                      |
 | `src/lib/learning.ts`                          | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
 | `src/lib/study-store.ts`                       | Store, localStorage, nhiều tab và phục hồi                   |

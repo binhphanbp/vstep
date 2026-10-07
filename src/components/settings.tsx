@@ -129,7 +129,7 @@ export function SettingsPage() {
       );
       if (
         !window.confirm(
-          `Nhập bản sao của ${parsed.profile.name} với ${parsed.attempts.length} lượt học? Bản hiện tại sẽ được tải xuống trước khi thay thế.`,
+          `Nhập bản sao của ${parsed.profile.name} với ${parsed.attempts.length} lượt học và ${(parsed.paperRuns ?? []).length} lượt đề nhập? Bản hiện tại sẽ được tải xuống trước khi thay thế.`,
         )
       )
         return;
@@ -393,7 +393,7 @@ export function SettingsPage() {
               <h2>Bản sao của hành trình</h2>
             </div>
             <p className="help-copy">
-              Xuất tiến độ, bài viết, bản nháp và lịch ôn ra file JSON. File
+              Xuất tiến độ, lượt làm đề nhập, bài viết, bản nháp và lịch ôn ra file JSON. File
               không chứa bản ghi âm: bản ghi của từng buổi nằm ở trang Lịch sử,
               mở buổi học rồi tải hoặc xóa từng bản.
             </p>
@@ -574,7 +574,7 @@ function CloudSettings({ storageError }: { storageError: string }) {
         const parsed = result.data;
         if (
           !window.confirm(
-            `Tải bản sao ngày ${whenLabel(data.updated_at)} (${parsed.attempts.length} lượt học)? Bản thiết bị hiện tại được xuất trước khi thay thế.`,
+            `Tải bản sao ngày ${whenLabel(data.updated_at)} (${parsed.attempts.length} lượt học, ${(parsed.paperRuns ?? []).length} lượt đề nhập)? Bản thiết bị hiện tại được xuất trước khi thay thế.`,
           )
         )
           return;

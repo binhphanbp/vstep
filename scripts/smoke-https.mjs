@@ -9,6 +9,8 @@ if (!baseURL || !baseURL.startsWith("https://")) {
 
 const routes = [
   "/settings",
+  "/papers",
+  "/papers/review-1309",
   "/practice/reading-cafe",
   "/practice/listening-weekend",
 ];
@@ -58,6 +60,25 @@ try {
       if (!headers[name]) throw Error(`${path} is missing ${name}.`);
     }
   }
+  const catalogResponse = await page.request.get(
+    new URL("/papers/manifest.json", baseURL).href,
+  );
+  if (!catalogResponse.ok()) throw Error("Imported paper catalog is unavailable.");
+  const catalog = await catalogResponse.json();
+  if (
+    catalog.length !== 6 ||
+    catalog.filter((paper) => paper.graded).length !== 5 ||
+    !catalog.some((paper) => paper.id === "review-1309" && paper.graded)
+  )
+    throw Error("Imported paper catalog does not contain five graded papers and 131.");
+  const reviewResponse = await page.request.get(
+    new URL("/papers/review-1309.json", baseURL).href,
+  );
+  if (!reviewResponse.ok()) throw Error("Review 13/09 paper is unavailable.");
+  const review = await reviewResponse.json();
+  const audio = review.sections?.[0]?.slots?.[0]?.audio;
+  if (!audio || !(await page.request.head(new URL(audio, baseURL).href)).ok())
+    throw Error("Review 13/09 listening audio is unavailable.");
   if (runtimeErrors.length) throw Error(runtimeErrors.join("\n"));
 
   const missing = await page.goto(

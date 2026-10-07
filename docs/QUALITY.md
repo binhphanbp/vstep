@@ -2,6 +2,15 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Nhập sáu đề 131–135 và Review 13/09 — bản làm việc ngày 07/10/2026
+
+- Nguồn thực tế trên máy là `../vstep/data`, gồm sáu JSON đề và audio; file `_attempt` của 135 là lượt làm, không nhập thành đề thứ bảy. Script `scripts/import-papers.mjs` kiểm tra cấu trúc từng đề, bốn phương án của từng câu, khóa đáp án nhất quán và sự tồn tại của file audio rồi tạo JSON tĩnh cùng 126 file MP3 (84 bài Nghe và 42 bài mẫu) trong `public/papers`. Tổng khoảng 79 MB.
+- Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Bản dịch câu hỏi, lựa chọn, bài đọc, transcript và đề bài có trong nguồn được mở sau khi hoàn thành. Đề 132–135 và Review 13/09 có đủ 375 đáp án và lời giải; đề 131 không có đáp án hoặc transcript trong nguồn, nên giao diện giữ 75 lựa chọn người học nhưng không tạo điểm hoặc lời giải.
+- Lượt làm lưu đáp án, bài Viết, phần Nói đã làm, phần thi và deadline vào cùng JSON backup/cloud snapshot. File ghi âm của micro vẫn ở IndexedDB, phải tải riêng. Đề tĩnh có version và dấu băm nguồn để không đối chiếu lượt cũ với khóa đáp án đã đổi. Hai tab cùng mở một lượt không được nộp chồng phần tiếp theo.
+- Kiểm tra tự động: 190 unit, 71 Playwright trên bản build production (67 Chromium, hai Firefox, hai WebKit), 112 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
+- Lượt chạy đầu đạt 68/70; hai ca WebKit không khởi chạy vì máy thiếu `libevent-2.1.so.7`. Sau khi nạp thư viện tạm từ `/tmp` vào môi trường test, chạy lại đúng hai ca WebKit đều đạt. Sau khi mở phần bản dịch, chạy lại ba ca E2E của kho đề đều đạt.
+- Sau khi thêm Review 13/09, lượt đầy đủ đạt 70/71. Ca offline còn lại chỉ chờ tiêu đề kho đề cũ; cập nhật kỳ vọng và chạy lại riêng ca này trên bản production: đạt. Như vậy cả 71 ca đều đã đạt qua các lượt chạy, nhưng chưa có một lượt đầy đủ duy nhất xanh sau thay đổi câu chữ của test.
+
 ## Lỗi dữ liệu đã tái hiện và sửa
 
 ### Phiên bản học liệu và đường ghi cloud
@@ -172,7 +181,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại bản dựng: 219 đoạn, 9 bảng, có đủ 186 unit / 67 E2E / 106 route / 16 màn axe, và không còn câu nào gọi `32422fa` là mốc hiện hành.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 190 unit / 71 E2E / 112 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -381,9 +390,9 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 186 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 67 kiểm thử Playwright trên bản production: 63 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
-- Axe WCAG A/AA trên 16 màn, cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release, kể cả `32422fa`.
+- 190 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 71 kiểm thử Playwright trên bản production: 67 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
 - GitHub Actions run `34790572846` đạt cho release `32422fa` ngày 14/09/2026: lint, typecheck, **81 unit**, build 45 route, audit dependency và **44 E2E** trên Chromium, Firefox, WebKit. Smoke production run `34790590164` của cùng commit cũng đạt. (Mốc trước đó: run `34733331145` cho release `6cdbbfe` với 57 unit và 40 E2E.)
