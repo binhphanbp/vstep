@@ -6,6 +6,7 @@ import { lessons, vocabulary } from "../../src/lib/content";
 import { PLAN_MAX_LESSONS } from "../../src/lib/learning";
 import { questionNotes } from "../../src/lib/question-notes";
 import { bankGroups } from "../../src/lib/review-bank";
+import { paperCatalog } from "../../src/lib/papers";
 
 /**
  * The documents are checked against the code, not against memory.
@@ -56,7 +57,8 @@ const e2eTests = chromiumTests + crossBrowserTests * 2;
  * and the `/practice/[id]` and `/review-pack/bank/[group]` rows themselves).
  */
 const NON_LESSON_ROUTES = 17;
-const routes = allLessons.length + bankGroups.length + NON_LESSON_ROUTES;
+const routes =
+  allLessons.length + bankGroups.length + paperCatalog.length + NON_LESSON_ROUTES;
 const questions = allLessons.reduce(
   (sum, lesson) => sum + lesson.questions.length,
   0,

@@ -18,10 +18,10 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 ## Có thể sử dụng
 
 - Kế hoạch ngày giải thích lý do chọn bài theo năng lượng, lỗi đến hạn, mức chắc chắn, kết quả, recency và ngày thi; hành trình, thống kê theo giờ Việt Nam.
-- 14 bài luyện ngắn bốn kỹ năng, giải thích câu hỏi, nháp Viết tự lưu, bài mẫu và tiêu chí tự kiểm tra.
-- Sau khi nộp, câu Nghe/Đọc đã chú giải chỉ ra câu trong ngữ liệu quyết định đáp án, vì sao phương án đã chọn chưa đúng và vì sao đáp án đúng; bài Nghe phát lại riêng câu đó. Hiện có 56/111 câu được chú giải.
-- Buổi rút gọn 51 phút và đề tự biên soạn đủ cấu trúc 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
-- Sổ câu sai ưu tiên lỗi “sai nhưng rất chắc”, số lần sai, subskill, luyện nhớ lại và lịch ôn; 20 thẻ từ có ví dụ, phiên âm và phát âm.
+- 42 bài luyện ngắn bốn kỹ năng, giải thích câu hỏi, nháp Viết tự lưu, bài mẫu và tiêu chí tự kiểm tra.
+- Sau khi nộp, 258 câu Nghe/Đọc tự biên soạn có chú giải bằng chứng và phân tích từng lựa chọn; bài Nghe phát lại riêng câu đó.
+- Buổi rút gọn 51 phút, hai đề tự biên soạn đủ cấu trúc và sáu đề nhập từ dữ liệu chủ dự án cung cấp. Mỗi đề đủ cấu trúc dài 172 phút: 35 Nghe, 40 Đọc, 2 Viết, 3 Nói. Đồng hồ phục hồi sau tải lại, tự lưu và chuyển phần khi hết giờ.
+- Sổ câu sai ưu tiên lỗi “sai nhưng rất chắc”, số lần sai, subskill, luyện nhớ lại và lịch ôn; 68 thẻ từ có ví dụ, phiên âm và phát âm.
 - Ghi âm, nghe lại, tải âm thanh; bản Nói đã hoàn thành có bản lưu riêng trong lịch sử.
 - Sao lưu/nhập JSON có kiểm tra; dữ liệu hỏng được giữ để phục hồi. Snapshot Supabase thủ công có kiểm tra phiên bản.
 - Giao diện máy tính/điện thoại, bàn phím, reduced motion, trạng thái lỗi và trang 404.
@@ -29,6 +29,14 @@ Mở [http://127.0.0.1:3000](http://127.0.0.1:3000). Vào **Cài đặt** để 
 
 Phân tích nỗi đau, UX và ranh giới sản phẩm: [docs/PRODUCT.md](docs/PRODUCT.md).
 Báo cáo bàn giao đầy đủ: [docs/HANDOVER.md](docs/HANDOVER.md).
+
+## Sáu đề nhập: 131–135 và Review 13/09
+
+Vào **Phòng thi thử → Mở kho đề 131–135 và Review 13/09** hoặc `/papers`. Mỗi đề có 14 ngữ liệu Nghe với file MP3 trên máy chủ, bốn bài Đọc, hai đề Viết, ba phần Nói và bài mẫu để đối chiếu sau khi hoàn thành. Bản dịch có trong nguồn được mở ở màn đối chiếu sau khi nộp. Đáp án, bài viết và trạng thái của từng lượt được lưu trong cùng bản sao JSON/Supabase của Mây; bản ghi micro vẫn ở IndexedDB và phải tải riêng khi cần chuyển thiết bị.
+
+Đề 132–135 và Review 13/09 có khóa đáp án cho đủ 75 câu/đề: **năm đề chấm được**. Đề 131 thiếu toàn bộ khóa đáp án và transcript trong dữ liệu nguồn, nên vẫn làm được nhưng **không chấm Nghe/Đọc**. Các đề nhập chưa được Mây hoặc giáo viên thẩm định; không quy đổi kết quả thành bậc VSTEP. Audio và JSON của đề được tải khi mở, vì vậy cần kết nối lần đầu; chúng không được cam kết dùng offline trước khi tải.
+
+Dữ liệu nguồn nằm ngoài repository tại `../vstep/data` trên máy hiện tại. Nếu cần tái tạo bản nhập sau khi nguồn đổi, chạy `node scripts/import-papers.mjs ../vstep/data` và rà lại 75 câu, audio và phiên bản học liệu trước khi phát hành. Bản nhập hiện dùng `version: 1`; lượt đã làm giữ mã phiên bản và dấu băm nguồn để phát hiện học liệu đổi.
 
 ## Kết nối Supabase cho tài khoản riêng
 
@@ -49,9 +57,9 @@ Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot
 ## Dữ liệu và âm thanh
 
 - Hồ sơ, đáp án, nháp và lịch sử ở localStorage; bản ghi âm ở IndexedDB. Dùng nhất quán một địa chỉ: `localhost` và `127.0.0.1` có kho dữ liệu khác nhau.
-- JSON và Supabase snapshot **không bao gồm âm thanh**. Dùng nút tải bản ghi để giữ file hoặc chuyển thiết bị. Xóa dữ liệu trình duyệt/chế độ riêng tư có thể xóa kho học. Không có service worker hay cam kết offline hoàn toàn.
+- JSON và Supabase snapshot **không bao gồm bản ghi micro**. Dùng nút tải bản ghi để giữ file hoặc chuyển thiết bị. Các file MP3 của đề nhập là tài nguyên tĩnh của ứng dụng. Xóa dữ liệu trình duyệt/chế độ riêng tư có thể xóa tiến độ và bản ghi. Service worker lưu màn chính và bài của kế hoạch ngày; audio đề nhập không được tải sẵn.
 - Micro chỉ mở khi bấm ghi âm, cần HTTPS hoặc localhost. Dừng ghi âm và chờ nút tải xuất hiện trước khi đóng/tải lại trang. Nếu trình duyệt crash khi đang thu, đoạn chưa lưu không thể bảo đảm khôi phục.
-- Giọng bài nghe/phát âm dùng speech synthesis của hệ điều hành. Hội thoại chọn giọng tiếng Anh khác nhau nếu thiết bị có đủ giọng; khả năng phát phụ thuộc thiết bị. Chưa có bản thu người nói.
+- Bài tự biên soạn dùng speech synthesis của hệ điều hành. Kho đề nhập phát các file MP3 đi kèm dữ liệu. Khả năng phát phụ thuộc thiết bị và kết nối khi file chưa được tải.
 - Đăng xuất đám mây chỉ kết thúc phiên trên thiết bị hiện tại và vẫn giữ dữ liệu học. Đây là ứng dụng cho thiết bị cá nhân, không phải kho được mã hóa bằng mật khẩu đăng nhập.
 - Đồng bộ dừng chờ sau 20 giây hoặc khi rời Cài đặt/đổi phiên đăng nhập. Nếu lần tải lên hết thời gian chờ, máy chủ có thể đã nhận bản sao; xuất bản thiết bị rồi tải bản cloud để kiểm tra trước khi thử lại. Không tự gửi lại hoặc tự hợp nhất dữ liệu.
 
