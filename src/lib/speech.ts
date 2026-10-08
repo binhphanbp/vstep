@@ -3,8 +3,8 @@
  * "Dr. Hart" in two and read "3.5" as "3" and "5", and "Nghe lại câu này" then
  * replayed half a sentence.
  */
-const KEPT_DOT = "\u0001";
-function shieldDots(line: string) {
+export const KEPT_DOT = "\u0001";
+export function shieldDots(line: string) {
   return (
     line
       .replace(/\b(Mr|Mrs|Ms|Dr|Prof|Jr|Sr)\./g, `$1${KEPT_DOT}`)

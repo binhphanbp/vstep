@@ -53,10 +53,10 @@ const crossBrowserTests = cases(
 const e2eTests = chromiumTests + crossBrowserTests * 2;
 /**
  * Pages `next build` prerenders: one per lesson, one per review-pack group,
- * plus the seventeen entries the build lists beside them (fifteen fixed routes
+ * plus the eighteen entries the build lists beside them (sixteen fixed routes
  * and the `/practice/[id]` and `/review-pack/bank/[group]` rows themselves).
  */
-const NON_LESSON_ROUTES = 17;
+const NON_LESSON_ROUTES = 18;
 const routes =
   allLessons.length + bankGroups.length + paperCatalog.length + NON_LESSON_ROUTES;
 const questions = allLessons.reduce(

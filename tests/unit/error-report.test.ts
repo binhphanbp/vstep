@@ -36,15 +36,45 @@ describe("the bug report file", () => {
         text: "Bài viết thật của Gùa",
       },
     ];
+    state.notes = [
+      {
+        id: "n1",
+        createdAt: "2026-09-08T10:00:00.000Z",
+        updatedAt: "2026-09-08T10:00:00.000Z",
+        body: "Bẫy: người nói đổi ý ở câu cuối",
+        anchor: {
+          source: "paper",
+          sourceId: "133",
+          version: 1,
+          group: "Đề 133",
+          label: "Đề 133 · Nghe · Part 2 · Câu 12",
+          excerpt: "What time does the shuttle leave?",
+        },
+      },
+      {
+        id: "n2",
+        createdAt: "2026-09-08T10:00:00.000Z",
+        updatedAt: "2026-09-08T10:00:00.000Z",
+        deletedAt: "2026-09-09T10:00:00.000Z",
+        body: "Ghi chú đã xóa",
+      },
+    ];
     recordError("Boom", "window:12");
     const report = buildErrorReport(state, "");
     const serialised = JSON.stringify(report);
     expect(report.counts.attempts).toBe(1);
     expect(report.counts.drafts).toBe(1);
+    // Notes are counted without the ones in the bin, and never quoted.
+    expect(report.counts.notes).toBe(1);
     expect(report.errors).toHaveLength(1);
-    // The two things that must never leave the device in a bug report.
+    // The things that must never leave the device in a bug report.
     expect(serialised).not.toContain("Bài viết thật");
     expect(serialised).not.toContain("Dear Alex");
+    expect(serialised).not.toContain("người nói đổi ý");
+    expect(serialised).not.toContain("shuttle");
+    expect(serialised).not.toContain("Ghi chú đã xóa");
+    expect(errorReportText(report)).toContain("1 ghi chú");
+    expect(errorReportText(report)).not.toContain("người nói đổi ý");
   });
   it("reports damaged storage so the report explains an empty state", () => {
     expect(buildErrorReport(freshState(), "Hỏng").storageError).toBe("Hỏng");

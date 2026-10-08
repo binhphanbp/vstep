@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
+import { NOTE_LIMITS } from "../../src/lib/notes";
 const cafe = lessons.find((lesson) => lesson.id === "reading-cafe")!;
 /** Read the keys from the content so a change of option order cannot lie. */
 const key = (id: string) =>
@@ -143,4 +144,77 @@ test("core Reading and Listening loop works across browser engines", async ({
     [],
   );
   expect(runtimeErrors).toEqual([]);
+});
+
+test("the browser leaves room for a full notebook beside a year of study", async ({
+  page,
+}, testInfo) => {
+  // The notes may take 1.5 MB of the saved profile and the study history about
+  // 20 KB a month; the profile is one localStorage value, so the room that
+  // matters is the browser's own. Measured here, not assumed: engines count
+  // the quota differently, and the number is printed so it can be written down.
+  await page.goto("/settings");
+  const room = await page.evaluate(() => {
+    const chunk = "x".repeat(100_000);
+    const keys: string[] = [];
+    try {
+      for (let index = 0; index < 200; index++) {
+        localStorage.setItem(`may-quota-probe-${index}`, chunk);
+        keys.push(`may-quota-probe-${index}`);
+      }
+    } catch {
+      // The browser's limit: what was written before this is what fits.
+    }
+    keys.forEach((name) => localStorage.removeItem(name));
+    return keys.length * chunk.length;
+  });
+  console.log(`localStorage ${testInfo.project.name}: ${room} ký tự`);
+  expect(room).toBeGreaterThan(NOTE_LIMITS.bytes + 400_000);
+});
+
+test("a note written after a lesson is kept and found again", async ({
+  page,
+}) => {
+  await page.goto("/practice/reading-cafe");
+  // The questions are drawn by the page, so reading them at once can find
+  // none: WebKit on the CI runner did, and the loop below then ran no turn.
+  await expect(page.locator(".question")).toHaveCount(5);
+  const names = await page
+    .locator(".question input[type=radio]")
+    .evaluateAll((inputs) => [
+      ...new Set(inputs.map((input) => (input as HTMLInputElement).name)),
+    ]);
+  // The answers are given again until the page itself says it has all of
+  // them, instead of assuming every click was kept.
+  const all = names.length;
+  expect(all).toBe(5);
+  await expect(async () => {
+    for (const name of names) {
+      await page.locator(`input[name="${name}"]`).first().check();
+      await page
+        .locator(".question")
+        .filter({ has: page.locator(`input[name="${name}"]`) })
+        .getByRole("button", { name: "Chưa chắc" })
+        .click();
+    }
+    await expect(page.locator(".answer-submit [role=status]")).toHaveText(
+      `${all}/${all} câu đã trả lời · ${all}/${all} mức chắc chắn`,
+      { timeout: 2000 },
+    );
+  }).toPass({ timeout: 30000 });
+  await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
+  const first = page.locator(".question").first();
+  await first.getByRole("button", { name: "Ghi chú cho câu này" }).click();
+  await first
+    .getByRole("textbox", { name: "Ghi chú của Gùa cho câu này" })
+    .fill("Bẫy: từ đồng nghĩa ở đoạn hai");
+  await expect(first.getByRole("status")).toHaveText("Đã lưu");
+  await page.goto("/notes");
+  await expect(page.locator(".note-card")).toHaveCount(1);
+  await page
+    .getByRole("textbox", { name: "Tìm trong ghi chú" })
+    .fill("bay dong nghia");
+  await expect(page.locator(".note-card")).toContainText("từ đồng nghĩa");
+  await page.reload();
+  await expect(page.locator(".note-card")).toContainText("đoạn hai");
 });

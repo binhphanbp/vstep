@@ -842,7 +842,9 @@ test("a lost phone: export, wipe everything, import, history intact", async ({
   await page.getByRole("button", { name: /Thêm .*doubtful/ }).click();
   // An unfinished piece of writing counts as work too.
   await page.goto("/practice/writing-email");
-  await page.locator("textarea").fill("Hi Alex, I am still writing this.");
+  await page
+    .getByRole("textbox", { name: "Bài viết của bạn" })
+    .fill("Hi Alex, I am still writing this.");
   await expect
     .poll(async () =>
       page.evaluate(() => localStorage.getItem("may-study-v1") ?? ""),
@@ -891,9 +893,9 @@ test("a lost phone: export, wipe everything, import, history intact", async ({
   await page.getByLabel("Tìm từ vựng").fill("doubtful");
   await expect(page.locator(".vocab-list-item")).toHaveCount(1);
   await page.goto("/practice/writing-email");
-  await expect(page.locator("textarea")).toHaveValue(
-    "Hi Alex, I am still writing this.",
-  );
+  await expect(
+    page.getByRole("textbox", { name: "Bài viết của bạn" }),
+  ).toHaveValue("Hi Alex, I am still writing this.");
 });
 
 test("a bad paper does not turn the notebook into a wall", async ({ page }) => {
@@ -950,8 +952,7 @@ test("a bug report can leave the phone in one tap, carrying no writing", async (
   });
   await page.goto("/practice/writing-email");
   await page
-    .getByRole("textbox")
-    .first()
+    .getByRole("textbox", { name: "Bài viết của bạn" })
     .fill("Dear Alex, I am writing about the delayed order.");
   await page.goto("/settings");
   await page.getByRole("button", { name: "Gửi báo lỗi" }).click();

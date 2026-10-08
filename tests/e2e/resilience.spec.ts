@@ -356,11 +356,14 @@ test("every page of the app opens with the network gone, not just the last one v
   // The install stores each page and its build assets one at a time. Waiting
   // for the last page of the list to land beats a fixed pause: a slow runner
   // would otherwise be cut off mid-install and fail for the wrong reason.
-  await page.waitForFunction(
-    () => caches.match("/guide").then(Boolean),
-    undefined,
-    { timeout: 30000 },
-  );
+  await expect
+    .poll(
+      () => page.evaluate(async () => Boolean(await caches.match("/guide"))),
+      {
+        timeout: 30000,
+      },
+    )
+    .toBe(true);
   await context.setOffline(true);
   const pages: [string, string][] = [
     ["/practice", "Mỗi kỹ năng"],
@@ -369,6 +372,7 @@ test("every page of the app opens with the network gone, not just the last one v
     ["/papers", "Năm đề có đáp án"],
     ["/vocabulary", "Gieo một từ"],
     ["/mistakes", "Không phải lỗi"],
+    ["/notes", "Những điều mình tự ghi lại"],
     ["/progress", "Tiến bộ đôi khi"],
     ["/settings", "Góc học"],
     ["/guide", "Hiểu kỳ thi"],
@@ -401,21 +405,32 @@ test("today's lessons are kept for the train, and they open with no network", as
   // her own data, so the app hands it the addresses once it has loaded.
   await page.goto("/");
   await page.evaluate(() => navigator.serviceWorker.ready);
-  const planned = await page
+  const plan = await page
     .locator(".plan-list a[href^='/practice/']")
-    .first()
-    .getAttribute("href");
-  expect(planned, "kế hoạch hôm nay phải có ít nhất một bài").toBeTruthy();
-  // Warming happens after the worker takes over: one page per plan entry, plus
-  // the assets each one names. Wait for the first lesson to be in the cache
-  // rather than guessing how long that takes.
-  await page.waitForFunction(
-    (path) => caches.match(path).then(Boolean),
-    planned!,
-    { timeout: 30000 },
-  );
+    .evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href") as string),
+    );
+  expect(
+    plan.length,
+    "kế hoạch hôm nay phải có ít nhất một bài",
+  ).toBeGreaterThan(0);
+  const planned = plan[0];
+  // Warming happens after the worker takes over, once the app has been still
+  // for a moment: one page per plan entry, in order, each stored after the
+  // assets it names. Wait for the last lesson of the plan rather than guessing
+  // how long that takes; the first is then certainly whole.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          async (path) => Boolean(await caches.match(path)),
+          plan[plan.length - 1],
+        ),
+      { timeout: 30000 },
+    )
+    .toBe(true);
   await context.setOffline(true);
-  await page.goto(planned!);
+  await page.goto(planned);
   await expect(page.locator("main h1")).not.toContainText("Mạng đang không ổn");
   await expect(page.locator(".question").first()).toBeVisible();
   await context.setOffline(false);

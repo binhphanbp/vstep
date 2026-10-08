@@ -3637,3 +3637,300 @@ body.exam-immersive main {
   cursor: pointer;
   font-weight: 600;
 }
+
+/* ── Notes: what Gùa writes herself ──
+   A warmer paper colour than the explanations Mây wrote, so the two are never
+   taken for each other. */
+.question-notes {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #ead7df;
+  display: grid;
+  gap: 10px;
+}
+.note-card {
+  background: #fff8e6;
+  border: 1px solid #f0dcaa;
+  border-radius: 12px;
+  padding: 12px 14px;
+  overflow-wrap: anywhere;
+}
+.note-card.binned {
+  background: #faf6f6;
+  border-color: #ead7df;
+}
+.note-card.editing {
+  background: #fffdf5;
+}
+.note-place {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #6f5a22;
+}
+.note-place span {
+  color: var(--muted);
+}
+.note-body {
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.note-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #ecd9a5;
+  background: white;
+  font-size: 12px;
+  color: #6f5a22;
+}
+.note-action.on {
+  background: #fdecb0;
+  border-color: #e0bf55;
+  color: #5b4510;
+  font-weight: 600;
+}
+.note-date {
+  margin-left: auto;
+  font-size: 11px;
+  color: #7b6a37;
+}
+.note-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px dashed #d9bd6c;
+  background: #fffaf0;
+  font-size: 13px;
+  color: #6f5a22;
+}
+.note-add:hover {
+  background: #fff3d6;
+}
+.note-editor textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border: 1px solid #e3cc8c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  background: #fffdf5;
+  color: var(--ink);
+}
+.note-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.note-chip {
+  min-height: 30px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid #e8d9b5;
+  background: white;
+  font-size: 12px;
+  color: #6f5a22;
+}
+.note-editor-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.note-error {
+  color: #a33a2f;
+  font-size: 12px;
+}
+.note-undo {
+  font-size: 13px;
+  color: #6f5a22;
+}
+.note-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.note-select {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.note-select select {
+  min-height: 40px;
+  border: 1px solid #e8dadf;
+  border-radius: 9px;
+  background: white;
+  padding: 6px 10px;
+  color: var(--ink);
+}
+.note-bin,
+.note-feedback {
+  margin-top: 22px;
+}
+.note-bin summary,
+.note-feedback summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+@media print {
+  .notes-page .note-card {
+    break-inside: avoid;
+    background: white;
+    border-color: #bbb;
+  }
+  .notes-page .note-actions button,
+  .notes-page .note-actions a {
+    display: none;
+  }
+}
+.notes-page .page-heading {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.notes-page .pill {
+  white-space: nowrap;
+}
+
+/* ── Highlights and scratch pages, made while working ── */
+.markable {
+  min-width: 0;
+}
+.mark-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+.mark-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 5px 12px;
+  border-radius: 9px;
+  border: 1px solid #ecd9a5;
+  background: #fffaf0;
+  font-size: 13px;
+  color: #6f5a22;
+}
+.mark-toggle.on {
+  background: #fdecb0;
+  border-color: #e0bf55;
+  color: #5b4510;
+  font-weight: 600;
+}
+.mark-bar .help-copy {
+  margin: 0;
+}
+mark.hl,
+.hl-pick.on {
+  background: #fff0a8;
+  color: inherit;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.hl-pick {
+  cursor: pointer;
+  border-bottom: 1px dashed #d9bd6c;
+}
+.hl-pick:hover {
+  background: #fff6cc;
+}
+.hl-pick.on:hover {
+  background: #ffe97a;
+}
+.hl-pick:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 1px;
+}
+.scratch {
+  margin: 12px 0;
+  border: 1px solid #ecd9a5;
+  border-radius: 12px;
+  background: #fffaf0;
+  padding: 8px 12px;
+}
+.scratch summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #6f5a22;
+}
+.scratch summary small {
+  font-weight: 400;
+  color: #7b6a37;
+}
+.scratch textarea {
+  width: 100%;
+  margin-top: 8px;
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid #e3cc8c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  background: #fffdf5;
+  color: var(--ink);
+}
+.scratch .help-copy,
+.scratch .note-error {
+  margin-top: 6px;
+}
+.scratch-review .note-body {
+  margin-top: 8px;
+}
+.highlight-notes {
+  margin: 10px 0;
+}
+.highlight-notes summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.highlight-notes ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.highlight-notes q {
+  display: block;
+  margin-bottom: 4px;
+  background: #fff0a8;
+  border-radius: 3px;
+  padding: 0 3px;
+  width: fit-content;
+  max-width: 100%;
+}
+.note-quote {
+  margin: 0 0 6px;
+  padding: 2px 8px;
+  border-left: 3px solid #e0bf55;
+  color: #6f5a22;
+  font-size: 13px;
+}

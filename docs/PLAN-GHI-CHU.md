@@ -2,6 +2,25 @@
 
 Viết ngày 08/10/2026 trên nền `main` tại `417bc52` (202 unit, 93 E2E, 111 route); rà lại và rút gọn cùng ngày sau khi anh chốt hướng. Mọi con số dưới đây là số đo hoặc đọc từ code (mục 8).
 
+## Tiến độ
+
+Cả bốn đợt đã làm, trong ba lần phát hành: đợt 0 (PR #51), đợt 1, và đợt 2 cùng đợt 3 gộp một lần vì cùng sửa vài chỗ như Cài đặt và trang Ghi chú.
+
+- **Đợt 0** (giữ trường lạ): các schema của hồ sơ, lượt học, phiên thi và lượt làm đề không còn bỏ khóa chưa biết.
+- **Đợt 1** (ghi chú cho từng câu + trang Sổ ghi chú): kể cả ★ "Cần nhớ", In, "Đã xóa gần đây" và nhận xét giáo viên chỉ đọc.
+- **Đợt 2** (nháp và tô khi làm bài): ô nháp ở từng phần, nút "Tô câu", và ghi chú gắn với một câu đã tô.
+- **Đợt 3**: nhắc sao lưu khi có từ 10 ghi chú mới chưa nằm trong bản sao nào. ★ và In đã nằm ở đợt 1 vì thẻ ghi chú đã có ở đó.
+
+Cách đo và những gì chưa thử được nằm trong [QUALITY.md](QUALITY.md).
+
+Những chỗ làm khác bản kế hoạch, và vì sao:
+
+- **Không có `kind` trong ghi chú.** Nháp và câu tô không phải là ghi chú: chúng là trường của lượt làm (`scratch`, `marks` trên lượt làm đề, lượt học và buổi thi). Nhờ vậy một lượt bị bỏ khi vượt 100 lượt mang nháp đi theo, không cần dọn mồ côi. Một bài học chưa nộp giữ chúng trong một bản nháp riêng (`work:<mã bài>`) và chuyển sang lượt học khi nộp.
+- **Nháp lưu theo từng phím, không chờ ngừng gõ.** Bài viết bên cạnh (đề kho và phòng thi mô phỏng) đã ghi theo cách đó; đo chi phí của một phím trên hồ sơ 90 ngày ở QUALITY.md. Ghi chú thì vẫn chờ 0,9 giây.
+- **Nháp và câu tô có trần riêng** (0,5 MB) tách khỏi ghi chú (1,5 MB), để một cuốn sổ ghi chú đầy không chặn việc gõ nháp giữa một buổi thi.
+- **`anchor`** có thêm `skill`, `group` (để lọc không phải đoán từ nhãn) và `quote` (câu đã tô mà ghi chú nói tới).
+- **Nháp ở phòng thi mô phỏng luôn có sẵn**, không có nút tắt: anh đã chốt đây là công cụ luyện, và phòng thi mô phỏng nói rõ như vậy ở màn xác nhận.
+
 ## 1. Mục tiêu
 
 Khi tự ôn, làm đề giấy hay thi thử trên máy, Gùa phải nháp và ghi chú bằng tay: gạch chân bài đọc, ghi từ khóa khi nghe, dàn ý trước khi nói, rồi chép lại "vì sao sai" ra sổ. Mây cần thay được việc đó, **gọn, không rối, dùng được ngay**.

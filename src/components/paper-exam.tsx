@@ -20,6 +20,14 @@ import {
 } from "@/lib/papers";
 import { wordCount, type PaperRun } from "@/lib/learning";
 import { saveRecording } from "@/lib/recordings";
+import { MarkablePassage } from "./marked-text";
+import {
+  SCRATCH_HINTS,
+  passageKey,
+  taskKey,
+  type PaperWork,
+} from "./paper-work";
+import { ScratchPad } from "./scratch-pad";
 
 /**
  * The exam room: a sitting that behaves like the computer-based VSTEP rather
@@ -227,6 +235,11 @@ export function ExamCheckIn({
             : "Hết giờ, bài làm tự lưu và lượt luyện kết thúc. Bài đã nộp không mở lại được."}{" "}
           Đồng hồ vẫn chạy khi tải lại hoặc rời trang.
         </li>
+        <li>
+          <strong>Nháp và tô câu:</strong> mỗi phần có ô nháp, và bài đọc hoặc
+          đề bài có nút “Tô câu”. Đây là công cụ luyện tập của Mây, lưu cùng
+          lượt thi và không tính điểm hay số từ.
+        </li>
         <li>Kết quả chỉ là số câu đúng, không quy đổi sang bậc VSTEP.</li>
       </ul>
       <p className="notice">
@@ -298,12 +311,14 @@ function ListeningSlot({
   slot,
   run,
   edit,
+  work,
   isLast,
   onNext,
 }: {
   slot: PaperSlot;
   run: PaperRun;
   edit: Edit;
+  work: PaperWork;
   isLast: boolean;
   onNext: () => void;
 }) {
@@ -390,6 +405,13 @@ function ListeningSlot({
           Phát bản ghi âm (chỉ một lần)
         </button>
       )}
+      <ScratchPad
+        value={work.scratch(slot.id)}
+        onChange={(value) => work.setScratch(slot.id, value)}
+        label={`Nháp cho ${slot.part}`}
+        placeholder={SCRATCH_HINTS.listening}
+        defaultOpen
+      />
       {slot.items.map((item) => (
         <Question key={item.id} item={item} run={run} edit={edit} />
       ))}
@@ -415,11 +437,13 @@ function ListeningRoom({
   paper,
   run,
   edit,
+  work,
   onSubmit,
 }: {
   paper: Paper;
   run: PaperRun;
   edit: Edit;
+  work: PaperWork;
   onSubmit: () => void;
 }) {
   const slots = paper.sections[0].slots;
@@ -430,6 +454,7 @@ function ListeningRoom({
       slot={slots[index]}
       run={run}
       edit={edit}
+      work={work}
       isLast={index === slots.length - 1}
       onNext={() =>
         index === slots.length - 1
@@ -444,10 +469,12 @@ function ReadingRoom({
   paper,
   run,
   edit,
+  work,
 }: {
   paper: Paper;
   run: PaperRun;
   edit: Edit;
+  work: PaperWork;
 }) {
   const slots = paper.sections[1].slots;
   const index = Math.min(run.material, slots.length - 1);
@@ -486,7 +513,15 @@ function ReadingRoom({
           tabIndex={0}
           aria-label={`Bài đọc ${index + 1}`}
         >
-          <PaperText text={slot.passage} />
+          <MarkablePassage
+            key={slot.id}
+            text={slot.passage}
+            className="paper-text"
+            marks={work.marks(passageKey(slot.id))}
+            onToggle={(sentence) =>
+              work.toggle(passageKey(slot.id), slot.passage, sentence)
+            }
+          />
         </section>
         <section className="exam-pane" aria-label="Câu hỏi">
           {slot.items.map((item) => (
@@ -494,6 +529,13 @@ function ReadingRoom({
           ))}
         </section>
       </div>
+      <ScratchPad
+        key={slot.id}
+        value={work.scratch(slot.id)}
+        onChange={(value) => work.setScratch(slot.id, value)}
+        label={`Nháp cho ${slot.part}`}
+        placeholder={SCRATCH_HINTS.reading}
+      />
       <div className="button-row exam-foot">
         <button
           type="button"
@@ -520,10 +562,12 @@ function WritingRoom({
   paper,
   run,
   edit,
+  work,
 }: {
   paper: Paper;
   run: PaperRun;
   edit: Edit;
+  work: PaperWork;
 }) {
   const slots = paper.sections[2].slots;
   const index = Math.min(run.material, slots.length - 1);
@@ -549,7 +593,23 @@ function WritingRoom({
       </div>
       <div className="exam-split">
         <section className="exam-pane" aria-label="Đề bài">
-          <PaperText text={slot.prompt} />
+          <MarkablePassage
+            key={slot.id}
+            text={slot.prompt}
+            className="paper-text"
+            marks={work.marks(taskKey(slot.id))}
+            onToggle={(sentence) =>
+              work.toggle(taskKey(slot.id), slot.prompt, sentence)
+            }
+          />
+          <ScratchPad
+            key={`scratch-${slot.id}`}
+            value={work.scratch(slot.id)}
+            onChange={(value) => work.setScratch(slot.id, value)}
+            label={`Dàn ý cho ${slot.part}`}
+            placeholder={SCRATCH_HINTS.writing}
+            defaultOpen
+          />
         </section>
         <section className="exam-pane" aria-label="Bài làm">
           <textarea
@@ -669,6 +729,7 @@ function SpeakingRoom({
   run,
   now,
   edit,
+  work,
   markRecorded,
   onFinish,
 }: {
@@ -676,6 +737,7 @@ function SpeakingRoom({
   run: PaperRun;
   now: number;
   edit: Edit;
+  work: PaperWork;
   markRecorded: (runId: string, slotId: string) => void;
   onFinish: () => void;
 }) {
@@ -805,7 +867,15 @@ function SpeakingRoom({
                   : "Đang mở micro"}{" "}
             · {clock(left)}
           </p>
-          <PaperText text={slot.prompt} />
+          <MarkablePassage
+            key={slot.id}
+            text={slot.prompt}
+            className="paper-text"
+            marks={work.marks(taskKey(slot.id))}
+            onToggle={(sentence) =>
+              work.toggle(taskKey(slot.id), slot.prompt, sentence)
+            }
+          />
           {slot.cues.length > 0 && slot.prompt.length < 200 && (
             <ul className="exam-cues" lang="en">
               {slot.cues.map((cue, cueIndex) => (
@@ -813,6 +883,14 @@ function SpeakingRoom({
               ))}
             </ul>
           )}
+          <ScratchPad
+            key={`scratch-${slot.id}`}
+            value={work.scratch(slot.id)}
+            onChange={(value) => work.setScratch(slot.id, value)}
+            label={`Dàn ý cho ${slot.part}`}
+            placeholder={SCRATCH_HINTS.speaking}
+            defaultOpen
+          />
           {micProblem && (
             <p className="notice error" role="alert">
               {micProblem}
@@ -854,6 +932,7 @@ export function ExamRoom({
   now,
   name,
   edit,
+  work,
   markRecorded,
   onSubmit,
   onFinish,
@@ -864,6 +943,7 @@ export function ExamRoom({
   now: number;
   name: string;
   edit: Edit;
+  work: PaperWork;
   markRecorded: (runId: string, slotId: string) => void;
   onSubmit: () => void;
   onFinish: () => void;
@@ -934,17 +1014,23 @@ export function ExamRoom({
             paper={paper}
             run={run}
             edit={edit}
+            work={work}
             onSubmit={onSubmit}
           />
         )}
-        {run.stage === 1 && <ReadingRoom paper={paper} run={run} edit={edit} />}
-        {run.stage === 2 && <WritingRoom paper={paper} run={run} edit={edit} />}
+        {run.stage === 1 && (
+          <ReadingRoom paper={paper} run={run} edit={edit} work={work} />
+        )}
+        {run.stage === 2 && (
+          <WritingRoom paper={paper} run={run} edit={edit} work={work} />
+        )}
         {run.stage === 3 && (
           <SpeakingRoom
             paper={paper}
             run={run}
             now={now}
             edit={edit}
+            work={work}
             markRecorded={markRecorded}
             onFinish={onFinish}
           />

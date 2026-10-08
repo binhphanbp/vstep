@@ -30,6 +30,8 @@ import {
 import { vocabulary } from "@/lib/content";
 import { useStudy } from "./study-provider";
 import { QuestionCard } from "./practice";
+import { QuestionNotes } from "./note-box";
+import { lessonQuestionPlace } from "@/lib/note-anchors";
 import { AudioPlayer } from "./audio-tools";
 /** The clock, read by handlers (kept out of the component body). */
 const clockNow = () => Date.now();
@@ -566,6 +568,11 @@ export function MistakesPage() {
                     chosen={chosen[item.key]}
                     submitted={seen}
                     skill={item.lesson.skill}
+                    notes={
+                      <QuestionNotes
+                        place={lessonQuestionPlace(item.lesson, item.question)}
+                      />
+                    }
                     onChoose={(v) =>
                       setChosen((c) => ({ ...c, [item.key]: v }))
                     }
