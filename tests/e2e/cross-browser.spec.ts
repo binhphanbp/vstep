@@ -176,15 +176,18 @@ test("a note written after a lesson is kept and found again", async ({
   page,
 }) => {
   await page.goto("/practice/reading-cafe");
+  // The questions are drawn by the page, so reading them at once can find
+  // none: WebKit on the CI runner did, and the loop below then ran no turn.
+  await expect(page.locator(".question")).toHaveCount(5);
   const names = await page
     .locator(".question input[type=radio]")
     .evaluateAll((inputs) => [
       ...new Set(inputs.map((input) => (input as HTMLInputElement).name)),
     ]);
-  // A click that lands before the page has hydrated is lost, and WebKit on a
-  // slow runner is where that happens. The answers are given again until the
-  // page itself says it has all of them, instead of assuming they were kept.
+  // The answers are given again until the page itself says it has all of
+  // them, instead of assuming every click was kept.
   const all = names.length;
+  expect(all).toBe(5);
   await expect(async () => {
     for (const name of names) {
       await page.locator(`input[name="${name}"]`).first().check();
