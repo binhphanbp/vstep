@@ -5,7 +5,6 @@ import { allLessons } from "../../src/lib/full-exam-content";
 import { lessons, vocabulary } from "../../src/lib/content";
 import { PLAN_MAX_LESSONS } from "../../src/lib/learning";
 import { questionNotes } from "../../src/lib/question-notes";
-import { bankGroups } from "../../src/lib/review-bank";
 import { paperCatalog } from "../../src/lib/papers";
 
 /**
@@ -52,13 +51,14 @@ const crossBrowserTests = cases(
 );
 const e2eTests = chromiumTests + crossBrowserTests * 2;
 /**
- * Pages `next build` prerenders: one per lesson, one per review-pack group,
- * plus the eighteen entries the build lists beside them (sixteen fixed routes
- * and the `/practice/[id]` and `/review-pack/bank/[group]` rows themselves).
+ * Pages `next build` prerenders: one per lesson and one per paper, plus the
+ * sixteen other pages the build generates (the fixed routes and the
+ * `/practice/[id]` and `/papers/[id]` rows themselves). Taken from the build
+ * output ("Generating static pages (n/n)"), which read 104 with 83 lessons and
+ * 5 papers.
  */
-const NON_LESSON_ROUTES = 18;
-const routes =
-  allLessons.length + bankGroups.length + paperCatalog.length + NON_LESSON_ROUTES;
+const NON_LESSON_ROUTES = 16;
+const routes = allLessons.length + paperCatalog.length + NON_LESSON_ROUTES;
 const questions = allLessons.reduce(
   (sum, lesson) => sum + lesson.questions.length,
   0,

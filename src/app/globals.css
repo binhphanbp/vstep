@@ -3213,80 +3213,8 @@ details .passage {
   gap: 8px;
   margin-top: 10px;
 }
-.pack-sheet h3 {
-  margin: 20px 0 8px;
-  font-size: 15px;
-  font-weight: 500;
-}
-.pack-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 13px;
-}
-.pack-table th,
-.pack-table td {
-  border: 1px solid var(--line);
-  padding: 10px;
-  text-align: left;
-  vertical-align: top;
-}
-.pack-table thead th {
-  background: #fdeef2;
-  font-weight: 500;
-}
-.pack-table th[scope="row"] {
-  width: 38%;
-  font-weight: 500;
-}
-.pack-table th small {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 400;
-}
-.pack-table td {
-  height: 72px;
-}
-/* The material-review pack: long documents a teacher reads on paper, so the
-   lists stay plain and each lesson can start on its own sheet. */
-.plain-list {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0;
-  display: grid;
-  gap: 6px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #6b636d;
-}
-.bank-questions {
-  margin: 8px 0 0;
-  padding-left: 20px;
-  display: grid;
-  gap: 18px;
-  font-size: 15px;
-  line-height: 1.75;
-  color: var(--ink);
-}
-.bank-questions .plain-list {
-  margin-top: 4px;
-}
-.bank-sheet {
-  break-inside: auto;
-}
-.bank-sheet + .bank-sheet {
-  break-before: page;
-}
-.bank-list {
-  display: grid;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-/* The pack is meant to leave the screen on paper: everything that is only
-   useful on a device is dropped, and the sheet gets the whole page. */
+/* Printing (the notes list): everything that is only useful on a device is
+   dropped, and the sheet gets the whole page. */
 @media print {
   .sidebar,
   .topbar,
@@ -3304,22 +3232,6 @@ details .passage {
     padding: 0;
     margin: 0;
   }
-  .review-pack .panel {
-    border: 0;
-    box-shadow: none;
-    padding: 0;
-  }
-  .review-pack .passage {
-    max-height: none;
-    overflow: visible;
-    position: static;
-  }
-}
-.pack-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: -14px 0 18px;
 }
 .provenance {
   display: flex;
@@ -4378,12 +4290,10 @@ body.exam-immersive main {
   padding: 6px 10px;
   color: var(--ink);
 }
-.note-bin,
-.note-feedback {
+.note-bin {
   margin-top: 22px;
 }
-.note-bin summary,
-.note-feedback summary {
+.note-bin summary {
   cursor: pointer;
   font-weight: 600;
 }

@@ -1,8 +1,6 @@
 "use client";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ClipboardCheck,
   Cloud,
   Download,
   HardDrive,
@@ -344,24 +342,6 @@ export function SettingsPage() {
                 <Trash2 size={15} />
                 Xoá danh sách lỗi
               </button>
-            </div>
-          </section>
-          <section className="panel">
-            <div className="section-title">
-              <ClipboardCheck size={20} />
-              <h2>Nhờ giáo viên duyệt học liệu</h2>
-            </div>
-            <p className="help-copy">
-              Toàn bộ bài học trong Mây do người dựng ứng dụng tự biên soạn và
-              chưa có giáo viên nào duyệt. Ở đây in được từng gói tài liệu — ngữ
-              liệu, câu hỏi, đáp án đang dùng và ô trống để người chấm ghi nhận
-              xét — để gửi đi nhờ xem giúp.
-            </p>
-            <div className="button-row">
-              <Link className="button secondary" href="/review-pack/bank">
-                <ClipboardCheck size={15} />
-                Mở gói duyệt học liệu
-              </Link>
             </div>
           </section>
           <StoragePanel />

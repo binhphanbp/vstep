@@ -264,21 +264,6 @@ export function ProgressPage() {
                       </details>
                     )}
                     {a.recordingId && <RecordingHistory id={a.recordingId} />}
-                    {(a.skill === "writing" || a.skill === "speaking") && (
-                      <Link
-                        className="text-link"
-                        href={`/review-pack?attempt=${a.id}`}
-                      >
-                        In gói gửi giáo viên
-                        <ArrowRight size={14} />
-                      </Link>
-                    )}
-                    {a.feedback && (
-                      <details>
-                        <summary>Nhận xét của người chấm</summary>
-                        <p className="help-copy">{a.feedback}</p>
-                      </details>
-                    )}
                     {a.selfCheck && Object.keys(a.selfCheck).length > 0 && (
                       <details>
                         <summary>Mình đã tự chấm theo tiêu chí</summary>

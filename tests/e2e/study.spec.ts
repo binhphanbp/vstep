@@ -373,7 +373,7 @@ test("cannot submit unanswered practice; writing is saved and reviewable", async
   await rateSelfCheck(page);
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   await expect(
-    page.getByText("Chưa có điểm chấm của giáo viên hoặc AI.", {
+    page.getByText("Chưa có điểm chấm cho bài này.", {
       exact: false,
     }),
   ).toBeVisible();
@@ -381,7 +381,7 @@ test("cannot submit unanswered practice; writing is saved and reviewable", async
   await page.getByText("Xem lại bài viết đã nộp").click();
   await expect(page.getByText(draft, { exact: true })).toBeVisible();
 });
-test("writing is self-checked against criteria and can be sent to a teacher", async ({
+test("writing is self-checked against criteria and the ratings are kept", async ({
   page,
 }) => {
   await page.goto("/practice/writing-email");
@@ -400,22 +400,6 @@ test("writing is self-checked against criteria and can be sent to a teacher", as
   await page.goto("/progress");
   await page.getByText("Mình đã tự chấm theo tiêu chí").click();
   await expect(page.getByText("Đủ yêu cầu của đề: Tạm ổn")).toBeVisible();
-  await page.getByRole("link", { name: "In gói gửi giáo viên" }).click();
-  await expect(page.locator(".pack-table")).toContainText("Việc cần làm tiếp");
-  await expect(page.locator(".pack-sheet")).toContainText("training session");
-  // Printing is the point of the page, so the action has to survive phone
-  // width, where heading actions are hidden by design.
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(
-    page.getByRole("button", { name: "In hoặc lưu PDF" }),
-  ).toBeVisible();
-  await page
-    .getByLabel("Nhận xét của giáo viên")
-    .fill("Cần thêm một câu kết rõ ràng hơn.");
-  await page.getByRole("button", { name: "Lưu nhận xét" }).click();
-  await page.goto("/progress");
-  await page.getByText("Nhận xét của người chấm").click();
-  await expect(page.getByText("Cần thêm một câu kết")).toBeVisible();
 });
 
 test("vocabulary recall schedules and persists", async ({ page }) => {
@@ -969,30 +953,6 @@ test("a bug report can leave the phone in one tap, carrying no writing", async (
   expect(text).toContain("1 bài nháp");
   expect(text).not.toContain("Dear Alex");
 });
-
-test("the question bank can be printed for a teacher, keys and all", async ({
-  page,
-}) => {
-  await page.goto("/settings");
-  await page.getByRole("link", { name: "Mở gói duyệt học liệu" }).click();
-  await page.waitForURL("**/review-pack/bank");
-  await page.getByRole("link", { name: /Thư viện Đọc/ }).click();
-  await page.waitForURL("**/review-pack/bank/reading");
-  const sheet = page.locator(".review-pack");
-  // What the reviewer is told before anything else: nobody has checked this.
-  await expect(sheet).toContainText("chưa qua giáo viên nào");
-  await expect(sheet).toContainText("chưa có người duyệt");
-  const cafe = question("rc1");
-  await expect(sheet).toContainText(cafe.text);
-  // The key is marked, so a wrong answer in the bank is visible on paper.
-  await expect(
-    sheet.locator("li", { hasText: cafe.options[cafe.answer] }).first(),
-  ).toContainText("✔");
-  await expect(sheet.locator(".pack-table").first()).toContainText(
-    "Đáp án đúng chưa",
-  );
-});
-
 test("the dot for today shows a tick she can actually see once she has studied", async ({
   page,
 }) => {
