@@ -246,7 +246,7 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 | Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
 | Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                      |
 | Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                                 |
-| Nháp, tô câu và ghi chú trên thiết bị thật | Chưa thử              | Bộ gõ tiếng Việt, chạm để tô câu trên điện thoại chưa được thử; sửa cùng một ghi chú ở hai tab thì lần lưu sau thắng |
+| Nháp, tô câu và ghi chú với bộ gõ thật | Chưa thử              | Gõ tiếng Việt bằng bộ gõ thật trên máy tính (Unikey, EVKey) chưa được thử; điện thoại không phải trọng tâm; sửa cùng một ghi chú ở hai tab thì lần lưu sau thắng |
 | PWA/offline đầy đủ                     | Một phần                  | Service worker giữ trang cố định và bài hôm nay; audio đề nhập không tải sẵn     |
 | Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                     |
 | C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                                |
@@ -373,6 +373,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 14. Các quyết định quan trọng cần giữ
 
+- **Desktop trước.** Gùa luyện đề trên máy tính, nên thiết kế, kiểm thử và sửa lỗi ưu tiên trình duyệt máy tính; điện thoại chỉ cần không vỡ bố cục và không làm gì hơn (quyết định của chủ dự án ngày 08/10/2026).
 - Giữ kiến trúc local-first vì sản phẩm dành cho một người, giúp học được ngay cả khi cloud lỗi.
 - Giữ cloud sync thủ công và cảnh báo conflict cho đến khi có nhu cầu thật về tự động đồng bộ.
 - Không hiển thị điểm dự đoán B1/B2/C1 từ dữ liệu chưa hiệu chuẩn.

@@ -24,7 +24,7 @@ def main() -> None:
 
     date = doc.add_paragraph()
     date.paragraph_format.space_after = Pt(14)
-    set_run_font(date.add_run("Cập nhật ngày 07 tháng 10 năm 2026"), size=10)
+    set_run_font(date.add_run("Cập nhật ngày 08 tháng 10 năm 2026"), size=10)
 
     intro = doc.add_paragraph()
     intro.paragraph_format.space_after = Pt(12)
@@ -36,7 +36,7 @@ def main() -> None:
             break
 
     doc.core_properties.title = "Báo cáo tình trạng Mây VSTEP"
-    doc.core_properties.subject = "Bản năm đề nhập, kiểm thử và phát hành"
+    doc.core_properties.subject = "Kho năm đề, ghi chú, nháp và tô câu, kiểm thử và phát hành"
     doc.core_properties.author = "Dự án Mây VSTEP"
     doc.save(OUTPUT)
     print(OUTPUT)

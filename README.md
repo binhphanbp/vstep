@@ -77,7 +77,7 @@ npm run test:production
 
 Chạy bản build bằng `npm run build` rồi `npm start`. Bản pilot đã deploy trên Vercel với HTTPS và hai biến Supabase ở thời điểm build. Build cần mạng để lấy Be Vietnam Pro qua `next/font/google`. Chưa có tên miền riêng, monitoring hoặc quy trình vận hành production.
 
-Trước khi dùng bản host với dữ liệu thật: thử đăng nhập/đồng bộ giữa hai thiết bị, xuất/khôi phục bản sao, nghe và ghi âm trên đúng điện thoại người học. Có thể dùng chế độ lưu trên thiết bị mà không bật Supabase.
+Trước khi dùng bản host với dữ liệu thật: thử đăng nhập/đồng bộ giữa hai thiết bị, xuất/khôi phục bản sao, nghe và ghi âm trên đúng máy tính người học. Có thể dùng chế độ lưu trên thiết bị mà không bật Supabase.
 
 ## Độ chân thực của nội dung
 
