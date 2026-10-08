@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **282 unit, 151 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **282 unit, 159 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 282 unit và 151 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 282 unit và 159 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -144,7 +144,9 @@ Ba công cụ thay giấy khi luyện; kế hoạch và cách đo nằm ở [PLA
 - Font Be Vietnam Pro hỗ trợ tiếng Việt và được tải qua `next/font/google` khi build.
 - Bố cục desktop có sidebar cố định; mobile dùng menu đóng mở, hỗ trợ Escape và giữ focus trong menu.
 - Có skip link, focus state, nhãn form, trạng thái lỗi, loading, empty state và trang 404.
-- Con trỏ tùy biến dùng chấm và vòng hồng, chỉ bật với thiết bị chuột chính xác. Nó tự tắt trong ô nhập liệu, trên thiết bị cảm ứng và khi người dùng bật reduced motion.
+- Con trỏ tùy biến dùng chấm và vòng hồng, chỉ bật với thiết bị chuột chính xác. Nó tự tắt trong ô nhập liệu, trong phòng thi mô phỏng, trên thiết bị cảm ứng và khi người dùng bật reduced motion.
+- **Ưu tiên máy tính** (CLAUDE.md): Gùa luyện đề trên máy tính, nên giao diện được thiết kế, đo và kiểm thử ở 1440×900 và 1280×720; điện thoại chỉ cần không vỡ bố cục.
+- **Phòng thi mô phỏng là một khung cố định** (`paper-exam.tsx`, phần CSS `.exam-*`): thanh trên, vùng làm bài, thanh dưới. Đọc và Viết có hai ô cuộn riêng; Nghe và Nói nằm trong cột giữa rộng tối đa 860 px; bảng câu hỏi, các tab Task, các chặng Part và nút đi tiếp ở thanh dưới; ô Nháp là ngăn kéo trên thanh dưới (`ScratchDock` trong `scratch-pad.tsx`) đẩy việc lên thay vì che. Dưới 900 px phòng thi trở lại cuộn thường. Bố cục theo cách phần mềm thi trên máy thường làm, không phải phần mềm VSTEP chính thức. Bố cục được giữ bằng `tests/e2e/exam-layout.spec.ts`.
 - Animation tuân theo `prefers-reduced-motion`.
 - Microcopy được viết theo hướng nhẹ nhàng, không dùng bảng xếp hạng, popup gây áp lực hoặc thành tích ảo.
 - Có web app manifest, màu theme, metadata và service worker. Trang cố định cùng bài trong kế hoạch hôm nay được lưu cho lúc mất mạng; audio của đề nhập không được tải sẵn.
@@ -212,7 +214,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 282/282 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 151 ca trên bản production local: 143 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 143/143; Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 282/282 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 159 ca trên bản production local: 151 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 151/151 (cập nhật 08/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
@@ -358,7 +360,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `src/components/audio-tools.tsx`               | Speech synthesis, ghi âm, phát và tải audio                  |
 | `src/components/review.tsx`                    | Từ vựng và sổ lỗi sai                                        |
 | `src/components/notes.tsx`, `note-box.tsx`     | Trang Sổ ghi chú và ô ghi chú dưới từng câu                  |
-| `src/components/scratch-pad.tsx`, `marked-text.tsx` | Trang nháp và nút Tô câu                                |
+| `src/components/scratch-pad.tsx`, `marked-text.tsx` | Trang nháp (kèm ngăn kéo `ScratchDock` của phòng thi) và nút Tô câu |
 | `src/lib/notes.ts`, `note-anchors.ts`          | Giới hạn và thao tác ghi chú; tên "chỗ ghi" của từng câu     |
 | `src/lib/work.ts`, `marks.ts`, `backup-mark.ts` | Nháp và câu tô của từng lượt; tách câu; nhắc sao lưu          |
 | `src/lib/recovery.ts`, `recovery-copy.ts`, `src/components/recovery-keeper.tsx` | Đưa ghi chú, nháp, câu tô về khi một tab bản cũ làm rơi; bản chép trong IndexedDB |

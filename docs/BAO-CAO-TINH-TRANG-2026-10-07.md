@@ -8,6 +8,8 @@ Kho hiện có **năm đề thi thử**: **132, 133, 134, 135 và Review 13/09**
 
 Ngày 08/10/2026 Mây có thêm bộ công cụ **ghi chú, nháp và tô câu** để Gùa luyện đề trên máy tính thay tờ giấy nháp và cây bút: ghi chú theo từng câu hỏi (chỉ hiện sau khi đã biết đáp án), trang **Sổ ghi chú** (`/notes`) để tìm, lọc, đánh dấu ★, in và khôi phục, nháp riêng cho từng phần của một lượt làm, và tô câu trong bài đọc, bản chép lời và đề bài. Hai pull request [#51](https://github.com/binhphanbp/vstep/pull/51) (nền: bản cũ không còn xóa được dữ liệu của bản mới) và [#52](https://github.com/binhphanbp/vstep/pull/52) (toàn bộ tính năng) đã merge; commit hiện hành trên `main` là `003be7f`. Kiểm tra trên GitHub Actions và smoke production của commit này đều đạt. Ghi chú, nháp và câu tô nằm trên máy và nằm trong file sao lưu; **không** gửi cho dịch vụ AI nào, và file báo lỗi chỉ đếm số ghi chú chứ không chứa nội dung.
 
+Cùng ngày, giao diện máy tính được rà lại từng màn (chụp ở 1440×900 và 1280×720) và phần luyện thi được dựng lại cho giống phần mềm thi trên máy: khung cố định vừa màn hình, đề và câu hỏi cuộn riêng, bảng câu hỏi và nút Nháp ở thanh dưới, Nghe và Nói ở cột giữa, con trỏ hệ thống trong phòng thi. Đây là cách bố trí thường gặp ở phần mềm thi trên máy, không phải phần mềm VSTEP chính thức. Chưa có ai ngoài các ca kiểm thử tự động dùng thử; nên để Gùa làm thử một phần Đọc và một phần Viết rồi nói chỗ nào còn vướng. Chi tiết nằm ở đầu QUALITY.md.
+
 ## 2. Phạm vi đã tích hợp
 
 | Hạng mục         | Hiện trạng                                                                                                                                               |
@@ -33,13 +35,13 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Phép kiểm tra                    | Kết quả local                                                                            |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | ESLint và TypeScript             | Đạt                                                                                      |
-| Vitest                           | 258/258                                                                                  |
-| Playwright trên production build | 151 ca: 143 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 143/143 |
+| Vitest                           | 282/282                                                                                  |
+| Playwright trên production build | 159 ca: 151 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 151/151 |
 | Accessibility tự động            | Axe WCAG A/AA trên 19 màn, có kho đề và Review 13/09                                     |
 | Build tĩnh                       | 112 trang, gồm năm route đề nhập                                                         |
 | Dependency production            | `npm audit --omit=dev` báo 0 lỗ hổng                                                     |
 
-Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 143/143 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
+Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 151/151 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
 
 ## 4. Kết quả phát hành
 
