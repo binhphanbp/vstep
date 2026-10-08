@@ -1,24 +1,23 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Printer, RotateCcw, StickyNote, Trash2 } from "lucide-react";
 import { lessons, type Skill } from "@/lib/content";
 import { attemptLesson, searchFold, type Note } from "@/lib/learning";
 import {
   NOTE_LIMITS,
-  allNotes,
-  binnedNotes,
+  binnedFrom,
   emptyBin,
   eraseNote,
-  liveNotes,
+  liveFrom,
   noteBytes,
   restoreNote,
   trashNote,
 } from "@/lib/notes";
-import { backupReminder, readBackupMark } from "@/lib/backup-mark";
 import { paperCatalog } from "@/lib/papers";
 import { formatBytes } from "@/lib/study-store";
 import type { StudyState } from "@/lib/learning";
+import { BackupNudge } from "./backup-nudge";
 import {
   NoteCard,
   NoteEditor,
@@ -64,14 +63,11 @@ function placeLink(state: StudyState, note: Note) {
 
 type Sort = "recent" | "place";
 
-/** Whether every word is in the note or in the words that name its place. */
-function matchesAll(note: Note, words: string[]) {
-  if (!words.length) return true;
-  const text = searchFold(
+/** The text a search looks in: the note and the words that name its place. */
+const searchable = (note: Note) =>
+  searchFold(
     `${note.body} ${note.anchor?.label ?? ""} ${note.anchor?.excerpt ?? ""}`,
   );
-  return words.every((word) => text.includes(word));
-}
 
 export function NotesPage() {
   const { state, update, ready, toast } = useStudy();
@@ -85,49 +81,67 @@ export function NotesPage() {
   const [deleted, setDeleted] = useState<string | null>(null);
   const clearUndo = useCallback(() => setDeleted(null), []);
 
+  // Everything below that depends only on the book is worked out once per
+  // change of the book, not once per key typed in the search box: a full book
+  // is two thousand notes, and folding, sorting and measuring all of them on
+  // every letter is what made typing there stutter on a slow machine.
+  const live = useMemo(() => liveFrom(state.notes), [state.notes]);
+  const bin = useMemo(() => binnedFrom(state.notes), [state.notes]);
+  const bytes = useMemo(() => noteBytes(state.notes ?? []), [state.notes]);
+  const folded = useMemo(
+    () => new Map(live.map((note) => [note.id, searchable(note)])),
+    [live],
+  );
+  const groups = useMemo(
+    () =>
+      [
+        ...new Map(
+          live
+            .filter((note) => note.anchor)
+            .map((note) => [
+              `${note.anchor!.source}:${note.anchor!.sourceId}`,
+              note.anchor!.group,
+            ]),
+        ),
+      ].sort((a, b) => a[1].localeCompare(b[1], "vi", { numeric: true })),
+    [live],
+  );
+  // The letters typed show at once; the list catches up when it can.
+  const asked = useDeferredValue(query);
+  // Every word typed has to be in the note, in any order and with or without marks.
+  const needle = searchFold(asked);
+  const matches = useMemo(() => {
+    const words = needle.split(" ").filter(Boolean);
+    return live
+      .filter(
+        (note) =>
+          (skill === "all" || note.anchor?.skill === skill) &&
+          (group === "all" ||
+            `${note.anchor?.source}:${note.anchor?.sourceId}` === group) &&
+          (!starred || note.star) &&
+          words.every((word) => folded.get(note.id)!.includes(word)),
+      )
+      .sort((a, b) =>
+        sort === "recent"
+          ? Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+          : (a.anchor?.group ?? "").localeCompare(b.anchor?.group ?? "", "vi", {
+              numeric: true,
+            }) ||
+            (a.anchor?.label ?? "").localeCompare(b.anchor?.label ?? "", "vi", {
+              numeric: true,
+            }) ||
+            Date.parse(a.createdAt) - Date.parse(b.createdAt),
+      );
+  }, [live, folded, skill, group, starred, needle, sort]);
+  const words = needle.split(" ").filter(Boolean);
+
   if (!ready) return <div className="loading-state">Đang mở sổ ghi chú…</div>;
 
-  const live = liveNotes(state);
-  const bin = binnedNotes(state);
-  const bytes = noteBytes(allNotes(state));
-  const groups = [
-    ...new Map(
-      live
-        .filter((note) => note.anchor)
-        .map((note) => [
-          `${note.anchor!.source}:${note.anchor!.sourceId}`,
-          note.anchor!.group,
-        ]),
-    ),
-  ].sort((a, b) => a[1].localeCompare(b[1], "vi", { numeric: true }));
-  // Every word typed has to be in the note, in any order and with or without marks.
-  const words = searchFold(query).split(" ").filter(Boolean);
-  const matches = live
-    .filter(
-      (note) =>
-        (skill === "all" || note.anchor?.skill === skill) &&
-        (group === "all" ||
-          `${note.anchor?.source}:${note.anchor?.sourceId}` === group) &&
-        (!starred || note.star) &&
-        matchesAll(note, words),
-    )
-    .sort((a, b) =>
-      sort === "recent"
-        ? Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
-        : (a.anchor?.group ?? "").localeCompare(b.anchor?.group ?? "", "vi", {
-            numeric: true,
-          }) ||
-          (a.anchor?.label ?? "").localeCompare(b.anchor?.label ?? "", "vi", {
-            numeric: true,
-          }) ||
-          Date.parse(a.createdAt) - Date.parse(b.createdAt),
-    );
   const feedback = state.attempts
     .filter((attempt) => attempt.feedback?.trim())
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const filtered =
     skill !== "all" || group !== "all" || starred || words.length > 0;
-  const reminder = backupReminder(state, readBackupMark());
 
   return (
     <div className="page notes-page">
@@ -149,18 +163,7 @@ export function NotesPage() {
         </span>
       </div>
 
-      {reminder && (
-        <p className="notice no-print" role="status">
-          {reminder.since} ghi chú mới chưa nằm trong bản sao lưu nào (
-          {reminder.last
-            ? `bản gần nhất: ${formatNoteDate(reminder.last)}`
-            : "chưa có bản nào"}
-          ). Ghi chú chỉ nằm trên máy này cho đến khi được sao lưu.{" "}
-          <Link className="text-link" href="/settings">
-            Xuất bản sao ở Cài đặt
-          </Link>
-        </p>
-      )}
+      <BackupNudge />
       {live.length === 0 ? (
         <div className="empty-state">
           <StickyNote size={32} />

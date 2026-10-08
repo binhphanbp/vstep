@@ -23,6 +23,8 @@ export const WORK_LIMITS = {
   keys: 40,
   /** What all scratch and highlights may take in the saved profile. */
   bytes: 512 * 1024,
+  /** What one saved draft may hold: more is not read back by the schema. */
+  draft: 30000,
 } as const;
 
 export type Work = {
@@ -267,6 +269,27 @@ function writeDraft(
   return { ...state, drafts };
 }
 
+const DRAFT_FULL =
+  "Phần nháp và câu tô của bài này đã đầy. Xóa bớt nháp hoặc bỏ tô vài câu rồi thử lại.";
+
+/**
+ * A lesson's draft is one text in the saved profile, and the schema reads no
+ * more than `WORK_LIMITS.draft` characters of it: a longer one would make the
+ * whole profile unreadable on the next load. One that is already too long can
+ * still shrink.
+ */
+function checkedDraft(
+  before: StudyState,
+  lessonId: string,
+  after: StudyState,
+): WorkResult {
+  const key = workDraftKey(lessonId);
+  const size = (after.drafts[key] ?? "").length;
+  if (size > WORK_LIMITS.draft && size > (before.drafts[key] ?? "").length)
+    return { state: before, error: DRAFT_FULL };
+  return checked(before, after);
+}
+
 export function setDraftScratch(
   state: StudyState,
   lessonId: string,
@@ -275,7 +298,11 @@ export function setDraftScratch(
 ): WorkResult {
   const result = withScratch(draftWork(state, lessonId), key, value);
   if (result.error) return { state, error: result.error };
-  return checked(state, writeDraft(state, lessonId, result.holder));
+  return checkedDraft(
+    state,
+    lessonId,
+    writeDraft(state, lessonId, result.holder),
+  );
 }
 
 export function toggleDraftMark(
@@ -287,7 +314,11 @@ export function toggleDraftMark(
 ): WorkResult {
   const result = withMark(draftWork(state, lessonId), key, text, index);
   if (result.error) return { state, error: result.error };
-  return checked(state, writeDraft(state, lessonId, result.holder));
+  return checkedDraft(
+    state,
+    lessonId,
+    writeDraft(state, lessonId, result.holder),
+  );
 }
 
 /** Takes the lesson's scratch and highlights out of the draft, to file them. */

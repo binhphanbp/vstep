@@ -31,9 +31,30 @@ export function ScratchPad({
   defaultOpen?: boolean;
 }) {
   const [error, setError] = useState("");
+  // Open or shut is the learner's choice once she has made one. Until then a
+  // page with something on it is open. It must not follow the text alone: an
+  // input method that corrects with Backspace (Unikey, EVKey) empties the box
+  // for an instant in the middle of a word, and so does select-all and delete;
+  // a page that folds away then takes the focus, and the next letters, with it.
+  // Only a click on the heading is a choice (a keyboard press on it is a click
+  // too): the page opening itself because text arrived is not.
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  // The same page reused for another part of the sitting starts over.
+  const [forLabel, setForLabel] = useState(label);
+  if (forLabel !== label) {
+    setForLabel(label);
+    setChosen(null);
+  }
   return (
-    <details className="scratch" open={defaultOpen ?? Boolean(value)}>
-      <summary>
+    <details className="scratch" open={chosen ?? defaultOpen ?? Boolean(value)}>
+      <summary
+        onClick={(event) => {
+          // The page is opened and shut by the state above, not by the
+          // browser: left alone, the browser would flip it again after this.
+          event.preventDefault();
+          setChosen(!event.currentTarget.parentElement?.hasAttribute("open"));
+        }}
+      >
         <PenLine size={14} />
         Nháp
         <small> · để luyện, không tính điểm hay số từ</small>
@@ -45,6 +66,9 @@ export function ScratchPad({
         maxLength={WORK_LIMITS.scratch}
         spellCheck={false}
         placeholder={placeholder}
+        // Being in the box is as good as having opened it: a page that opened
+        // itself because it had text, and is then emptied, must stay.
+        onFocus={() => setChosen((was) => was ?? true)}
         onChange={(event) => setError(onChange(event.target.value) ?? "")}
       />
       {error ? (
