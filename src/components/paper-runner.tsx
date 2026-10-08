@@ -15,6 +15,7 @@ import {
 } from "./paper-work";
 import { ScratchPad } from "./scratch-pad";
 import { useStudy } from "./study-provider";
+import { pruneGrades } from "@/lib/grades";
 import {
   addPaperRun,
   advancePaperRun,
@@ -164,7 +165,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         return current;
       }
       dropped = added.dropped;
-      return { ...current, paperRuns: added.runs };
+      // The AI grades of a sitting let go of by the cap go with it.
+      return pruneGrades({ ...current, paperRuns: added.runs });
     });
     // The recordings of sittings let go of by the cap go with them.
     for (const old of dropped)

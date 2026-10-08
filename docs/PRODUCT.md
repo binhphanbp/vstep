@@ -41,7 +41,7 @@ Nguồn định dạng đối chiếu: [ULIS VSTEP Test format](https://vstep.vn
 - IndexedDB lưu Blob ghi âm, không nhét base64 vào JSON. Bản nháp theo bài và bản lưu riêng cho lượt Nói hoàn thành. Xuất JSON không bao gồm âm thanh.
 - Supabase Auth email/mật khẩu cho tài khoản cấp sẵn; không có đăng ký công khai. RLS giới hạn đúng tài khoản được cho phép.
 - Snapshot đám mây lưu thủ công bằng RPC có revision và khoá giao dịch. Bản cũ không tự ghi đè bản mới. Tải về yêu cầu xác nhận và xuất bản thiết bị trước khi thay thế. Không tự gộp lịch sử khác nhánh.
-- Không có service-role key trong client, không tự gửi nội dung/bản ghi đến API AI, không tracking hay quảng cáo.
+- Không có service-role key trong client, không tự gửi gì đến API AI (chỉ đề bài và bài viết của một bài Viết, khi Gùa bấm “Chấm bằng AI” và đã đồng ý), không tracking hay quảng cáo.
 
 ## Ranh giới cần hoàn thành trước khi gọi là hệ luyện thi toàn diện
 

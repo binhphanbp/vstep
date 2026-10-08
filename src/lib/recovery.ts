@@ -32,6 +32,8 @@ export type WorkPair = { scratch?: Scratch; marks?: Marks };
 /** The part of a profile that an older build cannot hold. */
 export type Recoverable = {
   notes?: Note[];
+  /** The AI grades, by the work they belong to. */
+  grades?: NonNullable<StudyState["grades"]>;
   /** The scratch pages and highlights of each sitting, by its own id. */
   work?: {
     attempts?: Record<string, WorkPair>;
@@ -64,6 +66,8 @@ function collect(
 export function recoverableOf(state: StudyState): Recoverable {
   const saved: Recoverable = {};
   if (state.notes?.length) saved.notes = state.notes;
+  if (state.grades && Object.keys(state.grades).length)
+    saved.grades = state.grades;
   const work: NonNullable<Recoverable["work"]> = {};
   const attempts = collect(state.attempts as readonly Holder[]);
   if (attempts) work.attempts = attempts;
@@ -106,6 +110,8 @@ export function putBack(state: StudyState, saved: Recoverable): StudyState {
   let next = state;
   if (state.notes === undefined && saved.notes?.length)
     next = { ...next, notes: saved.notes };
+  if (state.grades === undefined && saved.grades)
+    next = { ...next, grades: saved.grades };
   const work = saved.work;
   if (work) {
     const attempts = withWork(

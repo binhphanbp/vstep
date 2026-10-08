@@ -504,7 +504,7 @@ textarea:focus-visible {
   border-color: #f1d1ce;
 }
 .button.ghost {
-  color: var(--rose);
+  color: #9f2f63;
   background: #f6f1f3;
 }
 .icon-button {
@@ -4438,4 +4438,130 @@ mark.hl,
   border-left: 3px solid #e0bf55;
   color: #6f5a22;
   font-size: 13px;
+}
+
+/* AI grading of a piece of writing (Chấm bằng AI) */
+.grade-panel {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffafc;
+}
+.grade-panel h4 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 8px;
+  color: #9f2f63;
+}
+.grade-panel h5 {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.grade-consent {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  max-width: 62ch;
+}
+.grade-consent label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.grade-consent input {
+  border: 1px solid #e3cfd9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+}
+.grade-consent a {
+  text-decoration: underline;
+}
+.grade-result {
+  margin-top: 14px;
+}
+.grade-estimate {
+  font-size: 12px;
+  color: #7d5a6b;
+  margin-bottom: 4px;
+}
+.grade-total {
+  font-size: 15px;
+  margin: 8px 0;
+}
+.grade-criteria,
+.grade-requirements,
+.grade-errors {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.grade-errors {
+  list-style: decimal;
+  padding-left: 20px;
+}
+.grade-criteria > li {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.grade-criterion-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.grade-criteria details {
+  margin-top: 6px;
+}
+.grade-criteria details p,
+.grade-criteria details ul {
+  margin: 6px 0 0;
+}
+.grade-criteria details ul {
+  padding-left: 18px;
+  list-style: disc;
+}
+.grade-essay {
+  margin: 8px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+mark.grade-err {
+  background: #ffe3d6;
+  color: inherit;
+  border-bottom: 2px solid #c8573a;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+mark.grade-err sup {
+  font-size: 10px;
+  margin-left: 1px;
+  color: #8f3a22;
+}
+.grade-meta {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--muted);
+}
+@media print {
+  .grade-panel .button-row,
+  .grade-consent {
+    display: none;
+  }
 }
