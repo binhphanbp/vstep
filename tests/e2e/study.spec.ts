@@ -26,6 +26,10 @@ async function rateSelfCheck(page: Page, level = "Tạm ổn") {
 test("dashboard is honest, responsive, and energy changes the plan", async ({
   page,
 }) => {
+  // The note in the side column is shown in full only where there is room for
+  // it (see shell-layout.spec.ts for the shorter screens, where it gives way
+  // to the links under it).
+  await page.setViewportSize({ width: 1280, height: 1100 });
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Một ngày mới, một bước tiến." }),

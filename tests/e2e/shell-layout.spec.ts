@@ -12,29 +12,33 @@ const state = () => {
   return s;
 };
 
-for (const height of [700, 720, 768, 800, 900, 1080]) {
-  test(`at ${height} px tall the side column shows everything, down to the profile`, async ({
-    page,
-  }) => {
+test("at every height from 700 px up the side column shows everything, down to the profile", async ({
+  page,
+}) => {
+  await page.addInitScript((initial) => {
+    if (!localStorage.getItem("may-study-v1"))
+      localStorage.setItem("may-study-v1", JSON.stringify(initial));
+  }, state());
+  for (const height of [700, 720, 768, 800, 900, 1080]) {
     await page.setViewportSize({ width: 1280, height });
-    await page.addInitScript((initial) => {
-      if (!localStorage.getItem("may-study-v1"))
-        localStorage.setItem("may-study-v1", JSON.stringify(initial));
-    }, state());
     await page.goto("/");
     const side = page.locator(".sidebar");
     await expect(
       side.getByRole("link", { name: /Hành trình đến/ }),
+      `${height} px`,
     ).toBeVisible();
     const fits = await side.evaluate((el) => ({
       scrolls: el.scrollHeight > el.clientHeight,
       last: el.querySelector(".profile-link")!.getBoundingClientRect().bottom,
       screen: innerHeight,
     }));
-    expect(fits.scrolls).toBe(false);
-    expect(fits.last).toBeLessThanOrEqual(fits.screen);
-  });
-}
+    expect(fits.scrolls, `${height} px: the column scrolls`).toBe(false);
+    expect(
+      fits.last,
+      `${height} px: the profile is cut off`,
+    ).toBeLessThanOrEqual(fits.screen);
+  }
+});
 
 test("the paper bank is in the menu, and is the page the menu marks while a paper is open", async ({
   page,
