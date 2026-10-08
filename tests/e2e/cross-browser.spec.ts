@@ -181,14 +181,24 @@ test("a note written after a lesson is kept and found again", async ({
     .evaluateAll((inputs) => [
       ...new Set(inputs.map((input) => (input as HTMLInputElement).name)),
     ]);
-  for (const name of names) {
-    await page.locator(`input[name="${name}"]`).first().check();
-    await page
-      .locator(".question")
-      .filter({ has: page.locator(`input[name="${name}"]`) })
-      .getByRole("button", { name: "Chưa chắc" })
-      .click();
-  }
+  // A click that lands before the page has hydrated is lost, and WebKit on a
+  // slow runner is where that happens. The answers are given again until the
+  // page itself says it has all of them, instead of assuming they were kept.
+  const all = names.length;
+  await expect(async () => {
+    for (const name of names) {
+      await page.locator(`input[name="${name}"]`).first().check();
+      await page
+        .locator(".question")
+        .filter({ has: page.locator(`input[name="${name}"]`) })
+        .getByRole("button", { name: "Chưa chắc" })
+        .click();
+    }
+    await expect(page.locator(".answer-submit [role=status]")).toHaveText(
+      `${all}/${all} câu đã trả lời · ${all}/${all} mức chắc chắn`,
+      { timeout: 2000 },
+    );
+  }).toPass({ timeout: 30000 });
   await page.getByRole("button", { name: "Xem kết quả", exact: true }).click();
   const first = page.locator(".question").first();
   await first.getByRole("button", { name: "Ghi chú cho câu này" }).click();
