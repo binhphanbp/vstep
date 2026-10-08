@@ -1,12 +1,33 @@
 "use client";
-import { useMemo, useState } from "react";
-import { PenLine } from "lucide-react";
+import { useId, useMemo, useState, type ReactNode } from "react";
+import { ChevronDown, PenLine } from "lucide-react";
 import { resolveMarks, sentenceSpans, type Mark } from "@/lib/marks";
 import { addNote } from "@/lib/notes";
 import type { NotePlace } from "@/lib/note-anchors";
 import { WORK_LIMITS } from "@/lib/work";
 import { NoteAdder, applyNote } from "./note-box";
 import { useStudy } from "./study-provider";
+
+/**
+ * Whether a page is open. Open or shut is the learner's choice once she has
+ * made one. Until then a page with something on it is open. It must not follow
+ * the text alone: an input method that corrects with Backspace (Unikey, EVKey)
+ * empties the box for an instant in the middle of a word, and so does
+ * select-all and delete; a page that folds away then takes the focus, and the
+ * next letters, with it. Only a click on the heading is a choice (a keyboard
+ * press on it is a click too): the page opening itself because text arrived is
+ * not.
+ */
+function useScratchChoice(label: string, value: string, defaultOpen?: boolean) {
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  // The same page reused for another part of the sitting starts over.
+  const [forLabel, setForLabel] = useState(label);
+  if (forLabel !== label) {
+    setForLabel(label);
+    setChosen(null);
+  }
+  return { open: chosen ?? defaultOpen ?? Boolean(value), setChosen };
+}
 
 /**
  * A page for keywords, numbers and outlines while working: the paper Gùa would
@@ -31,22 +52,9 @@ export function ScratchPad({
   defaultOpen?: boolean;
 }) {
   const [error, setError] = useState("");
-  // Open or shut is the learner's choice once she has made one. Until then a
-  // page with something on it is open. It must not follow the text alone: an
-  // input method that corrects with Backspace (Unikey, EVKey) empties the box
-  // for an instant in the middle of a word, and so does select-all and delete;
-  // a page that folds away then takes the focus, and the next letters, with it.
-  // Only a click on the heading is a choice (a keyboard press on it is a click
-  // too): the page opening itself because text arrived is not.
-  const [chosen, setChosen] = useState<boolean | null>(null);
-  // The same page reused for another part of the sitting starts over.
-  const [forLabel, setForLabel] = useState(label);
-  if (forLabel !== label) {
-    setForLabel(label);
-    setChosen(null);
-  }
+  const { open, setChosen } = useScratchChoice(label, value, defaultOpen);
   return (
-    <details className="scratch" open={chosen ?? defaultOpen ?? Boolean(value)}>
+    <details className="scratch" open={open}>
       <summary
         onClick={(event) => {
           // The page is opened and shut by the state above, not by the
@@ -79,6 +87,87 @@ export function ScratchPad({
         <p className="help-copy">Tự lưu cùng lượt này.</p>
       )}
     </details>
+  );
+}
+
+/**
+ * The scratch page as the exam room has it: a drawer that opens above the
+ * bottom bar and pushes the question up instead of covering it, the way a
+ * pad of paper sits beside the screen. Its button is the first thing in the
+ * bar; what the room wants beside it (the question list, the way on) is
+ * passed as children. The page belongs to the sitting exactly as `ScratchPad`'s
+ * does, and is opened and shut by the same rule.
+ */
+export function ScratchDock({
+  value,
+  onChange,
+  label,
+  placeholder,
+  defaultOpen,
+  children,
+}: {
+  value: string;
+  /** Returns why the text was not kept, if it was not. */
+  onChange: (value: string) => string | undefined;
+  label: string;
+  placeholder: string;
+  defaultOpen?: boolean;
+  children?: ReactNode;
+}) {
+  const [error, setError] = useState("");
+  const { open, setChosen } = useScratchChoice(label, value, defaultOpen);
+  const drawer = useId();
+  return (
+    <div className="exam-dock">
+      {open && (
+        <div className="exam-scratch" id={drawer}>
+          <div className="exam-scratch-head">
+            <PenLine size={14} />
+            <strong>Nháp</strong>
+            <small>để luyện, không tính điểm hay số từ</small>
+            {error ? (
+              <span className="note-error" role="alert">
+                {error}
+              </span>
+            ) : (
+              <span className="exam-scratch-state">Tự lưu cùng lượt này</span>
+            )}
+            <button
+              type="button"
+              className="exam-scratch-close"
+              aria-label="Thu gọn"
+              onClick={() => setChosen(false)}
+            >
+              <ChevronDown size={16} />
+            </button>
+          </div>
+          <textarea
+            aria-label={label}
+            value={value}
+            rows={4}
+            maxLength={WORK_LIMITS.scratch}
+            spellCheck={false}
+            placeholder={placeholder}
+            onFocus={() => setChosen((was) => was ?? true)}
+            onChange={(event) => setError(onChange(event.target.value) ?? "")}
+          />
+        </div>
+      )}
+      <div className="exam-bar">
+        <button
+          type="button"
+          className={`exam-tool ${open ? "on" : ""}`}
+          aria-expanded={open}
+          aria-controls={drawer}
+          onClick={() => setChosen(!open)}
+        >
+          <PenLine size={15} />
+          Nháp
+          {value && !open && <span className="exam-tool-dot" aria-hidden />}
+        </button>
+        {children}
+      </div>
+    </div>
   );
 }
 

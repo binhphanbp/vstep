@@ -8,6 +8,7 @@ import {
   BookOpen,
   Timer,
   Layers,
+  Library,
   NotebookPen,
   StickyNote,
   ChartNoAxesCombined,
@@ -29,6 +30,7 @@ const nav = [
   { href: "/journey", label: "Lộ trình của mình", icon: Route },
   { href: "/practice", label: "Luyện 4 kỹ năng", icon: BookOpen },
   { href: "/exam", label: "Phòng thi thử", icon: Timer },
+  { href: "/papers", label: "Kho đề luyện", icon: Library },
   { href: "/vocabulary", label: "Vườn từ vựng", icon: Layers },
   { href: "/mistakes", label: "Sổ tay lỗi sai", icon: NotebookPen },
   { href: "/notes", label: "Sổ ghi chú", icon: StickyNote },
@@ -37,7 +39,6 @@ const nav = [
 // Pages outside the main navigation; anything else is an error page and must
 // not borrow another page's name.
 function otherLabel(pathname: string) {
-  if (pathname.startsWith("/papers")) return "Kho đề luyện";
   if (pathname.startsWith("/guide")) return "Cẩm nang VSTEP";
   if (pathname.startsWith("/settings")) return "Cài đặt của mình";
   if (pathname.startsWith("/review-pack")) return "Gói ôn tập";

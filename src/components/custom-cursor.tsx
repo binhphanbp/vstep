@@ -43,6 +43,9 @@ export function CustomCursor() {
       dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%) scale(${pressed ? 0.72 : 1})`;
     };
     const animateRing = () => {
+      // The room is entered without the pointer moving, and the ring would
+      // stay where it was left.
+      if (visible && document.body.classList.contains("exam-immersive")) hide();
       ringX += (targetX - ringX) * 0.22;
       ringY += (targetY - ringY) * 0.22;
       ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) scale(${pressed ? 0.82 : 1})`;
@@ -62,7 +65,12 @@ export function CustomCursor() {
       }
 
       const target = event.target instanceof Element ? event.target : null;
-      if (target?.closest(nativeCursorSelector)) {
+      // The exam room is a plain screen with the system pointer: an exam's
+      // software does not trail a ring behind it.
+      if (
+        document.body.classList.contains("exam-immersive") ||
+        target?.closest(nativeCursorSelector)
+      ) {
         hide();
         return;
       }

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight, Headphones } from "lucide-react";
 import {
   Fragment,
   useCallback,
@@ -27,7 +28,7 @@ import {
   taskKey,
   type PaperWork,
 } from "./paper-work";
-import { ScratchPad } from "./scratch-pad";
+import { ScratchDock } from "./scratch-pad";
 
 /**
  * The exam room: a sitting that behaves like the computer-based VSTEP rather
@@ -259,7 +260,7 @@ export function ExamCheckIn({
       </label>
       <button
         type="button"
-        className="button primary"
+        className="button primary exam-start"
         disabled={!agreed || disabled}
         onClick={onStart}
       >
@@ -312,16 +313,20 @@ function ListeningSlot({
   run,
   edit,
   work,
-  isLast,
+  position,
+  count,
   onNext,
 }: {
   slot: PaperSlot;
   run: PaperRun;
   edit: Edit;
   work: PaperWork;
-  isLast: boolean;
+  /** Which recording this is, from 1, and how many there are. */
+  position: number;
+  count: number;
   onNext: () => void;
 }) {
+  const isLast = position === count;
   const alreadyHeard = (run.heard ?? []).includes(slot.id);
   // Whether this screen was opened after the recording had already played, e.g.
   // after a reload; decided once, so the wording does not flip mid-listen.
@@ -330,6 +335,9 @@ function ListeningSlot({
     alreadyHeard ? "done" : "reading",
   );
   const [wait, setWait] = useState(LISTENING_READ_SECONDS);
+  // How far the recording has played, 0 to 1: a bar that shows the time left
+  // without a handle to move, as the exam's own player does.
+  const [played, setPlayed] = useState(0);
   const audio = useRef<HTMLAudioElement>(null);
   const started = useRef(false);
 
@@ -379,57 +387,87 @@ function ListeningSlot({
       ? "Bản ghi âm bị gián đoạn và không phát lại được. Bạn có thể làm tiếp và bấm Tiếp theo."
       : "Không phát được bản ghi âm. Kiểm tra kết nối và tai nghe rồi bấm thử lại.",
   }[phase];
+  const meter =
+    phase === "reading"
+      ? (LISTENING_READ_SECONDS - wait) / LISTENING_READ_SECONDS
+      : phase === "playing"
+        ? played
+        : phase === "done"
+          ? 1
+          : 0;
   return (
-    <div className="exam-slot">
-      <h2>
-        {slot.part} · {first === last ? `Câu ${first}` : `Câu ${first}–${last}`}
-      </h2>
-      {slot.audio && (
-        <audio
-          ref={audio}
-          src={slot.audio}
-          preload="auto"
-          onPlaying={markHeard}
-          onEnded={() => setPhase("done")}
-          onError={() => {
-            started.current = false;
-            setPhase("failed");
-          }}
-        />
-      )}
-      <p className={`exam-audio-status ${phase}`} role="status">
-        {status}
-      </p>
-      {(phase === "blocked" || phase === "failed") && !alreadyHeard && (
-        <button type="button" className="button secondary" onClick={begin}>
-          Phát bản ghi âm (chỉ một lần)
-        </button>
-      )}
-      <ScratchPad
+    <>
+      <div className="exam-body">
+        <div className="exam-slot exam-column">
+          <h2>
+            {slot.part} ·{" "}
+            {first === last ? `Câu ${first}` : `Câu ${first}–${last}`}
+          </h2>
+          {slot.audio && (
+            <audio
+              ref={audio}
+              src={slot.audio}
+              preload="auto"
+              onPlaying={markHeard}
+              onTimeUpdate={(event) => {
+                const { currentTime, duration } = event.currentTarget;
+                if (duration > 0)
+                  setPlayed(Math.min(1, currentTime / duration));
+              }}
+              onEnded={() => setPhase("done")}
+              onError={() => {
+                started.current = false;
+                setPhase("failed");
+              }}
+            />
+          )}
+          <div className={`exam-audio-status ${phase}`} role="status">
+            <Headphones size={20} aria-hidden />
+            <span>{status}</span>
+            <i className="exam-meter" aria-hidden>
+              <b style={{ width: `${Math.round(meter * 100)}%` }} />
+            </i>
+          </div>
+          {(phase === "blocked" || phase === "failed") && !alreadyHeard && (
+            <button type="button" className="button secondary" onClick={begin}>
+              Phát bản ghi âm (chỉ một lần)
+            </button>
+          )}
+          {slot.items.map((item) => (
+            <Question key={item.id} item={item} run={run} edit={edit} />
+          ))}
+        </div>
+      </div>
+      <ScratchDock
         value={work.scratch(slot.id)}
         onChange={(value) => work.setScratch(slot.id, value)}
         label={`Nháp cho ${slot.part}`}
         placeholder={SCRATCH_HINTS.listening}
         defaultOpen
-      />
-      {slot.items.map((item) => (
-        <Question key={item.id} item={item} run={run} edit={edit} />
-      ))}
-      <div className="button-row exam-foot">
-        <button
-          type="button"
-          className="button primary"
-          // "blocked" is a recording not yet played: it has to be started first.
-          // A recording that fails outright must not trap the sitting, though.
-          disabled={
-            phase === "reading" || phase === "playing" || phase === "blocked"
-          }
-          onClick={onNext}
-        >
-          {isLast ? "Nộp phần Nghe" : "Tiếp theo"}
-        </button>
-      </div>
-    </div>
+      >
+        <div className="exam-bar-mid">
+          <span className="exam-where-now">
+            Đoạn {position}/{count}
+          </span>
+        </div>
+        <div className="exam-bar-end">
+          <button
+            type="button"
+            className="button primary"
+            // "blocked" is a recording not yet played: it has to be started
+            // first. A recording that fails outright must not trap the sitting,
+            // though.
+            disabled={
+              phase === "reading" || phase === "playing" || phase === "blocked"
+            }
+            onClick={onNext}
+          >
+            {isLast ? "Nộp phần Nghe" : "Tiếp theo"}
+            {!isLast && <ChevronRight size={16} aria-hidden />}
+          </button>
+        </div>
+      </ScratchDock>
+    </>
   );
 }
 
@@ -455,7 +493,8 @@ function ListeningRoom({
       run={run}
       edit={edit}
       work={work}
-      isLast={index === slots.length - 1}
+      position={index + 1}
+      count={slots.length}
       onNext={() =>
         index === slots.length - 1
           ? onSubmit()
@@ -483,78 +522,101 @@ function ReadingRoom({
   const go = (target: number) =>
     edit((current) => ({ ...current, material: target }));
   return (
-    <div className="exam-slot">
-      <nav className="exam-palette" aria-label="Danh sách câu hỏi">
-        {palette.map(({ item, slotIndex }) => (
-          <button
-            type="button"
-            key={item.id}
-            className={`${run.answers[item.id] !== undefined ? "answered" : ""} ${slotIndex === index ? "here" : ""}`}
-            aria-label={`Câu ${item.number}${run.answers[item.id] !== undefined ? ", đã trả lời" : ""}`}
-            onClick={() => {
-              go(slotIndex);
-              window.setTimeout(
-                () =>
-                  document
-                    .getElementById(`q-${item.id}`)
-                    ?.scrollIntoView({ block: "center" }),
-                30,
-              );
-            }}
-          >
-            {item.number}
-          </button>
-        ))}
-      </nav>
-      <h2>{slot.part}</h2>
-      <div className="exam-split">
-        <section
-          className="exam-pane exam-passage"
-          tabIndex={0}
-          aria-label={`Bài đọc ${index + 1}`}
-        >
-          <MarkablePassage
-            key={slot.id}
-            text={slot.passage}
-            className="paper-text"
-            marks={work.marks(passageKey(slot.id))}
-            onToggle={(sentence) =>
-              work.toggle(passageKey(slot.id), slot.passage, sentence)
-            }
-          />
-        </section>
-        <section className="exam-pane" aria-label="Câu hỏi">
-          {slot.items.map((item) => (
-            <Question key={item.id} item={item} run={run} edit={edit} />
-          ))}
-        </section>
+    <>
+      <div className="exam-body">
+        <div className="exam-slot exam-fill">
+          <div className="exam-split">
+            <section
+              className="exam-pane exam-passage"
+              tabIndex={0}
+              aria-label={`Bài đọc ${index + 1}`}
+            >
+              <h2>{slot.part}</h2>
+              <MarkablePassage
+                key={slot.id}
+                text={slot.passage}
+                className="paper-text"
+                marks={work.marks(passageKey(slot.id))}
+                onToggle={(sentence) =>
+                  work.toggle(passageKey(slot.id), slot.passage, sentence)
+                }
+              />
+            </section>
+            <section className="exam-pane exam-questions" aria-label="Câu hỏi">
+              {slot.items.map((item) => (
+                <Question key={item.id} item={item} run={run} edit={edit} />
+              ))}
+            </section>
+          </div>
+        </div>
       </div>
-      <ScratchPad
+      <ScratchDock
         key={slot.id}
         value={work.scratch(slot.id)}
         onChange={(value) => work.setScratch(slot.id, value)}
         label={`Nháp cho ${slot.part}`}
         placeholder={SCRATCH_HINTS.reading}
-      />
-      <div className="button-row exam-foot">
-        <button
-          type="button"
-          className="button secondary"
-          disabled={index === 0}
-          onClick={() => go(index - 1)}
-        >
-          Bài trước
-        </button>
-        <button
-          type="button"
-          className="button primary"
-          disabled={index === slots.length - 1}
-          onClick={() => go(index + 1)}
-        >
-          Bài tiếp theo
-        </button>
-      </div>
-    </div>
+      >
+        <nav className="exam-palette" aria-label="Danh sách câu hỏi">
+          {slots.map((entry, slotIndex) => (
+            <div
+              className={`exam-group ${slotIndex === index ? "here" : ""}`}
+              role="group"
+              aria-label={`Bài đọc ${slotIndex + 1}${slotIndex === index ? ", đang xem" : ""}`}
+              key={entry.id}
+            >
+              <span className="exam-group-name" aria-hidden>
+                Bài {slotIndex + 1}
+              </span>
+              {palette
+                .filter((cell) => cell.slotIndex === slotIndex)
+                .map(({ item }) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    className={
+                      run.answers[item.id] !== undefined ? "answered" : ""
+                    }
+                    aria-label={`Câu ${item.number}${run.answers[item.id] !== undefined ? ", đã trả lời" : ""}`}
+                    onClick={() => {
+                      go(slotIndex);
+                      window.setTimeout(
+                        () =>
+                          document
+                            .getElementById(`q-${item.id}`)
+                            ?.scrollIntoView({ block: "center" }),
+                        30,
+                      );
+                    }}
+                  >
+                    {item.number}
+                  </button>
+                ))}
+            </div>
+          ))}
+        </nav>
+        <div className="exam-bar-end">
+          <button
+            type="button"
+            className="button secondary"
+            disabled={index === 0}
+            onClick={() => go(index - 1)}
+          >
+            <ChevronLeft size={16} aria-hidden />
+            Bài trước
+          </button>
+          <button
+            type="button"
+            className="button primary"
+            disabled={index === slots.length - 1}
+            onClick={() => go(index + 1)}
+          >
+            Bài tiếp theo
+            <ChevronRight size={16} aria-hidden />
+          </button>
+        </div>
+      </ScratchDock>
+    </>
   );
 }
 
@@ -575,65 +637,79 @@ function WritingRoom({
   const text = run.essays[slot.id] ?? "";
   const words = wordCount(text);
   return (
-    <div className="exam-slot">
-      <div className="exam-tabs" role="tablist" aria-label="Bài viết">
-        {slots.map((entry, tab) => (
-          <button
-            type="button"
-            role="tab"
-            key={entry.id}
-            aria-selected={tab === index}
-            className={tab === index ? "current" : ""}
-            onClick={() => edit((current) => ({ ...current, material: tab }))}
-          >
-            {entry.part}
-            {(run.essays[entry.id] ?? "").trim() ? " ✓" : ""}
-          </button>
-        ))}
+    <>
+      <div className="exam-body">
+        <div className="exam-slot exam-fill">
+          <div className="exam-split">
+            <section className="exam-pane" aria-label="Đề bài">
+              <h2>{slot.part}</h2>
+              <MarkablePassage
+                key={slot.id}
+                text={slot.prompt}
+                className="paper-text"
+                marks={work.marks(taskKey(slot.id))}
+                onToggle={(sentence) =>
+                  work.toggle(taskKey(slot.id), slot.prompt, sentence)
+                }
+              />
+            </section>
+            <section className="exam-pane exam-write" aria-label="Bài làm">
+              <h2>Bài làm</h2>
+              <textarea
+                className="writing-area exam-writing"
+                aria-label={`Bài viết ${slot.part}`}
+                value={text}
+                maxLength={30000}
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                placeholder="Viết bài của bạn ở đây…"
+                onChange={(event) => {
+                  const value = event.target.value;
+                  edit((current) => ({
+                    ...current,
+                    essays: { ...current.essays, [slot.id]: value },
+                  }));
+                }}
+              />
+              <p
+                className={`exam-wordcount ${slot.wordMin !== undefined && words >= slot.wordMin ? "enough" : ""}`}
+                role="status"
+              >
+                {words} từ · yêu cầu: ít nhất {slot.wordMin} từ
+              </p>
+            </section>
+          </div>
+        </div>
       </div>
-      <div className="exam-split">
-        <section className="exam-pane" aria-label="Đề bài">
-          <MarkablePassage
-            key={slot.id}
-            text={slot.prompt}
-            className="paper-text"
-            marks={work.marks(taskKey(slot.id))}
-            onToggle={(sentence) =>
-              work.toggle(taskKey(slot.id), slot.prompt, sentence)
-            }
-          />
-          <ScratchPad
-            key={`scratch-${slot.id}`}
-            value={work.scratch(slot.id)}
-            onChange={(value) => work.setScratch(slot.id, value)}
-            label={`Dàn ý cho ${slot.part}`}
-            placeholder={SCRATCH_HINTS.writing}
-            defaultOpen
-          />
-        </section>
-        <section className="exam-pane" aria-label="Bài làm">
-          <textarea
-            className="writing-area exam-writing"
-            aria-label={`Bài viết ${slot.part}`}
-            value={text}
-            maxLength={30000}
-            spellCheck={false}
-            autoCorrect="off"
-            autoCapitalize="off"
-            onChange={(event) => {
-              const value = event.target.value;
-              edit((current) => ({
-                ...current,
-                essays: { ...current.essays, [slot.id]: value },
-              }));
-            }}
-          />
-          <p className="help-copy" role="status">
-            {words} từ · yêu cầu: ít nhất {slot.wordMin} từ
-          </p>
-        </section>
-      </div>
-    </div>
+      <ScratchDock
+        key={`scratch-${slot.id}`}
+        value={work.scratch(slot.id)}
+        onChange={(value) => work.setScratch(slot.id, value)}
+        label={`Dàn ý cho ${slot.part}`}
+        placeholder={SCRATCH_HINTS.writing}
+      >
+        <div className="exam-bar-mid">
+          <div className="exam-tabs" role="tablist" aria-label="Bài viết">
+            {slots.map((entry, tab) => (
+              <button
+                type="button"
+                role="tab"
+                key={entry.id}
+                aria-selected={tab === index}
+                className={tab === index ? "current" : ""}
+                onClick={() =>
+                  edit((current) => ({ ...current, material: tab }))
+                }
+              >
+                {entry.part}
+                {(run.essays[entry.id] ?? "").trim() ? " ✓" : ""}
+              </button>
+            ))}
+          </div>
+        </div>
+      </ScratchDock>
+    </>
   );
 }
 
@@ -831,26 +907,59 @@ function SpeakingRoom({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [now, current]);
 
+  const steps = (
+    <ol className="exam-steps" aria-label="Các phần Nói">
+      {slots.map((entry, step) => (
+        <li
+          key={entry.id}
+          className={step === index ? "current" : step < index ? "done" : ""}
+          aria-current={step === index ? "step" : undefined}
+        >
+          {step < index ? "✓ " : ""}
+          {entry.part}
+        </li>
+      ))}
+    </ol>
+  );
+  if (!current)
+    return (
+      <>
+        <div className="exam-body">
+          <div className="exam-slot exam-column">
+            <section className="panel exam-intro">
+              <h2>
+                {slot.part} · phần Nói {index + 1}/{slots.length}
+              </h2>
+              <p>
+                {plan.prepSeconds
+                  ? `Bạn có ${plan.prepSeconds / 60} phút chuẩn bị, rồi nói tối đa ${plan.talkSeconds / 60} phút. Máy tự bắt đầu ghi âm sau tiếng bíp.`
+                  : `Bạn nói tối đa ${plan.talkSeconds / 60} phút. Máy ghi âm sau tiếng bíp.`}{" "}
+                Không thể ghi lại bản mới sau khi kết thúc phần này.
+              </p>
+              <button
+                type="button"
+                className="button primary"
+                onClick={beginPart}
+              >
+                Bắt đầu {slot.part}
+              </button>
+            </section>
+          </div>
+        </div>
+        <div className="exam-dock">
+          <div className="exam-bar">
+            <div className="exam-bar-mid">{steps}</div>
+          </div>
+        </div>
+      </>
+    );
   return (
-    <div className="exam-slot">
-      <h2>
-        {slot.part} · phần Nói {index + 1}/{slots.length}
-      </h2>
-      {!current && (
-        <section className="panel exam-intro">
-          <p>
-            {plan.prepSeconds
-              ? `Bạn có ${plan.prepSeconds / 60} phút chuẩn bị, rồi nói tối đa ${plan.talkSeconds / 60} phút. Máy tự bắt đầu ghi âm sau tiếng bíp.`
-              : `Bạn nói tối đa ${plan.talkSeconds / 60} phút. Máy ghi âm sau tiếng bíp.`}{" "}
-            Không thể ghi lại bản mới sau khi kết thúc phần này.
-          </p>
-          <button type="button" className="button primary" onClick={beginPart}>
-            Bắt đầu {slot.part}
-          </button>
-        </section>
-      )}
-      {current && (
-        <>
+    <>
+      <div className="exam-body">
+        <div className="exam-slot exam-column">
+          <h2>
+            {slot.part} · phần Nói {index + 1}/{slots.length}
+          </h2>
           <p
             className={`exam-speak-clock ${current.phase}`}
             role="timer"
@@ -883,46 +992,48 @@ function SpeakingRoom({
               ))}
             </ul>
           )}
-          <ScratchPad
-            key={`scratch-${slot.id}`}
-            value={work.scratch(slot.id)}
-            onChange={(value) => work.setScratch(slot.id, value)}
-            label={`Dàn ý cho ${slot.part}`}
-            placeholder={SCRATCH_HINTS.speaking}
-            defaultOpen
-          />
           {micProblem && (
             <p className="notice error" role="alert">
               {micProblem}
             </p>
           )}
-          <div className="button-row exam-foot">
-            {current.phase === "prep" ? (
-              <button
-                type="button"
-                className="button secondary"
-                onClick={beginTalk}
-              >
-                Bắt đầu nói ngay
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="button primary"
-                onClick={() => {
-                  if (micProblem) marker.current(run.id, slot.id);
-                  advancePart();
-                }}
-              >
-                {index === slots.length - 1
-                  ? "Kết thúc phần Nói"
-                  : "Kết thúc phần này"}
-              </button>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+        </div>
+      </div>
+      <ScratchDock
+        key={`scratch-${slot.id}`}
+        value={work.scratch(slot.id)}
+        onChange={(value) => work.setScratch(slot.id, value)}
+        label={`Dàn ý cho ${slot.part}`}
+        placeholder={SCRATCH_HINTS.speaking}
+        defaultOpen
+      >
+        <div className="exam-bar-mid">{steps}</div>
+        <div className="exam-bar-end">
+          {current.phase === "prep" ? (
+            <button
+              type="button"
+              className="button secondary"
+              onClick={beginTalk}
+            >
+              Bắt đầu nói ngay
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="button primary"
+              onClick={() => {
+                if (micProblem) marker.current(run.id, slot.id);
+                advancePart();
+              }}
+            >
+              {index === slots.length - 1
+                ? "Kết thúc phần Nói"
+                : "Kết thúc phần này"}
+            </button>
+          )}
+        </div>
+      </ScratchDock>
+    </>
   );
 }
 
@@ -952,6 +1063,8 @@ export function ExamRoom({
   const seconds = Math.max(0, Math.ceil((run.deadline - now) / 1000));
   const answered = paperAnswered(paper, run, run.stage);
   const total = paperStageTotal(paper, run.stage);
+  const done =
+    total > 0 ? Math.min(100, Math.round((answered / total) * 100)) : 0;
   return (
     <div className="exam-room">
       <header className="exam-head">
@@ -1007,36 +1120,37 @@ export function ExamRoom({
             Thoát
           </Link>
         </div>
+        <i className="exam-progress-line" aria-hidden>
+          <b style={{ width: `${done}%` }} />
+        </i>
       </header>
-      <div className="exam-main">
-        {run.stage === 0 && (
-          <ListeningRoom
-            paper={paper}
-            run={run}
-            edit={edit}
-            work={work}
-            onSubmit={onSubmit}
-          />
-        )}
-        {run.stage === 1 && (
-          <ReadingRoom paper={paper} run={run} edit={edit} work={work} />
-        )}
-        {run.stage === 2 && (
-          <WritingRoom paper={paper} run={run} edit={edit} work={work} />
-        )}
-        {run.stage === 3 && (
-          <SpeakingRoom
-            paper={paper}
-            run={run}
-            now={now}
-            edit={edit}
-            work={work}
-            markRecorded={markRecorded}
-            onFinish={onFinish}
-          />
-        )}
-        {/* A failed save is announced once, by the app shell above. */}
-      </div>
+      {run.stage === 0 && (
+        <ListeningRoom
+          paper={paper}
+          run={run}
+          edit={edit}
+          work={work}
+          onSubmit={onSubmit}
+        />
+      )}
+      {run.stage === 1 && (
+        <ReadingRoom paper={paper} run={run} edit={edit} work={work} />
+      )}
+      {run.stage === 2 && (
+        <WritingRoom paper={paper} run={run} edit={edit} work={work} />
+      )}
+      {run.stage === 3 && (
+        <SpeakingRoom
+          paper={paper}
+          run={run}
+          now={now}
+          edit={edit}
+          work={work}
+          markRecorded={markRecorded}
+          onFinish={onFinish}
+        />
+      )}
+      {/* A failed save is announced once, by the app shell above. */}
     </div>
   );
 }

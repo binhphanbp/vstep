@@ -214,21 +214,26 @@ test("the timed Reading passage stays on screen next to its questions", async ({
   );
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/exam");
-  const panel = page.locator(".practice-layout .reading-panel");
+  // The left column (the passage and, under it, the scratch page) is what
+  // stays; the passage scrolls inside its own panel.
+  const side = page.locator(".practice-layout .practice-side");
+  const panel = side.locator(".reading-panel");
   await expect(panel).toBeVisible();
-  const layout = await panel.evaluate((el) => ({
+  const layout = await side.evaluate((el) => ({
     position: getComputedStyle(el).position,
-    scrolls: el.scrollHeight > el.clientHeight,
     height: el.getBoundingClientRect().height,
   }));
+  const scrolls = await panel.evaluate(
+    (el) => el.scrollHeight > el.clientHeight,
+  );
   // The passage scrolls inside its own box instead of pushing the questions
   // hundreds of words down the page.
   expect(layout.position).toBe("sticky");
-  expect(layout.scrolls).toBe(true);
+  expect(scrolls).toBe(true);
   expect(layout.height).toBeLessThan(844);
   // It is still on screen while the last question of the passage is answered.
   await page.locator(".question").last().scrollIntoViewIfNeeded();
-  const visible = await panel.evaluate((el) => {
+  const visible = await side.evaluate((el) => {
     const box = el.getBoundingClientRect();
     return Math.min(box.bottom, innerHeight) - Math.max(box.top, 0);
   });
