@@ -688,7 +688,6 @@ function WritingRoom({
         onChange={(value) => work.setScratch(slot.id, value)}
         label={`Dàn ý cho ${slot.part}`}
         placeholder={SCRATCH_HINTS.writing}
-        defaultOpen
       >
         <div className="exam-bar-mid">
           <div className="exam-tabs" role="tablist" aria-label="Bài viết">

@@ -549,31 +549,33 @@ export function ExamPage() {
           key={lesson.id}
           style={{ marginBottom: 30 }}
         >
-          <section
-            className={`panel ${lesson.skill === "reading" ? "reading-panel passage-panel" : ""}`}
+          <div
+            className={`practice-side ${lesson.skill === "reading" ? "passage-side" : ""}`}
           >
-            <div className="panel-label">{lesson.title}</div>
-            {lesson.skill === "listening" ? (
-              <AudioPlayer text={lesson.text} allowSpeed={false} />
-            ) : (
-              <MarkablePassage
-                text={lesson.text}
-                className="passage"
-                region="Ngữ liệu của phần thi"
-                marks={exam.marks?.[lesson.id]}
-                onToggle={(sentence) =>
-                  applyChange(update, (s) =>
-                    toggleExamMark(
-                      s,
-                      exam.id,
-                      lesson.id,
-                      lesson.text,
-                      sentence,
-                    ),
-                  )?.error
-                }
-              />
-            )}
+            <section className="panel reading-panel">
+              <div className="panel-label">{lesson.title}</div>
+              {lesson.skill === "listening" ? (
+                <AudioPlayer text={lesson.text} allowSpeed={false} />
+              ) : (
+                <MarkablePassage
+                  text={lesson.text}
+                  className="passage"
+                  region="Ngữ liệu của phần thi"
+                  marks={exam.marks?.[lesson.id]}
+                  onToggle={(sentence) =>
+                    applyChange(update, (s) =>
+                      toggleExamMark(
+                        s,
+                        exam.id,
+                        lesson.id,
+                        lesson.text,
+                        sentence,
+                      ),
+                    )?.error
+                  }
+                />
+              )}
+            </section>
             <ScratchPad
               value={exam.scratch?.[lesson.id] ?? ""}
               onChange={(value) =>
@@ -585,7 +587,7 @@ export function ExamPage() {
               placeholder={SCRATCH_HINTS[lesson.skill]}
               defaultOpen={lesson.skill === "reading" ? undefined : true}
             />
-          </section>
+          </div>
           <div>
             {lesson.questions.map((q, i) => (
               <QuestionCard

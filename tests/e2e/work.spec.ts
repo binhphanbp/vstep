@@ -182,6 +182,8 @@ test("an outline beside an essay is not part of the essay", async ({
   const outline = page.getByRole("textbox", {
     name: `Dàn ý cho ${writing.part}`,
   });
+  // The practice page opens with the outline; the exam room's drawer leaves the
+  // room to the essay until it is asked for.
   await expect(outline).toBeVisible();
   await outline.fill(
     "Mở bài: cảm ơn Jo. Thân bài: hai ý. Kết bài: hẹn gặp lại",
