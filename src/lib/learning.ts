@@ -166,7 +166,7 @@ function checkAttemptAgainstLesson(
     issue([...prefix, "correct"], "Điểm số phải khớp đáp án trong snapshot.");
 }
 const attemptSchema = z
-  .object({
+  .looseObject({
     id: limitedString(100),
     lessonId: limitedString(100),
     skill: skillSchema,
@@ -223,7 +223,7 @@ const examStageSchema = z.object({
   lessonIds: z.array(limitedString(100)).check(z.minLength(1), z.maxLength(40)),
 });
 export const examSchema = z
-  .object({
+  .looseObject({
     id: limitedString(100),
     // "full2" is the second paper. New value, old backups unaffected: a
     // stored sitting of "full" still parses and still finds its stages.
@@ -286,7 +286,7 @@ export const examSchema = z
   );
 /** How many sittings of the paper bank are kept on a device. */
 export const MAX_PAPER_RUNS = 100;
-export const paperRunSchema = z.object({
+export const paperRunSchema = z.looseObject({
   id: limitedString(100),
   // "131" was withdrawn from the bank, but a backup that holds a sitting of it
   // must still restore, so it stays a valid id; no screen lists it any more.
@@ -322,7 +322,7 @@ export const paperRunSchema = z.object({
   ),
 });
 export const stateSchema = z
-  .object({
+  .looseObject({
     version: z.literal(1),
     profile: profileSchema,
     attempts: z.array(attemptSchema).check(z.maxLength(10000)),
@@ -406,13 +406,28 @@ export const stateSchema = z
         });
     }),
   );
+/**
+ * What a loose schema infers minus the `[key: string]: unknown` it adds for
+ * the keys it lets through. The extra keys are kept at run time so an older
+ * tab cannot erase what a newer build saved, but they must not be part of the
+ * type: with the index signature a typo such as `state.notez` compiles.
+ */
+type Known<T> = {
+  [K in keyof T as string extends K
+    ? never
+    : number extends K
+      ? never
+      : symbol extends K
+        ? never
+        : K]: T[K];
+};
 export type Profile = z.infer<typeof profileSchema>;
-export type Attempt = z.infer<typeof attemptSchema>;
+export type Attempt = Known<z.infer<typeof attemptSchema>>;
 export type Confidence = z.infer<typeof confidenceSchema>;
 export type Review = z.infer<typeof reviewSchema>;
-export type StudyState = z.infer<typeof stateSchema>;
-export type ExamSession = z.infer<typeof examSchema>;
-export type PaperRun = z.infer<typeof paperRunSchema>;
+export type StudyState = Known<z.infer<typeof stateSchema>>;
+export type ExamSession = Known<z.infer<typeof examSchema>>;
+export type PaperRun = Known<z.infer<typeof paperRunSchema>>;
 
 export const DEFAULT_LEARNER_NAME = "Gùa";
 
