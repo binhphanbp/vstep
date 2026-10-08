@@ -11,6 +11,8 @@ Cả bốn đợt đã làm, trong ba lần phát hành: đợt 0 (PR #51), đ�
 - **Đợt 2** (nháp và tô khi làm bài): ô nháp ở từng phần, nút "Tô câu", và ghi chú gắn với một câu đã tô.
 - **Đợt 3**: nhắc sao lưu khi có từ 10 ghi chú mới chưa nằm trong bản sao nào. ★ và In đã nằm ở đợt 1 vì thẻ ghi chú đã có ở đó.
 
+Sau lần phát hành đó còn ba điều mở, và đã được xử lý: bộ gõ tiếng Việt, hai tab sửa cùng một ghi chú, và tab chạy bản cũ làm rơi ghi chú (kèm nhắc sao lưu có nút tải ngay).
+
 Cách đo và những gì chưa thử được nằm trong [QUALITY.md](QUALITY.md).
 
 Những chỗ làm khác bản kế hoạch, và vì sao:
@@ -207,7 +209,7 @@ State 90 ngày hôm nay là 217 KB. Con số 191 KB trong QUALITY.md đo trướ
 
 ### 5.4 Nhiều tab, nhiều thiết bị
 
-- **Hai tab cùng máy:** `updateStudy` đọc bản mới nhất trước mỗi lần ghi, nên mục viết ở tab này không mất khi tab kia ghi. Sửa **cùng một** ghi chú ở hai tab thì bản lưu sau cùng thắng.
+- **Hai tab cùng máy:** `updateStudy` đọc bản mới nhất trước mỗi lần ghi, nên mục viết ở tab này không mất khi tab kia ghi. Sửa **cùng một** ghi chú ở hai tab: ô ghi chú nhớ bản nó bắt đầu từ đó và hỏi chứ không ghi đè (làm sau khi phát hành, xem QUALITY.md).
 - **Hai thiết bị:** đồng bộ hiện là bấm "Lưu lên"/"Tải về" cả bản, có revision. Ghi trên hai máy trước khi đồng bộ thì vẫn phải chọn giữ một bản. Trường `deletedAt` giữ chỗ cho việc gộp theo `id` + `updatedAt` sau này.
 
 ## 6. Rủi ro và cách giảm

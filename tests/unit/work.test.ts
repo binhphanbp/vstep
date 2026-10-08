@@ -253,6 +253,32 @@ describe("while a lesson is open", () => {
     ).toEqual({ scratch: { ok: "giữ" }, marks: { text: [{ i: 1, q: "ok" }] } });
   });
 
+  it("never grows past what a saved draft is allowed to hold", () => {
+    // Forty pages of the longest length would be 80 000 characters in one
+    // draft, and the schema reads 30 000: the profile would not load again.
+    let state = freshState();
+    let refused: string | undefined;
+    for (let key = 0; key < WORK_LIMITS.keys && !refused; key++) {
+      const result = setDraftScratch(
+        state,
+        "reading-cafe",
+        `page-${key}`,
+        "x".repeat(WORK_LIMITS.scratch),
+      );
+      refused = result.error;
+      if (!refused) state = result.state;
+    }
+    expect(refused).toBeTruthy();
+    expect(
+      state.drafts[workDraftKey("reading-cafe")].length,
+    ).toBeLessThanOrEqual(WORK_LIMITS.draft);
+    expect(reload(state).success).toBe(true);
+    // A draft that is full can still be made smaller.
+    const smaller = setDraftScratch(state, "reading-cafe", "page-0", "");
+    expect(smaller.error).toBeUndefined();
+    expect(reload(smaller.state).success).toBe(true);
+  });
+
   it("is clearing a page by writing nothing", () => {
     let state = setDraftScratch(freshState(), "l", "main", "x").state;
     state = setDraftScratch(state, "l", "main", "").state;

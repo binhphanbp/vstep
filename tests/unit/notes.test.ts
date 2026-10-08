@@ -274,6 +274,85 @@ describe("editing, deleting and bringing back", () => {
   });
 });
 
+describe("a note edited in two places at once", () => {
+  it("applies an edit made on the text the writer last saw", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    const edited = editNote(state, id, { body: "bản sau", ifBody: "bản đầu" });
+    expect(edited.conflict).toBeUndefined();
+    expect(liveNotes(edited.state)[0].body).toBe("bản sau");
+  });
+
+  it("refuses to overwrite a text that changed elsewhere, and says what it now is", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    // Another tab saved a different text while this one was still writing.
+    const elsewhere = editNote(state, id, { body: "bản ở tab kia" }).state;
+    const mine = editNote(elsewhere, id, {
+      body: "bản của tôi",
+      ifBody: "bản đầu",
+    });
+    expect(mine.conflict).toEqual({ kind: "changed", theirs: "bản ở tab kia" });
+    expect(mine.state).toBe(elsewhere);
+    expect(mine.error).toBeUndefined();
+    expect(liveNotes(mine.state)[0].body).toBe("bản ở tab kia");
+  });
+
+  it("is no conflict when the other place saved the very same text", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    const elsewhere = editNote(state, id, { body: "giống nhau" }).state;
+    const mine = editNote(elsewhere, id, {
+      body: " giống nhau ",
+      ifBody: "bản đầu",
+    });
+    expect(mine.conflict).toBeUndefined();
+    expect(mine.error).toBeUndefined();
+    expect(liveNotes(mine.state)[0].body).toBe("giống nhau");
+  });
+
+  it("reports a note deleted or erased elsewhere instead of failing quietly", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    const binned = trashNote(state, id, t0);
+    expect(
+      editNote(binned, id, { body: "x", ifBody: "bản đầu" }).conflict,
+    ).toEqual({ kind: "gone" });
+    const erased = eraseNote(binned, id);
+    expect(
+      editNote(erased, id, { body: "x", ifBody: "bản đầu" }).conflict,
+    ).toEqual({ kind: "gone" });
+  });
+
+  it("still lets the writer overwrite on purpose, and keeps the star of the other place", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    // The other tab starred the note; this tab then keeps its own text.
+    const elsewhere = editNote(state, id, {
+      body: "bản ở tab kia",
+      star: true,
+    }).state;
+    const forced = editNote(elsewhere, id, { body: "bản của tôi" });
+    expect(forced.conflict).toBeUndefined();
+    expect(liveNotes(forced.state)[0]).toMatchObject({
+      body: "bản của tôi",
+      star: true,
+    });
+  });
+
+  it("does not look at the text when only the star changes", () => {
+    const state = add(freshState(), "bản đầu");
+    const id = liveNotes(state)[0].id;
+    const elsewhere = editNote(state, id, { body: "bản ở tab kia" }).state;
+    const starred = editNote(elsewhere, id, { star: true });
+    expect(starred.conflict).toBeUndefined();
+    expect(liveNotes(starred.state)[0]).toMatchObject({
+      body: "bản ở tab kia",
+      star: true,
+    });
+  });
+});
+
 describe("the schema around notes", () => {
   it("still reads a profile saved before notes existed", () => {
     expect(

@@ -1161,6 +1161,23 @@ textarea:focus-visible {
   border-color: #e7d9de;
   color: #a44374;
 }
+.backup-nudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 22px;
+  flex-wrap: wrap;
+}
+.backup-nudge p {
+  margin: 0;
+  max-width: 62ch;
+}
+.backup-nudge-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
 .notice a {
   text-decoration: underline;
 }
@@ -3734,6 +3751,28 @@ body.exam-immersive main {
   line-height: 1.7;
   background: #fffdf5;
   color: var(--ink);
+}
+.note-conflict {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #e0bf55;
+  border-radius: 10px;
+  background: #fff6d6;
+  font-size: 13px;
+  color: #4d3d10;
+}
+.note-conflict blockquote {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-left: 3px solid #e0bf55;
+  background: white;
+  border-radius: 6px;
+}
+.note-conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 .note-suggestions {
   display: flex;

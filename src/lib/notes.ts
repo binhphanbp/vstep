@@ -33,7 +33,15 @@ export type NoteOutcome = {
   note?: Note;
   /** Why nothing was saved, in words the learner can act on. */
   error?: string;
+  /**
+   * Nothing was saved because the note is no longer what the writer started
+   * from: another tab changed its text, or deleted it. The writer is shown
+   * both texts and chooses; nothing is overwritten on a guess.
+   */
+  conflict?: NoteConflict;
 };
+export type NoteConflict =
+  { kind: "changed"; theirs: string } | { kind: "gone" };
 
 /** The size the notes take once written, in bytes of the stored text. */
 export function noteBytes(notes: readonly Note[]) {
@@ -44,21 +52,34 @@ export function allNotes(state: StudyState): readonly Note[] {
   return state.notes ?? [];
 }
 
-/** Notes that have not been deleted, oldest first. */
-export function liveNotes(state: StudyState): Note[] {
-  return allNotes(state)
+/** The notes of a book that have not been deleted, oldest first. */
+export function liveFrom(notes: readonly Note[] | undefined): Note[] {
+  return (notes ?? [])
     .filter((note) => !note.deletedAt)
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
 }
 
+/** Notes that have not been deleted, oldest first. */
+export function liveNotes(state: StudyState): Note[] {
+  return liveFrom(state.notes);
+}
+
 const binCutoff = (now: Date) => now.getTime() - NOTE_LIMITS.trashDays * DAY;
+
+/** Deleted notes of a book that can still be brought back, newest deletion first. */
+export function binnedFrom(
+  notes: readonly Note[] | undefined,
+  now = new Date(),
+): Note[] {
+  const cutoff = binCutoff(now);
+  return (notes ?? [])
+    .filter((note) => note.deletedAt && Date.parse(note.deletedAt) >= cutoff)
+    .sort((a, b) => Date.parse(b.deletedAt!) - Date.parse(a.deletedAt!));
+}
 
 /** Deleted notes that can still be brought back, newest deletion first. */
 export function binnedNotes(state: StudyState, now = new Date()): Note[] {
-  const cutoff = binCutoff(now);
-  return allNotes(state)
-    .filter((note) => note.deletedAt && Date.parse(note.deletedAt) >= cutoff)
-    .sort((a, b) => Date.parse(b.deletedAt!) - Date.parse(a.deletedAt!));
+  return binnedFrom(state.notes, now);
 }
 
 /** What a question, or a whole paper or lesson, is called in a note. */
@@ -156,21 +177,32 @@ export function addNote(
  * Changes the text or the star of a live note. A longer text is refused when
  * the book no longer fits; a shorter one is always accepted, so a full book
  * can always be tidied.
+ *
+ * `ifBody` is the text the writer started from. When it is given and the note
+ * now says something else (the same note open in two tabs), the edit is not
+ * made and the outcome says so, so that the last tab to save does not win by
+ * accident. Without it the edit is made, which is how a writer who has seen
+ * both texts keeps their own. Changing only the star never looks at the text.
  */
 export function editNote(
   state: StudyState,
   id: string,
-  patch: { body?: string; star?: boolean },
+  patch: { body?: string; star?: boolean; ifBody?: string },
   now = new Date(),
 ): NoteOutcome {
   const current = allNotes(state).find((note) => note.id === id);
+  const guarded = patch.body !== undefined && patch.ifBody !== undefined;
   if (!current || current.deletedAt)
-    return { state, error: "Không tìm thấy ghi chú này; có thể nó đã bị xóa." };
+    return guarded
+      ? { state, conflict: { kind: "gone" } }
+      : { state, error: "Không tìm thấy ghi chú này; có thể nó đã bị xóa." };
   const body = patch.body?.trim();
   if (body !== undefined) {
     const problem = checkBody(body);
     if (problem) return { state, error: problem };
   }
+  if (guarded && current.body !== patch.ifBody && current.body !== body)
+    return { state, conflict: { kind: "changed", theirs: current.body } };
   const note: Note = {
     ...current,
     ...(body !== undefined ? { body } : {}),

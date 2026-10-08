@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+import { RecoveryKeeper } from "@/components/recovery-keeper";
 import { StudyProvider } from "@/components/study-provider";
 import { Shell } from "@/components/shell";
 import { CustomCursor } from "@/components/custom-cursor";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <StudyProvider>
           <Shell>{children}</Shell>
+          <RecoveryKeeper />
         </StudyProvider>
         <CustomCursor />
       </body>

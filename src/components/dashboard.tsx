@@ -15,6 +15,7 @@ import {
   Target,
   Zap,
 } from "lucide-react";
+import { BackupNudge } from "./backup-nudge";
 import { useStudy } from "./study-provider";
 import {
   todayPlan,
@@ -93,6 +94,7 @@ export function Dashboard() {
           <ArrowUpRight size={15} />
         </Link>
       </div>
+      <BackupNudge />
       <div className="dashboard-grid">
         <div className="dashboard-main">
           <section className="welcome-card">

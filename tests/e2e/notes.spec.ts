@@ -596,7 +596,7 @@ test("the notebook, the editor and a note card pass the accessibility checks", a
   }
 });
 
-test("the notebook asks for a backup once enough notes are not in any copy", async ({
+test("the notebook asks for a backup once enough notes are not in any copy, and one click makes it", async ({
   page,
 }) => {
   let state = withRun();
@@ -615,12 +615,22 @@ test("the notebook asks for a backup once enough notes are not in any copy", asy
     .filter({ hasText: "chưa nằm trong bản sao lưu nào" });
   await expect(banner).toContainText("12 ghi chú mới");
   await expect(banner).toContainText("chưa có bản nào");
-  // Exporting a copy settles it.
-  await banner.getByRole("link", { name: "Xuất bản sao ở Cài đặt" }).click();
+  const audit = await new AxeBuilder({ page })
+    .include(".backup-nudge")
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+  expect(audit.violations).toEqual([]);
+  // One click makes the copy, right there, and the banner goes.
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
-  await download;
-  await page.goto("/notes");
+  await banner.getByRole("button", { name: "Tải bản sao lưu ngay" }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toMatch(/^may-backup-.*\.json$/);
+  await expect(banner).toHaveCount(0);
+  await expect(page.locator(".toast")).toContainText("Đã tải bản sao lưu");
+  // The file really holds the notes.
+  const copy = JSON.parse(readFileSync((await file.path())!, "utf8"));
+  expect(copy.notes).toHaveLength(12);
+  await page.reload();
   await expect(
     page
       .getByRole("status")
@@ -631,7 +641,13 @@ test("the notebook asks for a backup once enough notes are not in any copy", asy
     const raw = JSON.parse(localStorage.getItem("may-study-v1")!);
     const first = raw.notes[0];
     for (let index = 0; index < 10; index++)
-      raw.notes.push({ ...first, id: `later-${index}`, body: `thêm ${index}` });
+      raw.notes.push({
+        ...first,
+        id: `later-${index}`,
+        body: `thêm ${index}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
     raw.updatedAt = new Date(Date.now() + 1000).toISOString();
     localStorage.setItem("may-study-v1", JSON.stringify(raw));
   });
@@ -641,4 +657,396 @@ test("the notebook asks for a backup once enough notes are not in any copy", asy
     .filter({ hasText: "chưa nằm trong bản sao lưu nào" });
   await expect(again).toContainText("10 ghi chú mới");
   await expect(again).toContainText("bản gần nhất:");
+  // The home page says it too, since the notebook is not where she lives.
+  await page.goto("/");
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "chưa nằm trong bản sao lưu nào" }),
+  ).toContainText("10 ghi chú mới");
+});
+
+test("a few notes that have gone a long time without a copy are mentioned too", async ({
+  page,
+}) => {
+  const place = paperItemPlace(paper, 0, firstSlot, firstItem);
+  let state = withRun();
+  for (let index = 0; index < 2; index++) {
+    const outcome = addNote(
+      state,
+      {
+        body: `ghi chú cũ ${index}`,
+        anchor: { ...place.anchor, itemId: `old-${index}` },
+      },
+      new Date(Date.now() - (20 - index) * 86_400_000),
+      `old-${index}`,
+    );
+    state = outcome.state;
+  }
+  await seed(page, state);
+  await page.goto("/notes");
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "chưa nằm trong bản sao lưu nào" }),
+  ).toContainText("ghi chú đầu tiên đã 20 ngày tuổi");
+});
+
+test("nobody with an empty notebook is asked about a backup", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: /Một ngày mới/ }),
+  ).toBeVisible();
+  await expect(page.locator(".backup-nudge")).toHaveCount(0);
+  await page.goto("/notes");
+  await expect(page.getByText("Chưa có ghi chú nào")).toBeVisible();
+  await expect(page.locator(".backup-nudge")).toHaveCount(0);
+});
+
+/** A second tab on the same profile: the same browser, so the same storage. */
+async function secondTab(page: Page) {
+  const other = await page.context().newPage();
+  await other.goto("/notes");
+  return other;
+}
+const cardOf = (page: Page) => page.locator(".note-card:not(.binned)");
+async function startEditing(page: Page, body: string) {
+  await cardOf(page)
+    .filter({ hasText: body })
+    .getByRole("button", { name: "Sửa" })
+    .click();
+  return page.getByRole("textbox", { name: /^Sửa ghi chú/ });
+}
+
+test("the same note open in two tabs: a tab that has typed nothing follows the other", async ({
+  page,
+}) => {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  const here = await startEditing(page, "bản đầu");
+  const there = await startEditing(other, "bản đầu");
+  await there.fill("bản sửa ở tab kia");
+  await expect(
+    other.getByRole("status").filter({ hasText: "Đã lưu" }),
+  ).toBeVisible();
+  // This tab typed nothing, so it simply shows what the other one saved.
+  await expect(here).toHaveValue("bản sửa ở tab kia");
+  await expect(page.locator(".note-conflict")).toHaveCount(0);
+  await other.close();
+});
+
+test("two tabs that both typed ask which text to keep, and never pick one by being last", async ({
+  page,
+}) => {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  const here = await startEditing(page, "bản đầu");
+  const there = await startEditing(other, "bản đầu");
+  // The other tab starts writing; before its text is saved, this tab saves its own.
+  await there.fill("bản của tab kia");
+  await here.fill("bản của tab này");
+  await here.blur();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Đã lưu" }),
+  ).toBeVisible();
+  // The other tab is the one about to overwrite, so it is the one that asks.
+  const asking = other.locator(".note-conflict");
+  await expect(asking).toContainText("vừa được sửa ở một tab khác");
+  await expect(asking.locator("blockquote")).toHaveText("bản của tab này");
+  const audit = await new AxeBuilder({ page: other })
+    .include(".note-editor")
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+  expect(audit.violations).toEqual([]);
+  // Its autosave does not run over the text it was shown.
+  await other.waitForTimeout(1300);
+  expect((await saved(page)).notes[0].body).toBe("bản của tab này");
+  // Closing without choosing asks first, and the box stays when she says no.
+  other.once("dialog", (dialog) => dialog.dismiss());
+  await other.getByRole("button", { name: "Xong" }).click();
+  await expect(there).toBeVisible();
+  // Keep both: the text found stays here, her own becomes a note of its own.
+  await other.getByRole("button", { name: "Giữ cả hai" }).click();
+  await expect(other.locator(".note-conflict")).toHaveCount(0);
+  await expect(there).toHaveValue("bản của tab này");
+  const notes = (await saved(page)).notes as {
+    body: string;
+    anchor: { label: string };
+  }[];
+  expect(notes.map((note) => note.body).sort()).toEqual([
+    "bản của tab kia",
+    "bản của tab này",
+  ]);
+  expect(new Set(notes.map((note) => note.anchor.label)).size).toBe(1);
+  await other.close();
+});
+
+test("a writer who has seen both texts can keep their own, or take the other", async ({
+  page,
+}) => {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  const here = await startEditing(page, "bản đầu");
+  const there = await startEditing(other, "bản đầu");
+  const savedHere = page.getByRole("status").filter({ hasText: "Đã lưu" });
+  await there.fill("bản của tab kia");
+  await here.fill("bản của tab này");
+  await here.blur();
+  await expect(savedHere).toBeVisible();
+  await expect(other.locator(".note-conflict")).toBeVisible();
+  await other.getByRole("button", { name: "Giữ bản của tôi" }).click();
+  await expect(other.locator(".note-conflict")).toHaveCount(0);
+  expect(
+    (await saved(page)).notes.map((note: { body: string }) => note.body),
+  ).toEqual(["bản của tab kia"]);
+  // This tab had saved and typed nothing since, so it follows.
+  await expect(here).toHaveValue("bản của tab kia");
+
+  // And the other way round: she takes the text from the other tab.
+  await there.fill("lại sửa ở tab kia");
+  await here.fill("bản mới của tab này");
+  await here.blur();
+  await expect(other.locator(".note-conflict")).toBeVisible();
+  await other.getByRole("button", { name: "Dùng bản bên kia" }).click();
+  await expect(there).toHaveValue("bản mới của tab này");
+  await other.waitForTimeout(1300);
+  expect(
+    (await saved(page)).notes.map((note: { body: string }) => note.body),
+  ).toEqual(["bản mới của tab này"]);
+  await other.close();
+});
+
+test("a note deleted in another tab does not swallow what is being written here", async ({
+  page,
+}) => {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  const here = await startEditing(page, "bản đầu");
+  await here.fill("viết dở khi tab kia xóa");
+  await cardOf(other)
+    .filter({ hasText: "bản đầu" })
+    .getByRole("button", { name: "Xóa" })
+    .click();
+  // The notebook drops a deleted note's box with the note. What was typed in
+  // it is not dropped: it is kept as a note of its own, and she is told.
+  await expect(page.locator(".toast")).toContainText("không còn trong sổ");
+  await expect(
+    cardOf(page).filter({ hasText: "viết dở khi tab kia xóa" }),
+  ).toHaveCount(1);
+  const notes = (await saved(page)).notes as {
+    body: string;
+    deletedAt?: string;
+  }[];
+  expect(
+    notes.filter((note) => !note.deletedAt).map((note) => note.body),
+  ).toEqual(["viết dở khi tab kia xóa"]);
+  expect(notes.filter((note) => note.deletedAt)).toHaveLength(1);
+  await other.close();
+});
+
+test("a box that stays open on a deleted note asks what to do with the text", async ({
+  page,
+}) => {
+  await seed(page, withRun());
+  await page.goto("/papers/132");
+  await page
+    .locator(".paper-review details")
+    .first()
+    .locator("summary")
+    .first()
+    .click();
+  const item = page.locator(`#item-${firstItem.id}`);
+  await item.getByRole("button", { name: "Ghi chú cho câu này" }).click();
+  const box = item.getByRole("textbox", {
+    name: "Ghi chú của Gùa cho câu này",
+  });
+  await box.fill("bản đầu");
+  await expect(item.getByRole("status")).toHaveText("Đã lưu");
+  // Another tab deletes the note this box has just written.
+  const other = await secondTab(page);
+  // She is in the middle of adding more words when the note is deleted.
+  await box.fill("bản đầu, viết thêm");
+  await cardOf(other)
+    .filter({ hasText: "bản đầu" })
+    .getByRole("button", { name: "Xóa" })
+    .click();
+  await expect(item.locator(".note-conflict")).toContainText(
+    "không còn trong sổ",
+  );
+  await item
+    .getByRole("button", { name: "Lưu bản của tôi thành ghi chú mới" })
+    .click();
+  await expect(item.locator(".note-conflict")).toHaveCount(0);
+  const notes = (await saved(page)).notes as {
+    body: string;
+    deletedAt?: string;
+  }[];
+  expect(
+    notes.filter((note) => !note.deletedAt).map((note) => note.body),
+  ).toEqual(["bản đầu, viết thêm"]);
+  expect(notes.filter((note) => note.deletedAt)).toHaveLength(1);
+  await other.close();
+});
+
+/** Two tabs on one note; the second has text waiting and has been asked to choose. */
+async function askedToChoose(page: Page) {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  const here = await startEditing(page, "bản đầu");
+  const there = await startEditing(other, "bản đầu");
+  await there.fill("bản của tab kia");
+  await here.fill("bản của tab này");
+  await here.blur();
+  await expect(other.locator(".note-conflict")).toBeVisible();
+  // Typing goes on in the box that has been asked, with no answer given.
+  await there.fill("bản của tab kia, viết thêm");
+  return other;
+}
+const liveBodies = async (page: Page) =>
+  ((await saved(page)).notes as { body: string; deletedAt?: string }[])
+    .filter((note) => !note.deletedAt)
+    .map((note) => note.body)
+    .sort();
+
+test("a question nobody answered does not lose the text when the page is left", async ({
+  page,
+}) => {
+  const other = await askedToChoose(page);
+  // Moving on inside the app takes the box away.
+  await other.getByRole("link", { name: "Cài đặt" }).first().click();
+  await expect(other).toHaveURL(/\/settings/);
+  await expect(other.locator(".toast")).toContainText("giữ thành ghi chú mới");
+  expect(await liveBodies(page)).toEqual([
+    "bản của tab kia, viết thêm",
+    "bản của tab này",
+  ]);
+  await other.close();
+});
+
+test("a question nobody answered does not lose the text when the tab is reloaded or closed", async ({
+  page,
+}) => {
+  const other = await askedToChoose(page);
+  await other.reload();
+  expect(await liveBodies(page)).toEqual([
+    "bản của tab kia, viết thêm",
+    "bản của tab này",
+  ]);
+  await other.close();
+});
+
+test("closing a question on purpose, discarding the text, does not keep it behind her back", async ({
+  page,
+}) => {
+  const other = await askedToChoose(page);
+  other.once("dialog", (dialog) => dialog.accept());
+  await other.getByRole("button", { name: "Xong" }).click();
+  await expect(other.locator(".note-editor")).toHaveCount(0);
+  await other.reload();
+  expect(await liveBodies(page)).toEqual(["bản của tab này"]);
+  await other.close();
+});
+
+test("a box on a deleted note can be given up without keeping the text", async ({
+  page,
+}) => {
+  await seed(page, withRun());
+  await page.goto("/papers/132");
+  await page
+    .locator(".paper-review details")
+    .first()
+    .locator("summary")
+    .first()
+    .click();
+  const item = page.locator(`#item-${firstItem.id}`);
+  await item.getByRole("button", { name: "Ghi chú cho câu này" }).click();
+  const box = item.getByRole("textbox", {
+    name: "Ghi chú của Gùa cho câu này",
+  });
+  await box.fill("bản đầu");
+  await expect(item.getByRole("status")).toHaveText("Đã lưu");
+  const other = await secondTab(page);
+  await box.fill("bản đầu, viết thêm");
+  await cardOf(other)
+    .filter({ hasText: "bản đầu" })
+    .getByRole("button", { name: "Xóa" })
+    .click();
+  await expect(item.locator(".note-conflict")).toContainText(
+    "không còn trong sổ",
+  );
+  await item.getByRole("button", { name: "Bỏ bản của tôi" }).click();
+  await expect(item.locator(".note-editor")).toHaveCount(0);
+  await page.reload();
+  expect(await liveBodies(page)).toEqual([]);
+  await other.close();
+});
+
+test("a tab with nothing typed closes its box when the note is deleted elsewhere", async ({
+  page,
+}) => {
+  await seed(
+    page,
+    seedNote(
+      withRun(),
+      paperItemPlace(paper, 0, firstSlot, firstItem),
+      "bản đầu",
+      1,
+    ),
+  );
+  await page.goto("/notes");
+  const other = await secondTab(page);
+  await startEditing(page, "bản đầu");
+  await cardOf(other)
+    .filter({ hasText: "bản đầu" })
+    .getByRole("button", { name: "Xóa" })
+    .click();
+  await expect(page.locator(".note-editor")).toHaveCount(0);
+  await other.close();
 });

@@ -34,12 +34,12 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | ESLint và TypeScript             | Đạt                                                                                      |
 | Vitest                           | 258/258                                                                                  |
-| Playwright trên production build | 121 ca: 113 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 113/113 |
+| Playwright trên production build | 151 ca: 143 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 143/143 |
 | Accessibility tự động            | Axe WCAG A/AA trên 19 màn, có kho đề và Review 13/09                                     |
 | Build tĩnh                       | 112 trang, gồm năm route đề nhập                                                         |
 | Dependency production            | `npm audit --omit=dev` báo 0 lỗ hổng                                                     |
 
-Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 113/113 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
+Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 143/143 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
 
 ## 4. Kết quả phát hành
 
@@ -58,9 +58,9 @@ Script `scripts/smoke-https.mjs` kiểm tra kho năm đề, file Review và mộ
 - Đề 131 đã được gỡ khỏi kho. Nếu thiết bị từng lưu lượt làm đề này thì dữ liệu đó vẫn nằm trong bản sao nhưng không còn hiện trong ứng dụng; không tự tạo điểm hoặc lời giải cho đề thiếu khóa đáp án.
 - Viết và Nói lưu bài, có mẫu đối chiếu, chưa chấm tự động. Số câu đúng của năm đề chưa được hiệu chuẩn để suy ra bậc VSTEP.
 - Bản ghi micro không đi vào JSON hoặc Supabase snapshot; audio đề nhập không được tải sẵn để dùng offline.
-- **Ưu tiên máy tính (desktop).** Gùa luyện đề trên máy tính, nên mọi kiểm tra và sửa chữa tập trung ở đó; điện thoại không phải trọng tâm. Chưa thử gõ tiếng Việt bằng bộ gõ thật (như Unikey, EVKey) trong ô nháp và ô ghi chú, vì các ca kiểm thử tự động dùng bàn phím mô phỏng; nên dùng thử vài phút trên máy của Gùa.
+- **Ưu tiên máy tính (desktop).** Gùa luyện đề trên máy tính, nên mọi kiểm tra và sửa chữa tập trung ở đó; điện thoại không phải trọng tâm. Gõ tiếng Việt trong ô nháp và ô ghi chú đã được kiểm với hai họ bộ gõ mô phỏng (gõ ghép tại chỗ; Backspace rồi chữ có dấu như Unikey và EVKey), nhưng chưa chạy phần mềm thật; nên dùng thử vài phút trên máy của Gùa.
 - Chưa nghiệm thu đăng nhập và đồng bộ trên HTTPS bằng hai thiết bị thật, micro và tai nghe thật.
-- Ghi chú, nháp và câu tô chỉ nằm trên máy cho đến khi có bản sao lưu hoặc bản đám mây. Sửa cùng một ghi chú ở hai tab thì lần lưu sau thắng. Một tab còn chạy bản trước ngày 08/10/2026 vẫn có thể bỏ trường mới khi lưu; đóng các tab cũ là đủ.
+- Ghi chú, nháp và câu tô chỉ nằm trên máy cho đến khi người học thật sự cất một bản sao lưu ở nơi khác: Mây nhắc, có nút tải ngay, và chỉ thế thôi (đồng bộ đám mây vẫn thủ công). Hai tab sửa cùng một ghi chú thì Mây hỏi chứ không ghi đè. Một tab còn chạy bản cũ của trang có thể làm rơi ghi chú khi lưu; Mây đưa chúng về (từ trí nhớ của tab đang mở, hoặc từ bản chép trong IndexedDB), trừ trường hợp tab bản cũ lưu khi chưa từng có tab bản mới nào mở.
 - Năm đề nhập là bộ đề của chủ dự án. Chủ dự án xác nhận ngày 07/10/2026 rằng chỉ dùng để học cá nhân, không chia sẻ hay kinh doanh. Địa chỉ trang hiện công khai với ai biết link; nếu muốn chỉ riêng Gùa vào được thì cần bật bảo vệ truy cập trên Vercel.
 
 Để tiếp tục, xem `README.md` để chạy ứng dụng, `QUALITY.md` để tra ca kiểm thử, `HANDOVER.md` cho kiến trúc và `RELEASE-RUNBOOK.md` cho quy trình khôi phục.

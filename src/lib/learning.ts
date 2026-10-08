@@ -399,7 +399,7 @@ export const stateSchema = z
     attempts: z.array(attemptSchema).check(z.maxLength(10000)),
     reviews: z.record(z.string(), reviewSchema),
     mistakeReviews: z.record(z.string(), reviewSchema),
-    drafts: z.record(z.string(), limitedString(30000)),
+    drafts: z.record(z.string(), limitedString(WORK_LIMITS.draft)),
     mood: z.record(z.string(), z.enum(["low", "okay", "great"])),
     // Optional on purpose: every backup written before word cards existed has
     // to keep parsing, or it lands in the "damaged data" path instead.
@@ -428,6 +428,10 @@ export const stateSchema = z
     notes: z.optional(
       z.array(noteSchema).check(z.maxLength(NOTE_LIMITS.count)),
     ),
+    // Stamped on every save by a build that knows the fields above. A build
+    // that does not know them drops this one too, which is how a profile an
+    // older tab has rewritten is told apart (`src/lib/recovery.ts`).
+    rev: z.optional(z.number().check(z.int())),
     updatedAt: z.iso.datetime(),
   })
   .check(
@@ -498,13 +502,15 @@ export const stateSchema = z
  * type: with the index signature a typo such as `state.notez` compiles.
  */
 type Known<T> = {
-  [K in keyof T as string extends K
-    ? never
-    : number extends K
+  [
+    K in keyof T as string extends K
       ? never
-      : symbol extends K
+      : number extends K
         ? never
-        : K]: T[K];
+        : symbol extends K
+          ? never
+          : K
+  ]: T[K];
 };
 export type Profile = z.infer<typeof profileSchema>;
 export type Attempt = Known<z.infer<typeof attemptSchema>>;
