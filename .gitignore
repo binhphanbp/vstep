@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# data for the grading eval harness (corpora are licensed, never committed)
+/.data/

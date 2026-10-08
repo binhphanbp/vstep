@@ -88,7 +88,7 @@ Thông tin dưới đây đọc từ tài liệu và SDK chính thức của Goo
 - **Độ ngẫu nhiên:** trên dòng Gemini 3, `temperature` không còn là cách điều khiển (Google khuyên giữ mặc định, và trên 3.8 Flash tham số này bị bỏ qua); `seed` chỉ là “cố gắng hết sức”. Vì vậy độ ổn định đến từ **chấm nhiều lần lấy trung vị và lưu kết quả**, không từ một tham số.
 - **Âm thanh:** Gemini nhận trực tiếp webm, ogg, opus, m4a, mp3, wav…; tối đa 100 MB mỗi yêu cầu; 32 token mỗi giây âm thanh (5 phút ≈ 9.600 token). Có chép lời nguyên văn kèm thời điểm từng từ (`audioTranscriptionConfig`, chế độ `VERBATIM`, `wordTimestamp`); nếu tùy chọn này không chạy được với model chấm thì dùng model chép lời riêng `gemini-3.5-transcribe`. **Google không công bố khả năng chấm phát âm**, nên điểm phát âm phải qua kiểm định riêng (mục 7).
 - **SDK:** `@google/genai` (ghim dưới 3.0.0 vì bản 3 đòi Node 22).
-- **Tầng trả phí là bắt buộc:** ở tầng miễn phí, Google dùng nội dung gửi lên để cải thiện sản phẩm và có thể cho người đọc; ở tầng trả phí thì không, chỉ lưu nhật ký có thời hạn để phát hiện lạm dụng. Mỗi yêu cầu đặt `store: false`.
+- **Tầng trả phí là bắt buộc:** ở tầng miễn phí, Google dùng nội dung gửi lên để cải thiện sản phẩm và có thể cho người đọc; ở tầng trả phí thì không, chỉ lưu nhật ký có thời hạn để phát hiện lạm dụng. Mây chỉ gọi `generateContent` (không dùng Interactions API, vốn lưu nội dung theo mặc định; tham số `store` chỉ có ở API đó).
 
 ## 5. Quy trình chấm Viết
 
@@ -136,7 +136,7 @@ Ngưỡng đặt theo **mức đồng thuận giữa chính người chấm** tr
 | Kiểm định | Chỉ số | Ngưỡng đề xuất | Căn cứ |
 | --- | --- | --- | --- |
 | Bậc của bài Viết (Write & Improve, các bài B1–C1) | QWK; trùng bậc; lệch tối đa một bậc | QWK ≥ 0,75; trùng ≥ 60%; lệch ≤ 1 bậc ≥ 95% | GPT-4 có bài neo đạt QWK 0,81, người – người 0,87 (Yancey và cộng sự 2023) |
-| Từng tiêu chí Viết (ELLIPSE) | QWK với điểm người chấm | ≥ 0,45 và độ lệch trung bình ≤ 0,25 điểm | Người – người 0,48–0,53 |
+| Từng tiêu chí Viết (ELLIPSE) | QWK với điểm người chấm | ≥ 0,45 và độ lệch có dấu trung bình (sau khi quy điểm 0–10 về thang 1–5 của ELLIPSE bằng phép quy đổi tuyến tính cố định `1 + 0,4 × điểm`) không quá 0,25 | Người – người 0,48–0,53 |
 | Bậc của bài Nói (Speak & Improve) | Tương quan Pearson | ≥ 0,75 | Model không huấn luyện thêm đạt 0,76; huấn luyện riêng 0,82 |
 | Phát âm, trôi chảy (speechocean762) | Tương quan Pearson | ≥ 0,60 | Chuyên gia – chuyên gia 0,66–0,71 |
 | Độ ổn định | Cùng bài chấm 10 lần | Trung vị dao động ≤ 0,5 điểm ở ≥ 95% bài | — |
@@ -167,7 +167,7 @@ Bài neo là bài mẫu đã có bậc đặt cạnh mô tả thang trong lời 
 
 Nguyên tắc cũ “không gửi bài viết và bản ghi âm ra dịch vụ AI nào” được thay bằng:
 
-- Bài Viết và bản ghi Nói chỉ được gửi tới Google (Gemini, **tầng trả phí**, `store: false`) **khi Gùa bấm “Chấm bằng AI”**; không tự động.
+- Bài Viết và bản ghi Nói chỉ được gửi tới Google (Gemini, **tầng trả phí**, qua `generateContent`) **khi Gùa bấm “Chấm bằng AI”**; không tự động.
 - Lần đầu dùng, app nói rõ gửi gì và đi đâu, hỏi đồng ý; tắt được trong Cài đặt.
 - Chỉ gửi đề và bài làm; không gửi tên, email, ghi chú hay dữ liệu nào khác.
 - File báo lỗi không chứa bài làm hay kết quả chấm.
@@ -190,12 +190,25 @@ Mỗi đợt là một PR, chờ CI xanh, merge khi chủ dự án bảo.
 
 Cần từ chủ dự án: việc 1, 3, 4 ở mục 11.
 
-1. Lấy văn bản mô tả mức điểm chính thức (mục 3.3); dựng `src/lib/rubric/vstep-3-5.ts` có nguồn từng dòng.
-2. Tách và cho duyệt danh sách ý bắt buộc của mọi đề Viết và câu hỏi Nói.
-3. Viết `src/lib/grading/` (trừ phần giao diện) kèm unit test cho cộng điểm, làm tròn, kiểm câu trích, số đo bằng code.
-4. Viết `scripts/grading-eval/`: tải dữ liệu đã có giấy phép vào `.data/`, chia phần chỉnh và phần giữ kín, chạy, xuất bảng số đo.
-5. Chạy với cả hai model; đo chi phí và thời gian thật mỗi bài.
-6. **Xong khi:** có bảng số đo trên phần giữ kín cho từng tiêu chí; chọn được model; biết tiêu chí nào qua ngưỡng ở mục 7.2. Chủ dự án xem bảng trước khi sang Đợt 2.
+**Đã làm (08/10/2026), kiểm bằng unit test và chạy thử bằng `--dry` trên dữ liệu ELLIPSE thật:**
+
+- `src/lib/grading/`: `scores.ts` (làm tròn theo Thông tư 23/2017, điểm bài Viết, điểm Viết = (Bài 1 + 2 × Bài 2)/3, điểm Nói, điểm tổng, bậc), `aggregate.ts` (trung vị, ba lần rồi thêm hai lần khi lệch quá 1 điểm), `verify.ts` (câu trích phải nằm trong bài), `measures.ts` (số từ, đoạn, câu, chép đề, chép bài mẫu, tiếng Việt; số đo trôi chảy từ thời điểm từng từ; kiểm thời điểm từng từ có khớp độ dài bản ghi), `schema.ts` (khuôn JSON và Zod), `prompts.ts` (lời nhắc có phiên bản, bài làm đóng khung như dữ liệu), `writing.ts` và `speaking.ts` (quy trình đầy đủ, nhận một hàm gọi model để thay bằng bản giả khi kiểm thử), `gemini.ts` (lời gọi thật, chỉ phía máy chủ), `gates.ts` (**mọi tiêu chí đang đóng**: chưa đo thì chưa hiện điểm), `requirements.ts` (ý bắt buộc lấy từ chính các dòng gạch đầu dòng của đề Task 1; mẫu cho Task 2 **chưa dùng cho đến khi chủ dự án duyệt**), `metrics.ts` (Pearson, QWK, sai số).
+- `src/lib/rubric/vstep-3-5.ts`: thang bốn bậc cho cả chín tiêu chí, dựng theo CEFR, **ghi rõ chưa phải văn bản chính thức** (`official: false`).
+- `scripts/grading-eval/run.ts` (chạy bằng `npx tsx`): các chế độ `ellipse`, `samples`, `stability`, `perturb`, `speech`; chia dữ liệu chỉnh và giữ kín cố định theo mã; báo cáo ghi vào `.data/reports/` (không commit). `perturb.ts` gồm bốn phép sửa có chiều tác động biết trước (cắt còn 80 từ, xáo câu, thêm lỗi ngữ pháp, chèn lời dặn cho người chấm).
+- Kiểm thử: 57 ca unit mới (`tests/unit/grading-*.test.ts`), gồm cả hai quy trình với model giả (ba lần chấm, thêm hai lần khi lệch, câu trích bịa bị loại, ý bắt buộc không có câu trích thì không được tính, bài lạc loại không gọi model, ô cổng đóng thì không có điểm).
+
+**Chưa làm được, đang chờ (mục 11):**
+
+- Không có `GEMINI_API_KEY` nên **chưa có lần chạy thật nào**: chưa so được hai model, chưa đo độ chính xác, chưa đo chi phí và thời gian, và `gates.ts` vẫn đóng hết.
+- Văn bản mô tả mức điểm chính thức: các tên miền `vstep.vnu.edu.vn`, `js.vnu.edu.vn`… chưa mở nên thang vẫn là bản dự phòng theo CEFR.
+- Dữ liệu Write & Improve, Speak & Improve (cần ký giấy phép) và file WAV của speechocean762: chưa có. Chỉ có ELLIPSE (đã tải sẵn) và điểm của speechocean762 (không kèm âm thanh).
+- Bài mẫu có bậc do giám khảo gán (chế độ `samples`): cần tải về `.data/samples/`.
+- Chưa có cách lấy thời điểm từng từ đáng tin: kế hoạch dùng `audioTranscriptionConfig` của Gemini hoặc model `gemini-3.5-transcribe`; chưa thử được. Trong code, nếu thời điểm không khớp độ dài bản ghi thì tiêu chí trôi chảy tự mất điểm, chỉ còn nhận xét.
+- Chủ dự án duyệt mẫu ý bắt buộc của bài luận (Task 2) ở `src/lib/grading/requirements.ts`, rồi đổi `ESSAY_TEMPLATES_APPROVED` thành `true`; bài Task 2 của đề Review 13/09 và các bài học có đề không thuộc ba mẫu đó cần danh sách riêng (`APPROVED_REQUIREMENTS`).
+
+**Việc tiếp theo ngay khi có khóa:** `npx tsx scripts/grading-eval/run.ts ellipse --model gemini-3.8-flash --n 60` rồi `--model gemini-3.1-pro-preview`; sau đó `stability` và `perturb`; đọc bảng, chọn model, sửa `gates.ts` theo báo cáo.
+
+**Xong khi:** có bảng số đo trên phần giữ kín cho từng tiêu chí; chọn được model; biết tiêu chí nào qua ngưỡng ở mục 7.2. Chủ dự án xem bảng trước khi sang Đợt 2.
 
 ### Đợt 2: Chấm Viết trong app
 
