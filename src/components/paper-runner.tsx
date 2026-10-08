@@ -257,7 +257,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             <p>35 câu Nghe · 40 câu Đọc · hai bài Viết · ba phần Nói</p>
           </div>
         </div>
-        <div className="content-grid">
+        <div className="paper-landing">
           <section className="panel">
             <h2>Trước khi bắt đầu</h2>
             <div className="stack paper-stage-list">
@@ -358,16 +358,16 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             )}
             {storageError && <p role="alert">{storageError}</p>}
           </section>
+          {mode === "exam" && (
+            <ExamCheckIn
+              name={state.profile.name}
+              paper={paper}
+              only={scope === "all" ? undefined : scope}
+              disabled={Boolean(storageError)}
+              onStart={() => createRun("exam")}
+            />
+          )}
         </div>
-        {mode === "exam" && (
-          <ExamCheckIn
-            name={state.profile.name}
-            paper={paper}
-            only={scope === "all" ? undefined : scope}
-            disabled={Boolean(storageError)}
-            onStart={() => createRun("exam")}
-          />
-        )}
       </div>
     );
 

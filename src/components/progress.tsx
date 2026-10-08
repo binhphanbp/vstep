@@ -167,7 +167,9 @@ export function ProgressPage() {
                     <small>
                       {stats.practiceAccuracy !== null
                         ? `Luyện lại ${stats.practiceAccuracy}%`
-                        : "lần đầu"}
+                        : stats.accuracy !== null
+                          ? "lần đầu"
+                          : "số liệu lần đầu"}
                     </small>
                   </div>
                 </div>

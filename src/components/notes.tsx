@@ -158,8 +158,10 @@ export function NotesPage() {
           </p>
         </div>
         <span className="pill no-print">
-          {live.length} ghi chú · {formatBytes(bytes)} /{" "}
-          {formatBytes(NOTE_LIMITS.bytes)}
+          {live.length} ghi chú
+          {/* The room the notes take is only worth saying once it matters. */}
+          {bytes >= NOTE_LIMITS.bytes / 2 &&
+            ` · đã dùng ${formatBytes(bytes)} / ${formatBytes(NOTE_LIMITS.bytes)}`}
         </span>
       </div>
 

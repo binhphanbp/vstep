@@ -729,51 +729,74 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       )}
       <div className="practice-layout">
         <div
-          className={`panel reading-panel ${lesson.skill === "reading" ? "passage-panel" : ""}`}
-          tabIndex={0}
-          role="region"
-          aria-label="Ngữ liệu và hướng dẫn bài học"
+          className={`practice-side ${lesson.skill === "reading" ? "passage-side" : ""}`}
         >
-          <div className="panel-label">
-            {lesson.skill === "reading"
-              ? "READ THE PASSAGE"
-              : lesson.skill === "listening"
-                ? "LISTEN CAREFULLY"
-                : "YOUR TASK"}
-          </div>
-          {lesson.skill === "listening" ? (
-            <>
-              <AudioPlayer text={lesson.text} />
-              {result && (
-                <details open>
-                  <summary>Bản chép lời</summary>
-                  <MarkablePassage
-                    text={lesson.text}
-                    className="passage"
-                    marks={worked.marks?.text}
-                    onToggle={toggleSentence}
-                  />
-                </details>
-              )}
-            </>
-          ) : (
-            <MarkablePassage
-              text={lesson.text}
-              className="passage"
-              marks={worked.marks?.text}
-              onToggle={toggleSentence}
-            />
-          )}
-          {result ? (
-            <>
-              <HighlightNotes
+          <div
+            className="panel reading-panel"
+            tabIndex={0}
+            role="region"
+            aria-label="Ngữ liệu và hướng dẫn bài học"
+          >
+            <div className="panel-label">
+              {lesson.skill === "reading"
+                ? "READ THE PASSAGE"
+                : lesson.skill === "listening"
+                  ? "LISTEN CAREFULLY"
+                  : "YOUR TASK"}
+            </div>
+            {lesson.skill === "listening" ? (
+              <>
+                <AudioPlayer text={lesson.text} />
+                {result && (
+                  <details open>
+                    <summary>Bản chép lời</summary>
+                    <MarkablePassage
+                      text={lesson.text}
+                      className="passage"
+                      marks={worked.marks?.text}
+                      onToggle={toggleSentence}
+                    />
+                  </details>
+                )}
+              </>
+            ) : (
+              <MarkablePassage
                 text={lesson.text}
+                className="passage"
                 marks={worked.marks?.text}
-                place={lessonWholePlace(lesson)}
+                onToggle={toggleSentence}
               />
-              <ScratchReview text={scratch} place={lessonWholePlace(lesson)} />
-            </>
-          ) : (
+            )}
+            {result && (
+              <>
+                <HighlightNotes
+                  text={lesson.text}
+                  marks={worked.marks?.text}
+                  place={lessonWholePlace(lesson)}
+                />
+                <ScratchReview
+                  text={scratch}
+                  place={lessonWholePlace(lesson)}
+                />
+              </>
+            )}
+            {lesson.tips.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <div className="section-title" style={{ marginBottom: 0 }}>
+                  <Lightbulb size={18} />
+                  <h3>Một gợi ý nhỏ</h3>
+                </div>
+                <ul className="tips-list">
+                  {lesson.tips.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          {/* Outside the panel's own scroll: a page that sits below the end of
+              a long passage is a page nobody finds. */}
+          {!result && (
             <ScratchPad
               value={scratch}
               onChange={(value) =>
@@ -791,19 +814,6 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               placeholder={SCRATCH_HINTS[lesson.skill]}
               defaultOpen={lesson.skill === "reading" ? undefined : true}
             />
-          )}
-          {lesson.tips.length > 0 && (
-            <div style={{ marginTop: 24 }}>
-              <div className="section-title" style={{ marginBottom: 0 }}>
-                <Lightbulb size={18} />
-                <h3>Một gợi ý nhỏ</h3>
-              </div>
-              <ul className="tips-list">
-                {lesson.tips.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
           )}
         </div>
         <div>
