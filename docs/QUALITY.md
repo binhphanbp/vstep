@@ -2,6 +2,17 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI, đợt 1 (phần làm được khi chưa có khóa): mã chấm, thang dự phòng, bộ đo — 08/10/2026
+
+Yêu cầu: làm Đợt 1 của [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md). Phần cần khóa Gemini, tài liệu VSTEP chính thức và dữ liệu Cambridge chưa làm được (môi trường chưa có khóa và chặn các tên miền cần thiết); phần còn lại đã làm.
+
+- **Đã làm:** thư viện `src/lib/grading/` và `src/lib/rubric/`, bộ đo `scripts/grading-eval/`, `@google/genai` (≥ 2.28, < 3) và `tsx` trong package.json, `/.data/` trong `.gitignore`. Chi tiết từng file ở mục Đợt 1 của kế hoạch.
+- **Ở app chưa có gì thay đổi:** không trang nào gọi các module này; chưa có đường dẫn API, chưa có nút “Chấm bằng AI”. Đó là Đợt 2.
+- **Điều kiện chống chấm cảm tính được kiểm bằng ca thử:** cộng điểm và làm tròn ở code (có ca biên .25/.75 và sai số dấu phẩy động); câu trích bịa bị loại và đếm; một ý bắt buộc chỉ được tính khi có câu trích thật; bài trống, quá ngắn, tiếng Việt, chép đề không gọi model; bài có lời dặn người chấm được đóng khung như dữ liệu; thời điểm từng từ không khớp bản ghi thì tiêu chí trôi chảy mất điểm; mọi cổng đóng thì không điểm nào được hiện.
+- **Bộ đo chạy thử bằng `--dry`** (model giả tất định) trên 3.911 bài ELLIPSE thật: các chế độ `ellipse`, `stability`, `perturb` chạy hết và ghi báo cáo; các số của model giả vô nghĩa và đều không qua ngưỡng, đúng như phải thế.
+- **Chưa kiểm được:** mọi điều về chất lượng chấm. Chưa có lần gọi Gemini thật nào, nên chưa biết độ chính xác, độ ổn định, chi phí, thời gian một bài, ca nào bị Gemini từ chối, và cách lấy thời điểm từng từ có chạy không.
+- **Kiểm tra:** 339 unit (thêm 57); ESLint, TypeScript sạch; E2E không đổi (165).
+
 ## Chấm AI, đợt 0: bỏ hết phần dành cho giáo viên — 08/10/2026
 
 Yêu cầu của chủ dự án: Mây chỉ làm cho Gùa và do chính họ quản lý, nên bỏ phần gửi giáo viên; việc chấm Viết và Nói sẽ làm bằng AI ([PLAN-CHAM-AI.md](PLAN-CHAM-AI.md)).
@@ -376,7 +387,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 282 unit / 165 E2E / 104 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 339 unit / 165 E2E / 104 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -585,7 +596,7 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 282 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 339 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
 - 165 kiểm thử Playwright trên bản production: 157 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.

@@ -35,7 +35,7 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Phép kiểm tra                    | Kết quả local                                                                            |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | ESLint và TypeScript             | Đạt                                                                                      |
-| Vitest                           | 282/282                                                                                  |
+| Vitest                           | 339/339                                                                                  |
 | Playwright trên production build | 165 ca: 157 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 157/157 |
 | Accessibility tự động            | Axe WCAG A/AA trên 16 màn, có kho đề và Review 13/09                                     |
 | Build tĩnh                       | 104 trang, gồm năm route đề nhập                                                         |
