@@ -21,6 +21,8 @@ import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { QuestionCard } from "./practice";
+import { QuestionNotes } from "./note-box";
+import { lessonQuestionPlace } from "@/lib/note-anchors";
 export function ExamPage() {
   const { state, update } = useStudy();
   const [now, setNow] = useState(() => Date.now());
@@ -440,6 +442,9 @@ export function ExamPage() {
                     submitted
                     skill={lesson.skill}
                     step={nextStep(state, q, lesson.id)}
+                    notes={
+                      <QuestionNotes place={lessonQuestionPlace(lesson, q)} />
+                    }
                     onChoose={() => {}}
                   />
                 ))}

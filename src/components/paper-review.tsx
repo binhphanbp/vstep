@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Recorder } from "./audio-tools";
+import { QuestionNotes } from "./note-box";
 import { PaperText } from "./paper-exam";
 import {
   itemStatus,
@@ -15,6 +16,11 @@ import {
   type PaperSlot,
 } from "@/lib/papers";
 import { wordCount, type PaperRun } from "@/lib/learning";
+import {
+  paperItemPlace,
+  paperSlotPlace,
+  paperWholePlace,
+} from "@/lib/note-anchors";
 
 const sectionNames = ["Nghe", "Đọc", "Viết", "Nói"];
 const LETTERS = "ABCD";
@@ -157,9 +163,11 @@ type RetryEntry = { item: PaperItem; slot: PaperSlot; stage: number };
  * sitting: the result of the exam stays the result of the exam.
  */
 function RetryDrill({
+  paper,
   entries,
   onClose,
 }: {
+  paper: Paper;
   entries: RetryEntry[];
   onClose: () => void;
 }) {
@@ -263,6 +271,12 @@ function RetryDrill({
           )}
         </div>
       )}
+      {answered && (
+        <QuestionNotes
+          key={item.id}
+          place={paperItemPlace(paper, stage, slot, item)}
+        />
+      )}
       <div className="button-row">
         <button
           type="button"
@@ -307,6 +321,18 @@ export function PaperReview({
 }) {
   const [onlyMissed, setOnlyMissed] = useState(false);
   const [retry, setRetry] = useState<RetryEntry[] | null>(null);
+  // The notebook opens a paper on the question a note was written about.
+  const [focusItem] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : (new URLSearchParams(window.location.search).get("item") ?? ""),
+  );
+  useEffect(() => {
+    if (!focusItem) return;
+    document
+      .getElementById(`item-${focusItem}`)
+      ?.scrollIntoView({ block: "center" });
+  }, [focusItem]);
   const stages = runStages(run);
   const sameMaterial = sameMaterialAs(paper, run);
   const graded = paper.graded && sameMaterial;
@@ -339,6 +365,7 @@ export function PaperReview({
           </div>
         </div>
         <RetryDrill
+          paper={paper}
           entries={retry}
           onClose={() => {
             setRetry(null);
@@ -421,6 +448,11 @@ export function PaperReview({
           </select>
         )}
       </div>
+
+      <section className="panel paper-whole-note" aria-label="Ghi chú về cả đề">
+        <h2>Rút kinh nghiệm cả đề</h2>
+        <QuestionNotes place={paperWholePlace(paper)} noun="cả đề này" />
+      </section>
 
       {(timing.length > 0 || (graded && objective.length > 0)) && (
         <div className="review-summary">
@@ -586,7 +618,14 @@ export function PaperReview({
                 (mark) => mark === "wrong" || mark === "blank",
               ).length;
               return (
-                <details key={slot.id}>
+                <details
+                  key={slot.id}
+                  open={
+                    focusItem && slot.items.some((item) => item.id === focusItem)
+                      ? true
+                      : undefined
+                  }
+                >
                   <summary>
                     {slot.part} · {slot.title}
                     {graded && slot.items.length > 0 && (
@@ -627,7 +666,11 @@ export function PaperReview({
                     </ul>
                   )}
                   {items.map((item) => (
-                    <div className="paper-review-item" key={item.id}>
+                    <div
+                      className="paper-review-item"
+                      key={item.id}
+                      id={`item-${item.id}`}
+                    >
                       <strong>
                         {item.number}. {item.text}
                       </strong>{" "}
@@ -653,6 +696,9 @@ export function PaperReview({
                         </details>
                       )}
                       {sameMaterial && <Explanation item={item} />}
+                      <QuestionNotes
+                        place={paperItemPlace(paper, index, slot, item)}
+                      />
                     </div>
                   ))}
                   {section.skill === "writing" && (
@@ -673,6 +719,17 @@ export function PaperReview({
                     run.spoken.includes(slot.id) && (
                       <Recorder id={`paper-${run.id}-${slot.id}`} readOnly />
                     )}
+                  {(section.skill === "writing" ||
+                    section.skill === "speaking") && (
+                    <QuestionNotes
+                      place={paperSlotPlace(paper, index, slot)}
+                      noun={
+                        section.skill === "writing"
+                          ? "bài viết này"
+                          : "phần nói này"
+                      }
+                    />
+                  )}
                   <SampleAnswers slot={slot} />
                 </details>
               );

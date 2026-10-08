@@ -9,6 +9,7 @@ import {
   Timer,
   Layers,
   NotebookPen,
+  StickyNote,
   ChartNoAxesCombined,
   Settings,
   Heart,
@@ -30,6 +31,7 @@ const nav = [
   { href: "/exam", label: "Phòng thi thử", icon: Timer },
   { href: "/vocabulary", label: "Vườn từ vựng", icon: Layers },
   { href: "/mistakes", label: "Sổ tay lỗi sai", icon: NotebookPen },
+  { href: "/notes", label: "Sổ ghi chú", icon: StickyNote },
   { href: "/progress", label: "Nhìn lại tiến bộ", icon: ChartNoAxesCombined },
 ];
 // Pages outside the main navigation; anything else is an error page and must

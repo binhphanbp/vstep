@@ -41,6 +41,7 @@ const PRECACHE = [
   "/papers",
   "/vocabulary",
   "/mistakes",
+  "/notes",
   "/progress",
   "/settings",
   "/guide",

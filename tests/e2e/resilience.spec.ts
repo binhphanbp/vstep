@@ -369,6 +369,7 @@ test("every page of the app opens with the network gone, not just the last one v
     ["/papers", "Năm đề có đáp án"],
     ["/vocabulary", "Gieo một từ"],
     ["/mistakes", "Không phải lỗi"],
+    ["/notes", "Những điều mình tự ghi lại"],
     ["/progress", "Tiến bộ đôi khi"],
     ["/settings", "Góc học"],
     ["/guide", "Hiểu kỳ thi"],

@@ -25,6 +25,7 @@ import {
   whenLabel,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
+import { NOTE_LIMITS, allNotes, binnedNotes, noteBytes } from "@/lib/notes";
 import {
   CLOUD_REQUEST_TIMEOUT,
   isCloudTimeout,
@@ -791,7 +792,10 @@ function CloudSettings({ storageError }: { storageError: string }) {
  * action that is safe to offer: takes older than a month.
  */
 function StoragePanel() {
-  const { toast } = useStudy();
+  const { state, toast } = useStudy();
+  const notes = allNotes(state);
+  const liveCount = notes.filter((note) => !note.deletedAt).length;
+  const binCount = binnedNotes(state).length;
   type Report = {
     data: number;
     usage: RecordingUsage | null;
@@ -846,11 +850,27 @@ function StoragePanel() {
       <div className="history-row">
         <div>
           <h3>Dữ liệu học</h3>
-          <small>Tiến độ, bài viết, bản nháp và lịch ôn.</small>
+          <small>Tiến độ, bài viết, bản nháp, lịch ôn và ghi chú.</small>
         </div>
         <div className="skill-accuracy">
           <strong>{report ? formatBytes(report.data) : "—"}</strong>
           <small>trong trình duyệt</small>
+        </div>
+      </div>
+      <div className="history-row">
+        <div>
+          <h3>Ghi chú</h3>
+          <small>
+            Nằm trong dữ liệu học và đi theo bản sao lưu. Tối đa{" "}
+            {NOTE_LIMITS.count} ghi chú, {formatBytes(NOTE_LIMITS.bytes)}.
+          </small>
+        </div>
+        <div className="skill-accuracy">
+          <strong>{formatBytes(noteBytes(notes))}</strong>
+          <small>
+            {liveCount} ghi chú
+            {binCount ? ` · ${binCount} đã xóa` : ""}
+          </small>
         </div>
       </div>
       <div className="history-row">

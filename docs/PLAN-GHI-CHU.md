@@ -2,6 +2,14 @@
 
 Viết ngày 08/10/2026 trên nền `main` tại `417bc52` (202 unit, 93 E2E, 111 route); rà lại và rút gọn cùng ngày sau khi anh chốt hướng. Mọi con số dưới đây là số đo hoặc đọc từ code (mục 8).
 
+## Tiến độ
+
+- **Đợt 0** (giữ trường lạ): đã làm, PR #51.
+- **Đợt 1** (ghi chú cho từng câu + trang Sổ ghi chú): đã làm, kể cả ★ "Cần nhớ", In, "Đã xóa gần đây" và nhận xét giáo viên chỉ đọc. Ghi chú về cách đo và những gì chưa thử nằm trong [QUALITY.md](QUALITY.md).
+- **Đợt 2** (nháp và tô khi làm bài), **Đợt 3** (nhắc sao lưu): chưa làm.
+
+Hai chỗ làm khác bản kế hoạch: `kind` ("note", "scratch", "highlight") không còn trong ghi chú vì nháp và tô thuộc về lượt làm (đợt 2), nên không cần loại; `anchor` có thêm `skill` và `group` (tên đề hoặc bài) để lọc mà không phải đoán từ nhãn. ★ và In đã nằm ở đợt 1 vì thẻ ghi chú đã có ở đó.
+
 ## 1. Mục tiêu
 
 Khi tự ôn, làm đề giấy hay thi thử trên máy, Gùa phải nháp và ghi chú bằng tay: gạch chân bài đọc, ghi từ khóa khi nghe, dàn ý trước khi nói, rồi chép lại "vì sao sai" ra sổ. Mây cần thay được việc đó, **gọn, không rối, dùng được ngay**.

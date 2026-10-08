@@ -42,6 +42,8 @@ import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { deleteRecording, getRecording, saveRecording } from "@/lib/recordings";
 import { readQuizDraft } from "@/lib/quiz-draft";
+import { lessonQuestionPlace, lessonWholePlace } from "@/lib/note-anchors";
+import { QuestionNotes } from "./note-box";
 export function PracticeLibrary() {
   const params = useSearchParams();
   const initial = params.get("skill");
@@ -209,6 +211,7 @@ export function QuestionCard({
   onConfidence,
   skill,
   step,
+  notes: noteBox,
 }: {
   question: Question;
   index: number;
@@ -220,6 +223,8 @@ export function QuestionCard({
   skill?: Skill;
   /** One concrete thing to do about this question, shown only when wrong. */
   step?: NextStep;
+  /** Her own notes on the question; shown only once the answer is known. */
+  notes?: React.ReactNode;
 }) {
   const notes = question.optionNotes;
   const others = notes
@@ -345,6 +350,7 @@ export function QuestionCard({
           </Link>
         </p>
       )}
+      {submitted && noteBox}
     </fieldset>
   );
 }
@@ -685,6 +691,12 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           <p className="help-copy">{insightAdvice(insights)}</p>
         </section>
       )}
+      {result && (
+        <section className="panel" aria-label="Ghi chú về cả bài">
+          <h2>Ghi chú về cả bài</h2>
+          <QuestionNotes place={lessonWholePlace(lesson)} noun="cả bài này" />
+        </section>
+      )}
       <div className="practice-layout">
         <div
           className={`panel reading-panel ${lesson.skill === "reading" ? "passage-panel" : ""}`}
@@ -747,6 +759,11 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                 result
                   ? nextStep(state, q, lesson.id, confidence[q.id])
                   : undefined
+              }
+              notes={
+                result ? (
+                  <QuestionNotes place={lessonQuestionPlace(lesson, q)} />
+                ) : undefined
               }
               onChoose={(value) => {
                 update((s) => {

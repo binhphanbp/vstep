@@ -14,6 +14,7 @@ test("main learning surfaces have no WCAG A/AA violations", async ({
     "/papers/review-1309",
     "/guide",
     "/mistakes",
+    "/notes",
     "/practice/listening-weekend",
     "/practice/speaking-social",
     "/practice/reading-cafe",

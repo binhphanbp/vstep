@@ -15,6 +15,7 @@ import {
   fullWriting2,
 } from "./full-exam-02";
 import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
+import { NOTE_LIMITS } from "./notes";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -321,6 +322,36 @@ export const paperRunSchema = z.looseObject({
     }),
   ),
 });
+/**
+ * Where a note was written. Loose on purpose, like the records a later release
+ * adds fields to: a tab on an older build must not strip what a newer one saved.
+ */
+const noteAnchorSchema = z.looseObject({
+  source: z.enum(["paper", "lesson"]),
+  sourceId: limitedString(100),
+  /** Version of the paper or lesson when the note was written. */
+  version: boundedInteger(0, 1000000),
+  skill: z.optional(skillSchema),
+  /** "Đề 133" or a lesson title: what the notebook filters by. */
+  group: limitedString(NOTE_LIMITS.group),
+  /** "Đề 133 · Nghe · Part 2 · Câu 12": readable without opening the paper. */
+  label: limitedString(NOTE_LIMITS.label),
+  /** Absent for a note about the whole paper or lesson. */
+  itemId: z.optional(limitedString(120)),
+  /** First line of the question, kept so the notebook works offline. */
+  excerpt: z.optional(limitedString(NOTE_LIMITS.excerpt)),
+});
+export const noteSchema = z.looseObject({
+  id: limitedString(100),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  /** Set when deleted; the note stays recoverable for a while. */
+  deletedAt: z.optional(z.iso.datetime()),
+  body: limitedString(NOTE_LIMITS.body),
+  /** "Cần nhớ". */
+  star: z.optional(z.boolean()),
+  anchor: z.optional(noteAnchorSchema),
+});
 export const stateSchema = z
   .looseObject({
     version: z.literal(1),
@@ -349,6 +380,13 @@ export const stateSchema = z
     // other study data. The question bank itself stays in versioned static files.
     paperRuns: z.optional(
       z.array(paperRunSchema).check(z.maxLength(MAX_PAPER_RUNS)),
+    ),
+    // The learner's own notes. Optional, so every backup written before notes
+    // existed still parses; the caps are enforced where notes are written
+    // (`src/lib/notes.ts`), because the state is stored without validation and
+    // a number the schema rejects would make the next load report damaged data.
+    notes: z.optional(
+      z.array(noteSchema).check(z.maxLength(NOTE_LIMITS.count)),
     ),
     updatedAt: z.iso.datetime(),
   })
@@ -404,6 +442,13 @@ export const stateSchema = z
           path: ["paperRuns"],
           message: "Mỗi lượt thi phải có mã riêng.",
         });
+      const notes = state.notes ?? [];
+      if (new Set(notes.map((note) => note.id)).size !== notes.length)
+        ctx.addIssue({
+          code: "custom",
+          path: ["notes"],
+          message: "Mỗi ghi chú phải có mã riêng.",
+        });
     }),
   );
 /**
@@ -428,6 +473,10 @@ export type Review = z.infer<typeof reviewSchema>;
 export type StudyState = Known<z.infer<typeof stateSchema>>;
 export type ExamSession = Known<z.infer<typeof examSchema>>;
 export type PaperRun = Known<z.infer<typeof paperRunSchema>>;
+export type NoteAnchor = Known<z.infer<typeof noteAnchorSchema>>;
+export type Note = Omit<Known<z.infer<typeof noteSchema>>, "anchor"> & {
+  anchor?: NoteAnchor;
+};
 
 export const DEFAULT_LEARNER_NAME = "Gùa";
 
@@ -1692,7 +1741,7 @@ export function mistakes(state: StudyState, now = new Date()) {
       question: Question;
       lesson: Pick<
         (typeof lessons)[number],
-        "id" | "version" | "title" | "skill" | "text"
+        "id" | "version" | "title" | "skill" | "text" | "questions"
       >;
       chosen: number | undefined;
       confidence: Confidence | undefined;
