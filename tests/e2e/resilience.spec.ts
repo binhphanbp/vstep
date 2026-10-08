@@ -420,3 +420,32 @@ test("today's lessons are kept for the train, and they open with no network", as
   await expect(page.locator(".question").first()).toBeVisible();
   await context.setOffline(false);
 });
+
+test("a save by this build keeps the fields a newer build wrote", async ({
+  page,
+}) => {
+  // A tab still on an older build read the profile, dropped every key it did
+  // not know and wrote the rest back, which erased whatever a newer build had
+  // added. The profile is seeded with fields this build has never heard of.
+  const state = {
+    ...freshState(),
+    futureList: [{ id: "n1", body: "written by a newer build" }],
+  };
+  await page.addInitScript((initial) => {
+    if (!localStorage.getItem("may-study-v1"))
+      localStorage.setItem("may-study-v1", JSON.stringify(initial));
+  }, state);
+  await page.goto("/practice/reading-cafe");
+  await page.locator('input[name="rc1"][value="1"]').check();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => JSON.parse(localStorage.getItem("may-study-v1")!).drafts,
+      ),
+    )
+    .toHaveProperty("quiz:reading-cafe");
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("may-study-v1")!),
+  );
+  expect(saved.futureList).toEqual(state.futureList);
+});
