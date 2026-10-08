@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Leaf,
   NotebookPen,
   RotateCcw,
@@ -355,17 +356,29 @@ function WeakSpots() {
   const ranked = [...types].sort(
     (a, b) => b.wrong / b.asked - a.wrong / a.asked || b.asked - a.asked,
   );
+  // While no kind of question has enough behind it to say anything, the rows
+  // are all "too few to tell": the card is folded to its heading, so the
+  // mistakes themselves, which are what the page is for, are not pushed down
+  // the screen by a table of nothing. It opens as soon as there is something
+  // to read.
+  const anyEnough = types.some((type) => type.asked >= TYPE_EVIDENCE_MINIMUM);
   return (
-    <section className="panel weak-spots">
-      <div className="section-heading">
-        <div>
-          <h2>Chỗ mình hay vấp</h2>
-          <p>
-            Tính trên lần đầu gặp mỗi bài, vì làm lại bài đã biết đáp án thì
-            không nói lên điều gì.
-          </p>
+    <details className="panel weak-spots" open={anyEnough}>
+      <summary>
+        <div className="section-heading">
+          <div>
+            <h2>Chỗ mình hay vấp</h2>
+            <p>
+              Tính trên lần đầu gặp mỗi bài, vì làm lại bài đã biết đáp án thì
+              không nói lên điều gì.
+            </p>
+          </div>
         </div>
-      </div>
+        <span className="weak-toggle">
+          {anyEnough ? "" : "Chưa đủ bài để kết luận"}
+          <ChevronDown size={18} aria-hidden />
+        </span>
+      </summary>
       <ul>
         {ranked.map((type) => {
           const enough = type.asked >= TYPE_EVIDENCE_MINIMUM;
@@ -414,7 +427,7 @@ function WeakSpots() {
         Kế hoạch mỗi ngày cũng ưu tiên hai dạng đang sai nhiều nhất, nên{" "}
         {state.profile.name} không phải tự nhớ danh sách này.
       </p>
-    </section>
+    </details>
   );
 }
 /**

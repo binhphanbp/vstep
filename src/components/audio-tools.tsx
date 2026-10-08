@@ -302,7 +302,7 @@ export function AudioPlayer({
               aria-label="Nghe lại câu này"
             >
               <RotateCcw size={14} />
-              Nghe lại câu này
+              Nghe lại
             </button>
             <button
               type="button"

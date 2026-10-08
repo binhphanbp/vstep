@@ -318,6 +318,56 @@ textarea:focus-visible {
 .profile-link > svg {
   margin-left: auto;
 }
+
+/* The side column has to hold its last links (the guide, Settings, the
+   profile) on a laptop or a 1080p browser window, not only on a tall monitor.
+   It needs 1070 px as it was drawn; the decorative note shrinks first, then
+   goes, and the spacing tightens, so that it fits from 700 px up. */
+@media (min-width: 801px) and (max-height: 1069px) {
+  .brand {
+    padding-bottom: 22px;
+  }
+  .nav-item {
+    padding: 10px 14px;
+  }
+  .love-note {
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .love-note > span {
+    display: none;
+  }
+  .love-note p {
+    margin: 6px 0 0;
+  }
+  .sidebar-bottom {
+    padding-top: 12px;
+  }
+  .profile-link {
+    margin-top: 6px;
+    padding: 12px 10px;
+  }
+}
+@media (min-width: 801px) and (max-height: 919px) {
+  .sidebar {
+    padding-top: 22px;
+  }
+  .brand {
+    padding-bottom: 14px;
+  }
+  .love-note {
+    display: none;
+  }
+  .nav-item {
+    padding: 9px 14px;
+    margin: 2px 0;
+  }
+}
+@media (min-width: 801px) and (max-height: 759px) {
+  .nav-item {
+    padding: 7px 14px;
+  }
+}
 .main-shell {
   margin-left: 248px;
   min-width: 0;
@@ -1611,19 +1661,27 @@ textarea:focus-visible {
   border-radius: 999px;
 }
 .audio-seek-row {
-  display: flex;
-  flex-wrap: wrap;
+  /* The position on a line of its own and the three ways round the passage
+     in equal columns: at the width of the lesson's left column they used to
+     wrap one and two to a row. The full names are the buttons' labels. */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  align-items: center;
   margin-top: 10px;
 }
+.audio-seek-row .button {
+  justify-content: center;
+}
 .audio-position {
+  grid-column: 1 / -1;
   font-size: 12px;
   color: #43618f;
-  min-width: 86px;
 }
 .tips-list {
-  padding-left: 20px;
+  /* Tailwind's reset takes the bullets away, and the indent was left behind:
+     the items hung off the heading with nothing to hang from. */
+  list-style: disc;
+  padding-left: 22px;
   margin: 12px 0;
   color: #716974;
   font-size: 14px;
@@ -1631,6 +1689,9 @@ textarea:focus-visible {
 .tips-list li {
   padding: 6px 0;
   line-height: 1.8;
+}
+.tips-list li::marker {
+  color: var(--rose);
 }
 .writing-area {
   width: 100%;
@@ -1668,9 +1729,74 @@ textarea:focus-visible {
   padding: 0;
   margin: 4px 0 0;
 }
+.weak-spots {
+  margin-bottom: 22px;
+}
+.weak-spots > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.weak-spots > summary::-webkit-details-marker {
+  display: none;
+}
+.weak-spots > summary .section-heading {
+  margin-bottom: 0;
+}
+.weak-toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.weak-spots[open] > summary {
+  margin-bottom: 8px;
+}
+.weak-spots[open] .weak-toggle svg {
+  transform: rotate(180deg);
+}
+/* One line to a kind of question: the name and what is known, the way on at
+   the end, the bar underneath. The list of mistakes below is what the page is
+   for, so this does not get to push it off the screen. */
 .weak-spots li {
-  padding: 14px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head foot"
+    "track track";
+  align-items: center;
+  gap: 0 18px;
+  padding: 11px 0;
   border-bottom: 1px solid var(--line);
+}
+.weak-spots .weak-head {
+  grid-area: head;
+}
+.weak-spots .weak-foot {
+  grid-area: foot;
+  margin-top: 0;
+  justify-content: flex-end;
+}
+.weak-spots .skill-progress-track {
+  grid-area: track;
+}
+@media (max-width: 700px) {
+  .weak-spots li {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "track"
+      "foot";
+  }
+  .weak-spots .weak-foot {
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
 }
 .weak-spots li:last-child {
   border-bottom: 0;
@@ -2027,7 +2153,9 @@ details .passage {
   font-size: 13px;
 }
 .flashcard {
-  min-height: 330px;
+  /* Short enough on a laptop that the four ways to rate the word are on the
+     screen the moment the card is turned over, not a scroll away. */
+  min-height: clamp(210px, 30vh, 330px);
   border: 1px solid #e7dade;
   border-radius: 20px;
   background: #f8f2f4;
@@ -2035,9 +2163,9 @@ details .passage {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 35px;
+  padding: clamp(18px, 3.4vh, 35px);
   text-align: center;
-  gap: 15px;
+  gap: clamp(8px, 1.6vh, 15px);
   width: 100%;
 }
 .flashcard h2 {
@@ -3205,7 +3333,8 @@ details .passage {
    long passages and large question sets without widening a phone viewport. */
 .paper-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  /* Three across at the most: five papers fall 3 + 2, not 4 + 1. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 16px;
   margin-top: 22px;
 }
