@@ -1,5 +1,5 @@
 import manifest from "../../public/papers/manifest.json";
-import type { PaperRun } from "./learning";
+import { MAX_PAPER_RUNS, type PaperRun } from "./learning";
 import type { Skill } from "./content";
 
 export type PaperItem = {
@@ -208,4 +208,33 @@ export function readingPalette(paper: Paper) {
   return section.slots.flatMap((slot, slotIndex) =>
     slot.items.map((item) => ({ item, slotIndex })),
   );
+}
+
+/**
+ * Adds a new sitting to the saved ones.
+ *
+ * - If the paper already has one in progress (a second tab that still showed
+ *   the start screen), nothing is added and that sitting is returned instead:
+ *   two open sittings of one paper would leave the older one stranded.
+ * - The saved list is capped. A sitting past the cap would be written to the
+ *   device but fail validation on the next load and make the whole app read
+ *   as damaged, so the oldest finished sittings are let go first.
+ */
+export function addPaperRun(
+  runs: readonly PaperRun[],
+  next: PaperRun,
+  cap = MAX_PAPER_RUNS,
+): { runs: PaperRun[]; reused?: PaperRun; dropped: PaperRun[] } {
+  const open = runs.find(
+    (run) => run.paperId === next.paperId && !run.finishedAt,
+  );
+  if (open) return { runs: [...runs], reused: open, dropped: [] };
+  const kept = [...runs];
+  const dropped: PaperRun[] = [];
+  while (kept.length >= cap) {
+    const oldest = kept.findIndex((run) => run.finishedAt);
+    if (oldest === -1) break;
+    dropped.push(...kept.splice(oldest, 1));
+  }
+  return { runs: [...kept, next], dropped };
 }

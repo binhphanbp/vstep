@@ -284,6 +284,8 @@ export const examSchema = z
       });
     }),
   );
+/** How many sittings of the paper bank are kept on a device. */
+export const MAX_PAPER_RUNS = 100;
 export const paperRunSchema = z.object({
   id: limitedString(100),
   // "131" was withdrawn from the bank, but a backup that holds a sitting of it
@@ -345,7 +347,9 @@ export const stateSchema = z
     exam: z.nullable(examSchema),
     // Imported papers keep responses in the same backup/cloud snapshot as all
     // other study data. The question bank itself stays in versioned static files.
-    paperRuns: z.optional(z.array(paperRunSchema).check(z.maxLength(100))),
+    paperRuns: z.optional(
+      z.array(paperRunSchema).check(z.maxLength(MAX_PAPER_RUNS)),
+    ),
     updatedAt: z.iso.datetime(),
   })
   .check(

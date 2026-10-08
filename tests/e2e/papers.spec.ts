@@ -718,3 +718,115 @@ test("the bank holds five papers, and a saved sitting of the withdrawn 131 break
   );
   expect(kept).toContain("131");
 });
+
+// ── Rare paths of the bank ─────────────────────────────────────────────────
+async function startPractice(page: import("@playwright/test").Page) {
+  await page.getByRole("radio", { name: /Luyện thoải mái/ }).check();
+  await page.getByRole("checkbox", { name: /đủ 172 phút/ }).check();
+  await page.getByRole("button", { name: /Bắt đầu đề 132/ }).click();
+  await expect(page.locator(".paper-clock")).toBeVisible();
+}
+
+test("the 101st sitting does not make the saved data unreadable", async ({
+  page,
+}) => {
+  await page.goto("/papers/132");
+  await startPractice(page);
+  // The device already holds 100 finished sittings.
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+    const done = state.paperRuns.pop();
+    state.paperRuns = Array.from({ length: 100 }, (_, i) => ({
+      ...done,
+      id: `old-${i}`,
+      startedAt: 1_000_000 + i,
+      stage: 3,
+      finishedAt: new Date(2_000_000_000 + i * 1000).toISOString(),
+    }));
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+  });
+  await page.goto("/papers/132");
+  await page.getByRole("button", { name: "Làm lại đề này" }).click();
+  await startPractice(page);
+  const ids = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns.map(
+      (run: { id: string }) => run.id,
+    ),
+  );
+  expect(ids).toHaveLength(100);
+  expect(ids).not.toContain("old-0");
+  expect(ids).toContain("old-99");
+  // The proof is the next load: it used to read the data as damaged.
+  await page.reload();
+  await expect(page.locator(".paper-clock")).toBeVisible();
+  await expect(page.getByText(/Không đọc được dữ liệu/)).toHaveCount(0);
+});
+
+test("a second tab follows the sitting the first one starts instead of offering another", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/papers/132");
+  const other = await context.newPage();
+  await other.goto("/papers/132");
+  await expect(
+    other.getByRole("radio", { name: /Luyện thoải mái/ }),
+  ).toBeVisible();
+  await startPractice(page);
+  // No second start screen to press: the other tab moves to the same sitting.
+  await expect(other.locator(".paper-clock")).toBeVisible();
+  await expect(
+    other.getByRole("radio", { name: /Luyện thoải mái/ }),
+  ).toHaveCount(0);
+  const runs = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("may-study-v1")!).paperRuns,
+  );
+  expect(runs).toHaveLength(1);
+  await other.close();
+});
+
+test("a sitting left past its time says so on the bank card", async ({
+  page,
+}) => {
+  await page.goto("/papers/132");
+  await startPractice(page);
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+    state.paperRuns[0].deadline = Date.now() - 3_600_000;
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+  });
+  await page.goto("/papers");
+  const card = page.locator(".paper-card", { hasText: "Đề 132" });
+  await expect(card).toContainText("Đã quá giờ");
+  await expect(card).not.toContainText("Đang làm · phần");
+  // Opening it settles the sitting from its absolute deadlines.
+  await card.getByRole("link", { name: "Tiếp tục làm đề" }).click();
+  await expect(page.getByText(/ĐỀ 132 ·/)).toBeVisible();
+});
+
+test("a paper that will not load says so and opens once the connection is back", async ({
+  page,
+}) => {
+  await page.route("**/papers/133.json", (route) => route.abort());
+  await page.goto("/papers/133");
+  await expect(page.locator("p.notice.error")).toContainText(
+    "Không tải được đề",
+  );
+  await expect(page.getByRole("link", { name: "Về kho đề" })).toBeVisible();
+  // A file that arrives broken is refused the same way, not half-shown.
+  await page.unroute("**/papers/133.json");
+  await page.route("**/papers/133.json", (route) =>
+    route.fulfill({ contentType: "application/json", body: '{"id":"133"}' }),
+  );
+  await page.reload();
+  await expect(page.locator("p.notice.error")).toContainText(
+    "Không tải được đề",
+  );
+  // Back online.
+  await page.unroute("**/papers/133.json");
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: /Đề thi thử VSTEP 133/ }),
+  ).toBeVisible();
+  await expect(page.locator("p.notice.error")).toHaveCount(0);
+});
