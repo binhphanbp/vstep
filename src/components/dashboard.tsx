@@ -26,7 +26,8 @@ import {
   milestones,
   quickSession,
   QUICK_SESSION_MINUTES,
-  openVocabulary,
+  vocabularyDeck,
+  dueVocabulary,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
 import { SkillIcon } from "./icons";
@@ -50,10 +51,8 @@ export function Dashboard() {
   const learnedMinutes = Math.round(
     todayAttempts.reduce((s, a) => s + a.seconds, 0) / 60,
   );
-  const open = openVocabulary(state);
-  const due = open.filter(
-    (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
-  ).length;
+  const deck = vocabularyDeck(state);
+  const due = dueVocabulary(state, now).length;
   const week = Array.from({ length: 7 }, (_, i) => dayOffset(today, i - 6));
   // Only milestones that really happened; an empty list shows the quote
   // instead, because a congratulation she did not earn is worse than none.
@@ -465,7 +464,7 @@ export function Dashboard() {
             </h2>
             <p>
               <strong>{due} từ</strong>{" "}
-              {due === open.length
+              {due === deck.length
                 ? `sẵn sàng để ${state.profile.name} khám phá.`
                 : `đang chờ ${state.profile.name} ôn lại.`}
               <br />

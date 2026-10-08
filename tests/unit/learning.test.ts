@@ -7,6 +7,10 @@ import {
   TYPE_EVIDENCE_MINIMUM,
   TYPE_STEP_MINIMUM,
   addSavedWord,
+  dueVocabulary,
+  searchFold,
+  vocabularyDeck,
+  wordHasAuthoredCard,
   advanceExam,
   attemptLesson,
   compareSittings,
@@ -1810,5 +1814,77 @@ describe("a date and time for a history row", () => {
   });
   it("says nothing rather than 'Invalid Date' for a broken value", () => {
     expect(whenLabel("không phải ngày")).toBe("");
+  });
+});
+
+describe("the vocabulary garden's own cards and rare paths", () => {
+  const now = new Date("2026-10-08T03:00:00Z");
+  it("counts the cards she added wherever the garden's due cards are counted", () => {
+    let state = freshState();
+    const authored = dueVocabulary(state, now).length;
+    state = addSavedWord(addSavedWord(state, "rc4", now), "rk4", now);
+    // The two she added are in the deck and due, like any card never seen.
+    expect(
+      vocabularyDeck(state).filter((card) => card.id.startsWith("w:")),
+    ).toHaveLength(2);
+    expect(dueVocabulary(state, now)).toHaveLength(authored + 2);
+    // A card she has just marked "again" is not due for ten minutes.
+    state = {
+      ...state,
+      reviews: {
+        ...state.reviews,
+        "w:rc4": scheduleReview(undefined, "again", now),
+      },
+    };
+    expect(dueVocabulary(state, now)).toHaveLength(authored + 1);
+    expect(
+      dueVocabulary(state, new Date(now.getTime() + 11 * 60_000)),
+    ).toHaveLength(authored + 2);
+    // The week plan and the ten-minute session count the same cards.
+    const withExam = {
+      ...state,
+      profile: { ...state.profile, examDate: "2026-12-30" },
+    };
+    expect(
+      examWeekPlan(withExam, now)!.thisWeek.some((line) =>
+        line.includes(`${authored + 1} thẻ từ`),
+      ),
+    ).toBe(true);
+    // Words taken to the ten-minute session can be the ones she added.
+    const onlyMine = {
+      ...state,
+      reviews: {
+        ...state.reviews,
+        ...Object.fromEntries(
+          vocabulary.map((word) => [
+            word.id,
+            scheduleReview(undefined, "easy", now),
+          ]),
+        ),
+      },
+    };
+    const quick = quickSession(onlyMine, now);
+    expect(quick?.words.map((word) => word.id)).toEqual(["w:rk4"]);
+  });
+
+  it("does not put the same word in the deck twice", () => {
+    // "manageable" already has an authored card; "regularly" does not.
+    expect(wordHasAuthoredCard("frm4")).toBe(true);
+    expect(wordHasAuthoredCard("rc4")).toBe(false);
+    expect(wordHasAuthoredCard("no-such-question")).toBe(false);
+    const state = freshState();
+    expect(addSavedWord(state, "frm4", now)).toBe(state);
+    expect(
+      Object.keys(addSavedWord(state, "rc4", now).savedWords ?? {}),
+    ).toEqual(["rc4"]);
+  });
+
+  it("searches without regard to case, diacritics or Unicode form", () => {
+    expect(searchFold("Bền vững")).toBe("ben vung");
+    expect(searchFold("  Đường   phố ")).toBe("duong pho");
+    // The same letters composed differently compare equal.
+    expect(searchFold("e\u0302\u0301")).toBe(searchFold("\u1ebf"));
+    expect(searchFold("BỀN").includes(searchFold("ben"))).toBe(true);
+    expect(searchFold("")).toBe("");
   });
 });

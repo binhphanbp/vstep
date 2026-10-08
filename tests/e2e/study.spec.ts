@@ -317,6 +317,16 @@ test("a word she got wrong can join the vocabulary garden", async ({
   await expect(row).toHaveCount(1);
   await expect(row).toContainText("Tự thêm");
   await expect(row).toContainText("thuyết phục");
+  // Taking a card out also takes its review history, so it asks first.
+  const asked: string[] = [];
+  page.once("dialog", (dialog) => {
+    asked.push(dialog.message());
+    void dialog.dismiss();
+  });
+  await row.getByRole("button", { name: "Bỏ khỏi vườn" }).click();
+  expect(asked.join(" ")).toContain("Lịch ôn của thẻ này cũng mất");
+  await expect(page.locator(".vocab-list-item")).toHaveCount(1);
+  page.once("dialog", (dialog) => void dialog.accept());
   await row.getByRole("button", { name: "Bỏ khỏi vườn" }).click();
   await expect(page.locator(".vocab-list-item")).toHaveCount(0);
 });
@@ -1250,4 +1260,76 @@ test("the history writes a date she can read, and the chart panel is not stretch
   await page.getByRole("button", { name: "Xem thêm 5 buổi" }).click();
   await expect(sessions).toHaveCount(45);
   await expect(page.getByRole("button", { name: /Xem thêm/ })).toHaveCount(0);
+});
+
+test("a card marked 'again' that comes due does not replace the card she is on", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/vocabulary");
+  await expect(
+    page.getByRole("heading", { name: "reliable", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Lật thẻ để xem nghĩa" }).click();
+  await page.getByRole("button", { name: "Chưa nhớ" }).click();
+  // The next card is a new one; she is thinking about it.
+  await expect(
+    page.getByRole("heading", { name: "affordable", exact: true }),
+  ).toBeVisible();
+  // Eleven minutes pass: "reliable" is due again, but not under her nose.
+  await page.clock.fastForward("11:00");
+  await expect(
+    page.getByRole("heading", { name: "affordable", exact: true }),
+  ).toBeVisible();
+  // Once she has answered, the returning card is the next one.
+  await page.getByRole("button", { name: "Lật thẻ để xem nghĩa" }).click();
+  await page.getByRole("button", { name: "Nhớ rồi" }).click();
+  await expect(
+    page.getByRole("heading", { name: "reliable", exact: true }),
+  ).toBeVisible();
+});
+
+test("the home screen and the garden count the same due cards, her own included", async ({
+  page,
+}) => {
+  await page.goto("/vocabulary");
+  await page.getByRole("button", { name: "Lật thẻ để xem nghĩa" }).click();
+  await page.getByRole("button", { name: "Nhớ rồi" }).click();
+  const due = async () =>
+    Number(
+      (
+        await page.getByRole("button", { name: /^Ôn hôm nay/ }).innerText()
+      ).match(/(\d+)\s*$/)![1],
+    );
+  const before = await due();
+  // Two cards she added herself, as the notebook would have saved them.
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("may-study-v1")!);
+    const at = new Date().toISOString();
+    state.savedWords = { rc4: { addedAt: at }, rk4: { addedAt: at } };
+    localStorage.setItem("may-study-v1", JSON.stringify(state));
+  });
+  await page.reload();
+  expect(await due()).toBe(before + 2);
+  // The home screen says the same number, not the authored cards alone.
+  await page.goto("/");
+  await expect(
+    page.locator("section", { hasText: "SPACED REPETITION" }),
+  ).toContainText(`${before + 2} từ`);
+});
+
+test("the word list is found without typing the diacritics", async ({
+  page,
+}) => {
+  await page.goto("/vocabulary");
+  await page
+    .getByRole("button", { name: "Tất cả từ vựng", exact: true })
+    .click();
+  const search = page.getByRole("textbox", { name: "Tìm từ vựng" });
+  await search.fill("ben vung");
+  await expect(page.locator(".vocab-list-item")).toHaveCount(1);
+  await expect(page.locator(".vocab-list-item")).toContainText("sustainable");
+  // Capitals and the other composition of the same letters find it as well.
+  await search.fill("BỀN VỮNG".normalize("NFD"));
+  await expect(page.locator(".vocab-list-item")).toHaveCount(1);
 });

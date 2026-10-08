@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -21,12 +21,18 @@ import {
   scheduleReview,
   TYPE_EVIDENCE_MINIMUM,
   wordCardFor,
+  vocabularyDeck,
+  dueVocabulary,
   openVocabulary,
+  searchFold,
+  wordHasAuthoredCard,
 } from "@/lib/learning";
 import { vocabulary } from "@/lib/content";
 import { useStudy } from "./study-provider";
 import { QuestionCard } from "./practice";
 import { AudioPlayer } from "./audio-tools";
+/** The clock, read by handlers (kept out of the component body). */
+const clockNow = () => Date.now();
 export function VocabularyPage() {
   const { state, update, toast } = useStudy();
   const [flipped, setFlipped] = useState(false);
@@ -37,17 +43,17 @@ export function VocabularyPage() {
   // follow the same schedule; only the label says where they came from.
   const mine = savedWords(state);
   // Cards quoting a lesson appear once that lesson has been worked.
-  const deck = [...openVocabulary(state), ...mine];
+  const deck = vocabularyDeck(state);
   const waiting = vocabulary.length - openVocabulary(state).length;
   const added = new Set(mine.map((word) => word.id));
-  const due = deck
-    .filter(
-      (v) => !state.reviews[v.id] || Date.parse(state.reviews[v.id].due) <= now,
-    )
-    .sort(
-      (a, b) => (state.reviews[a.id] ? 0 : 1) - (state.reviews[b.id] ? 0 : 1),
-    );
+  const due = dueVocabulary(state, now).sort(
+    (a, b) => (state.reviews[a.id] ? 0 : 1) - (state.reviews[b.id] ? 0 : 1),
+  );
   const card = due[0];
+  const needle = searchFold(query);
+  const listed = deck.filter((v) =>
+    searchFold(`${v.word} ${v.meaning} ${v.topic}`).includes(needle),
+  );
   const learned = deck.filter((v) => state.reviews[v.id]).length;
   // "Chưa nhớ" brings a card back in ten minutes; an empty deck should say so
   // rather than read like the end of the day.
@@ -55,8 +61,16 @@ export function VocabularyPage() {
     const review = state.reviews[v.id];
     return review && review.interval < 1 && Date.parse(review.due) > now;
   }).length;
+  // While a card is on screen the queue stands still: a card she marked
+  // "Chưa nhớ" coming due must not replace the one she is thinking about.
+  const holding = useRef(false);
   useEffect(() => {
-    const tick = setInterval(() => setNow(Date.now()), 30000);
+    holding.current = Boolean(card);
+  });
+  useEffect(() => {
+    const tick = setInterval(() => {
+      if (!holding.current) setNow(Date.now());
+    }, 30000);
     return () => {
       clearInterval(tick);
       window.speechSynthesis?.cancel();
@@ -72,6 +86,8 @@ export function VocabularyPage() {
       },
     }));
     setFlipped(false);
+    // The next card is chosen from the clock as it is now.
+    setNow(clockNow());
   }
   function speak(word: string) {
     if (!window.speechSynthesis) {
@@ -261,65 +277,61 @@ export function VocabularyPage() {
             onChange={(e) => setQuery(e.target.value)}
           />
           <div className="vocab-list">
-            {deck
-              .filter((v) =>
-                `${v.word} ${v.meaning} ${v.topic}`
-                  .toLocaleLowerCase("vi")
-                  .includes(query.toLocaleLowerCase("vi")),
-              )
-              .map((v) => (
-                <div className="vocab-list-item" key={v.id}>
-                  <div>
-                    <strong>
-                      {v.word}
-                      {added.has(v.id) && (
-                        <span className="confidence-pill">Tự thêm</span>
-                      )}
-                    </strong>
-                    <small>
-                      {v.meaning} · {v.topic}
-                    </small>
-                    <small>
-                      {state.reviews[v.id]
-                        ? `Lần ôn tiếp: ${dueLabel(state.reviews[v.id].due)}`
-                        : "Chưa ôn"}
-                    </small>
-                    <p className="help-copy" lang="en">
-                      {v.example}
-                    </p>
-                  </div>
-                  <div className="vocab-list-actions">
+            {listed.map((v) => (
+              <div className="vocab-list-item" key={v.id}>
+                <div>
+                  <strong>
+                    {v.word}
+                    {added.has(v.id) && (
+                      <span className="confidence-pill">Tự thêm</span>
+                    )}
+                  </strong>
+                  <small>
+                    {v.meaning} · {v.topic}
+                  </small>
+                  <small>
+                    {state.reviews[v.id]
+                      ? `Lần ôn tiếp: ${dueLabel(state.reviews[v.id].due)}`
+                      : "Chưa ôn"}
+                  </small>
+                  <p className="help-copy" lang="en">
+                    {v.example}
+                  </p>
+                </div>
+                <div className="vocab-list-actions">
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={`Nghe phát âm ${v.word}`}
+                    onClick={() => speak(v.word)}
+                  >
+                    <Volume2 size={18} />
+                  </button>
+                  {added.has(v.id) && (
                     <button
                       type="button"
-                      className="icon-button"
-                      aria-label={`Nghe phát âm ${v.word}`}
-                      onClick={() => speak(v.word)}
+                      className="text-link"
+                      onClick={() => {
+                        if (
+                          !window.confirm(
+                            `Bỏ “${v.word}” khỏi vườn từ vựng? Lịch ôn của thẻ này cũng mất.`,
+                          )
+                        )
+                          return;
+                        update((state) =>
+                          removeSavedWord(state, v.id.replace("w:", "")),
+                        );
+                        toast(`Đã bỏ “${v.word}” khỏi vườn từ vựng.`);
+                      }}
                     >
-                      <Volume2 size={18} />
+                      Bỏ khỏi vườn
                     </button>
-                    {added.has(v.id) && (
-                      <button
-                        type="button"
-                        className="text-link"
-                        onClick={() => {
-                          update((state) =>
-                            removeSavedWord(state, v.id.replace("w:", "")),
-                          );
-                          toast(`Đã bỏ “${v.word}” khỏi vườn từ vựng.`);
-                        }}
-                      >
-                        Bỏ khỏi vườn
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
-          {!deck.some((v) =>
-            `${v.word} ${v.meaning} ${v.topic}`
-              .toLocaleLowerCase("vi")
-              .includes(query.toLocaleLowerCase("vi")),
-          ) && (
+          {listed.length === 0 && (
             <p className="help-copy">
               Chưa tìm thấy từ phù hợp. Thử tìm bằng tiếng Anh nhé.
             </p>
@@ -566,6 +578,11 @@ export function MistakesPage() {
                         <Leaf size={12} />
                         Đã thêm “{wordCardFor(item.question.id).word}” vào vườn
                         từ
+                      </span>
+                    ) : wordHasAuthoredCard(item.question.id) ? (
+                      <span className="confidence-pill">
+                        <Leaf size={12} />“{wordCardFor(item.question.id).word}”
+                        đã có sẵn trong vườn từ
                       </span>
                     ) : (
                       <button

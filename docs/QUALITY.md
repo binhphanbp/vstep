@@ -2,6 +2,16 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Rà các đường hiếm của phần từ vựng — 08/10/2026
+
+- **Số đếm không khớp, đã sửa:** Vườn từ vựng đếm cả thẻ có sẵn lẫn thẻ Gùa tự thêm từ sổ lỗi, nhưng bảng điều khiển, kế hoạch tuần, buổi học 10 phút và gợi ý "bước tiếp theo" chỉ đếm thẻ có sẵn. Kết quả có thể là trang chủ báo "0 từ" trong khi vườn ghi "Ôn hôm nay · 5". Nay mọi nơi cùng dùng `vocabularyDeck` / `dueVocabulary`, và buổi 10 phút có thể gồm thẻ tự thêm. Có E2E: thêm hai thẻ riêng rồi đối chiếu số trên vườn với số trên trang chủ.
+- **Tấm thẻ đang xem bị thay, đã sửa:** thẻ vừa chọn "Chưa nhớ" quay lại sau 10 phút, và bộ đếm 30 giây của trang xếp thẻ ôn lại lên trước thẻ mới, nên tấm thẻ Gùa đang nghĩ (hoặc đã lật) bị đổi ngay trước mắt. Nay hàng đợi đứng yên khi đang có thẻ trên màn hình; chọn mức nhớ xong mới tính lại theo đồng hồ hiện tại, nên thẻ quay lại xuất hiện ngay sau đó. Đã kiểm hai chiều: gỡ hàng rào thì E2E đỏ, có hàng rào thì xanh.
+- **Từ bị đưa vào vườn hai lần, đã sửa:** "manageable" vừa có thẻ có sẵn vừa có thẻ có thể tự thêm từ một câu hỏi. Nay không thêm được nếu từ đã có thẻ có sẵn, và nút đổi thành "đã có sẵn trong vườn từ". Thẻ đã thêm từ trước vẫn giữ nguyên, không bị gỡ.
+- **Tìm kiếm không dấu, đã sửa:** gõ "ben vung" không ra "bền vững" (so khớp phân biệt dấu), và cùng một chữ ghi theo dạng Unicode khác cũng không khớp. Nay tìm không phân biệt hoa thường, dấu và dạng Unicode.
+- **Bỏ thẻ không hỏi lại, đã sửa:** "Bỏ khỏi vườn" xóa luôn lịch ôn của thẻ ngay khi bấm nhầm. Nay hỏi xác nhận và nói rõ lịch ôn cũng mất. Chưa có "hoàn tác".
+- **Đã xem và không sửa:** thẻ tự thêm chưa được tính vào mốc "nhớ qua 60 ngày" ở trang Tiến bộ (mốc đó chỉ đếm thẻ có sẵn): đây là thiếu sót nhỏ, không sai số liệu hiện có; các khoảng cách của thuật toán lịch ôn không có chỗ sai đã thấy khi đọc mã; việc bấm nhanh hai lần vào một mức nhớ chỉ được suy luận chứ chưa thử trên trình duyệt.
+- Kiểm tra: ba unit mới (số đếm có thẻ tự thêm, chống trùng từ, tìm kiếm không dấu) và ba E2E mới, cùng một E2E cũ được cập nhật cho hộp thoại xác nhận.
+
 ## Rà các đường hiếm của kho đề — 08/10/2026
 
 - **Lỗi nghiêm trọng, đã sửa:** `updateStudy` ghi thẳng vào máy mà không kiểm tra schema, còn khi tải lại thì dữ liệu sai schema bị coi là "Không đọc được dữ liệu thiết bị". Schema giới hạn 100 lượt thi của kho đề, nên lượt thứ 101 được ghi rồi ở lần mở app kế tiếp toàn bộ dữ liệu hiện báo hỏng. Tái hiện bằng trình duyệt: lưu 100 lượt, bắt đầu lượt 101, tải lại thì báo không đọc được. Vì mỗi lượt thi riêng một kỹ năng cũng tính một lượt, trần này dễ chạm hơn trước (chừng ba tháng thi riêng mỗi ngày một phần). Nay `addPaperRun` bỏ lượt đã xong cũ nhất khi đã đủ 100, kèm bản ghi âm của lượt đó, và không bao giờ bỏ lượt đang làm dở. Hệ quả cần nói rõ: lịch sử các lượt thi kho đề chỉ giữ 100 lượt gần nhất. Chưa có màn hình xóa từng lượt.
@@ -25,9 +35,9 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 - Nguồn thực tế trên máy là `../vstep/data`, gồm sáu JSON đề và audio; file `_attempt` của 135 là lượt làm, không nhập thành đề thứ bảy. Script `scripts/import-papers.mjs` kiểm tra cấu trúc từng đề, bốn phương án của từng câu, khóa đáp án nhất quán và sự tồn tại của file audio rồi tạo JSON tĩnh cùng 126 file MP3 (84 bài Nghe và 42 bài mẫu) trong `public/papers`. Tổng khoảng 79 MB.
 - Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Bản dịch câu hỏi, lựa chọn, bài đọc, transcript và đề bài có trong nguồn được mở sau khi hoàn thành. Đề 132–135 và Review 13/09 có đủ 375 đáp án và lời giải; đề 131 không có đáp án hoặc transcript trong nguồn, nên giao diện giữ 75 lựa chọn người học nhưng không tạo điểm hoặc lời giải.
 - Lượt làm lưu đáp án, bài Viết, phần Nói đã làm, phần thi và deadline vào cùng JSON backup/cloud snapshot. File ghi âm của micro vẫn ở IndexedDB, phải tải riêng. Đề tĩnh có version và dấu băm nguồn để không đối chiếu lượt cũ với khóa đáp án đã đổi. Hai tab cùng mở một lượt không được nộp chồng phần tiếp theo.
-- Kiểm tra tự động: 198 unit, 86 Playwright trên bản build production (82 Chromium, hai Firefox, hai WebKit), 111 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
+- Kiểm tra tự động: 201 unit, 89 Playwright trên bản build production (85 Chromium, hai Firefox, hai WebKit), 111 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
 - Lượt chạy đầu đạt 68/70; hai ca WebKit không khởi chạy vì máy thiếu `libevent-2.1.so.7`. Sau khi nạp thư viện tạm từ `/tmp` vào môi trường test, chạy lại đúng hai ca WebKit đều đạt. Sau khi mở phần bản dịch, chạy lại ba ca E2E của kho đề đều đạt.
-- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 82/82 trên bản production local (lint và TypeScript sạch, 198/198 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
+- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 85/85 trên bản production local (lint và TypeScript sạch, 201/201 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
 
 ## Công cụ luyện đề: luyện riêng từng kỹ năng, chữa đề theo phần, làm lại câu sai — 07/10/2026
 
@@ -237,7 +247,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 198 unit / 86 E2E / 111 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 201 unit / 89 E2E / 111 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -446,8 +456,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 198 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 86 kiểm thử Playwright trên bản production: 82 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 201 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 89 kiểm thử Playwright trên bản production: 85 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

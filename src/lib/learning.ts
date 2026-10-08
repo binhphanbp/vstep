@@ -543,6 +543,21 @@ export function daysUntil(date: string, now = new Date()) {
       86400000,
   );
 }
+/**
+ * Text as a search compares it: no case, no diacritics, one form of Unicode.
+ * Someone typing Vietnamese on a phone or a plain keyboard often leaves the
+ * marks off ("ben vung" for "bền vững"), and a Mac can send the same letter
+ * in a different composition than the one the cards were written in.
+ */
+export function searchFold(text: string) {
+  return text
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/đ/gi, "d")
+    .toLocaleLowerCase("vi")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 export function wordCount(text: string) {
   return (
     text.trim().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)?.length ?? 0
@@ -783,10 +798,7 @@ export function examWeekPlan(
   const weeks = Math.ceil(days / 7);
   const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
   const unseen = lessons.filter((lesson) => !met.has(lesson.id)).length;
-  const dueWords = openVocabulary(state).filter((word) => {
-    const review = state.reviews[word.id];
-    return !review || Date.parse(review.due) <= now.getTime();
-  }).length;
+  const dueWords = dueVocabulary(state, now).length;
   const dueMistakes = mistakes(state, now).filter((item) => item.due).length;
   const weak = weakQuestionTypes(state).slice(0, 2);
   const satExam = state.attempts.some((attempt) =>
@@ -955,7 +967,7 @@ export const QUICK_SESSION_MINUTES = 10;
 const QUICK_LESSON_MINUTES = 8;
 export type QuickSession = {
   lesson: (typeof lessons)[number];
-  words: typeof vocabulary;
+  words: DeckCard[];
   mistake: ReturnType<typeof mistakes>[number] | undefined;
 };
 export function quickSession(
@@ -985,12 +997,7 @@ export function quickSession(
       );
     })[0] ?? null;
   if (!lesson) return null;
-  const words = openVocabulary(state)
-    .filter((word) => {
-      const review = state.reviews[word.id];
-      return !review || Date.parse(review.due) <= now.getTime();
-    })
-    .slice(0, 3);
+  const words = dueVocabulary(state, now).slice(0, 3);
   const mistake = mistakes(state, now)
     .filter((item) => item.due)
     .sort((a, b) => b.wrongCount - a.wrongCount)[0];
@@ -1023,6 +1030,13 @@ export function savedWords(state: StudyState): SavedWord[] {
     }))
     .sort((a, b) => Date.parse(a.addedAt) - Date.parse(b.addedAt));
 }
+/** True when the authored deck already teaches the word this card is for. */
+export function wordHasAuthoredCard(questionId: string) {
+  const card = wordCards[questionId];
+  if (!card) return false;
+  const word = card.word.trim().toLowerCase();
+  return vocabulary.some((entry) => entry.word.trim().toLowerCase() === word);
+}
 /** A card exists for this question only if one was written for it. */
 export function wordCardFor(questionId: string) {
   return wordCards[questionId];
@@ -1033,6 +1047,8 @@ export function addSavedWord(
   now = new Date(),
 ): StudyState {
   if (!wordCards[questionId] || state.savedWords?.[questionId]) return state;
+  // A word that already has an authored card would sit in the deck twice.
+  if (wordHasAuthoredCard(questionId)) return state;
   return {
     ...state,
     savedWords: {
@@ -1174,6 +1190,27 @@ export function compareSittings(state: StudyState): SittingComparison | null {
 export function openVocabulary(state: StudyState): Vocabulary[] {
   const met = new Set(state.attempts.map((attempt) => attempt.lessonId));
   return vocabulary.filter((word) => !word.source || met.has(word.source));
+}
+/** A card in the garden: one of the authored ones, or one she added. */
+export type DeckCard = Vocabulary | SavedWord;
+/**
+ * Everything the garden shows her. The home screen, the week plan and the
+ * ten-minute session count from this too: counting only the authored cards
+ * left them saying "0 từ" while the garden itself had five of her own due.
+ */
+export function vocabularyDeck(state: StudyState): DeckCard[] {
+  return [...openVocabulary(state), ...savedWords(state)];
+}
+/** The cards to meet now: never seen, or past their due time. */
+export function dueVocabulary(
+  state: StudyState,
+  now: Date | number = new Date(),
+): DeckCard[] {
+  const time = typeof now === "number" ? now : now.getTime();
+  return vocabularyDeck(state).filter((card) => {
+    const review = state.reviews[card.id];
+    return !review || Date.parse(review.due) <= time;
+  });
 }
 /**
  * One concrete thing to do about a question just got wrong.
@@ -1350,10 +1387,7 @@ export function spareStep(
       "/mistakes",
       "Mở sổ tay",
     );
-  const words = openVocabulary(state).filter((word) => {
-    const review = state.reviews[word.id];
-    return !review || Date.parse(review.due) <= now.getTime();
-  }).length;
+  const words = dueVocabulary(state, now).length;
   if (words)
     return say(
       `Vườn từ vựng có ${words} thẻ đến lịch ôn.`,
