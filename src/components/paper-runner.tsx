@@ -2,10 +2,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Recorder } from "./audio-tools";
+import { deleteRecording } from "@/lib/recordings";
 import { ExamCheckIn, ExamRoom, PaperText } from "./paper-exam";
 import { PaperReview } from "./paper-review";
 import { useStudy } from "./study-provider";
 import {
+  addPaperRun,
   advancePaperRun,
   isFinalStage,
   paperAnswered,
@@ -124,11 +126,23 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       mode: chosen,
       ...(scope === "all" ? {} : { only: scope }),
     };
-    update((current) => ({
-      ...current,
-      paperRuns: [...(current.paperRuns ?? []), next],
-    }));
-    setSelectedId(next.id);
+    let startedId = next.id;
+    let dropped: PaperRun[] = [];
+    update((current) => {
+      const added = addPaperRun(current.paperRuns ?? [], next);
+      if (added.reused) {
+        // Another tab already started this paper: carry on with that one.
+        startedId = added.reused.id;
+        return current;
+      }
+      dropped = added.dropped;
+      return { ...current, paperRuns: added.runs };
+    });
+    // The recordings of sittings let go of by the cap go with them.
+    for (const old of dropped)
+      for (const slot of old.spoken)
+        void deleteRecording(`paper-${old.id}-${slot}`).catch(() => {});
+    setSelectedId(startedId);
     setAgreed(false);
   }
 

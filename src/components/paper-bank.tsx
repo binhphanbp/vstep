@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { useStudy } from "./study-provider";
 import { paperCatalog } from "@/lib/papers";
 
 export function PaperBank() {
   const { state, ready } = useStudy();
+  // Fixed when the page opens; the label below only shows once the saved
+  // state is ready, which the server never is, so the two cannot disagree.
+  const [now] = useState(() => Date.now());
   return (
     <div className="page">
       <div className="page-heading">
@@ -47,9 +51,11 @@ export function PaperBank() {
                 <p className="help-copy">
                   {latest.finishedAt
                     ? `Đã làm ${runs.filter((run) => run.finishedAt).length} lượt`
-                    : latest.only === undefined
-                      ? `Đang làm · phần ${latest.stage + 1}/4`
-                      : `Đang luyện riêng ${["Nghe", "Đọc", "Viết", "Nói"][latest.stage]}`}
+                    : now > latest.deadline
+                      ? "Đã quá giờ · mở để chốt bài và xem kết quả"
+                      : latest.only === undefined
+                        ? `Đang làm · phần ${latest.stage + 1}/4`
+                        : `Đang luyện riêng ${["Nghe", "Đọc", "Viết", "Nói"][latest.stage]}`}
                 </p>
               )}
               <Link className="button primary" href={`/papers/${paper.id}`}>

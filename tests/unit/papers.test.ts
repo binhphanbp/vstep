@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { freshState, stateSchema, type PaperRun } from "../../src/lib/learning";
 import {
   LISTENING_READ_SECONDS,
+  addPaperRun,
   SPEAKING_PARTS,
   advancePaperRun,
   isFinalStage,
@@ -321,5 +322,49 @@ describe("imported exam papers", () => {
     // More section closings than a one-section sitting can have.
     expect(bad({ ...reading, stageEnds: [5000, 6000] })).toBe(false);
     expect(bad({ ...reading, stageEnds: [5000] })).toBe(true);
+  });
+
+  it("keeps the saved sittings under the cap the schema enforces, and never opens a second one of a paper", () => {
+    const paper = papers[0];
+    const done = (n: number): PaperRun => ({
+      ...firstRun(paper),
+      id: `done-${n}`,
+      finishedAt: new Date(2_000_000_000 + n * 1000).toISOString(),
+      stage: 3,
+    });
+    const full = Array.from({ length: 100 }, (_, n) => done(n));
+    const next = { ...firstRun(paper), id: "next" };
+    // The 101st sitting makes the oldest finished one go, so the list stays valid.
+    const added = addPaperRun(full, next);
+    expect(added.runs).toHaveLength(100);
+    expect(added.runs.at(-1)!.id).toBe("next");
+    expect(added.dropped.map((run) => run.id)).toEqual(["done-0"]);
+    expect(
+      stateSchema.safeParse({ ...freshState(), paperRuns: added.runs }).success,
+    ).toBe(true);
+    // Without the helper, that very list is what the app would call damaged.
+    expect(
+      stateSchema.safeParse({ ...freshState(), paperRuns: [...full, next] })
+        .success,
+    ).toBe(false);
+    // Short lists lose nothing.
+    expect(addPaperRun([done(1)], next).dropped).toEqual([]);
+    // A sitting still in progress is never the one let go.
+    const mixed = [
+      { ...firstRun(papers[1]), id: "open-other" },
+      ...Array.from({ length: 99 }, (_, n) => done(n)),
+    ];
+    const kept = addPaperRun(mixed, next);
+    expect(kept.runs.map((run) => run.id)).toContain("open-other");
+    expect(kept.dropped.map((run) => run.id)).toEqual(["done-0"]);
+    // A paper with a sitting in progress gets no second one.
+    const open = { ...firstRun(paper), id: "open" };
+    const again = addPaperRun([open], next);
+    expect(again.reused?.id).toBe("open");
+    expect(again.runs.map((run) => run.id)).toEqual(["open"]);
+    // Another paper's sitting in progress does not block this one.
+    expect(
+      addPaperRun([{ ...firstRun(papers[1]), id: "other" }], next).reused,
+    ).toBeUndefined();
   });
 });
