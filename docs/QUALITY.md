@@ -2,6 +2,18 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Rà các đường hiếm của phần Đọc và Nghe — 08/10/2026
+
+Phần này được rà cả bằng quét dữ liệu toàn bộ ngân hàng lẫn bằng thao tác trên trình duyệt.
+
+- **Đồng hồ bài học đứng rồi nhảy, đã sửa:** thời gian tính theo giây nhưng chỉ ghi vào nháp mỗi 10 giây, còn đồng hồ trên màn hình đọc từ nháp, nên đứng ở 0:00 suốt 10 giây rồi nhảy sang 0:10 và cứ thế, trông như bị treo. Tái hiện bằng cách đọc đồng hồ mỗi giây. Nay đồng hồ hiện cả số giây chưa ghi, và các bước nộp bài, làm lại, tải lại đều không cộng dồn sai (đã thử: tải lại giữa chừng giữ nguyên số giây, thời gian ghi vào lượt học bằng đúng số hiện trên đồng hồ lúc nộp, làm lại bắt đầu từ gần 0).
+- **Mức "chắc chắn" của đáp án cũ còn lại sau khi đổi đáp án, đã sửa:** chọn A rồi bấm "Rất chắc", sau đó đổi sang B thì "Rất chắc" vẫn còn, và vì buổi học bắt buộc có mức chắc chắn cho mọi câu nên nó lọt qua mà không ai nhận ra. Dữ liệu "sai dù đã rất chắc", cơ sở của phản hồi theo dạng câu, có thể sai. Nay đổi sang đáp án khác thì mức chắc chắn của câu đó bị xóa và phải chọn lại; chọn lại đúng đáp án cũ thì giữ nguyên. Kiểm cả sau khi tải lại.
+- **Chia câu cho giọng đọc, đã gia cố:** mã cắt ở mọi dấu chấm nên "Dr. Hart" bị cắt đôi, "3.5" thành "3" và "5", và "Nghe lại câu này" đọc dở câu. Nay không cắt ở danh xưng (Mr, Mrs, Ms, Dr, Prof, Jr, Sr), số thập phân, "e.g.", "i.e." và "a.m."/"p.m." khi từ sau viết thường. Nội dung hiện có không có trường hợp nào như vậy: đã so cách chia cũ và mới trên cả 40 bài Nghe cùng các câu trích dẫn, kết quả giống hệt, nên đây là gia cố cho nội dung thêm sau chứ không sửa lỗi đang gặp.
+- **Đã quét dữ liệu và sạch:** 83 bài, 258 câu hỏi; không trùng mã bài hay mã câu; không đáp án nào nằm ngoài khoảng; không lời giải hay ghi chú nào nhắc thẳng chữ cái đáp án (sẽ sai khi thứ tự đáp án được xáo cố định theo mã câu hỏi); không lựa chọn kiểu "cả A và B" hay "tất cả những điều trên" phụ thuộc thứ tự; mọi câu có giải thích; chỉ 6 hội thoại có nhãn người nói (3 ở đề đầy đủ, 3 ở đề thứ hai), mỗi hội thoại đúng hai người, không đoạn độc thoại nào bị nhận nhầm là có người nói.
+- **Đã thử và đúng:** trước khi nộp, lời giải, ghi chú từng phương án, bản chép lời bài Nghe và bài mẫu không có trong phần tử hiển thị của trang (chúng có trong dữ liệu mà khung ứng dụng gửi kèm, như mọi ứng dụng chạy trên trình duyệt, nên người xem mã nguồn trang vẫn thấy được; đây là giới hạn của ứng dụng chạy hoàn toàn trên máy). Thứ tự đáp án cố định theo mã câu hỏi là điều đọc từ mã và đã có unit test riêng từ trước, không thử lại trên trình duyệt ở đợt này.
+- **Chưa thử được:** giọng đọc thật. Môi trường kiểm thử không có giọng nói, nên các tình huống phụ thuộc thiết bị chưa được thử: máy chỉ có một giọng tiếng Anh (hai người nói trong hội thoại sẽ nghe giống nhau), tạm dừng không được hỗ trợ trên một số máy Android, và trình duyệt không phát sự kiện kết thúc câu. Cần Gùa nghe thử trên máy thật.
+- Kiểm tra: một unit mới cho chia câu, hai E2E mới (đồng hồ, mức chắc chắn).
+
 ## Rà các đường hiếm của phần Viết và Nói — 08/10/2026
 
 - **Thời lượng sai ở buổi thi rút gọn, đã sửa:** phần Nói chỉ lập một lượt học cho cả buổi. Nếu Gùa ghi một đoạn thử micro 1 giây rồi ghi lại câu trả lời thật 4,5 giây, bản ghi được thay nhưng lịch sử vẫn ghi 1 giây của đoạn thử. Tái hiện bằng trình duyệt trước khi sửa. Nay bản ghi mới cập nhật thời lượng của lượt học đó (vẫn một lượt cho một phần, không phải một lượt cho mỗi lần ghi).
@@ -44,9 +56,9 @@ Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, 
 - Nguồn thực tế trên máy là `../vstep/data`, gồm sáu JSON đề và audio; file `_attempt` của 135 là lượt làm, không nhập thành đề thứ bảy. Script `scripts/import-papers.mjs` kiểm tra cấu trúc từng đề, bốn phương án của từng câu, khóa đáp án nhất quán và sự tồn tại của file audio rồi tạo JSON tĩnh cùng 126 file MP3 (84 bài Nghe và 42 bài mẫu) trong `public/papers`. Tổng khoảng 79 MB.
 - Mỗi đề có 35 câu Nghe, 40 câu Đọc, hai bài Viết và ba phần Nói. Bản dịch câu hỏi, lựa chọn, bài đọc, transcript và đề bài có trong nguồn được mở sau khi hoàn thành. Đề 132–135 và Review 13/09 có đủ 375 đáp án và lời giải; đề 131 không có đáp án hoặc transcript trong nguồn, nên giao diện giữ 75 lựa chọn người học nhưng không tạo điểm hoặc lời giải.
 - Lượt làm lưu đáp án, bài Viết, phần Nói đã làm, phần thi và deadline vào cùng JSON backup/cloud snapshot. File ghi âm của micro vẫn ở IndexedDB, phải tải riêng. Đề tĩnh có version và dấu băm nguồn để không đối chiếu lượt cũ với khóa đáp án đã đổi. Hai tab cùng mở một lượt không được nộp chồng phần tiếp theo.
-- Kiểm tra tự động: 201 unit, 91 Playwright trên bản build production (87 Chromium, hai Firefox, hai WebKit), 111 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
+- Kiểm tra tự động: 202 unit, 93 Playwright trên bản build production (89 Chromium, hai Firefox, hai WebKit), 111 route build, 19 màn axe; một E2E làm cả bốn phần, tải lại và kiểm tra file backup chứa lượt đề nhập. Kết quả này là trên máy local, chưa phải CI hoặc HTTPS của bản mới.
 - Lượt chạy đầu đạt 68/70; hai ca WebKit không khởi chạy vì máy thiếu `libevent-2.1.so.7`. Sau khi nạp thư viện tạm từ `/tmp` vào môi trường test, chạy lại đúng hai ca WebKit đều đạt. Sau khi mở phần bản dịch, chạy lại ba ca E2E của kho đề đều đạt.
-- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 87/87 trên bản production local (lint và TypeScript sạch, 201/201 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
+- Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 89/89 trên bản production local (lint và TypeScript sạch, 202/202 Vitest). Bốn ca Firefox và WebKit chưa chạy lại cho thay đổi này vì chúng không chạm kho đề; chưa có CI hoặc HTTPS của bản mới.
 
 ## Công cụ luyện đề: luyện riêng từng kỹ năng, chữa đề theo phần, làm lại câu sai — 07/10/2026
 
@@ -256,7 +268,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 201 unit / 91 E2E / 111 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 202 unit / 93 E2E / 111 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -465,8 +477,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 201 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 91 kiểm thử Playwright trên bản production: 87 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 202 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 93 kiểm thử Playwright trên bản production: 89 ca Chromium, hai ca Firefox và hai ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
