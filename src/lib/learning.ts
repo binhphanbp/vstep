@@ -558,9 +558,16 @@ export function searchFold(text: string) {
     .replace(/\s+/g, " ")
     .trim();
 }
+/**
+ * Words the way a word processor counts them: "10,000", "3.5", "e.g." and
+ * "part-time" are one word each, and a bare dash is none. Where the two ways
+ * of reading differ this one counts fewer, which is the safe side for someone
+ * checking a minimum. This is Mây's own convention; the exam's counter is not
+ * documented anywhere the app can read.
+ */
 export function wordCount(text: string) {
   return (
-    text.trim().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)?.length ?? 0
+    text.trim().match(/[\p{L}\p{N}]+(?:['’.,-][\p{L}\p{N}]+)*/gu)?.length ?? 0
   );
 }
 export function scheduleReview(

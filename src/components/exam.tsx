@@ -14,6 +14,7 @@ import {
   examMinutes,
   getExamStages,
   nextStep,
+  recordAttempt,
   wordCount,
 } from "@/lib/learning";
 import { allLessons as lessons } from "@/lib/full-exam-content";
@@ -21,7 +22,7 @@ import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { QuestionCard } from "./practice";
 export function ExamPage() {
-  const { state, update, addAttempt } = useStudy();
+  const { state, update } = useStudy();
   const [now, setNow] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
   const [mode, setMode] = useState<"mini" | "full" | "full2">("mini");
@@ -613,20 +614,35 @@ export function ExamPage() {
                   onReady={({ ready, duration }) => {
                     // Only a take just captured files an attempt: a restored
                     // one carries no duration and would log the part as 0 phút.
-                    if (ready && duration !== undefined)
-                      addAttempt({
-                        id: `exam:${exam.id}:${lesson.id}`,
-                        lessonId: lesson.id,
-                        skill: "speaking",
-                        date: new Date().toISOString(),
-                        answers: {},
-                        correct: 0,
-                        total: 0,
-                        recordingId: full
-                          ? `exam-${exam.id}-${lesson.id}`
-                          : `exam-${exam.id}`,
-                        seconds: duration,
-                      });
+                    if (!ready || duration === undefined) return;
+                    const attemptId = `exam:${exam.id}:${lesson.id}`;
+                    update((s) =>
+                      s.attempts.some((a) => a.id === attemptId)
+                        ? // A new take replaces the audio, so the time
+                          // filed beside it has to be that take's, not the
+                          // microphone test before it.
+                          {
+                            ...s,
+                            attempts: s.attempts.map((a) =>
+                              a.id === attemptId
+                                ? { ...a, seconds: Math.min(18000, duration) }
+                                : a,
+                            ),
+                          }
+                        : recordAttempt(s, {
+                            id: attemptId,
+                            lessonId: lesson.id,
+                            skill: "speaking",
+                            date: new Date().toISOString(),
+                            answers: {},
+                            correct: 0,
+                            total: 0,
+                            recordingId: full
+                              ? `exam-${exam.id}-${lesson.id}`
+                              : `exam-${exam.id}`,
+                            seconds: duration,
+                          }),
+                    );
                   }}
                 />
                 {!state.attempts.some(

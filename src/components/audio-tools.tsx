@@ -345,10 +345,16 @@ export type TakeState = {
 export function Recorder({
   id,
   onReady,
+  onBusy,
   readOnly = false,
 }: {
   id: string;
   onReady?: (take: TakeState) => void;
+  /**
+   * True from the moment recording starts until the take is safely stored, so
+   * a parent can tell "nothing recorded yet" from "still recording or saving".
+   */
+  onBusy?: (busy: boolean) => void;
   readOnly?: boolean;
 }) {
   const [recording, setRecording] = useState(false);
@@ -361,12 +367,14 @@ export function Recorder({
   const stream = useRef<MediaStream | null>(null);
   const chunks = useRef<Blob[]>([]);
   const callback = useRef(onReady);
+  const busyCallback = useRef(onBusy);
   const currentUrl = useRef("");
   const mounted = useRef(true);
   const captureStarted = useRef(0);
   useEffect(() => {
     callback.current = onReady;
-  }, [onReady]);
+    busyCallback.current = onBusy;
+  }, [onReady, onBusy]);
   useEffect(() => {
     mounted.current = true;
     let cancelled = false;
@@ -453,6 +461,7 @@ export function Recorder({
           setError("Ghi âm bị gián đoạn. Hãy kiểm tra micro và thử lại.");
         media.getTracks().forEach((t) => t.stop());
         if (mounted.current) setRecording(false);
+        busyCallback.current?.(false);
       };
       rec.onstop = async () => {
         const duration = Math.max(
@@ -466,6 +475,7 @@ export function Recorder({
             setError("Bản ghi rỗng. Hãy thử lại.");
             setRecording(false);
           }
+          busyCallback.current?.(false);
           return;
         }
         try {
@@ -489,12 +499,14 @@ export function Recorder({
           setMime(blob.type);
           setRecording(false);
         }
+        busyCallback.current?.(false);
       };
       setSeconds(0);
       callback.current?.({ ready: false, savedAt: 0 });
       captureStarted.current = Date.now();
       rec.start(1000);
       setRecording(true);
+      busyCallback.current?.(true);
     } catch (e) {
       stream.current?.getTracks().forEach((track) => track.stop());
       if (!mounted.current) return;
