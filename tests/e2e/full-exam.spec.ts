@@ -143,3 +143,47 @@ test("switching speaking parts saves the recording being stopped on unmount", as
   expect(attempts[0].seconds).toBeGreaterThan(0);
   expect(attempts[0].recordingId).toBe("exam-record-recovery-speaking-social");
 });
+
+test("a short microphone test does not stay as the time filed for the Speaking part", async ({
+  page,
+}) => {
+  const state = freshState();
+  const time = Date.now();
+  state.exam = {
+    id: "mic-test",
+    mode: "full",
+    startedAt: time,
+    deadline: time + 720000,
+    stage: 3,
+    answers: {},
+    writing: "",
+    finished: false,
+  };
+  await page.goto("/");
+  await page.evaluate(
+    (s) => localStorage.setItem("may-study-v1", JSON.stringify(s)),
+    state,
+  );
+  await page.goto("/exam");
+  const seconds = async () =>
+    page.evaluate(() =>
+      JSON.parse(localStorage.getItem("may-study-v1")!).attempts.map(
+        (a: { seconds: number }) => a.seconds,
+      ),
+    );
+  await page
+    .getByRole("button", { name: "Bắt đầu ghi âm", exact: true })
+    .click();
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Dừng ghi âm", exact: true }).click();
+  await expect.poll(seconds).toHaveLength(1);
+  const test = (await seconds())[0];
+  expect(test).toBeLessThanOrEqual(2);
+  // The answer itself, recorded over the test.
+  await page.getByRole("button", { name: "Ghi lại bản mới" }).click();
+  await page.waitForTimeout(4500);
+  await page.getByRole("button", { name: "Dừng ghi âm", exact: true }).click();
+  await expect.poll(async () => (await seconds())[0]).toBeGreaterThanOrEqual(4);
+  // Still one attempt for the part, not one per take.
+  expect(await seconds()).toHaveLength(1);
+});

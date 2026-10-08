@@ -479,6 +479,14 @@ describe("scoring and honest progress", () => {
   it("counts natural words without treating punctuation as words", () => {
     expect(wordCount("  ")).toBe(0);
     expect(wordCount("I'm a part-time learner. Hello, world!")).toBe(6);
+    // Numbers and abbreviations are one word each, as a word processor reads
+    // them; a bare dash is none; and a missing space under-counts rather than
+    // over-counts, which is the safe side when checking a minimum.
+    expect(wordCount("It cost 10,000 dong, or about 3.5 dollars.")).toBe(8);
+    expect(wordCount("Some cities, e.g. Hue, are quiet.")).toBe(6);
+    expect(wordCount("well-known — and U.S.A. — too")).toBe(4);
+    expect(wordCount("end.Next")).toBe(1);
+    expect(wordCount("1,2,3")).toBe(1);
   });
 });
 describe("adaptive plan and memory scheduling", () => {

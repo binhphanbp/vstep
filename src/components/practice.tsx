@@ -357,6 +357,8 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const seconds = result?.seconds ?? draft.seconds;
   const [selfCheck, setSelfCheck] = useState<Record<string, number>>({});
   const [takeSavedAt, setTakeSavedAt] = useState(0);
+  // The microphone is on, or the take is still being written to the device.
+  const [recorderBusy, setRecorderBusy] = useState(false);
   // Without a microphone every Speaking lesson stays unfinished for ever, keeps
   // its "never practised" bonus and holds a slot in the daily plan. Answering
   // out loud is still practice; the session is filed, just with no take.
@@ -456,6 +458,12 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     }
     if (lesson.skill === "writing" && wordCount(text) < 10) {
       setError("Hãy viết ít nhất một đoạn ngắn (10 từ) trước khi hoàn thành.");
+      return;
+    }
+    if (lesson.skill === "speaking" && recorderBusy) {
+      setError(
+        "Bản ghi chưa xong: bấm “Dừng ghi âm” và đợi một chút để bản ghi được lưu, rồi hoàn thành buổi luyện.",
+      );
       return;
     }
     if (lesson.skill === "speaking" && !hasRecording && !withoutRecording) {
@@ -811,6 +819,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               <h2>Giọng nói của mình</h2>
               <Recorder
                 id={lesson.id}
+                onBusy={setRecorderBusy}
                 onReady={(take) =>
                   setTakeSavedAt(take.ready ? take.savedAt : 0)
                 }

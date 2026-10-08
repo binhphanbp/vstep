@@ -1333,3 +1333,38 @@ test("the word list is found without typing the diacritics", async ({
   await search.fill("BỀN VỮNG".normalize("NFD"));
   await expect(page.locator(".vocab-list-item")).toHaveCount(1);
 });
+
+test("finishing a Speaking lesson while still recording, or the instant after stopping, says what is happening", async ({
+  page,
+}) => {
+  await page.goto("/practice/speaking-social");
+  await page
+    .getByRole("button", { name: "Bắt đầu ghi âm", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Dừng ghi âm", exact: true }),
+  ).toBeVisible();
+  await page.waitForTimeout(1200);
+  await rateSelfCheck(page);
+  const finish = page.getByRole("button", { name: "Hoàn thành buổi luyện" });
+  const unfinished = page.getByText(/Bản ghi chưa xong/);
+  const misleading = page.getByText(/Ghi âm câu trả lời trước khi hoàn thành/);
+  // Still recording: it is not "nothing recorded".
+  await finish.click();
+  await expect(unfinished).toBeVisible();
+  await expect(misleading).toHaveCount(0);
+  // Stopped and finishing in the same instant, before the take is stored.
+  await Promise.all([
+    page.getByRole("button", { name: "Dừng ghi âm", exact: true }).click(),
+    finish.click({ noWaitAfter: true }),
+  ]);
+  await expect(misleading).toHaveCount(0);
+  // Once the take is stored, the same button files the session.
+  await expect(
+    page.getByRole("link", { name: "Tải bản ghi", exact: true }),
+  ).toBeVisible();
+  await finish.click();
+  await expect(
+    page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
+  ).toBeVisible();
+});
