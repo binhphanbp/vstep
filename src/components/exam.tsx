@@ -22,7 +22,12 @@ import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { QuestionCard } from "./practice";
 import { QuestionNotes } from "./note-box";
-import { lessonQuestionPlace } from "@/lib/note-anchors";
+import { lessonQuestionPlace, lessonWholePlace } from "@/lib/note-anchors";
+import { setExamScratch, toggleExamMark } from "@/lib/work";
+import { applyChange } from "./apply-change";
+import { MarkablePassage } from "./marked-text";
+import { SCRATCH_HINTS } from "./paper-work";
+import { HighlightNotes, ScratchPad, ScratchReview } from "./scratch-pad";
 export function ExamPage() {
   const { state, update } = useStudy();
   const [now, setNow] = useState(() => Date.now());
@@ -429,10 +434,32 @@ export function ExamPage() {
                       ? "Bản chép lời để đối chiếu sau khi nộp"
                       : "Bài đọc để đối chiếu sau khi nộp"}
                   </h3>
-                  <div className="passage" lang="en">
-                    {lesson.text}
-                  </div>
+                  <MarkablePassage
+                    text={lesson.text}
+                    className="passage"
+                    marks={exam.marks?.[lesson.id]}
+                    onToggle={(sentence) =>
+                      applyChange(update, (s) =>
+                        toggleExamMark(
+                          s,
+                          exam.id,
+                          lesson.id,
+                          lesson.text,
+                          sentence,
+                        ),
+                      )?.error
+                    }
+                  />
+                  <HighlightNotes
+                    text={lesson.text}
+                    marks={exam.marks?.[lesson.id]}
+                    place={lessonWholePlace(lesson)}
+                  />
                 </section>
+                <ScratchReview
+                  text={exam.scratch?.[lesson.id]}
+                  place={lessonWholePlace(lesson)}
+                />
                 {lesson.questions.map((q, i) => (
                   <QuestionCard
                     key={q.id}
@@ -529,16 +556,35 @@ export function ExamPage() {
             {lesson.skill === "listening" ? (
               <AudioPlayer text={lesson.text} allowSpeed={false} />
             ) : (
-              <div
+              <MarkablePassage
+                text={lesson.text}
                 className="passage"
-                lang="en"
-                tabIndex={0}
-                role="region"
-                aria-label="Ngữ liệu của phần thi"
-              >
-                {lesson.text}
-              </div>
+                region="Ngữ liệu của phần thi"
+                marks={exam.marks?.[lesson.id]}
+                onToggle={(sentence) =>
+                  applyChange(update, (s) =>
+                    toggleExamMark(
+                      s,
+                      exam.id,
+                      lesson.id,
+                      lesson.text,
+                      sentence,
+                    ),
+                  )?.error
+                }
+              />
             )}
+            <ScratchPad
+              value={exam.scratch?.[lesson.id] ?? ""}
+              onChange={(value) =>
+                applyChange(update, (s) =>
+                  setExamScratch(s, exam.id, lesson.id, value),
+                )?.error
+              }
+              label={`Nháp cho ${lesson.title}`}
+              placeholder={SCRATCH_HINTS[lesson.skill]}
+              defaultOpen={lesson.skill === "reading" ? undefined : true}
+            />
           </section>
           <div>
             {lesson.questions.map((q, i) => (

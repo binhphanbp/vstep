@@ -43,7 +43,18 @@ import { AudioPlayer, Recorder } from "./audio-tools";
 import { deleteRecording, getRecording, saveRecording } from "@/lib/recordings";
 import { readQuizDraft } from "@/lib/quiz-draft";
 import { lessonQuestionPlace, lessonWholePlace } from "@/lib/note-anchors";
+import {
+  draftWork,
+  setDraftScratch,
+  takeDraftWork,
+  toggleAttemptMark,
+  toggleDraftMark,
+} from "@/lib/work";
+import { applyChange } from "./apply-change";
+import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
+import { SCRATCH_HINTS } from "./paper-work";
+import { HighlightNotes, ScratchPad, ScratchReview } from "./scratch-pad";
 export function PracticeLibrary() {
   const params = useSearchParams();
   const initial = params.get("skill");
@@ -376,6 +387,19 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     .reduce((latest, a) => Math.max(latest, Date.parse(a.date)), 0);
   const hasRecording = takeSavedAt > lastFiled;
   const text = state.drafts[lesson.id] ?? "";
+  // What was jotted and highlighted: in the lesson's draft while it is open,
+  // on the filed attempt once it is done.
+  const filed = result
+    ? (state.attempts.find((entry) => entry.id === result.id) ?? result)
+    : undefined;
+  const worked = filed ?? draftWork(state, lesson.id);
+  const scratch = worked.scratch?.main ?? "";
+  const toggleSentence = (sentence: number) =>
+    applyChange(update, (s) =>
+      result
+        ? toggleAttemptMark(s, result.id, "text", lesson.text, sentence)
+        : toggleDraftMark(s, lesson.id, "text", lesson.text, sentence),
+    )?.error;
   const started = useRef(0);
   const lock = useRef(false);
   /** Active seconds counted since the last write to the stored draft. */
@@ -504,6 +528,8 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
       seconds: Math.min(18000, seconds + pending.current),
       text: lesson.skill === "writing" ? text : undefined,
       selfCheck: criteria ? selfCheck : undefined,
+      ...(worked.scratch ? { scratch: worked.scratch } : {}),
+      ...(worked.marks ? { marks: worked.marks } : {}),
     };
     lock.current = true;
     if (lesson.skill === "speaking" && hasRecording) {
@@ -532,10 +558,14 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     setUnwritten(0);
     addAttempt(a);
     setResult(a);
-    update((s) => ({
-      ...s,
-      drafts: { ...s.drafts, [`quiz:${lesson.id}`]: "" },
-    }));
+    update((s) => {
+      // The scratch page and highlights are now on the attempt.
+      const cleared = takeDraftWork(s, lesson.id).state;
+      return {
+        ...cleared,
+        drafts: { ...cleared.drafts, [`quiz:${lesson.id}`]: "" },
+      };
+    });
     toast(`Đã lưu buổi học. Một bước tiến nhỏ của ${state.profile.name}!`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -717,16 +747,50 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               {result && (
                 <details open>
                   <summary>Bản chép lời</summary>
-                  <div className="passage" lang="en">
-                    {lesson.text}
-                  </div>
+                  <MarkablePassage
+                    text={lesson.text}
+                    className="passage"
+                    marks={worked.marks?.text}
+                    onToggle={toggleSentence}
+                  />
                 </details>
               )}
             </>
           ) : (
-            <div className="passage" lang="en">
-              {lesson.text}
-            </div>
+            <MarkablePassage
+              text={lesson.text}
+              className="passage"
+              marks={worked.marks?.text}
+              onToggle={toggleSentence}
+            />
+          )}
+          {result ? (
+            <>
+              <HighlightNotes
+                text={lesson.text}
+                marks={worked.marks?.text}
+                place={lessonWholePlace(lesson)}
+              />
+              <ScratchReview text={scratch} place={lessonWholePlace(lesson)} />
+            </>
+          ) : (
+            <ScratchPad
+              value={scratch}
+              onChange={(value) =>
+                applyChange(update, (s) =>
+                  setDraftScratch(s, lesson.id, "main", value),
+                )?.error
+              }
+              label={
+                lesson.skill === "listening"
+                  ? "Nháp khi nghe"
+                  : lesson.skill === "reading"
+                    ? "Nháp khi đọc"
+                    : "Dàn ý"
+              }
+              placeholder={SCRATCH_HINTS[lesson.skill]}
+              defaultOpen={lesson.skill === "reading" ? undefined : true}
+            />
           )}
           {lesson.tips.length > 0 && (
             <div style={{ marginTop: 24 }}>

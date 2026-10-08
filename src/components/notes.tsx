@@ -15,6 +15,7 @@ import {
   restoreNote,
   trashNote,
 } from "@/lib/notes";
+import { backupReminder, readBackupMark } from "@/lib/backup-mark";
 import { paperCatalog } from "@/lib/papers";
 import { formatBytes } from "@/lib/study-store";
 import type { StudyState } from "@/lib/learning";
@@ -126,6 +127,7 @@ export function NotesPage() {
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const filtered =
     skill !== "all" || group !== "all" || starred || words.length > 0;
+  const reminder = backupReminder(state, readBackupMark());
 
   return (
     <div className="page notes-page">
@@ -147,6 +149,18 @@ export function NotesPage() {
         </span>
       </div>
 
+      {reminder && (
+        <p className="notice no-print" role="status">
+          {reminder.since} ghi chú mới chưa nằm trong bản sao lưu nào (
+          {reminder.last
+            ? `bản gần nhất: ${formatNoteDate(reminder.last)}`
+            : "chưa có bản nào"}
+          ). Ghi chú chỉ nằm trên máy này cho đến khi được sao lưu.{" "}
+          <Link className="text-link" href="/settings">
+            Xuất bản sao ở Cài đặt
+          </Link>
+        </p>
+      )}
       {live.length === 0 ? (
         <div className="empty-state">
           <StickyNote size={32} />

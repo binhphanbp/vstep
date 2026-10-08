@@ -19,6 +19,7 @@ export const NOTE_LIMITS = {
   group: 80,
   label: 160,
   excerpt: 200,
+  quote: 300,
   /** What the notes may take in the saved profile (1.5 MB), measured as stored. */
   bytes: 1.5 * 1024 * 1024,
   /** How long a deleted note can still be brought back. */
@@ -99,6 +100,9 @@ function clampAnchor(anchor: NoteAnchor): NoteAnchor {
     ...(anchor.excerpt === undefined
       ? {}
       : { excerpt: anchor.excerpt.slice(0, NOTE_LIMITS.excerpt) }),
+    ...(anchor.quote === undefined
+      ? {}
+      : { quote: anchor.quote.slice(0, NOTE_LIMITS.quote) }),
   };
 }
 

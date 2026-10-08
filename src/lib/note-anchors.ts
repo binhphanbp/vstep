@@ -47,7 +47,7 @@ export function paperItemPlace(
 export function paperSlotPlace(
   paper: Pick<Paper, "id" | "version">,
   stage: number,
-  slot: Pick<PaperSlot, "id" | "part" | "prompt">,
+  slot: Pick<PaperSlot, "id" | "part" | "title" | "prompt">,
 ): NotePlace {
   const group = paperGroup(paper);
   return {
@@ -58,7 +58,7 @@ export function paperSlotPlace(
       version: paper.version,
       skill: SECTION_SKILLS[stage],
       group,
-      label: `${group} · ${SECTION_NAMES[stage]} · ${slot.part}`,
+      label: `${group} · ${SECTION_NAMES[stage]} · ${slot.part} · ${slot.title}`,
       itemId: slot.id,
       excerpt: slot.prompt
         .replace(/^#+\s*/gm, "")

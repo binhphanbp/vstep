@@ -16,6 +16,8 @@ import {
 } from "./full-exam-02";
 import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 import { NOTE_LIMITS } from "./notes";
+import { MARK_LIMITS } from "./marks";
+import { WORK_LIMITS } from "./work";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -93,6 +95,36 @@ const lessonSnapshotSchema = z
         path: ["questions"],
       },
     ),
+  );
+
+/**
+ * What was jotted and highlighted while working (see `src/lib/work.ts`). It is
+ * a field of the sitting it was made in, so it is optional everywhere: every
+ * sitting saved before it existed, and every backup holding one, still parses.
+ */
+const scratchSchema = z
+  .record(limitedString(120), limitedString(WORK_LIMITS.scratch))
+  .check(
+    z.refine((pages) => Object.keys(pages).length <= WORK_LIMITS.keys, {
+      error: "Một lượt có quá nhiều trang nháp.",
+    }),
+  );
+const marksSchema = z
+  .record(
+    limitedString(120),
+    z
+      .array(
+        z.object({
+          i: boundedInteger(0, MARK_LIMITS.sentences - 1),
+          q: limitedString(MARK_LIMITS.quote),
+        }),
+      )
+      .check(z.maxLength(MARK_LIMITS.perText)),
+  )
+  .check(
+    z.refine((lists) => Object.keys(lists).length <= WORK_LIMITS.keys, {
+      error: "Một lượt có quá nhiều bài được tô.",
+    }),
   );
 
 export const profileSchema = z.object({
@@ -194,6 +226,8 @@ const attemptSchema = z
      * `lessonSnapshot` and are read exactly as they were.
      */
     lessonRef: z.optional(limitedString(120)),
+    scratch: z.optional(scratchSchema),
+    marks: z.optional(marksSchema),
   })
   .check(
     z.superRefine((attempt, ctx) => {
@@ -248,6 +282,8 @@ export const examSchema = z
     stagePlan: z.optional(
       z.array(examStageSchema).check(z.minLength(4), z.maxLength(4)),
     ),
+    scratch: z.optional(scratchSchema),
+    marks: z.optional(marksSchema),
   })
   .check(
     z.superRefine((exam, ctx) => {
@@ -321,6 +357,8 @@ export const paperRunSchema = z.looseObject({
       until: boundedNumber(0, 10000000000000),
     }),
   ),
+  scratch: z.optional(scratchSchema),
+  marks: z.optional(marksSchema),
 });
 /**
  * Where a note was written. Loose on purpose, like the records a later release
@@ -340,6 +378,8 @@ const noteAnchorSchema = z.looseObject({
   itemId: z.optional(limitedString(120)),
   /** First line of the question, kept so the notebook works offline. */
   excerpt: z.optional(limitedString(NOTE_LIMITS.excerpt)),
+  /** The highlighted sentence a note was written about. */
+  quote: z.optional(limitedString(NOTE_LIMITS.quote)),
 });
 export const noteSchema = z.looseObject({
   id: limitedString(100),

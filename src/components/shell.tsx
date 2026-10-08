@@ -68,24 +68,32 @@ export function Shell({ children }: { children: ReactNode }) {
   // Today's lessons are the pages she would actually lose on a train, and the
   // worker cannot know which ones they are: the plan comes from her data. Sent
   // once the worker is in charge, so the day's work opens with no network.
+  //
+  // The plan reads the whole history: about 30 ms at three months of study,
+  // measured. Computed on every change of the profile, it made every keystroke
+  // of an essay or a scratch page wait for it (45 ms a key, 230 ms at the
+  // slowest). It now waits until the profile has been still for two seconds.
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
     if (!ready || !("serviceWorker" in navigator)) return;
-    const paths = todayPlan(state).lessons.map(
-      (lesson) => `/practice/${lesson.id}`,
-    );
-    if (!paths.length) return;
     let cancelled = false;
-    navigator.serviceWorker.ready
-      .then((registration) => {
-        if (!cancelled)
-          registration.active?.postMessage({ type: "may-warm", paths });
-      })
-      .catch(() => {
-        // No worker, no warming: every page still loads over the network.
-      });
+    const timer = window.setTimeout(() => {
+      const paths = todayPlan(state).lessons.map(
+        (lesson) => `/practice/${lesson.id}`,
+      );
+      if (!paths.length) return;
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          if (!cancelled)
+            registration.active?.postMessage({ type: "may-warm", paths });
+        })
+        .catch(() => {
+          // No worker, no warming: every page still loads over the network.
+        });
+    }, 2000);
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [ready, state]);
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil, Star, StickyNote, Trash2 } from "lucide-react";
-import type { Note, NoteAnchor, StudyState } from "@/lib/learning";
+import type { Note, NoteAnchor } from "@/lib/learning";
 import {
   NOTE_LIMITS,
   NOTE_SUGGESTIONS,
@@ -15,25 +15,12 @@ import {
 } from "@/lib/notes";
 import type { NotePlace } from "@/lib/note-anchors";
 import { getSnapshot } from "@/lib/study-store";
+import { applyChange } from "./apply-change";
 import { useStudy } from "./study-provider";
 import { useDebouncedSave } from "./use-debounced-save";
 
-/**
- * Runs a change to the notes against the freshest saved profile and hands back
- * what happened. The store calls the function at once, so the outcome (a refused
- * note, with the reason) is there to show before the next line runs.
- */
-export function applyNote(
-  update: (fn: (state: StudyState) => StudyState) => void,
-  make: (state: StudyState) => NoteOutcome,
-): NoteOutcome | undefined {
-  let outcome = undefined as NoteOutcome | undefined;
-  update((state) => {
-    outcome = make(state);
-    return outcome.state;
-  });
-  return outcome;
-}
+/** Runs a change to the notes and hands back what happened (see `applyChange`). */
+export const applyNote = applyChange<NoteOutcome>;
 
 /** The box a note is written in. It saves itself; nothing has to be pressed. */
 export function NoteEditor({
@@ -41,6 +28,7 @@ export function NoteEditor({
   anchor,
   label,
   onClose,
+  onCreated,
 }: {
   /** Set when an existing note is being changed. */
   note?: Note;
@@ -48,6 +36,8 @@ export function NoteEditor({
   anchor?: NoteAnchor;
   label: string;
   onClose: () => void;
+  /** Called once, when a new note has been written for the first time. */
+  onCreated?: (id: string) => void;
 }) {
   const { update } = useStudy();
   const [text, setText] = useState(note?.body ?? "");
@@ -75,6 +65,7 @@ export function NoteEditor({
         setStatus({ error: true, text: outcome.error });
         return;
       }
+      if (outcome.note && !noteId.current) onCreated?.(outcome.note.id);
       if (outcome.note) noteId.current = outcome.note.id;
       lastSaved.current = body;
       // The note is in the app but the device refused it: say so, because
@@ -87,7 +78,7 @@ export function NoteEditor({
           : { error: false, text: "Đã lưu" },
       );
     },
-    [update, anchor],
+    [update, anchor, onCreated],
   );
   const { schedule, flush } = useDebouncedSave(save);
 
@@ -214,6 +205,11 @@ export function NoteCard({
           {note.anchor.excerpt && <span lang="en">{note.anchor.excerpt}</span>}
         </header>
       )}
+      {note.anchor?.quote && (
+        <blockquote className="note-quote" lang="en">
+          {note.anchor.quote}
+        </blockquote>
+      )}
       <p className="note-body">{note.body}</p>
       <div className="note-actions">
         <button
@@ -275,6 +271,54 @@ export function UndoDelete({ id, onDone }: { id: string; onDone: () => void }) {
   );
 }
 
+/** The button that opens a box for a new note, and the box. */
+export function NoteAdder({
+  anchor,
+  label,
+  button,
+  onComposing,
+}: {
+  anchor: NoteAnchor;
+  /** What the box is called to a screen reader. */
+  label: string;
+  /** What the button says. */
+  button: string;
+  /**
+   * Tells the list which note is being written in the box, so it is not drawn
+   * a second time as a card above its own box; null when the box closes.
+   */
+  onComposing?: (id: string | null) => void;
+}) {
+  const [adding, setAdding] = useState(false);
+  const addButton = useRef<HTMLButtonElement>(null);
+  if (adding)
+    return (
+      <NoteEditor
+        anchor={anchor}
+        label={label}
+        onCreated={(id) => onComposing?.(id)}
+        onClose={() => {
+          setAdding(false);
+          onComposing?.(null);
+          window.setTimeout(() => addButton.current?.focus(), 0);
+        }}
+      />
+    );
+  return (
+    <div>
+      <button
+        ref={addButton}
+        type="button"
+        className="note-add"
+        onClick={() => setAdding(true)}
+      >
+        <StickyNote size={14} />
+        {button}
+      </button>
+    </div>
+  );
+}
+
 /**
  * Everything Gùa wrote about one question (or one whole paper or lesson), and
  * the way to add more. Shown only after the answer is known, so a note that
@@ -290,57 +334,42 @@ export function QuestionNotes({
   const { state, update } = useStudy();
   const target: NoteTarget = place.target;
   const notes = notesAt(state, target);
-  const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [composing, setComposing] = useState<string | null>(null);
   const [deleted, setDeleted] = useState<string | null>(null);
-  const addButton = useRef<HTMLButtonElement>(null);
   const clearUndo = useCallback(() => setDeleted(null), []);
   const label = `Ghi chú của ${state.profile.name} cho ${noun}`;
   return (
     <section className="question-notes" aria-label={label}>
-      {notes.map((note) =>
-        editing === note.id ? (
-          <NoteEditor
-            key={note.id}
-            note={note}
-            label={label}
-            onClose={() => setEditing(null)}
-          />
-        ) : (
-          <NoteCard
-            key={note.id}
-            note={note}
-            onEdit={() => setEditing(note.id)}
-            onDelete={() => {
-              update((s) => trashNote(s, note.id));
-              setDeleted(note.id);
-            }}
-          />
-        ),
-      )}
+      {notes
+        .filter((note) => note.id !== composing)
+        .map((note) =>
+          editing === note.id ? (
+            <NoteEditor
+              key={note.id}
+              note={note}
+              label={label}
+              onClose={() => setEditing(null)}
+            />
+          ) : (
+            <NoteCard
+              key={note.id}
+              note={note}
+              onEdit={() => setEditing(note.id)}
+              onDelete={() => {
+                update((s) => trashNote(s, note.id));
+                setDeleted(note.id);
+              }}
+            />
+          ),
+        )}
       {deleted && <UndoDelete id={deleted} onDone={clearUndo} />}
-      {adding ? (
-        <NoteEditor
-          anchor={place.anchor}
-          label={label}
-          onClose={() => {
-            setAdding(false);
-            window.setTimeout(() => addButton.current?.focus(), 0);
-          }}
-        />
-      ) : (
-        <div>
-          <button
-            ref={addButton}
-            type="button"
-            className="note-add"
-            onClick={() => setAdding(true)}
-          >
-            <StickyNote size={14} />
-            {notes.length ? "Thêm ghi chú" : `Ghi chú cho ${noun}`}
-          </button>
-        </div>
-      )}
+      <NoteAdder
+        anchor={place.anchor}
+        label={label}
+        button={notes.length ? "Thêm ghi chú" : `Ghi chú cho ${noun}`}
+        onComposing={setComposing}
+      />
     </section>
   );
 }

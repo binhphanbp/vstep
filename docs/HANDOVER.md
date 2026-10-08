@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **222 unit, 110 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **258 unit, 121 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 222 unit và 110 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 258 unit và 121 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -106,12 +106,16 @@ Trong các vòng phát triển tiếp theo, nên ưu tiên chất lượng học
 - Mỗi bài học hiện người soạn và trạng thái thẩm định. Hiện tại **chưa bài nào qua thẩm định của giáo viên**; nhãn B1/B2 là định hướng biên soạn.
 - Cài đặt có nút tải file báo lỗi gồm thông tin máy, số lượng dữ liệu và tối đa 10 lỗi gần nhất; file không chứa bài viết, bản nháp hay bản ghi âm.
 
-### 4.6c Sổ ghi chú
+### 4.6c Nháp, tô câu và sổ ghi chú
 
-- Ghi bằng lời của mình dưới từng câu **sau khi đã biết đáp án**: ở màn chữa đề kho đề (Nghe, Đọc, từng bài Viết, từng phần Nói), "Làm lại câu sai", kết quả bài học, kết quả buổi thi rút gọn và Sổ tay lỗi sai; thêm ô "Rút kinh nghiệm" cho cả đề hoặc cả bài. Ghi chú gắn với câu hỏi, nên hiện lại mỗi lần gặp lại câu đó; khi đang làm bài thì không hiện, để một ghi chú giải thích đáp án không lộ ở lần làm lại.
+Ba công cụ thay giấy khi luyện; kế hoạch và cách đo nằm ở [PLAN-GHI-CHU.md](PLAN-GHI-CHU.md).
+
+- **Nháp:** ô chữ ở từng phần của đề kho (phòng thi mô phỏng lẫn luyện thoải mái: Nghe, Đọc, dàn ý Viết, dàn ý Nói kể cả phút chuẩn bị), ở bài học và ở buổi thi rút gọn. Không tính điểm hay số từ, lưu theo từng phím như bài viết bên cạnh. Thuộc về **lượt làm**: làm lại đề là trang trắng, xem lại lượt cũ thấy đúng trang của ngày đó, và một lượt bị bỏ khi vượt 100 lượt thì mang nháp đi theo.
+- **Tô câu:** nút “Tô câu” trên bài đọc, bản chép lời (sau khi nộp) và đề bài; bấm hoặc chạm vào một câu để tô, bấm lần nữa để bỏ; dùng được bằng Tab và Enter. Một màu. Tô theo câu chứ không theo khoảng chữ, vì bôi chọn bằng bàn phím không làm được trên chữ thường và trên điện thoại rất khó. Câu được tách theo cùng quy tắc với giọng đọc (không cắt ở “Dr.”, số thập phân, “a.m.”). Tô tìm lại câu của mình bằng vài chữ đầu nếu bài đã đổi, và báo rõ câu nào không còn tìm thấy.
+- **Ghi chú** bằng lời của mình dưới từng câu **sau khi đã biết đáp án**: màn chữa đề kho đề (Nghe, Đọc, từng bài Viết, từng phần Nói), “Làm lại câu sai”, kết quả bài học, kết quả buổi thi rút gọn và Sổ tay lỗi sai; thêm ô “Rút kinh nghiệm” cho cả đề hoặc cả bài. Gắn với câu hỏi nên hiện lại mỗi lần gặp lại câu đó; khi đang làm bài thì không hiện, để một ghi chú giải thích đáp án không lộ ở lần làm lại. Từ một câu đã tô có thể viết ghi chú kèm đúng câu đó, và một trang nháp có thể giữ lại thành ghi chú.
 - Tự lưu sau 0,9 giây ngừng gõ và khi rời ô hoặc rời trang; năm gợi ý một chạm do Mây đặt; khi trình duyệt không ghi được thì ô báo đúng lỗi và hỏi trước khi bỏ chữ vừa viết.
-- Trang `/notes`: tìm mọi từ không cần gõ dấu, lọc theo kỹ năng, đề hoặc bài, ★ "Cần nhớ", sắp xếp, sửa tại chỗ, xóa có "Hoàn tác", mục "Đã xóa gần đây" khôi phục trong 30 ngày, mở đúng chỗ đã ghi, in danh sách đang lọc; nhận xét giáo viên đã chép ở "Gói gửi giáo viên" hiện thêm ở đó (chỉ đọc).
-- Giới hạn kiểm ngay lúc ghi (`src/lib/notes.ts`): 2000 ghi chú (tính cả mục đã xóa), 2000 ký tự mỗi ghi chú, 1,5 MB tổng. Ghi chú nằm trong cùng state và đi theo bản sao lưu và đồng bộ; file báo lỗi chỉ đếm số ghi chú. Kế hoạch đầy đủ và cách đo: [PLAN-GHI-CHU.md](PLAN-GHI-CHU.md).
+- Trang `/notes`: tìm mọi từ không cần gõ dấu, lọc theo kỹ năng, đề hoặc bài, ★ “Cần nhớ”, sắp xếp, sửa tại chỗ, xóa có “Hoàn tác”, mục “Đã xóa gần đây” khôi phục trong 30 ngày, mở đúng chỗ đã ghi, in danh sách đang lọc, nhắc sao lưu khi có từ 10 ghi chú mới chưa nằm trong bản sao nào; nhận xét giáo viên đã chép ở “Gói gửi giáo viên” hiện thêm ở đó (chỉ đọc).
+- Giới hạn kiểm ngay lúc ghi (`src/lib/notes.ts`, `src/lib/work.ts`): ghi chú tối đa 2000 (tính cả mục đã xóa), 2000 ký tự mỗi ghi chú, 1,5 MB; nháp tối đa 2000 ký tự mỗi phần và 40 phần mỗi lượt, mỗi bài tô tối đa 60 câu, và toàn bộ nháp cùng câu tô tối đa 0,5 MB. Tất cả nằm trong cùng state và đi theo bản sao lưu và đồng bộ; file báo lỗi chỉ đếm số ghi chú.
 
 ### 4.7 Tiến bộ và lịch sử
 
@@ -205,7 +209,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 222/222 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 110 ca trên bản production local: 102 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 102/102; Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 258/258 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 121 ca trên bản production local: 113 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 113/113; Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
@@ -242,7 +246,7 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 | Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
 | Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                      |
 | Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                                 |
-| Ghi chú: gõ tiếng Việt trên thiết bị thật | Chưa thử              | Bộ gõ điện thoại và máy tính chưa được thử; sửa cùng một ghi chú ở hai tab thì lần lưu sau thắng |
+| Nháp, tô câu và ghi chú trên thiết bị thật | Chưa thử              | Bộ gõ tiếng Việt, chạm để tô câu trên điện thoại chưa được thử; sửa cùng một ghi chú ở hai tab thì lần lưu sau thắng |
 | PWA/offline đầy đủ                     | Một phần                  | Service worker giữ trang cố định và bài hôm nay; audio đề nhập không tải sẵn     |
 | Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                     |
 | C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                                |
@@ -351,7 +355,9 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 | `src/components/audio-tools.tsx`               | Speech synthesis, ghi âm, phát và tải audio                  |
 | `src/components/review.tsx`                    | Từ vựng và sổ lỗi sai                                        |
 | `src/components/notes.tsx`, `note-box.tsx`     | Trang Sổ ghi chú và ô ghi chú dưới từng câu                  |
+| `src/components/scratch-pad.tsx`, `marked-text.tsx` | Trang nháp và nút Tô câu                                |
 | `src/lib/notes.ts`, `note-anchors.ts`          | Giới hạn và thao tác ghi chú; tên "chỗ ghi" của từng câu     |
+| `src/lib/work.ts`, `marks.ts`, `backup-mark.ts` | Nháp và câu tô của từng lượt; tách câu; nhắc sao lưu          |
 | `src/components/settings.tsx`                  | Hồ sơ, backup, Auth và cloud sync                            |
 | `src/lib/content.ts`                           | Học liệu ngắn và nguồn tham khảo                             |
 | `src/lib/full-exam-content.ts`                 | Ngữ liệu đề đủ cấu trúc                                      |

@@ -25,7 +25,9 @@ import {
   whenLabel,
 } from "@/lib/learning";
 import { skillNames, type Skill } from "@/lib/content";
+import { markBackup } from "@/lib/backup-mark";
 import { NOTE_LIMITS, allNotes, binnedNotes, noteBytes } from "@/lib/notes";
+import { WORK_LIMITS, workBytes } from "@/lib/work";
 import {
   CLOUD_REQUEST_TIMEOUT,
   isCloudTimeout,
@@ -59,8 +61,11 @@ export function downloadJson(data: unknown, name: string) {
  */
 export function downloadBackup(damaged: boolean, name: string) {
   const raw = damaged ? rawStudyData() : null;
-  if (raw === null) downloadJson(currentBackupState(), name);
-  else downloadText(raw, name);
+  if (raw === null) {
+    const state = currentBackupState();
+    downloadJson(state, name);
+    markBackup(state);
+  } else downloadText(raw, name);
 }
 function downloadText(text: string, name: string) {
   const url = URL.createObjectURL(
@@ -394,9 +399,9 @@ export function SettingsPage() {
               <h2>Bản sao của hành trình</h2>
             </div>
             <p className="help-copy">
-              Xuất tiến độ, lượt làm đề nhập, bài viết, bản nháp và lịch ôn ra file JSON. File
-              không chứa bản ghi âm: bản ghi của từng buổi nằm ở trang Lịch sử,
-              mở buổi học rồi tải hoặc xóa từng bản.
+              Xuất tiến độ, lượt làm đề nhập, bài viết, bản nháp và lịch ôn ra
+              file JSON. File không chứa bản ghi âm: bản ghi của từng buổi nằm ở
+              trang Lịch sử, mở buổi học rồi tải hoặc xóa từng bản.
             </p>
             <div className="button-row">
               <button
@@ -634,6 +639,7 @@ function CloudSettings({ storageError }: { storageError: string }) {
           toast("Đã lưu bản trước đó. Thay đổi mới vẫn ở trên thiết bị.");
           return;
         }
+        markBackup(uploaded);
         setLast(
           `Đã lưu lên đám mây lúc ${new Date().toLocaleTimeString("vi-VN")}.`,
         );
@@ -859,14 +865,15 @@ function StoragePanel() {
       </div>
       <div className="history-row">
         <div>
-          <h3>Ghi chú</h3>
+          <h3>Ghi chú, nháp và câu tô</h3>
           <small>
-            Nằm trong dữ liệu học và đi theo bản sao lưu. Tối đa{" "}
-            {NOTE_LIMITS.count} ghi chú, {formatBytes(NOTE_LIMITS.bytes)}.
+            Nằm trong dữ liệu học và đi theo bản sao lưu. Ghi chú tối đa{" "}
+            {NOTE_LIMITS.count} ghi chú và {formatBytes(NOTE_LIMITS.bytes)};
+            nháp và câu tô tối đa {formatBytes(WORK_LIMITS.bytes)}.
           </small>
         </div>
         <div className="skill-accuracy">
-          <strong>{formatBytes(noteBytes(notes))}</strong>
+          <strong>{formatBytes(noteBytes(notes) + workBytes(state))}</strong>
           <small>
             {liveCount} ghi chú
             {binCount ? ` · ${binCount} đã xóa` : ""}

@@ -3,8 +3,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Recorder } from "./audio-tools";
 import { deleteRecording } from "@/lib/recordings";
-import { ExamCheckIn, ExamRoom, PaperText } from "./paper-exam";
+import { ExamCheckIn, ExamRoom } from "./paper-exam";
 import { PaperReview } from "./paper-review";
+import { MarkablePassage } from "./marked-text";
+import {
+  SCRATCH_HINTS,
+  paperWork,
+  passageKey,
+  taskKey,
+  type PaperWork,
+} from "./paper-work";
+import { ScratchPad } from "./scratch-pad";
 import { useStudy } from "./study-provider";
 import {
   addPaperRun,
@@ -19,8 +28,25 @@ import { wordCount, type PaperRun, type StudyState } from "@/lib/learning";
 
 const sectionNames = ["Nghe", "Đọc", "Viết", "Nói"];
 
-function PlainText({ text }: { text: string }) {
-  return <PaperText text={text} />;
+/** A passage or a task with the switch that highlights its sentences. */
+function Markable({
+  text,
+  markKey,
+  work,
+}: {
+  text: string;
+  markKey: string;
+  work: PaperWork;
+}) {
+  return (
+    <MarkablePassage
+      key={markKey}
+      text={text}
+      className="paper-text"
+      marks={work.marks(markKey)}
+      onToggle={(sentence) => work.toggle(markKey, text, sentence)}
+    />
+  );
 }
 
 function activeRunFor(state: StudyState, paperId: string) {
@@ -71,6 +97,8 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       ? undefined
       : (runs.find((entry) => entry.id === selectedId) ?? runs.at(-1));
   const active = activeRunFor(state, paperId);
+  // Scratch and highlights belong to the sitting being shown, finished or not.
+  const work = run ? paperWork(run, update) : undefined;
 
   useEffect(() => {
     if (!paper || !ready || !active) return;
@@ -343,11 +371,13 @@ export function PaperRunner({ paperId }: { paperId: string }) {
       </div>
     );
 
+  if (!work) return null;
   if (run.finishedAt)
     return (
       <PaperReview
         paper={paper}
         run={run}
+        work={work}
         runs={runs}
         shortLabel={shortLabel}
         hasActive={Boolean(active)}
@@ -364,6 +394,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         now={now}
         name={state.profile.name}
         edit={editRun}
+        work={work}
         markRecorded={markRecorded}
         onSubmit={() => submitStage()}
         onFinish={() => submitStage(true)}
@@ -450,7 +481,32 @@ export function PaperRunner({ paperId }: { paperId: string }) {
             />
           </div>
         )}
-        {section.skill === "reading" && <PlainText text={slot.passage} />}
+        {section.skill === "listening" && (
+          <ScratchPad
+            key={`scratch-${slot.id}`}
+            value={work.scratch(slot.id)}
+            onChange={(value) => work.setScratch(slot.id, value)}
+            label={`Nháp cho ${slot.part}`}
+            placeholder={SCRATCH_HINTS.listening}
+            defaultOpen
+          />
+        )}
+        {section.skill === "reading" && (
+          <>
+            <Markable
+              text={slot.passage}
+              markKey={passageKey(slot.id)}
+              work={work}
+            />
+            <ScratchPad
+              key={`scratch-${slot.id}`}
+              value={work.scratch(slot.id)}
+              onChange={(value) => work.setScratch(slot.id, value)}
+              label={`Nháp cho ${slot.part}`}
+              placeholder={SCRATCH_HINTS.reading}
+            />
+          </>
+        )}
         {slot.items.map((item) => (
           <fieldset className="paper-question" key={item.id}>
             <legend>
@@ -479,7 +535,19 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         ))}
         {section.skill === "writing" && (
           <>
-            <PlainText text={slot.prompt} />
+            <Markable
+              text={slot.prompt}
+              markKey={taskKey(slot.id)}
+              work={work}
+            />
+            <ScratchPad
+              key={`scratch-${slot.id}`}
+              value={work.scratch(slot.id)}
+              onChange={(value) => work.setScratch(slot.id, value)}
+              label={`Dàn ý cho ${slot.part}`}
+              placeholder={SCRATCH_HINTS.writing}
+              defaultOpen
+            />
             <textarea
               className="writing-area"
               aria-label={`Bài viết ${slot.part}`}
@@ -501,7 +569,21 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         )}
         {section.skill === "speaking" && (
           <>
-            {slot.prompt && <PlainText text={slot.prompt} />}
+            {slot.prompt && (
+              <Markable
+                text={slot.prompt}
+                markKey={taskKey(slot.id)}
+                work={work}
+              />
+            )}
+            <ScratchPad
+              key={`scratch-${slot.id}`}
+              value={work.scratch(slot.id)}
+              onChange={(value) => work.setScratch(slot.id, value)}
+              label={`Dàn ý cho ${slot.part}`}
+              placeholder={SCRATCH_HINTS.speaking}
+              defaultOpen
+            />
             {slot.cues.length > 0 && (
               <ul>
                 {slot.cues.map((cue, index) => (

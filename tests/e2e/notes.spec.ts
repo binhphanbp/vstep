@@ -501,7 +501,7 @@ test("a full notebook refuses one more note, says why, and still opens", async (
   // Settings says how much room the notes take.
   await page.goto("/settings");
   const row = page.locator(".history-row").filter({
-    has: page.getByRole("heading", { name: "Ghi chú", exact: true }),
+    has: page.getByRole("heading", { name: "Ghi chú, nháp và câu tô" }),
   });
   await expect(row).toContainText(`${NOTE_LIMITS.count} ghi chú`);
 });
@@ -594,4 +594,51 @@ test("the notebook, the editor and a note card pass the accessibility checks", a
       route,
     ).toEqual([]);
   }
+});
+
+test("the notebook asks for a backup once enough notes are not in any copy", async ({
+  page,
+}) => {
+  let state = withRun();
+  const place = paperItemPlace(paper, 0, firstSlot, firstItem);
+  for (let index = 0; index < 12; index++)
+    state = seedNote(
+      state,
+      { ...place, anchor: { ...place.anchor, itemId: `item-${index}` } },
+      `ghi chú số ${index}`,
+      index,
+    );
+  await seed(page, state);
+  await page.goto("/notes");
+  const banner = page
+    .getByRole("status")
+    .filter({ hasText: "chưa nằm trong bản sao lưu nào" });
+  await expect(banner).toContainText("12 ghi chú mới");
+  await expect(banner).toContainText("chưa có bản nào");
+  // Exporting a copy settles it.
+  await banner.getByRole("link", { name: "Xuất bản sao ở Cài đặt" }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Xuất bản sao", exact: true }).click();
+  await download;
+  await page.goto("/notes");
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "chưa nằm trong bản sao lưu nào" }),
+  ).toHaveCount(0);
+  // Ten more notes, and it asks again, naming the copy it is counting from.
+  await page.evaluate(() => {
+    const raw = JSON.parse(localStorage.getItem("may-study-v1")!);
+    const first = raw.notes[0];
+    for (let index = 0; index < 10; index++)
+      raw.notes.push({ ...first, id: `later-${index}`, body: `thêm ${index}` });
+    raw.updatedAt = new Date(Date.now() + 1000).toISOString();
+    localStorage.setItem("may-study-v1", JSON.stringify(raw));
+  });
+  await page.reload();
+  const again = page
+    .getByRole("status")
+    .filter({ hasText: "chưa nằm trong bản sao lưu nào" });
+  await expect(again).toContainText("10 ghi chú mới");
+  await expect(again).toContainText("bản gần nhất:");
 });

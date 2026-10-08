@@ -110,8 +110,10 @@ export function buildErrorReport(state: StudyState, storageError: string) {
       mistakeReviews: Object.keys(state.mistakeReviews).length,
       // A draft is cleared to "" when its session is filed, and the key stays:
       // counting keys reported four drafts for a learner with none.
-      drafts: Object.values(state.drafts).filter(
-        (draft) => typeof draft === "string" && draft.trim(),
+      drafts: Object.entries(state.drafts).filter(
+        ([key, draft]) =>
+          // Scratch and highlights of an open lesson are not a draft of hers.
+          !key.startsWith("work:") && typeof draft === "string" && draft.trim(),
       ).length,
       savedWords: Object.keys(state.savedWords ?? {}).length,
       // How many, never what they say: a note is something she wrote.

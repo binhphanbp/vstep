@@ -69,8 +69,10 @@ async function store(cache, path) {
     const html = type.includes("text/html")
       ? await response.clone().text()
       : "";
-    await cache.put(path, response);
+    // The assets go first: a page that is in the cache must open offline, and
+    // it cannot if it was stored while the chunks it boots from were not.
     if (html) await storeAssets(cache, html);
+    await cache.put(path, response);
     return true;
   } catch {
     return false;
