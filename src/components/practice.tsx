@@ -374,10 +374,14 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   const lock = useRef(false);
   /** Active seconds counted since the last write to the stored draft. */
   const pending = useRef(0);
+  // The seconds counted but not yet written, mirrored so the clock on screen
+  // moves every second instead of every ten.
+  const [unwritten, setUnwritten] = useState(0);
   const flush = useCallback(() => {
     const elapsed = pending.current;
     if (!elapsed) return;
     pending.current = 0;
+    setUnwritten(0);
     update((s) => {
       const current = readQuizDraft(s.drafts[`quiz:${lesson.id}`], lesson);
       return {
@@ -415,6 +419,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         Date.now() - started.current < 120000
       )
         pending.current += 1;
+      setUnwritten(pending.current);
       // Every stored second used to cost a full read, parse and validation of
       // the whole profile. The count is kept in memory and written in batches;
       // leaving the page flushes whatever has not been written yet.
@@ -518,6 +523,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
     // Only once the attempt is really filed: a failed save above returns to a
     // session whose counted seconds must still be there.
     pending.current = 0;
+    setUnwritten(0);
     addAttempt(a);
     setResult(a);
     update((s) => ({
@@ -530,6 +536,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
   function retry() {
     lock.current = false;
     pending.current = 0;
+    setUnwritten(0);
     setResult(null);
     update((s) => ({
       ...s,
@@ -560,7 +567,8 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
         </div>
         <span className="timer" role="timer" aria-live="off">
           <Clock3 size={16} />
-          {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
+          {Math.floor((seconds + unwritten) / 60)}:
+          {String((seconds + unwritten) % 60).padStart(2, "0")}
           <span className="muted" style={{ fontSize: 11 }}>
             {" "}
             / {lesson.minutes} phút gợi ý
@@ -753,7 +761,16 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
                       [`quiz:${lesson.id}`]: JSON.stringify({
                         contentVersion: lesson.version,
                         answers: { ...current.answers, [q.id]: value },
-                        confidence: current.confidence,
+                        // "How sure are you?" was about the earlier answer; a
+                        // different answer has to be rated again.
+                        confidence:
+                          current.answers[q.id] === value
+                            ? current.confidence
+                            : Object.fromEntries(
+                                Object.entries(current.confidence).filter(
+                                  ([id]) => id !== q.id,
+                                ),
+                              ),
                         seconds: current.seconds,
                       }),
                     },

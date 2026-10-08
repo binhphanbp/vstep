@@ -1368,3 +1368,53 @@ test("finishing a Speaking lesson while still recording, or the instant after st
     page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
   ).toBeVisible();
 });
+
+test("the lesson clock moves every second, not in steps of ten", async ({
+  page,
+}) => {
+  await page.goto("/practice/reading-market");
+  const clock = async () => {
+    const text = await page.locator("[role=timer]").first().innerText();
+    const [minutes, seconds] = text
+      .match(/(\d+):(\d{2})/)!
+      .slice(1)
+      .map(Number);
+    return minutes * 60 + seconds;
+  };
+  await page.waitForTimeout(3500);
+  // Three and a half seconds in: it shows them, instead of waiting for the
+  // tenth second to write a batch.
+  const early = await clock();
+  expect(early).toBeGreaterThanOrEqual(2);
+  expect(early).toBeLessThanOrEqual(5);
+  // The whole session still adds up when a batch is written (after ten).
+  await page.waitForTimeout(8000);
+  const later = await clock();
+  expect(later).toBeGreaterThanOrEqual(10);
+  expect(later).toBeLessThanOrEqual(13);
+});
+
+test("changing an answer asks again how sure she is", async ({ page }) => {
+  await page.goto("/practice/reading-market");
+  const first = page.locator(".question").first();
+  const sure = first.getByRole("button", { name: "Rất chắc" });
+  await first.getByRole("radio").nth(0).check();
+  await sure.click();
+  await expect(sure).toHaveAttribute("aria-pressed", "true");
+  // The same answer again changes nothing.
+  await first.getByRole("radio").nth(0).check();
+  await expect(sure).toHaveAttribute("aria-pressed", "true");
+  // A different answer is a different claim: the earlier "sure" is gone.
+  await first.getByRole("radio").nth(1).check();
+  await expect(sure).toHaveAttribute("aria-pressed", "false");
+  await expect(first.getByRole("button", { name: "Đoán" })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+  // It survives a reload as "not answered", so the lesson cannot be filed
+  // with the old rating standing in for the new answer.
+  await page.reload();
+  await expect(
+    page.locator(".question").first().getByRole("button", { name: "Rất chắc" }),
+  ).toHaveAttribute("aria-pressed", "false");
+});
