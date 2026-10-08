@@ -631,7 +631,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
             <p>
               {result.total
                 ? "Đây là kết quả bài ngắn, không quy đổi thành điểm VSTEP. Câu sai đã vào sổ tay."
-                : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm của giáo viên hoặc AI."}
+                : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm cho bài này."}
             </p>
             <div className="result-actions">
               {upNext?.next && (

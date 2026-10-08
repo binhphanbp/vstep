@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **282 unit, 166 E2E**, build 112 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **282 unit, 165 E2E**, build 104 route, axe trên 16 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,11 +10,11 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 282 unit và 166 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 282 unit và 165 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
-Ba việc vẫn cần người quyết định nhưng nay mỗi việc chỉ còn một thao tác. `/review-pack/bank` in ra sáu tập hồ sơ học liệu để nhờ giáo viên duyệt: ngữ liệu, câu hỏi, đáp án đang dùng có đánh dấu, câu trích dẫn làm căn cứ và bảng trống cho người chấm; kết quả duyệt chỉ vào được `provenance.ts` bằng tay, với tên và ngày thật. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. Chủ website đã chọn không bật cổng chờ CI của Vercel; quy trình phát hành yêu cầu CI xanh trước merge và smoke sau deploy. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy.
+Hai việc vốn cần người quyết định nay mỗi việc chỉ còn một thao tác. Cài đặt có nút **Gửi báo lỗi** đưa bản mô tả dạng chữ vào khay chia sẻ hoặc clipboard của điện thoại, mang đúng những gì bản JSON được phép mang. Chủ website đã chọn không bật cổng chờ CI của Vercel; quy trình phát hành yêu cầu CI xanh trước merge và smoke sau deploy. [UAT-DIEN-THOAI.md](UAT-DIEN-THOAI.md) là danh sách 20 mục để nghiệm thu trên máy Gùa, chưa ai chạy. Ngày 08/10/2026 chủ dự án quyết định **bỏ hết phần dành cho giáo viên** (Gói gửi giáo viên, Gói duyệt học liệu): Mây chỉ dùng cho Gùa; việc chấm Viết và Nói sẽ làm bằng AI theo [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md).
 
 Các hạng mục kỹ thuật P0 về lịch sử học liệu, kiểm tra payload cloud, timeout mạng, backup khi lỗi và smoke test sau triển khai đã hoàn thành trong mã nguồn. Migration gia cố quyền ghi Supabase đã áp dụng và hậu kiểm thành công trên production ngày 13/09/2026. Nghiệm thu thiết bị thật, thẩm định học liệu, đánh giá đầu vào và phản hồi Viết hoặc Nói vẫn đang mở và được liệt kê tại Mục 12.
 
@@ -215,7 +215,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 282/282 Vitest, build 112 route và audit production dependency đều đạt. Playwright có 166 ca trên bản production local: 158 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 158/158 (cập nhật 08/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 282/282 Vitest, build 104 route và audit production dependency đều đạt. Playwright có 165 ca trên bản production local: 157 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 157/157 (cập nhật 08/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
@@ -333,7 +333,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ### P1 Nâng chất lượng học tập
 
-1. Mời giáo viên VSTEP rà rubric, đáp án, độ khó, từ vựng, thời lượng và mức B1/B2.
+1. Mời giáo viên VSTEP rà rubric, đáp án, độ khó, từ vựng, thời lượng và mức B1/B2. (Chủ dự án đã quyết định ngày 08/10/2026 không nhờ giáo viên; mục này chỉ còn là khuyến nghị chung.)
 2. Xây ngân hàng đề độc lập đủ dùng trong nhiều tuần, không tái sử dụng bài đã học trong bài đo tiến bộ.
 3. Thu hoặc mua quyền sử dụng audio người nói với tốc độ, giọng và nhiễu phù hợp từng phần thi.
 4. Thêm phản hồi Viết/Nói theo rubric. Nếu dùng AI, phải lưu rubric, ví dụ chuẩn, giới hạn độ tin cậy và luôn tách phản hồi gợi ý khỏi điểm chính thức.

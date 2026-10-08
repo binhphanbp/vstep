@@ -47,7 +47,7 @@ Nguồn định dạng đối chiếu: [ULIS VSTEP Test format](https://vstep.vn
 
 1. Nghiệm thu đồng bộ Supabase trên hai thiết bị thật. Dự án, migration, tài khoản, RLS và luồng lưu/tải trên một thiết bị local đã kiểm tra; CI kiểm tra SQL/RLS bằng PostgreSQL trong PGlite.
 2. Giáo viên thẩm định bộ đề đủ cấu trúc đã có; mở rộng ngân hàng độc lập có quyền sử dụng, thay giọng tổng hợp bằng bản thu người nói và hiệu chuẩn độ khó. Một đề tự biên soạn chưa đủ cho chương trình luyện dài hạn.
-3. Tích hợp phản hồi Viết/Nói từ giáo viên hoặc AI được hiệu chuẩn theo rubric, luôn hiển thị giới hạn độ tin cậy. Chưa triển khai chấm AI tự động.
+3. Chấm Viết/Nói bằng AI (Gemini) theo thang VSTEP, luôn hiển thị giới hạn độ tin cậy và nhãn “điểm ước lượng”; kế hoạch ở [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md), chưa triển khai.
 4. Bản HTTPS pilot đã có tại `https://vstep-turtle.vercel.app`; tiếp tục thử đăng nhập/sync, micro/giọng đọc trên đúng điện thoại và máy tính người học sử dụng, kiểm tra khôi phục dữ liệu thật và sao lưu vận hành.
 5. Cá nhân hoá nội dung sâu hơn khi có trình độ, mục tiêu, ngày thi và sở thích thực của người học. Tên thân mật hiện là “Gùa/Rùa”; các mục còn lại cấu hình được và không tự bịa thông tin.
 

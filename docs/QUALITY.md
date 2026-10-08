@@ -2,6 +2,15 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI, đợt 0: bỏ hết phần dành cho giáo viên — 08/10/2026
+
+Yêu cầu của chủ dự án: Mây chỉ làm cho Gùa và do chính họ quản lý, nên bỏ phần gửi giáo viên; việc chấm Viết và Nói sẽ làm bằng AI ([PLAN-CHAM-AI.md](PLAN-CHAM-AI.md)).
+
+- **Đã gỡ:** trang `/review-pack` (Gói gửi giáo viên), `/review-pack/bank` và tám trang `/review-pack/bank/[group]` (Gói duyệt học liệu), các file `review-pack.tsx`, `bank-review.tsx`, `src/lib/review-bank.ts`; nút “In gói gửi giáo viên” và phần “Nhận xét của người chấm” ở trang Tiến bộ; thẻ “Nhờ giáo viên duyệt học liệu” ở Cài đặt; mục “Nhận xét của giáo viên đã ghi lại” ở Sổ ghi chú; tên trang `/review-pack` trong khung app; mọi CSS chỉ các trang này dùng (bảng gói, tờ in, danh sách gói).
+- **Giữ lại có chủ ý:** trường `feedback` của lượt học vẫn có trong schema, để bản sao lưu cũ có nhận xét vẫn khôi phục được (chỉ thôi hiển thị); nhãn “Chưa qua thẩm định của giáo viên” trên bài học và đề, vì đó là sự thật về nguồn gốc học liệu. Dòng ở màn kết quả bài Viết/Nói đổi từ “Chưa có điểm chấm của giáo viên hoặc AI.” thành “Chưa có điểm chấm cho bài này.” cho khỏi nhắc tới giáo viên.
+- **Số liệu:** build giảm từ 112 xuống **104 route** (hai trang cố định và tám trang theo nhóm); số ca E2E giảm một (ca in gói duyệt học liệu), ca “Viết được tự kiểm tra… và gửi giáo viên” giữ phần tự kiểm tra và bỏ phần gửi; ca axe bỏ ba đường dẫn, còn 16 màn. Tổng: 282 unit, 165 E2E (157 Chromium, bốn Firefox, bốn WebKit).
+- **Chưa kiểm được:** Firefox và WebKit chưa chạy ở máy này (CI chạy).
+
 ## Giao diện máy tính, đợt rà thứ hai: thanh bên, kho đề, sổ lỗi sai, thẻ từ, trình nghe — 08/10/2026
 
 Yêu cầu: kiểm tra kỹ hơn và cải thiện UX/UI. Đợt đầu chủ yếu nhìn phòng thi; đợt này đi qua phần còn lại **ở trạng thái đã dùng** (đã làm một bài Reading với hai câu sai, đã có ghi chú, đã có một đề nộp) chứ không chỉ màn trống, ở 1280×720, và đo thay vì chỉ nhìn: chiều cao thanh bên, vị trí các nút trên màn đầu, số cột của lưới. Lỗi nào đo được thì có ca kiểm giữ lại.
@@ -367,7 +376,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 282 unit / 166 E2E / 112 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 282 unit / 165 E2E / 104 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -577,7 +586,7 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 ## Bằng chứng kiểm tra
 
 - 282 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 166 kiểm thử Playwright trên bản production: 158 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 165 kiểm thử Playwright trên bản production: 157 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

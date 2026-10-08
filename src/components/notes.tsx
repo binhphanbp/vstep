@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Printer, RotateCcw, StickyNote, Trash2 } from "lucide-react";
 import { lessons, type Skill } from "@/lib/content";
-import { attemptLesson, searchFold, type Note } from "@/lib/learning";
+import { searchFold, type Note } from "@/lib/learning";
 import {
   NOTE_LIMITS,
   binnedFrom,
@@ -137,9 +137,6 @@ export function NotesPage() {
 
   if (!ready) return <div className="loading-state">Đang mở sổ ghi chú…</div>;
 
-  const feedback = state.attempts
-    .filter((attempt) => attempt.feedback?.trim())
-    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const filtered =
     skill !== "all" || group !== "all" || starred || words.length > 0;
 
@@ -396,30 +393,6 @@ export function NotesPage() {
               <Trash2 size={14} />
               Dọn sạch mục này
             </button>
-          </div>
-        </details>
-      )}
-
-      {feedback.length > 0 && (
-        <details className="panel note-feedback no-print">
-          <summary>
-            Nhận xét của giáo viên đã ghi lại ({feedback.length})
-          </summary>
-          <p className="help-copy">
-            Chỉ để đọc ở đây; chép nhận xét mới ở “Gói gửi giáo viên”.
-          </p>
-          <div className="note-list">
-            {feedback.map((attempt) => (
-              <article className="note-card" key={attempt.id}>
-                <header className="note-place">
-                  <strong>
-                    {attemptLesson(state, attempt)?.title ?? attempt.lessonId}
-                  </strong>
-                  <span>{formatNoteDate(attempt.date)}</span>
-                </header>
-                <p className="note-body">{attempt.feedback}</p>
-              </article>
-            ))}
           </div>
         </details>
       )}

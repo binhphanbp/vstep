@@ -50,7 +50,6 @@ Giải thích, dẫn chứng và ghi chú từng phương án do Mây viết s�
 - mỗi ghi chú có nhãn chỗ ghi ("Đề 133 · Nghe Part 2 · Câu 12") và nút "Mở chỗ đã ghi";
 - sửa, xóa có "Hoàn tác"; dòng "Đã xóa gần đây (n)" khôi phục được trong 30 ngày;
 - nút **In** in đúng danh sách đang lọc, ví dụ chỉ "★ Cần nhớ" để đọc trước ngày thi;
-- hiện thêm, chỉ đọc, nhận xét giáo viên đã gõ ở "Gói gửi giáo viên".
 
 ## 3. Không làm (để gọn)
 

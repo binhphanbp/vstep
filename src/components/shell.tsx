@@ -41,7 +41,6 @@ const nav = [
 function otherLabel(pathname: string) {
   if (pathname.startsWith("/guide")) return "Cẩm nang VSTEP";
   if (pathname.startsWith("/settings")) return "Cài đặt của mình";
-  if (pathname.startsWith("/review-pack")) return "Gói ôn tập";
   if (pathname.startsWith("/offline")) return "Đang ngoại tuyến";
   return "Không tìm thấy trang";
 }
