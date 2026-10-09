@@ -142,7 +142,7 @@ Ngưỡng đặt theo **mức đồng thuận giữa chính người chấm** tr
 | Độ ổn định                                        | Cùng bài chấm 10 lần                | Trung vị dao động ≤ 0,5 điểm ở ≥ 95% bài                                                                                                                  | —                                                                          |
 | Câu trích sai                                     | Tỉ lệ câu trích không có trong bài  | ≤ 2%                                                                                                                                                      | —                                                                          |
 
-Tiêu chí nào không đạt: từ 09/10/2026 app vẫn hiện điểm của tiêu chí đó nhưng kèm một ghi chú ở đầu kết quả (điểm là ước lượng của AI, chưa được so với điểm người chấm; ngày 09/10/2026 chủ dự án nói rõ không có người chấm nào, nên không còn nhãn lặp trên từng tiêu chí) (trước đó: ẩn điểm; công tắc là `SHOW_UNVALIDATED_SCORES`). Đạt hay không là số đo, không phải ý kiến; nhãn chỉ biến mất khi có số đo cho tiêu chí đó.
+Tiêu chí nào không đạt: từ 09/10/2026 app vẫn hiện điểm của tiêu chí đó nhưng kèm một ghi chú ở đầu kết quả (điểm là ước lượng của AI; ngày 09/10/2026 chủ dự án nói rõ không có người chấm nào, nên ghi chú chỉ nói "chỉ là ước lượng, có thể lệch" và không còn nhãn lặp trên từng tiêu chí) (trước đó: ẩn điểm; công tắc là `SHOW_UNVALIDATED_SCORES`). Đạt hay không là số đo, không phải ý kiến; nhãn chỉ biến mất khi có số đo cho tiêu chí đó.
 
 ### 7.3 Bài neo
 

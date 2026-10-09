@@ -263,9 +263,10 @@ export function EstimateNotice({
   if (!unchecked) return null;
   return (
     <p className="notice" role="note">
-      Các điểm này <strong>chưa được so với điểm của người chấm</strong>, nên có
-      thể lệch so với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần
-      sửa gì, đừng coi là điểm dự đoán chắc chắn.
+      Các điểm này do AI chấm theo mô tả mức điểm công khai của VSTEP, nên{" "}
+      <strong>chỉ là ước lượng</strong> và có thể lệch so với điểm thi thật.
+      Dùng để theo dõi mình tiến bộ và biết cần sửa gì, đừng coi là điểm dự đoán
+      chắc chắn.
     </p>
   );
 }

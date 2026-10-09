@@ -2,6 +2,10 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Sửa lời ghi chú điểm AI — 09/10/2026
+
+Chủ dự án chỉ ra rằng câu "chưa được so với điểm của người chấm" vô nghĩa với Mây: app chấm hoàn toàn bằng AI, không có và sẽ không có người chấm nào để so, nên câu đó nghe như một việc còn dang dở. Nay ghi chú ở kết quả, ở điểm Viết tổng và ở biểu đồ chỉ nói điều đúng và hữu ích: điểm do AI chấm theo mô tả mức điểm công khai của VSTEP, chỉ là ước lượng, có thể lệch so với điểm thi thật, dùng để theo dõi tiến bộ. Dòng "Thang chấm: dựng theo mô tả CEFR công khai, chưa đối chiếu văn bản chính thức của VSTEP" giữ nguyên vì nó nói về văn bản thang chấm, không phải về người chấm. Các ca E2E đổi theo chữ mới.
+
 ## Chấm AI: lần đo thật đầu tiên — 09/10/2026
 
 Chạy `scripts/grading-eval/first-run.sh` với `gemini-3.8-flash` trên phần "tune" của dữ liệu (phần giữ kín chưa đọc). Không có người chấm VSTEP nào để so, nên chỉ đo được các phép tự thân. Cả ba phần chạy hết, không lệnh nào lỗi. Số liệu do phiên "Chạy đo" ghi lại; tôi chép nguyên vào đây.
@@ -31,13 +35,13 @@ AI xếp thứ tự bài khá giống người chấm (Pearson 0,57–0,62) như
 
 **Chi phí và thời gian:** 768 lệnh gọi, 1,13 triệu token vào và 3,31 triệu token ra (gồm suy luận). Giá 0,75 / 3,75 USD mỗi triệu token lấy từ các trang giá bên thứ ba, chưa kiểm trên trang Google, nên khoảng **13 USD** (hoặc 6–7 USD nếu giá thật bằng nửa). Chạy mất khoảng 57 phút.
 
-**Quyết định:** không tiêu chí nào qua ngưỡng, nên `gates.ts` **giữ nguyên đóng**; điểm vẫn hiện nhưng kèm ghi chú "chưa được so với điểm của người chấm". Chưa chạy `gemini-3.1-pro-preview`.
+**Quyết định:** không tiêu chí nào qua ngưỡng, nên `gates.ts` **giữ nguyên đóng**; điểm vẫn hiện nhưng kèm ghi chú "chỉ là ước lượng, có thể lệch so với điểm thi thật". Chưa chạy `gemini-3.1-pro-preview`.
 
 ## Rà UX/UI đợt ba: các màn chấm AI — 09/10/2026
 
 Chụp ảnh 1280×720 và 1440×900 các màn có chấm AI (kết quả Viết, kết quả Nói, điểm Viết tổng, trang tiến bộ, Cài đặt, kết quả bài học Viết) với dữ liệu đã chấm, xem từng ảnh và sửa các lỗi thấy được:
 
-- **Kết quả chấm ba lần nhắc cùng một ý.** Đầu kết quả có dòng "Điểm ước lượng… không phải điểm chính thức", rồi "Thang chấm…", rồi mới tới điểm, rồi một hộp ghi chú lặp lại "do AI ước lượng". Nay điểm đứng đầu, chữ to; ngay sau là một dòng ước lượng, một hộp ghi chú ngắn (chỉ còn ý "chưa so với điểm người chấm"), rồi mới tới dòng thang chấm. Ở bài Nói, câu "tính bằng trung bình năm tiêu chí…" tách thành dòng riêng thay vì dính vào dòng điểm.
+- **Kết quả chấm ba lần nhắc cùng một ý.** Đầu kết quả có dòng "Điểm ước lượng… không phải điểm chính thức", rồi "Thang chấm…", rồi mới tới điểm, rồi một hộp ghi chú lặp lại "do AI ước lượng". Nay điểm đứng đầu, chữ to; ngay sau là một dòng ước lượng, một hộp ghi chú ngắn ("chỉ là ước lượng"), rồi mới tới dòng thang chấm. Ở bài Nói, câu "tính bằng trung bình năm tiêu chí…" tách thành dòng riêng thay vì dính vào dòng điểm.
 - **Điểm từng tiêu chí quá nhỏ.** Nay đậm và to hơn tên tiêu chí.
 - **Trang tiến bộ có khoảng trống lớn dưới biểu đồ nhịp học** vì cột bên phải dài. Biểu đồ điểm AI chuyển vào cột trái, dưới biểu đồ nhịp học, hai cột cân nhau (có ca E2E đo vị trí).
 - **Thẻ "Chấm bài bằng AI" ở Cài đặt** là một đoạn dài đặc. Nay là một câu mở đầu và bốn gạch đầu dòng (gửi gì, Google làm gì, kết quả là gì, file báo lỗi).

@@ -311,9 +311,8 @@ export function GradeResult({
         </p>
       ) : (
         <p className="help-copy">
-          Chưa hiện điểm số: các tiêu chí này chưa được đối chiếu với người
-          chấm, nên Mây chỉ đưa nhận xét, ý còn thiếu và lỗi trích từ chính bài
-          của bạn.
+          Chưa hiện điểm số: Mây chỉ đưa nhận xét, ý còn thiếu và lỗi trích từ
+          chính bài của bạn.
         </p>
       )}
       <p className="grade-estimate">{ESTIMATE_LABEL}</p>

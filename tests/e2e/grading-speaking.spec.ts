@@ -302,7 +302,7 @@ test("shows the Speaking score, with how it is worked out, only when the grade s
   await expect(result.locator(".pill", { hasText: "6/10" })).toHaveCount(3);
   await expect(result.locator(".pill", { hasText: "7/10" })).toHaveCount(2);
   await expect(result.getByRole("note").first()).toContainText(
-    "chưa được so với điểm của người chấm",
+    "chỉ là ước lượng",
   );
 });
 

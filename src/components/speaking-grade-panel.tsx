@@ -337,9 +337,8 @@ export function SpeakingResult({
         </p>
       ) : (
         <p className="help-copy">
-          Chưa hiện điểm số: các tiêu chí này chưa được đối chiếu với người
-          chấm, nên Mây chỉ đưa nhận xét và những câu trích từ chính lời nói của
-          bạn.
+          Chưa hiện điểm số: Mây chỉ đưa nhận xét và những câu trích từ chính
+          lời nói của bạn.
         </p>
       )}
       {grade.speakingScore !== null && (
