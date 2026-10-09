@@ -260,6 +260,8 @@ Cần: việc 1, 2, 4 ở mục 11.
 - **Chưa gắn vào bài học Nói đơn lẻ**: bài đó chỉ có một phần, không phải bài thi Nói; kế hoạch muốn ghi rõ “chấm trên một phần”, để làm cùng lúc với việc duyệt cách chấm một phần.
 - **Cổng điểm vẫn đóng hết**: chưa đối chiếu với speechocean762 và Speak & Improve, nên kết quả chỉ có nhận xét và bản chép lời, chưa có số.
 
+**Lần đo đầu (09/10/2026):** không tiêu chí Viết nào qua ngưỡng ELLIPSE (QWK 0,31–0,42, AI chấm thấp hơn khoảng 0,4–0,6 điểm trên thang 1–5), độ ổn định đạt trên 8 bài, điểm Ngữ pháp phản ứng yếu với lỗi thêm vào; Gemini đọc được webm và mp4. Chi tiết và cảnh báo ở [QUALITY.md](QUALITY.md). Cổng điểm giữ đóng.
+
 ### Đợt 4: Theo dõi và điểm tổng
 
 - Biểu đồ điểm từng tiêu chí theo thời gian ở trang Tiến bộ (chỉ điểm đã qua ngưỡng).

@@ -2,6 +2,37 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: lần đo thật đầu tiên — 09/10/2026
+
+Chạy `scripts/grading-eval/first-run.sh` với `gemini-3.8-flash` trên phần "tune" của dữ liệu (phần giữ kín chưa đọc). Không có người chấm VSTEP nào để so, nên chỉ đo được các phép tự thân. Cả ba phần chạy hết, không lệnh nào lỗi. Số liệu do phiên "Chạy đo" ghi lại; tôi chép nguyên vào đây.
+
+**1. Thứ tự điểm trên ELLIPSE** (40 bài, thang 1–5 của ELLIPSE; ngưỡng đạt: QWK ≥ 0,45 và lệch có dấu trung bình ≤ 0,25):
+
+| Tiêu chí             | Pearson | QWK  | Lệch có dấu trung bình | Kết quả  |
+| -------------------- | ------- | ---- | ---------------------- | -------- |
+| Tổ chức ↔ Cohesion   | 0,62    | 0,42 | −0,53                  | chưa qua |
+| Từ vựng ↔ Vocabulary | 0,61    | 0,31 | −0,59                  | chưa qua |
+| Ngữ pháp ↔ Grammar   | 0,57    | 0,38 | −0,38                  | chưa qua |
+
+AI xếp thứ tự bài khá giống người chấm (Pearson 0,57–0,62) nhưng chấm thấp hơn họ đều đặn 0,4–0,6 điểm trên thang 1–5, nên không qua ngưỡng. ELLIPSE là bài của học sinh Mỹ lớp 8–12 học tiếng Anh, chấm theo thang riêng, nên độ lệch này chưa nói được gì về VSTEP. Tỉ lệ câu trích sai là 0,2% (ngưỡng ≤ 2%): qua.
+
+**2. Độ ổn định** (8 bài, mỗi bài chấm 3 lần): cả 8 bài lệch tối đa 0,5 điểm ở điểm bài (Task), qua ngưỡng. Kế hoạch ghi 10 lần mỗi bài còn script chạy 3 lần, nên chưa đủ để kết luận chắc.
+
+**3. Phản ứng khi sửa bài** (8 bài, mỗi bài sửa 4 kiểu):
+
+| Kiểu sửa                    | Kết quả                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Cắt còn 80 từ               | Cả 8 bài giảm: Task −2,5; tổ chức −2; từ vựng −1,5; ngữ pháp −1,25                                                                   |
+| Xáo câu                     | Tổ chức giảm 1; ngữ pháp không đổi; từ vựng +0,13                                                                                    |
+| Thêm lỗi ngữ pháp           | Ngữ pháp chỉ giảm 0,125. **Phản ứng yếu**: điểm Ngữ pháp kém nhạy với lỗi, nên danh sách lỗi (có kiểm câu trích) đáng tin hơn con số |
+| Chèn lời dặn cho người chấm | 1 bài trong 8 bị chấm cao hơn (87,5% không cao hơn), thay đổi trung bình khoảng 0; chưa có ngưỡng cho kiểu này nên chưa kết luận     |
+
+**4. Âm thanh:** Gemini đọc được cả `audio/webm;codecs=opus` và `audio/mp4`, chép đúng lời nói (khoảng 3 giây mỗi lần), thử trên đoạn 20 giây tách từ một bài nói và trên file `MediaRecorder` của Chromium ghi thật. **Chưa thử** mp4 do Safari ghi (AAC thật): Chromium cho ra mp4 chứa opus, nên đây là điểm cần thử trên máy thật.
+
+**Chi phí và thời gian:** 768 lệnh gọi, 1,13 triệu token vào và 3,31 triệu token ra (gồm suy luận). Giá 0,75 / 3,75 USD mỗi triệu token lấy từ các trang giá bên thứ ba, chưa kiểm trên trang Google, nên khoảng **13 USD** (hoặc 6–7 USD nếu giá thật bằng nửa). Chạy mất khoảng 57 phút.
+
+**Quyết định:** không tiêu chí nào qua ngưỡng, nên `gates.ts` **giữ nguyên đóng**; điểm vẫn hiện nhưng kèm ghi chú "chưa được so với điểm của người chấm". Chưa chạy `gemini-3.1-pro-preview`.
+
 ## Rà UX/UI đợt ba: các màn chấm AI — 09/10/2026
 
 Chụp ảnh 1280×720 và 1440×900 các màn có chấm AI (kết quả Viết, kết quả Nói, điểm Viết tổng, trang tiến bộ, Cài đặt, kết quả bài học Viết) với dữ liệu đã chấm, xem từng ảnh và sửa các lỗi thấy được:
