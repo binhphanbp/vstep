@@ -11,6 +11,7 @@ import {
   CriteriaList,
   ConsentBox,
   ErrorNotice,
+  EstimateNotice,
   Waiting,
   scoreText,
   useAvailable,
@@ -319,6 +320,7 @@ export function GradeResult({
           của bạn.
         </p>
       )}
+      <EstimateNotice criteria={grade.criteria} />
       {grade.lowConfidence && (
         <p className="notice" role="status">
           Các lần chấm độc lập chênh nhau khá nhiều ở một vài tiêu chí, nên độ

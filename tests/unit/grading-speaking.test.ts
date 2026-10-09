@@ -101,9 +101,21 @@ describe("grading a speaking performance", () => {
     expect(grade.rawSpeakingScore).toBe(6.5);
   });
 
-  it("shows nothing while the gates are closed", async () => {
+  it("shows the scores while the gates are closed but marks them unvalidated", async () => {
     const { generate } = fake([[6, 6, 7, 6, 7]]);
     const grade = await gradeSpeaking([part], { generate });
+    if (grade.status !== "graded") throw new Error("expected a grade");
+    expect(grade.speakingScore).not.toBeNull();
+    expect(Object.values(grade.criteria).every((c) => c.showScore)).toBe(true);
+    expect(Object.values(grade.criteria).some((c) => c.validated)).toBe(false);
+  });
+
+  it("shows nothing when showing unvalidated scores is switched off", async () => {
+    const { generate } = fake([[6, 6, 7, 6, 7]]);
+    const grade = await gradeSpeaking([part], {
+      generate,
+      showUnvalidated: false,
+    });
     if (grade.status !== "graded") throw new Error("expected a grade");
     expect(grade.speakingScore).toBeNull();
     expect(Object.values(grade.criteria).some((c) => c.showScore)).toBe(false);

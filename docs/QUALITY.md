@@ -2,6 +2,18 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: hiện điểm ước lượng có nhãn, chấm được Task 2 và bài học Viết — 09/10/2026
+
+Chủ dự án thử bài Viết thật và thấy hai điều: kết quả ghi “Chưa hiện điểm số” (họ kỳ vọng phải chấm được) và Task 2 báo “chưa có danh sách ý bắt buộc đã được duyệt nên chưa chấm được”. Cả hai là chủ ý của bản trước (không đưa ra số chưa đối chiếu), nhưng với một app luyện tập cá nhân thì nó không dùng được. Đã đổi như sau; mọi thứ vẫn nói thật rằng điểm chưa được kiểm với giám khảo.
+
+- **Điểm hiện, kèm nhãn.** Hằng `SHOW_UNVALIDATED_SCORES = true` (`src/lib/grading/gates.ts`) cho điểm từng tiêu chí và điểm bài hiện ra ngay cả khi cổng chưa mở. Mỗi tiêu chí có trường `validated` (chỉ đúng khi cổng của tiêu chí đó đã mở sau khi đo); chưa đúng thì hiện nhãn “chưa đối chiếu giám khảo” cạnh điểm, và đầu kết quả có một ghi chú nói điểm là ước lượng của AI, dùng để theo dõi tiến bộ chứ không phải dự đoán chắc chắn. Đặt hằng về `false` thì quay lại cách ẩn số như trước. Với Nói, tiêu chí trôi chảy vẫn mất điểm khi thời điểm từng từ không đáng tin (độ dài bản ghi không khớp).
+- **Task 2 chấm được.** `ESSAY_TEMPLATES_APPROVED = true` (chủ dự án chấp nhận ngày 09/10/2026; đổi lại thành `false` là thu hồi): bài luận dùng mẫu ý bắt buộc theo dạng đề (bàn hai quan điểm, mức độ đồng ý, nguyên nhân và giải pháp). Đề không khớp mẫu nào thì vẫn không chấm và nói rõ lý do.
+- **Bài học Viết chấm được.** Năm bài học Viết (`writing-email`, `-request`, `-complaint`, `-apology`, `-directions`) và Task 2 của đề Review 13/09 có danh sách ý riêng trong `APPROVED_REQUIREMENTS`; các danh sách này tách từ chính câu lệnh của đề bài (chưa có ai ngoài tôi đọc lại), nên cần chủ dự án xem. Nút “Chấm bài viết này” hiện ở kết quả bài học Viết, khi máy chủ đã bật.
+- **Điểm Viết tổng.** Khi cả hai bài của một lượt đã chấm, màn chữa đề hiện “Điểm Viết của lượt này (ước lượng)” tính trong code theo đúng cách bài thi tính: (Bài 1 + 2 × Bài 2) / 3, làm tròn đến 0,5, kèm cách tính và nhãn chưa đối chiếu.
+- **Chưa làm được (không đổi):** điểm tổng bốn kỹ năng (chưa có bảng quy đổi Nghe/Đọc chính thức); đối chiếu với giám khảo thật (cần khóa Gemini trong môi trường của tôi, tài liệu VSTEP chính thức và dữ liệu có điểm người chấm); chưa có lần gọi Gemini thật nào từ môi trường của tôi, nên độ lệch so với giám khảo thật chưa được đo.
+- **Lỗi tìm thấy khi làm:** ca E2E “finishing a Speaking lesson while still recording…” (không liên quan tới thay đổi này) thỉnh thoảng đỏ vì giả định cú nhấp “Hoàn thành” luôn đến trước khi bản ghi được lưu; trên máy nhanh bản ghi đã lưu xong nên chính cú nhấp đó đã nộp bài và nút biến mất. Đã sửa ca kiểm cho chấp nhận cả hai thứ tự (chạy lặp 6 lần đều đạt).
+- **Kiểm tra:** 398 unit (sáu ca cũ sửa theo hành vi mới, thêm các ca về nhãn, hằng bật/tắt, danh sách ý của bài học), 188 E2E (Chromium 180; thêm ca chấm Task 2 + điểm Viết tổng, ca chấm bài học Viết, và các khẳng định về nhãn/ghi chú), ESLint và TypeScript sạch.
+
 ## Chấm AI: sửa sau lần thử thật đầu tiên — 09/10/2026
 
 Chủ dự án đặt khóa Gemini và mã chấm bài trên Vercel rồi thử chấm một bài Viết thật trên bản live. Ba điều họ thấy:
@@ -31,7 +43,7 @@ Yêu cầu: làm Đợt 2 của [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md). Phần máy 
 - **Lưu trữ:** `grades` trong hồ sơ học, tối đa 40 lần chấm và 0,5 MB; đi theo sao lưu và cloud; dọn theo lượt thi; phục hồi khi tab bản cũ làm rơi; không vào file báo lỗi.
 - **Giao diện:** nút “Chấm bài viết này” ở màn chữa đề, hộp đồng ý và mã, dừng giữa chừng, kết quả có lỗi được tô trong bài, thẻ ở Cài đặt. Không hiện gì khi máy chủ chưa bật.
 - **Lỗi tìm thấy khi làm:** ca E2E đầu tiên đỏ vì một dòng ngày “8/10/2026” khớp mẫu “n/10” của điểm (sửa ca kiểm, không phải giao diện); axe báo nút `ghost` có màu chữ chưa đủ tương phản (đổi màu chữ nút này từ #c24178 sang #9f2f63 cho cả ứng dụng); một lần nâng `STATE_REV` làm sáu ca phục hồi đỏ vì dấu bị đổi, và rà lại thấy không cần nâng (mọi bản đã có dấu 2 đều giữ trường lạ), nên đã bỏ.
-- **Giới hạn đã biết:** hầu hết bài Viết chưa chấm được vì chưa có danh sách ý bắt buộc đã duyệt (chỉ Task 1 của các đề nhập); cổng điểm đóng hết nên kết quả chưa có số; `maxDuration = 300` giây có thể không được gói Vercel chấp nhận.
+- **Giới hạn đã biết:** (đã thay đổi ngày 09/10/2026, xem mục trên) hầu hết bài Viết chưa chấm được vì chưa có danh sách ý bắt buộc đã duyệt; cổng điểm đóng hết nên kết quả chưa có số; `maxDuration = 300` giây có thể không được gói Vercel chấp nhận.
 - **Kiểm tra:** 365 unit (thêm 26), 175 E2E (thêm 10; Chromium 167), build 105 route, ESLint và TypeScript sạch.
 
 ## Chấm AI, đợt 1 (phần làm được khi chưa có khóa): mã chấm, thang dự phòng, bộ đo — 08/10/2026
@@ -419,7 +431,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 392 unit / 187 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 398 unit / 188 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -628,8 +640,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 392 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 187 kiểm thử Playwright trên bản production: 179 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 398 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 188 kiểm thử Playwright trên bản production: 180 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

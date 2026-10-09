@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Recorder } from "./audio-tools";
 import { GradePanel } from "./grade-panel";
 import { SpeakingGradePanel } from "./speaking-grade-panel";
+import { WritingTotal } from "./writing-total";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
 import { PaperText } from "./paper-exam";
@@ -829,6 +830,9 @@ export function PaperReview({
                 </details>
               );
             })}
+            {section.skill === "writing" && sameMaterial && (
+              <WritingTotal runId={run.id} slots={section.slots} />
+            )}
             {section.skill === "speaking" && sameMaterial && (
               <SpeakingGradePanel
                 runId={run.id}

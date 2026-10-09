@@ -126,9 +126,9 @@ describe("what may be sent", () => {
     const reply = await handleGradeWriting(
       post(
         body({
-          slotId: "132-writing-2",
+          slotId: "some-new-task",
           prompt:
-            "Some people believe that homework is useful. To what extent do you agree or disagree?",
+            "Describe your favourite place in your city and say why people should visit it.",
         }),
       ),
       deps({}, calls),
@@ -147,7 +147,9 @@ describe("grading", () => {
     expect(reply.headers.get("cache-control")).toBe("no-store");
     const { grade } = await reply.json();
     expect(grade.status).toBe("graded");
-    expect(grade.criteria.task.showScore).toBe(false); // the real gates are closed
+    // Shown, but marked as not yet checked against examiners.
+    expect(grade.criteria.task.showScore).toBe(true);
+    expect(grade.criteria.task.validated).toBe(false);
     expect(calls.length).toBeGreaterThanOrEqual(6);
   });
   it("returns a block, not an error, for work that should not be graded", async () => {
@@ -286,7 +288,8 @@ describe("grading a Speaking performance", () => {
     expect(reply.status).toBe(200);
     const { grade } = await reply.json();
     expect(grade.status).toBe("graded");
-    expect(grade.criteria.fluency.showScore).toBe(false); // the real gates are closed
+    expect(grade.criteria.fluency.showScore).toBe(true);
+    expect(grade.criteria.fluency.validated).toBe(false);
     expect(
       calls.filter((c) => c.startsWith("speaking-transcribe")),
     ).toHaveLength(1);

@@ -97,6 +97,7 @@ type CriterionItem = {
   whyNotLower: string;
   toRaise: string;
   showScore: boolean;
+  validated?: boolean;
 };
 
 /** One row per criterion: the mark (or why there is none), the nearest level, and the reasons. */
@@ -119,12 +120,17 @@ export function CriteriaList({
             <div className="grade-criterion-head">
               <strong>{entry.label}</strong>
               {item.showScore ? (
-                <span className="pill">
-                  {scoreText(item.score)}/10
-                  {item.low !== item.high
-                    ? ` (các lần chấm: ${scoreText(item.low)}–${scoreText(item.high)})`
-                    : ""}
-                </span>
+                <>
+                  <span className="pill">
+                    {scoreText(item.score)}/10
+                    {item.low !== item.high
+                      ? ` (các lần chấm: ${scoreText(item.low)}–${scoreText(item.high)})`
+                      : ""}
+                  </span>
+                  {item.validated !== true && (
+                    <span className="pill">chưa đối chiếu giám khảo</span>
+                  )}
+                </>
               ) : (
                 <span className="pill">chưa hiện điểm</span>
               )}
@@ -234,5 +240,28 @@ export function ErrorNotice({
       <p>{text}</p>
       {detail && <p className="grade-detail">Chi tiết kỹ thuật: {detail}</p>}
     </div>
+  );
+}
+
+/**
+ * Said once above any mark that no examiner comparison has validated: what the
+ * number is and is not, so it is read as an estimate to follow progress by.
+ */
+export function EstimateNotice({
+  criteria,
+}: {
+  criteria: Record<string, { showScore: boolean; validated?: boolean }>;
+}) {
+  const unchecked = Object.values(criteria).some(
+    (item) => item.showScore && item.validated !== true,
+  );
+  if (!unchecked) return null;
+  return (
+    <p className="notice" role="note">
+      Các điểm dưới đây do AI ước lượng theo thang VSTEP và{" "}
+      <strong>chưa được đối chiếu với giám khảo thật</strong>, nên có thể lệch
+      so với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần sửa gì,
+      đừng coi là điểm dự đoán chắc chắn.
+    </p>
   );
 }

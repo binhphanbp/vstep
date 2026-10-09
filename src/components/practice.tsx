@@ -41,6 +41,7 @@ import { useStudy } from "./study-provider";
 import { SkillIcon } from "./icons";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { deleteRecording, getRecording, saveRecording } from "@/lib/recordings";
+import { attemptGradeId } from "@/lib/grades";
 import { readQuizDraft } from "@/lib/quiz-draft";
 import { lessonQuestionPlace, lessonWholePlace } from "@/lib/note-anchors";
 import {
@@ -51,6 +52,7 @@ import {
   toggleDraftMark,
 } from "@/lib/work";
 import { applyChange } from "./apply-change";
+import { GradePanel } from "./grade-panel";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
 import { SCRATCH_HINTS } from "./paper-work";
@@ -672,6 +674,16 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
             )}
           </div>
         </div>
+      )}
+      {result && lesson.skill === "writing" && (
+        <GradePanel
+          id={attemptGradeId(result.id)}
+          task={lesson.part.includes("2") ? 2 : 1}
+          slotId={lesson.id}
+          prompt={lesson.text}
+          text={result.text ?? ""}
+          samples={lesson.sample ? [lesson.sample] : undefined}
+        />
       )}
       {insights && (
         <section

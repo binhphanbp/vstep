@@ -1324,14 +1324,17 @@ test("finishing a Speaking lesson while still recording, or the instant after st
     finish.click({ noWaitAfter: true }),
   ]);
   await expect(misleading).toHaveCount(0);
-  // Once the take is stored, the same button files the session.
+  // Once the take is stored, the same button files the session. On a fast
+  // machine the take is already stored when the click lands and the session is
+  // filed by that click, so only press again if it was not.
+  const done = page.getByRole("heading", {
+    name: "Gùa đã dành thời gian để luyện tập.",
+  });
   await expect(
     page.getByRole("link", { name: "Tải bản ghi", exact: true }),
   ).toBeVisible();
-  await finish.click();
-  await expect(
-    page.getByRole("heading", { name: "Gùa đã dành thời gian để luyện tập." }),
-  ).toBeVisible();
+  if (!(await done.isVisible())) await finish.click();
+  await expect(done).toBeVisible();
 });
 
 test("the lesson clock moves every second, not in steps of ten", async ({

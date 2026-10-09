@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **392 unit, 187 E2E**, build 106 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **398 unit, 188 E2E**, build 106 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 392 unit và 187 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 398 unit và 188 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -215,7 +215,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 392/392 Vitest, build 106 route và audit production dependency đều đạt. Playwright có 187 ca trên bản production local: 179 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 179/179 (cập nhật 09/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 398/398 Vitest, build 106 route và audit production dependency đều đạt. Playwright có 188 ca trên bản production local: 180 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 180/180 (cập nhật 09/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
@@ -240,23 +240,23 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 
 ## 9. Những việc chưa làm và giới hạn hiện tại
 
-| Hạng mục                               | Trạng thái hiện tại       | Ảnh hưởng                                                                        |
-| -------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
-| Hosting HTTPS pilot                    | Đã có                     | `vstep-turtle.vercel.app`; 9 màn chính, 14 bài luyện, 404 và headers đã kiểm tra |
-| Đăng nhập/sync trên bản host           | Chưa nghiệm thu           | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production             |
-| Nghiệm thu thiết bị thật               | Chưa làm                  | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt           |
-| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                  | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                             |
-| Ngân hàng đề độc lập                   | Có hai đề Mây và năm đề nhập | Năm đề nhập có đáp án; nội dung cần thẩm định; dùng học cá nhân                        |
-| Bản thu người nói cho Nghe             | Có MP3 ở năm đề nhập      | Hai đề Mây vẫn dùng speech synthesis của thiết bị                               |
-| Chấm và phản hồi Viết/Nói              | Chưa làm                  | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu               |
-| Đồng bộ audio                          | Chưa làm                  | Bản ghi chỉ ở thiết bị và phải tải riêng                                         |
-| Tự động đồng bộ nhiều thiết bị         | Chưa làm                  | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                      |
-| Hợp nhất chỉnh sửa đồng thời           | Chưa làm                  | Hai nhánh lịch sử không tự merge                                                 |
+| Hạng mục                               | Trạng thái hiện tại                 | Ảnh hưởng                                                                                                                                                                  |
+| -------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hosting HTTPS pilot                    | Đã có                               | `vstep-turtle.vercel.app`; 9 màn chính, 14 bài luyện, 404 và headers đã kiểm tra                                                                                           |
+| Đăng nhập/sync trên bản host           | Chưa nghiệm thu                     | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production                                                                                                       |
+| Nghiệm thu thiết bị thật               | Chưa làm                            | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt                                                                                                     |
+| Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                            | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                                                                                                                       |
+| Ngân hàng đề độc lập                   | Có hai đề Mây và năm đề nhập        | Năm đề nhập có đáp án; nội dung cần thẩm định; dùng học cá nhân                                                                                                            |
+| Bản thu người nói cho Nghe             | Có MP3 ở năm đề nhập                | Hai đề Mây vẫn dùng speech synthesis của thiết bị                                                                                                                          |
+| Chấm và phản hồi Viết/Nói              | Chưa làm                            | Người học chỉ tự kiểm tra; không có điểm hoặc phản hồi cá nhân sâu                                                                                                         |
+| Đồng bộ audio                          | Chưa làm                            | Bản ghi chỉ ở thiết bị và phải tải riêng                                                                                                                                   |
+| Tự động đồng bộ nhiều thiết bị         | Chưa làm                            | Người dùng phải chủ động Lưu/Tải và xử lý revision conflict                                                                                                                |
+| Hợp nhất chỉnh sửa đồng thời           | Chưa làm                            | Hai nhánh lịch sử không tự merge                                                                                                                                           |
 | Nháp, tô câu và ghi chú với bộ gõ thật | Đã mô phỏng, chưa thử phần mềm thật | Hai họ bộ gõ đã được mô phỏng và kiểm trong E2E (gõ ghép tại chỗ; Backspace rồi chữ có dấu); chưa chạy Unikey, EVKey hay bộ gõ macOS thật; điện thoại không phải trọng tâm |
-| PWA/offline đầy đủ                     | Một phần                  | Service worker giữ trang cố định và bài hôm nay; audio đề nhập không tải sẵn     |
-| Monitoring và báo lỗi production       | Chưa làm                  | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                     |
-| C1 toàn diện                           | Chưa làm                  | Kho nội dung hiện tập trung B1-B2                                                |
-| Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích | Phù hợp yêu cầu dùng cá nhân hiện tại                                            |
+| PWA/offline đầy đủ                     | Một phần                            | Service worker giữ trang cố định và bài hôm nay; audio đề nhập không tải sẵn                                                                                               |
+| Monitoring và báo lỗi production       | Chưa làm                            | Chưa có dashboard lỗi hoặc cảnh báo vận hành                                                                                                                               |
+| C1 toàn diện                           | Chưa làm                            | Kho nội dung hiện tập trung B1-B2                                                                                                                                          |
+| Đa người dùng, quản trị, thanh toán    | Ngoài phạm vi có chủ đích           | Phù hợp yêu cầu dùng cá nhân hiện tại                                                                                                                                      |
 
 ## 10. Hướng dẫn chạy và vận hành
 
@@ -349,35 +349,35 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 
 ## 13. Cấu trúc mã nguồn cần biết
 
-| Đường dẫn                                      | Nội dung                                                     |
-| ---------------------------------------------- | ------------------------------------------------------------ |
-| `src/app`                                      | Route, metadata, layout, error, global-error và not-found    |
-| `src/components/dashboard.tsx`                 | Góc học hôm nay và kế hoạch ngày                             |
-| `src/components/practice.tsx`                  | Thư viện và phiên luyện kỹ năng                              |
-| `src/components/exam.tsx`                      | Luồng mini/full exam và điều phối phần thi                   |
-| `src/app/papers`, `src/components/paper-runner.tsx` | Kho đề nhập và luồng làm năm đề                           |
-| `src/lib/papers.ts`, `public/papers`            | Kiểu dữ liệu, JSON đề và 105 file MP3                       |
-| `scripts/import-papers.mjs`                    | Nhập lại bộ đề từ dữ liệu nguồn ngoài repository             |
-| `src/components/audio-tools.tsx`               | Speech synthesis, ghi âm, phát và tải audio                  |
-| `src/components/review.tsx`                    | Từ vựng và sổ lỗi sai                                        |
-| `src/components/notes.tsx`, `note-box.tsx`     | Trang Sổ ghi chú và ô ghi chú dưới từng câu                  |
-| `src/components/scratch-pad.tsx`, `marked-text.tsx` | Trang nháp (kèm ngăn kéo `ScratchDock` của phòng thi) và nút Tô câu |
-| `src/lib/notes.ts`, `note-anchors.ts`          | Giới hạn và thao tác ghi chú; tên "chỗ ghi" của từng câu     |
-| `src/lib/work.ts`, `marks.ts`, `backup-mark.ts` | Nháp và câu tô của từng lượt; tách câu; nhắc sao lưu          |
+| Đường dẫn                                                                       | Nội dung                                                                          |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `src/app`                                                                       | Route, metadata, layout, error, global-error và not-found                         |
+| `src/components/dashboard.tsx`                                                  | Góc học hôm nay và kế hoạch ngày                                                  |
+| `src/components/practice.tsx`                                                   | Thư viện và phiên luyện kỹ năng                                                   |
+| `src/components/exam.tsx`                                                       | Luồng mini/full exam và điều phối phần thi                                        |
+| `src/app/papers`, `src/components/paper-runner.tsx`                             | Kho đề nhập và luồng làm năm đề                                                   |
+| `src/lib/papers.ts`, `public/papers`                                            | Kiểu dữ liệu, JSON đề và 105 file MP3                                             |
+| `scripts/import-papers.mjs`                                                     | Nhập lại bộ đề từ dữ liệu nguồn ngoài repository                                  |
+| `src/components/audio-tools.tsx`                                                | Speech synthesis, ghi âm, phát và tải audio                                       |
+| `src/components/review.tsx`                                                     | Từ vựng và sổ lỗi sai                                                             |
+| `src/components/notes.tsx`, `note-box.tsx`                                      | Trang Sổ ghi chú và ô ghi chú dưới từng câu                                       |
+| `src/components/scratch-pad.tsx`, `marked-text.tsx`                             | Trang nháp (kèm ngăn kéo `ScratchDock` của phòng thi) và nút Tô câu               |
+| `src/lib/notes.ts`, `note-anchors.ts`                                           | Giới hạn và thao tác ghi chú; tên "chỗ ghi" của từng câu                          |
+| `src/lib/work.ts`, `marks.ts`, `backup-mark.ts`                                 | Nháp và câu tô của từng lượt; tách câu; nhắc sao lưu                              |
 | `src/lib/recovery.ts`, `recovery-copy.ts`, `src/components/recovery-keeper.tsx` | Đưa ghi chú, nháp, câu tô về khi một tab bản cũ làm rơi; bản chép trong IndexedDB |
-| `src/components/backup-nudge.tsx`, `src/lib/download.ts` | Thông báo nhắc sao lưu có nút tải ngay; tải file sao lưu |
-| `src/components/settings.tsx`                  | Hồ sơ, backup, Auth và cloud sync                            |
-| `src/lib/content.ts`                           | Học liệu ngắn và nguồn tham khảo                             |
-| `src/lib/full-exam-content.ts`                 | Ngữ liệu đề đủ cấu trúc                                      |
-| `src/lib/learning.ts`                          | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi |
-| `src/lib/study-store.ts`                       | Store, localStorage, nhiều tab và phục hồi                   |
-| `src/lib/recordings.ts`                        | IndexedDB cho bản ghi                                        |
-| `supabase/migrations/001_personal_study.sql`   | Bảng, RLS và RPC snapshot nền tảng                           |
-| `supabase/migrations/002_harden_snapshots.sql` | Contract payload, thu hồi direct DML và RPC khóa revision    |
-| `supabase/rollback/002_harden_snapshots.sql`   | Rollback khẩn cấp có chủ đích cho migration 002              |
-| `tests/unit`                                   | Logic và database tests                                      |
-| `tests/e2e`                                    | E2E, accessibility, resilience và full exam                  |
-| `.github/workflows/check.yml`                  | Pipeline CI                                                  |
+| `src/components/backup-nudge.tsx`, `src/lib/download.ts`                        | Thông báo nhắc sao lưu có nút tải ngay; tải file sao lưu                          |
+| `src/components/settings.tsx`                                                   | Hồ sơ, backup, Auth và cloud sync                                                 |
+| `src/lib/content.ts`                                                            | Học liệu ngắn và nguồn tham khảo                                                  |
+| `src/lib/full-exam-content.ts`                                                  | Ngữ liệu đề đủ cấu trúc                                                           |
+| `src/lib/learning.ts`                                                           | Schema, kế hoạch, lịch ôn, chấm điểm và state machine kỳ thi                      |
+| `src/lib/study-store.ts`                                                        | Store, localStorage, nhiều tab và phục hồi                                        |
+| `src/lib/recordings.ts`                                                         | IndexedDB cho bản ghi                                                             |
+| `supabase/migrations/001_personal_study.sql`                                    | Bảng, RLS và RPC snapshot nền tảng                                                |
+| `supabase/migrations/002_harden_snapshots.sql`                                  | Contract payload, thu hồi direct DML và RPC khóa revision                         |
+| `supabase/rollback/002_harden_snapshots.sql`                                    | Rollback khẩn cấp có chủ đích cho migration 002                                   |
+| `tests/unit`                                                                    | Logic và database tests                                                           |
+| `tests/e2e`                                                                     | E2E, accessibility, resilience và full exam                                       |
+| `.github/workflows/check.yml`                                                   | Pipeline CI                                                                       |
 
 ## 14. Các quyết định quan trọng cần giữ
 

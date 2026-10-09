@@ -8,6 +8,15 @@ import type { SpeakingCriterion, WritingCriterion } from "./scores";
  *
  * Edit this file only from a harness report, and record the report's date.
  */
+/**
+ * Whether a mark is shown before it has been measured against human raters.
+ * It is, because a grader that gives only comments is of little use to a
+ * learner, but never unlabelled: every such mark carries `validated: false`
+ * and the screen says it is an AI estimate not yet checked against examiners.
+ * Set to false to go back to comments only until a harness report opens a gate.
+ */
+export const SHOW_UNVALIDATED_SCORES = true;
+
 export type Gates = {
   writing: Record<WritingCriterion, boolean>;
   speaking: Record<SpeakingCriterion, boolean>;

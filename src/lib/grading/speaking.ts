@@ -14,7 +14,7 @@ import {
   TRANSCRIBE_MODEL,
 } from "./config";
 import type { Generate, OnProgress, Part } from "./generate";
-import { GATES, type Gates } from "./gates";
+import { GATES, SHOW_UNVALIDATED_SCORES, type Gates } from "./gates";
 import {
   fluencyMeasures,
   timestampsPlausible,
@@ -159,11 +159,13 @@ export async function gradeSpeaking(
     model?: string;
     transcribeModel?: string;
     gates?: Gates;
+    showUnvalidated?: boolean;
     onProgress?: OnProgress;
   },
 ): Promise<SpeakingGrade> {
   const model = deps.model ?? GRADER_MODEL;
   const gates = deps.gates ?? GATES;
+  const showUnvalidated = deps.showUnvalidated ?? SHOW_UNVALIDATED_SCORES;
 
   // One transcript per part, made once: the scoring runs all read the same one.
   let transcribed = 0;
@@ -238,7 +240,12 @@ export async function gradeSpeaking(
       ...result,
       band: bandOfMark(result.score),
       ...closest.detail[key],
-      showScore: gates.speaking[key] && (key !== "fluency" || timed),
+      // Fluency is built on word times: without believable times in every
+      // part it has no mark, validated or not.
+      showScore:
+        (gates.speaking[key] || showUnvalidated) &&
+        (key !== "fluency" || timed),
+      validated: gates.speaking[key] && (key !== "fluency" || timed),
     };
   }
   const raw = speakingScore(
