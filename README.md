@@ -64,6 +64,10 @@ Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot
 - Đăng xuất đám mây chỉ kết thúc phiên trên thiết bị hiện tại và vẫn giữ dữ liệu học. Đây là ứng dụng cho thiết bị cá nhân, không phải kho được mã hóa bằng mật khẩu đăng nhập.
 - Đồng bộ dừng chờ sau 20 giây hoặc khi rời Cài đặt/đổi phiên đăng nhập. Nếu lần tải lên hết thời gian chờ, máy chủ có thể đã nhận bản sao; xuất bản thiết bị rồi tải bản cloud để kiểm tra trước khi thử lại. Không tự gửi lại hoặc tự hợp nhất dữ liệu.
 
+## Chấm bài Viết bằng AI (tùy chọn)
+
+Nút “Chấm bằng AI” ở màn chữa đề **chỉ hiện khi máy chủ có đủ hai biến môi trường** (không bao giờ đặt trong `NEXT_PUBLIC_*` hay trong repo): `GEMINI_API_KEY` (khóa Gemini của dự án Google đã gắn thanh toán, vì gói miễn phí cho Google dùng nội dung gửi lên) và `GRADER_PASSCODE` (một chuỗi dài, ngẫu nhiên; Gùa nhập một lần ở Cài đặt). Khi bấm nút, chỉ đề bài và bài viết đó đi qua `/api/grade/writing` tới Gemini; kết quả lưu cùng dữ liệu học. Hiện chưa tiêu chí nào được hiện điểm vì chưa đối chiếu với người chấm; xem [docs/PLAN-CHAM-AI.md](docs/PLAN-CHAM-AI.md). Bộ đo: `npx tsx scripts/grading-eval/run.ts <chế độ>` (chạy tay, không chạy trong CI).
+
 ## Kiểm tra và triển khai
 
 ```sh

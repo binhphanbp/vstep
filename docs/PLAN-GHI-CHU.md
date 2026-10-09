@@ -63,7 +63,7 @@ Giải thích, dẫn chứng và ghi chú từng phương án do Mây viết s�
 | Tạo thẻ từ từ ghi chú | Vườn từ chỉ nhận thẻ viết sẵn; thẻ tự tạo là thay đổi mô hình dữ liệu riêng, để sau |
 | Lịch ôn giãn cách cho ghi chú, file Markdown | Để sau nếu ★ + In chưa đủ |
 | Trình soạn thảo định dạng, ảnh, vẽ tay | Khó kiểm thử, không cần cho luyện đề |
-| Gợi ý bằng AI | Nội dung học không gửi ra dịch vụ AI |
+| Gợi ý bằng AI từ nội dung ghi chú | Ghi chú không gửi ra dịch vụ AI; chỉ một bài Viết được gửi khi Gùa bấm “Chấm bằng AI” ([PLAN-CHAM-AI.md](PLAN-CHAM-AI.md)) |
 
 ## 4. Các đợt
 

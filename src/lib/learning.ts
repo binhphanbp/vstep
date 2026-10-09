@@ -18,6 +18,7 @@ import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 import { NOTE_LIMITS } from "./notes";
 import { MARK_LIMITS } from "./marks";
 import { WORK_LIMITS } from "./work";
+import { GRADE_LIMITS, storedGradeSchema } from "./grades";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -427,6 +428,18 @@ export const stateSchema = z
     // a number the schema rejects would make the next load report damaged data.
     notes: z.optional(
       z.array(noteSchema).check(z.maxLength(NOTE_LIMITS.count)),
+    ),
+    // The AI grades Gùa asked for, by the work they belong to. Optional, like
+    // notes, so every earlier backup parses; caps are enforced where a grade is
+    // written (`src/lib/grades.ts`).
+    grades: z.optional(
+      z
+        .record(z.string(), storedGradeSchema)
+        .check(
+          z.refine(
+            (grades) => Object.keys(grades).length <= GRADE_LIMITS.schemaCount,
+          ),
+        ),
     ),
     // Stamped on every save by a build that knows the fields above. A build
     // that does not know them drops this one too, which is how a profile an

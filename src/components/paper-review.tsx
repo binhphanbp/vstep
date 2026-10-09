@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Recorder } from "./audio-tools";
+import { GradePanel } from "./grade-panel";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
 import { PaperText } from "./paper-exam";
@@ -23,6 +24,7 @@ import {
   type PaperItem,
   type PaperSlot,
 } from "@/lib/papers";
+import { paperGradeId } from "@/lib/grades";
 import { wordCount, type PaperRun } from "@/lib/learning";
 import {
   paperItemPlace,
@@ -790,6 +792,16 @@ export function PaperReview({
                       <PaperText
                         text={run.essays[slot.id] || "Chưa có bài làm"}
                       />
+                      {sameMaterial && (
+                        <GradePanel
+                          id={paperGradeId(run.id, slot.id)}
+                          task={slot.part.includes("2") ? 2 : 1}
+                          slotId={slot.id}
+                          prompt={slot.prompt}
+                          text={run.essays[slot.id] ?? ""}
+                          samples={slot.samples.map((sample) => sample.text)}
+                        />
+                      )}
                     </>
                   )}
                   {section.skill === "speaking" &&

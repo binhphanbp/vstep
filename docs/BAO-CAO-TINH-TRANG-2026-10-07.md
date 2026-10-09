@@ -35,13 +35,13 @@ Nguồn trên máy nằm ở `../vstep/data`. Script `scripts/import-papers.mjs`
 | Phép kiểm tra                    | Kết quả local                                                                            |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | ESLint và TypeScript             | Đạt                                                                                      |
-| Vitest                           | 339/339                                                                                  |
-| Playwright trên production build | 165 ca: 157 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 157/157 |
-| Accessibility tự động            | Axe WCAG A/AA trên 16 màn, có kho đề và Review 13/09                                     |
-| Build tĩnh                       | 104 trang, gồm năm route đề nhập                                                         |
+| Vitest                           | 365/365                                                                                  |
+| Playwright trên production build | 175 ca: 167 Chromium, bốn Firefox, bốn WebKit; lượt Chromium đầy đủ mới nhất đạt 167/167 |
+| Accessibility tự động            | Axe WCAG A/AA trên 18 màn, có kho đề và Review 13/09                                     |
+| Build tĩnh                       | 105 trang, gồm năm route đề nhập                                                         |
 | Dependency production            | `npm audit --omit=dev` báo 0 lỗ hổng                                                     |
 
-Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 157/157 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
+Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 167/167 trên bản production local; Firefox và WebKit chưa chạy lại cho thay đổi này. Hai workflow [Validate Mây của nhánh](https://github.com/binhphanbp/vstep/actions/runs/37600019911) và [của PR](https://github.com/binhphanbp/vstep/actions/runs/37600046882) đều đạt trên checkout sạch. Kịch bản kiểm tra Review là đề riêng có điểm, 131 không có điểm, lưu bài qua tải lại, backup chứa lượt làm, và tab cũ không nộp chồng phần tiếp theo.
 
 ## 4. Kết quả phát hành
 

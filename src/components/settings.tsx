@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   Cloud,
   Download,
@@ -9,6 +15,7 @@ import {
   LogOut,
   Save,
   Send,
+  Sparkles,
   Trash2,
   Upload,
   UserRound,
@@ -27,6 +34,15 @@ import { markBackup } from "@/lib/backup-mark";
 import { downloadBackup, downloadJson } from "@/lib/download";
 import { NOTE_LIMITS, allNotes, binnedNotes, noteBytes } from "@/lib/notes";
 import { WORK_LIMITS, workBytes } from "@/lib/work";
+import { GRADE_LIMITS } from "@/lib/grades";
+import {
+  forgetAvailability,
+  getAiSettings,
+  getServerAiSettings,
+  gradingAvailable,
+  saveAiSettings,
+  subscribeAiSettings,
+} from "@/lib/grading/client";
 import {
   CLOUD_REQUEST_TIMEOUT,
   isCloudTimeout,
@@ -344,6 +360,7 @@ export function SettingsPage() {
               </button>
             </div>
           </section>
+          <AiPanel />
           <StoragePanel />
           <section className="panel">
             <div className="section-title">
@@ -834,6 +851,24 @@ function StoragePanel() {
       </div>
       <div className="history-row">
         <div>
+          <h3>Lần chấm bằng AI</h3>
+          <small>
+            Nằm trong dữ liệu học và đi theo bản sao lưu. Giữ tối đa{" "}
+            {GRADE_LIMITS.count} lần chấm gần nhất.
+          </small>
+        </div>
+        <div className="skill-accuracy">
+          <strong>
+            {formatBytes(
+              new TextEncoder().encode(JSON.stringify(state.grades ?? {}))
+                .length,
+            )}
+          </strong>
+          <small>{Object.keys(state.grades ?? {}).length} lần chấm</small>
+        </div>
+      </div>
+      <div className="history-row">
+        <div>
           <h3>Bản ghi âm</h3>
           <small>
             {report?.failed
@@ -900,6 +935,124 @@ function StoragePanel() {
         Xoá từng bản ghi của một buổi cụ thể ở trang Lịch sử. Bản ghi bị xoá
         không khôi phục được.
       </p>
+    </section>
+  );
+}
+
+function AiPanel() {
+  const { state, update, toast } = useStudy();
+  const ai = useSyncExternalStore(
+    subscribeAiSettings,
+    getAiSettings,
+    getServerAiSettings,
+  );
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [code, setCode] = useState("");
+  useEffect(() => {
+    let alive = true;
+    void gradingAvailable().then((value) => alive && setAvailable(value));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const graded = Object.keys(state.grades ?? {}).length;
+  return (
+    <section className="panel" aria-labelledby="ai-heading">
+      <div className="section-title">
+        <Sparkles size={20} />
+        <h2 id="ai-heading">Chấm bài bằng AI</h2>
+      </div>
+      <p className="help-copy">
+        {available === null
+          ? "Đang hỏi máy chủ…"
+          : available
+            ? "Máy chủ của Mây đã bật chức năng này."
+            : "Máy chủ của Mây chưa bật chức năng này (người quản lý cần đặt khóa và mã chấm bài), nên nút “Chấm bằng AI” chưa hiện."}
+      </p>
+      <p className="help-copy">
+        Khi bạn bấm “Chấm bằng AI” ở một bài viết,{" "}
+        <strong>đề bài và bài viết</strong> được gửi tới máy chủ của Mây rồi tới
+        Google (Gemini, gói trả phí: Google không dùng nội dung gửi lên để cải
+        thiện sản phẩm của họ, chỉ lưu nhật ký có thời hạn để phát hiện lạm
+        dụng). Không có gì được gửi nếu bạn không bấm nút. Kết quả là điểm ước
+        lượng theo thang VSTEP, không phải điểm chính thức. File báo lỗi không
+        bao giờ chứa bài viết hay kết quả chấm.
+      </p>
+      <label className="paper-agree">
+        <input
+          type="checkbox"
+          checked={ai.consent}
+          onChange={(event) =>
+            saveAiSettings({ consent: event.target.checked })
+          }
+        />
+        Cho phép gửi bài viết tới Google để chấm khi mình bấm nút
+      </label>
+      <div className="grade-consent">
+        <label>
+          Mã chấm bài {ai.passcode ? "(đã lưu trên máy này)" : ""}
+          <input
+            type="password"
+            autoComplete="off"
+            value={code}
+            placeholder={ai.passcode ? "•••••••• (nhập để đổi)" : ""}
+            onChange={(event) => setCode(event.target.value)}
+          />
+        </label>
+        <div className="button-row">
+          <button
+            type="button"
+            className="button secondary small"
+            disabled={!code.trim()}
+            onClick={() => {
+              saveAiSettings({ passcode: code.trim() });
+              setCode("");
+              forgetAvailability();
+              toast("Đã lưu mã chấm bài trên máy này.");
+            }}
+          >
+            Lưu mã
+          </button>
+          <button
+            type="button"
+            className="button ghost small"
+            disabled={!ai.passcode}
+            onClick={() => {
+              saveAiSettings({ passcode: "" });
+              toast("Đã xóa mã khỏi máy này.");
+            }}
+          >
+            Xóa mã
+          </button>
+        </div>
+        <p className="help-copy">
+          Mã chỉ nằm trên máy này, không vào bản sao lưu hay cloud.
+        </p>
+      </div>
+      <div className="button-row">
+        <button
+          type="button"
+          className="button secondary small"
+          disabled={!graded}
+          onClick={() => {
+            if (
+              !window.confirm(
+                `Xóa ${graded} lần chấm AI đã lưu? Bài viết không bị xóa.`,
+              )
+            )
+              return;
+            update((current) => {
+              const { grades, ...rest } = current;
+              void grades;
+              return rest as typeof current;
+            });
+            toast("Đã xóa các lần chấm AI.");
+          }}
+        >
+          <Trash2 size={15} />
+          Xóa các lần chấm đã lưu ({graded})
+        </button>
+      </div>
     </section>
   );
 }

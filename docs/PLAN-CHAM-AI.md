@@ -221,6 +221,21 @@ Cần: việc 1, 2 ở mục 11.
 - Ca kiểm Playwright với API giả (điểm, độ tin cậy thấp, lỗi, hủy, mở lại thấy kết quả cũ); axe trên màn kết quả.
 - **Xong khi:** chấm được từ app, kết quả trùng với bộ đo trên cùng bài, CI xanh.
 
+**Đã làm (08/10/2026), kiểm bằng unit test và E2E với API giả:**
+
+- **Máy chủ.** `POST /api/grade/writing` và `GET /api/grade/status` (`src/app/api/grade/`, logic ở `src/lib/grading/server.ts` để kiểm thử không cần máy chủ). Chỉ bật khi có đủ `GEMINI_API_KEY` và `GRADER_PASSCODE`; so mã bằng `timingSafeEqual` trên băm SHA-256; mười lần sai mã trong 15 phút thì khóa 15 phút; tối đa 2 lần chấm cùng lúc và 20 lần mỗi giờ mỗi instance (chỉ là phanh, không phải ranh giới bảo mật: các instance serverless không chung bộ nhớ, nên chặn thật là mã truy cập và cảnh báo ngân sách bên Google); giới hạn 48 KB mỗi yêu cầu, 8.000 ký tự bài viết; nhật ký chỉ ghi loại lỗi (ví dụ `model-error:429`), không ghi nội dung. `maxDuration = 300` giây; nếu gói Vercel của dự án không cho 300 giây, bản xem trước của PR sẽ báo lỗi triển khai và phải hạ xuống.
+- **Dữ liệu.** Mục `grades` trong hồ sơ học (`src/lib/grades.ts`): tối đa 40 lần chấm và 0,5 MB, cũ nhất bị bỏ trước; chấm lại cùng một bài thì thay lần cũ; lần chấm đi theo bản sao lưu và cloud; mất theo lượt thi khi lượt đó bị bỏ vì vượt trần 100 lượt; thêm vào cơ chế phục hồi khi một tab bản cũ làm rơi (không đổi `STATE_REV`: mọi bản đã đóng dấu 2 đều giữ trường lạ nhờ schema `looseObject`, nên chỉ bản không có dấu mới làm rơi `grades`). File báo lỗi không chứa gì từ đây (có ca kiểm).
+- **Giao diện.** Ở màn chữa đề, dưới bài viết của từng bài Viết: nút “Chấm bài viết này”; hộp đồng ý lần đầu nói rõ gửi gì và đi đâu, kèm ô nhập mã chấm bài; trạng thái đang chấm có nút “Dừng”; câu báo riêng cho sai mã, bận hoặc hết lượt, lỗi dịch vụ, mất mạng, bài quá ngắn, không phải tiếng Anh, chép đề; kết quả có dòng “điểm ước lượng… không phải điểm chính thức”, nhãn thang chưa chính thức, mức mô tả gần nhất của từng tiêu chí, lý do và việc cần làm để lên nửa bậc, các ý đề yêu cầu, lỗi được tô ngay trong bài kèm câu sửa, cảnh báo khi bài đã đổi sau lần chấm hoặc lần chấm dùng thang cũ. Mã chấm bài và sự đồng ý chỉ nằm ở máy Gùa (không vào bản sao lưu). Cài đặt có thẻ “Chấm bài bằng AI” (bật/tắt đồng ý, lưu/xóa mã, xóa các lần chấm) và dòng dung lượng trong “Chỗ ở của dữ liệu”.
+- **Nút chỉ hiện khi máy chủ báo đã bật** (hoặc khi bài đã có kết quả lưu), nên không có gì đổi cho đến khi chủ dự án đặt hai biến môi trường.
+- Kiểm thử: 26 ca unit mới (`grades`, `grade-server`, `grade-locate`), 10 ca E2E mới (`tests/e2e/grading.spec.ts`: ẩn khi máy chủ tắt, đồng ý rồi chấm, hiện số khi cổng mở, các loại lỗi, dừng giữa chừng, bài chưa có danh sách ý, cảnh báo bài đã đổi, Cài đặt, axe, máy chủ thật trả 503 khi chưa có khóa).
+
+**Chưa làm, và vì sao:**
+
+- **Chưa có lần gọi Gemini thật nào** (chưa có khóa), nên chưa thấy một kết quả thật hiện lên giao diện; mọi ca E2E dùng API giả.
+- **Hầu hết bài Viết chưa chấm được**: chỉ bài Task 1 của năm đề nhập (đọc ý bắt buộc từ chính đề) và đề Review 13/09 Task 1. Task 2 và bài học Viết cần danh sách ý bắt buộc đã được chủ dự án duyệt (mục Đợt 1); giao diện nói rõ lý do thay vì ẩn.
+- **Chưa gắn vào kết quả bài học Viết và buổi thi rút gọn**: các bài đó chưa có danh sách ý bắt buộc đã duyệt, nên nút sẽ không dùng được; gắn cùng lúc với việc duyệt danh sách để không có nút chết.
+- **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo), nên màn kết quả hiện nhận xét, ý còn thiếu và lỗi, không hiện điểm.
+
 ### Đợt 3: Chấm Nói
 
 Cần: việc 1, 2, 4 ở mục 11.
