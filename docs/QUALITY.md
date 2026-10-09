@@ -2,6 +2,16 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: sửa sau lần thử thật đầu tiên — 09/10/2026
+
+Chủ dự án đặt khóa Gemini và mã chấm bài trên Vercel rồi thử chấm một bài Viết thật trên bản live. Ba điều họ thấy:
+
+- **Nội dung dính sát mép khung** ở màn chữa đề: nội dung bên trong từng bài (đề, bản dịch, bài viết, khung chấm AI) chạm thẳng vào viền của khung, vì quy tắc `.paper-review details` đặt phần đệm ngang bằng 0. Nay có 18 px đệm ngang, và tiêu đề “Bài viết của bạn” cách khung bản dịch phía trên. Có ca E2E đo khoảng cách (ít nhất 12 px).
+- **Đang chấm mà không thấy gì**: chỉ có nút bị mờ và một dòng chữ nhỏ, nên không phân biệt được đang chờ với máy đơ. Nay có vòng xoay, đồng hồ chạy, thanh tiến độ (trượt khi chưa biết, đầy dần theo số lần chấm đã xong), dòng nói đang làm gì (“Đã xong 2/3 lần chấm độc lập”, “đang chấm thêm”, “đã chép lời 1/3 phần”), lời dặn “thường mất một đến ba phút, cứ để trang này mở”, và nhắc “đã lâu hơn thường lệ” sau bốn phút. Muốn có số liệu thật nên máy chủ không còn trả một cục JSON sau vài phút im lặng: nó gửi từng dòng JSON (`progress`, `ping` mười giây một lần, rồi `grade` hoặc `error`) khi trình duyệt xin `application/x-ndjson`; yêu cầu thường vẫn nhận một JSON như cũ.
+- **Báo “Không kết nối được” mà không rõ vì sao**: ảnh chụp không cho biết nguyên nhân thật (tôi không có nhật ký của Vercel). Hai việc đã làm: (1) mọi lỗi nay kèm một dòng “Chi tiết kỹ thuật” không chứa nội dung bài (mã HTTP, tên lỗi, “Gemini trả về HTTP 404/429/…” khi chính Gemini từ chối); (2) một lỗi xảy ra ở máy người học sau khi kết quả đã về (ví dụ không lưu được) trước đây bị gán nhầm là “mất mạng”, nay có câu riêng “Có lỗi khi xử lý kết quả trên máy này”. Nguyên nhân gốc của lần lỗi đầu chưa xác định được; hướng nghi ngờ nhất là một kết nối im lặng quá lâu bị cắt, mà dòng nhịp tim nay giải quyết, và lỗi từ Gemini (tên model, khóa, hạn mức) mà dòng chi tiết nay sẽ lộ ra.
+- **Lỗi tìm thấy khi sửa:** bản đọc luồng đầu tiên bỏ rơi dòng cuối nếu không có ký tự xuống dòng (hai ca E2E đỏ); nay dòng cuối luôn được đọc.
+- **Kiểm tra:** 392 unit (thêm 17: luồng, nhịp tim, giải mã phía trình duyệt, chi tiết lỗi), 187 E2E (thêm 3; Chromium 179), ESLint, TypeScript sạch.
+
 ## Chấm AI, đợt 3: chấm phần Nói trong app — 09/10/2026
 
 Yêu cầu: làm Đợt 3 của [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md). Máy chủ, lưu trữ và giao diện đã làm và kiểm bằng API giả; chưa có lần gọi Gemini thật nào (chưa có khóa).
@@ -409,7 +419,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 375 unit / 184 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 392 unit / 187 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -618,8 +628,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 375 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 184 kiểm thử Playwright trên bản production: 176 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 392 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 187 kiểm thử Playwright trên bản production: 179 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

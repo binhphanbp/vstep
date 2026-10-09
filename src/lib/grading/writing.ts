@@ -9,7 +9,7 @@ import {
   type CriterionResult,
 } from "./aggregate";
 import { GRADER_MODEL, PROMPT_VERSION, RUBRIC_VERSION } from "./config";
-import type { Generate } from "./generate";
+import type { Generate, OnProgress } from "./generate";
 import { GATES, type Gates } from "./gates";
 import {
   writingMeasures,
@@ -240,7 +240,12 @@ export function consensusErrors(runs: GradedError[][]) {
 
 export async function gradeWriting(
   input: WritingInput,
-  deps: { generate: Generate; model?: string; gates?: Gates },
+  deps: {
+    generate: Generate;
+    model?: string;
+    gates?: Gates;
+    onProgress?: OnProgress;
+  },
 ): Promise<WritingGrade> {
   const model = deps.model ?? GRADER_MODEL;
   const gates = deps.gates ?? GATES;
@@ -248,20 +253,25 @@ export async function gradeWriting(
   const block = writingBlock(measures);
   if (block) return { status: "blocked", reason: block, measures };
 
-  const runs: Run[] = await Promise.all(
-    Array.from({ length: FIRST_RUNS }, (_, i) =>
-      oneRun(input, measures, deps.generate, model, i),
-    ),
-  );
-  if (disagrees(collect(runs.map((r) => r.marks)))) {
-    runs.push(
-      ...(await Promise.all(
-        Array.from({ length: EXTRA_RUNS }, (_, i) =>
-          oneRun(input, measures, deps.generate, model, FIRST_RUNS + i),
-        ),
-      )),
+  const track = async (
+    count: number,
+    first: number,
+    stage: "runs" | "extra",
+  ) => {
+    let done = 0;
+    deps.onProgress?.({ stage, done, total: count });
+    return Promise.all(
+      Array.from({ length: count }, (_, i) =>
+        oneRun(input, measures, deps.generate, model, first + i).then((run) => {
+          deps.onProgress?.({ stage, done: ++done, total: count });
+          return run;
+        }),
+      ),
     );
-  }
+  };
+  const runs: Run[] = await track(FIRST_RUNS, 0, "runs");
+  if (disagrees(collect(runs.map((r) => r.marks))))
+    runs.push(...(await track(EXTRA_RUNS, FIRST_RUNS, "extra")));
 
   const summary = summarise(collect(runs.map((r) => r.marks)));
   const criteria = {} as Record<WritingCriterion, CriterionGrade>;

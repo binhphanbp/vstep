@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Generate } from "../../src/lib/grading/generate";
 import {
   GradeLimiter,
+  HEARTBEAT_MS,
   PASSCODE_HEADER,
   REQUEST_LIMITS,
   AUDIO_LIMITS,
@@ -175,7 +176,10 @@ describe("grading", () => {
       deps({ generate: () => failing, limiter, log: (e) => logged.push(e) }),
     );
     expect(reply.status).toBe(502);
-    expect(await reply.json()).toEqual({ error: "model" });
+    expect(await reply.json()).toEqual({
+      error: "model",
+      detail: "Gemini trả về HTTP 429",
+    });
     expect(logged).toEqual(["model-error:429"]);
     expect(JSON.stringify(logged)).not.toContain("secret");
     // The slot was released, so the next request is not refused as busy.
@@ -388,3 +392,111 @@ function speakingGenerate(calls: string[] = [], silent = false): Generate {
     };
   };
 }
+
+async function lines(response: Response) {
+  const text = await response.text();
+  return text
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as Record<string, unknown>);
+}
+const streaming = (payload: string) =>
+  new Request("http://localhost/api/grade/writing", {
+    method: "POST",
+    headers: {
+      [PASSCODE_HEADER]: "open sesame",
+      accept: "application/x-ndjson",
+    },
+    body: payload,
+  });
+
+describe("progress while grading", () => {
+  it("streams what has been done, then the grade, as lines of JSON", async () => {
+    const reply = await handleGradeWriting(streaming(body()), deps());
+    expect(reply.status).toBe(200);
+    expect(reply.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(reply.headers.get("cache-control")).toBe("no-store");
+    const events = await lines(reply);
+    expect(events[0]).toEqual({ type: "progress", stage: "started" });
+    const runs = events.filter(
+      (e) => e.type === "progress" && e.stage === "runs",
+    );
+    expect(runs.map((e) => e.done)).toEqual([0, 1, 2, 3]);
+    expect(runs.every((e) => e.total === 3)).toBe(true);
+    const last = events[events.length - 1] as {
+      type: string;
+      grade: { status: string };
+    };
+    expect(last.type).toBe("grade");
+    expect(last.grade.status).toBe("graded");
+  });
+
+  it("answers a plain request with one JSON body, as before", async () => {
+    const reply = await handleGradeWriting(post(body()), deps());
+    expect(reply.headers.get("content-type")).toContain("application/json");
+    expect((await reply.json()).grade.status).toBe("graded");
+  });
+
+  it("says in the stream that it failed, with only the kind of failure", async () => {
+    const logged: string[] = [];
+    const failing: Generate = async () => {
+      throw Object.assign(new Error("secret essay"), { status: 429 });
+    };
+    const reply = await handleGradeWriting(
+      streaming(body()),
+      deps({ generate: () => failing, log: (e) => logged.push(e) }),
+    );
+    const events = await lines(reply);
+    expect(events[events.length - 1]).toEqual({
+      type: "error",
+      error: "model",
+      detail: "Gemini trả về HTTP 429",
+    });
+    expect(JSON.stringify(events)).not.toContain("secret");
+    expect(logged).toEqual(["model-error:429"]);
+  });
+
+  it("keeps a quiet connection alive with a ping, and frees its slot at the end", async () => {
+    vi.useFakeTimers();
+    try {
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => (release = resolve));
+      const slow: Generate = async (request) => {
+        await gate;
+        return fakeGenerate()(request);
+      };
+      const limiter = new GradeLimiter(20, 1);
+      const reply = await handleGradeWriting(
+        streaming(body()),
+        deps({ generate: () => slow, limiter }),
+      );
+      const reader = reply.body!.getReader();
+      const decoder = new TextDecoder();
+      const first = decoder.decode((await reader.read()).value);
+      expect(first).toContain('"stage":"started"');
+      await vi.advanceTimersByTimeAsync(HEARTBEAT_MS * 2 + 10);
+      let seen = "";
+      // The pings are already queued: read until both are seen.
+      while ((seen.match(/"type":"ping"/g) ?? []).length < 2) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        seen += decoder.decode(chunk.value);
+      }
+      expect((seen.match(/"type":"ping"/g) ?? []).length).toBe(2);
+      // The one slot is still held while it works…
+      expect("retryAfter" in limiter.take()).toBe(true);
+      release();
+      let rest = "";
+      for (;;) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        rest += decoder.decode(chunk.value);
+      }
+      expect(rest).toContain('"type":"grade"');
+      // …and free again once it is over.
+      expect("release" in limiter.take()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

@@ -394,10 +394,11 @@ test("says what went wrong in plain words, forgets a wrong passcode, and can be 
     "Không kết nối được",
   );
   await ask().click();
+  await expect(panel(page).locator(".grade-wait")).toContainText("Đang chấm");
+  await expect(panel(page).locator(".grade-wait")).toContainText("bản ghi");
   await expect(
-    panel(page).getByRole("status").filter({ hasText: "Đang nghe và chấm" }),
-  ).toBeVisible();
-  await expect(ask()).toBeDisabled();
+    panel(page).getByRole("button", { name: "Đang chấm…" }),
+  ).toBeDisabled();
   await panel(page).getByRole("button", { name: "Dừng" }).click();
   await expect(panel(page).getByRole("alert")).toHaveCount(0);
   await expect(ask()).toBeEnabled();

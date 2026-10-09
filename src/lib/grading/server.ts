@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import * as z from "zod/mini";
-import type { Generate } from "./generate";
+import type { Generate, OnProgress } from "./generate";
 import { requirementsFor } from "./requirements";
 import { AUDIO_LIMITS } from "./audio-limits";
 import { gradeSpeaking, type SpeakingGrade } from "./speaking";
@@ -135,6 +135,91 @@ export type GradeReply =
 export type SpeakingReply =
   { grade: SpeakingGrade } | { error: GradeFailure; retryAfter?: number };
 
+/** A client that asks for `application/x-ndjson` gets progress as it happens. */
+function wantsStream(request: Request) {
+  return (request.headers.get("accept") ?? "").includes("application/x-ndjson");
+}
+
+/** How often a quiet stream says it is still alive, so no hop in between closes it. */
+export const HEARTBEAT_MS = 10_000;
+
+type Slot = { release: () => void };
+
+/**
+ * Runs a grading and answers it. For a plain request the answer is one JSON
+ * body when the work ends. For a streaming one it is a line of JSON at a time:
+ * `progress` as stages finish, `ping` every few seconds, then one `grade` or
+ * `error`. A grading takes minutes; a connection that carries nothing for that
+ * long is the first thing a proxy or a browser drops, and a learner looking at
+ * a button cannot tell a long wait from a dead page.
+ */
+async function finish(
+  request: Request,
+  deps: GradeDeps,
+  slot: Slot,
+  work: (onProgress: OnProgress) => Promise<unknown>,
+): Promise<Response> {
+  /** What kind of failure, never what was being graded: the model's own status code, or the error's name. */
+  const failed = (error: unknown) => {
+    const status = (error as { status?: number }).status;
+    deps.log?.(`model-error:${status ?? (error as Error).name}`);
+    return status ? `Gemini trả về HTTP ${status}` : `${(error as Error).name}`;
+  };
+  if (!wantsStream(request)) {
+    try {
+      const grade = await work(() => {});
+      return json({ grade });
+    } catch (error) {
+      return json({ error: "model", detail: failed(error) }, 502);
+    } finally {
+      slot.release();
+    }
+  }
+  const encoder = new TextEncoder();
+  let timer: ReturnType<typeof setInterval> | undefined;
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        const send = (event: object) => {
+          try {
+            controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+          } catch {
+            // The reader has gone away; the work still finishes and frees its slot.
+          }
+        };
+        send({ type: "progress", stage: "started" });
+        timer = setInterval(() => send({ type: "ping" }), HEARTBEAT_MS);
+        try {
+          const grade = await work((progress) =>
+            send({ type: "progress", ...progress }),
+          );
+          send({ type: "grade", grade });
+        } catch (error) {
+          send({ type: "error", error: "model", detail: failed(error) });
+        } finally {
+          clearInterval(timer);
+          slot.release();
+          try {
+            controller.close();
+          } catch {
+            // Already closed by a reader that left.
+          }
+        }
+      },
+      cancel() {
+        clearInterval(timer);
+      },
+    }),
+    {
+      headers: {
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "cache-control": "no-store",
+        "x-accel-buffering": "no",
+      },
+    },
+  );
+}
+
 /**
  * The checks every grading request passes first: switched on, not locked out,
  * and the right passcode. Returns the refusal to send, or null to go on.
@@ -184,8 +269,8 @@ export async function handleGradeWriting(
     return json({ error: "rate", retryAfter: slot.retryAfter }, 429, {
       "retry-after": String(slot.retryAfter),
     });
-  try {
-    const grade = await gradeWriting(
+  return finish(request, deps, slot, (onProgress) =>
+    gradeWriting(
       {
         task: parsed.task,
         prompt: parsed.prompt,
@@ -193,18 +278,12 @@ export async function handleGradeWriting(
         text: parsed.text,
         samples: parsed.samples,
       },
-      { generate: deps.generate() },
-    );
-    deps.log?.(`graded:${grade.status}`);
-    return json({ grade });
-  } catch (error) {
-    // Say what kind of failure it was, never what was being graded.
-    const status = (error as { status?: number }).status;
-    deps.log?.(`model-error:${status ?? (error as Error).name}`);
-    return json({ error: "model" }, 502);
-  } finally {
-    slot.release();
-  }
+      { generate: deps.generate(), onProgress },
+    ).then((grade) => {
+      deps.log?.(`graded:${grade.status}`);
+      return grade;
+    }),
+  );
 }
 
 export function handleStatus(env: GradeEnv) {
@@ -289,33 +368,26 @@ export async function handleGradeSpeaking(
     return json({ error: "rate", retryAfter: slot.retryAfter }, 429, {
       "retry-after": String(slot.retryAfter),
     });
-  try {
-    const grade = await gradeSpeaking(
-      await Promise.all(
-        meta.parts.map(async (part, i) => ({
-          id: part.id,
-          title: part.title,
-          prompt: part.prompt,
-          durationSeconds: part.durationSeconds,
-          audio: {
-            mimeType: files[i].type.split(";")[0].trim().toLowerCase(),
-            base64: Buffer.from(await files[i].arrayBuffer()).toString(
-              "base64",
-            ),
-          },
-        })),
-      ),
-      { generate: deps.generate() },
+  return finish(request, deps, slot, async (onProgress) => {
+    const inputs = await Promise.all(
+      meta.parts.map(async (part, i) => ({
+        id: part.id,
+        title: part.title,
+        prompt: part.prompt,
+        durationSeconds: part.durationSeconds,
+        audio: {
+          mimeType: files[i].type.split(";")[0].trim().toLowerCase(),
+          base64: Buffer.from(await files[i].arrayBuffer()).toString("base64"),
+        },
+      })),
     );
+    const grade = await gradeSpeaking(inputs, {
+      generate: deps.generate(),
+      onProgress,
+    });
     deps.log?.(`graded-speaking:${grade.status}`);
-    return json({ grade });
-  } catch (error) {
-    const status = (error as { status?: number }).status;
-    deps.log?.(`model-error:${status ?? (error as Error).name}`);
-    return json({ error: "model" }, 502);
-  } finally {
-    slot.release();
-  }
+    return grade;
+  });
 }
 
 export { AUDIO_LIMITS };

@@ -25,3 +25,11 @@ export async function gradeKey(parts: (string | number)[]) {
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 }
+
+/** How far a grading has got, for the screen to show while it works. */
+export type GradeProgress = {
+  stage: "transcribe" | "runs" | "extra";
+  done: number;
+  total: number;
+};
+export type OnProgress = (progress: GradeProgress) => void;

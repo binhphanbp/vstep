@@ -2,6 +2,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { gradingAvailable } from "@/lib/grading/client";
+import {
+  clock,
+  progressText,
+  type Progress,
+} from "@/lib/grading/progress-text";
+
+export type { Progress };
 import { BAND_LABEL, type Band } from "@/lib/grading/scores";
 import type { Descriptor } from "@/lib/rubric/vstep-3-5";
 
@@ -151,5 +158,81 @@ export function CriteriaList({
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * What the screen shows while a grading runs, which takes minutes: a moving
+ * spinner, the time so far, a bar that fills as stages finish, and what is
+ * happening. A button that only goes grey looks the same as a frozen page.
+ */
+export function Waiting({
+  progress,
+  what,
+  onStop,
+}: {
+  progress: Progress;
+  /** "bài viết" or "bản ghi": what stays safe on this device. */
+  what: string;
+  onStop: () => void;
+}) {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    const started = Date.now();
+    const id = setInterval(
+      () => setSeconds(Math.round((Date.now() - started) / 1000)),
+      1000,
+    );
+    return () => clearInterval(id);
+  }, []);
+  const known =
+    progress && progress.stage !== "started" && progress.total > 0
+      ? progress
+      : null;
+  return (
+    <div className="grade-wait" aria-busy="true">
+      <div className="grade-wait-head">
+        <span className="grade-spinner" aria-hidden="true" />
+        <strong>Đang chấm</strong>
+        <span className="grade-clock" aria-hidden="true">
+          {clock(seconds)}
+        </span>
+        <button type="button" className="button ghost small" onClick={onStop}>
+          Dừng
+        </button>
+      </div>
+      <progress
+        className="grade-bar"
+        max={known?.total}
+        value={known?.done}
+        aria-label="Tiến độ chấm"
+      />
+      <p role="status" aria-live="polite">
+        {progressText(progress)}
+      </p>
+      <p className="help-copy">
+        Thường mất một đến ba phút. Cứ để trang này mở; {what} của bạn vẫn nằm
+        yên ở máy này.
+        {seconds > 240
+          ? " Đã lâu hơn thường lệ; nếu quá năm phút máy chủ sẽ tự dừng và báo lỗi."
+          : ""}
+      </p>
+    </div>
+  );
+}
+
+/** The error line plus, below it, a short technical note she can read out if it keeps happening. */
+export function ErrorNotice({
+  text,
+  detail,
+}: {
+  text: string;
+  detail?: string;
+}) {
+  return (
+    <div role="alert" className="notice error">
+      <p>{text}</p>
+      {detail && <p className="grade-detail">Chi tiết kỹ thuật: {detail}</p>}
+    </div>
   );
 }

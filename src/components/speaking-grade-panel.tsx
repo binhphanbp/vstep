@@ -4,8 +4,11 @@ import { Sparkles } from "lucide-react";
 import {
   ConsentBox,
   CriteriaList,
+  ErrorNotice,
+  Waiting,
   scoreText,
   useAvailable,
+  type Progress,
 } from "./grade-parts";
 import { failureText } from "./grade-panel";
 import { formatNoteDate } from "./note-box";
@@ -17,6 +20,7 @@ import {
 } from "@/lib/grading/config";
 import {
   GradeRequestError,
+  describeError,
   getAiSettings,
   getServerAiSettings,
   requestSpeakingGrade,
@@ -49,7 +53,7 @@ type Phase =
   | { name: "idle" }
   | { name: "running" }
   | { name: "problem"; text: string }
-  | { name: "error"; kind: RequestFailure; wait?: number }
+  | { name: "error"; kind: RequestFailure; wait?: number; detail?: string }
   | { name: "silent" };
 
 const recordingId = (runId: string, slotId: string) =>
@@ -81,6 +85,7 @@ export function SpeakingGradePanel({
   const available = useAvailable();
   const [phase, setPhase] = useState<Phase>({ name: "idle" });
   const [asking, setAsking] = useState(false);
+  const [progress, setProgress] = useState<Progress>(null);
   const abort = useRef<AbortController | null>(null);
   const id = paperSpeakingGradeId(runId);
   const mine = slots.filter((slot) => spoken.includes(slot.id));
@@ -133,6 +138,7 @@ export function SpeakingGradePanel({
   async function grade(code: string) {
     setAsking(false);
     setPhase({ name: "running" });
+    setProgress(null);
     const controller = new AbortController();
     abort.current = controller;
     try {
@@ -177,7 +183,12 @@ export function SpeakingGradePanel({
         });
         return;
       }
-      const reply = await requestSpeakingGrade(parts, code, controller.signal);
+      const reply = await requestSpeakingGrade(
+        parts,
+        code,
+        controller.signal,
+        setProgress,
+      );
       if (reply.status === "blocked") {
         setPhase({ name: "silent" });
         return;
@@ -201,12 +212,18 @@ export function SpeakingGradePanel({
         if (error.kind === "aborted") setPhase({ name: "idle" });
         else {
           if (error.kind === "passcode") saveAiSettings({ passcode: "" });
-          setPhase({ name: "error", kind: error.kind, wait: error.retryAfter });
+          setPhase({
+            name: "error",
+            kind: error.kind,
+            wait: error.retryAfter,
+            detail: error.detail,
+          });
         }
       } else
         setPhase({
-          name: "problem",
-          text: "Không đọc được bản ghi trên máy này. Thử tải lại trang.",
+          name: "error",
+          kind: "client",
+          detail: describeError(error),
         });
     } finally {
       abort.current = null;
@@ -246,17 +263,12 @@ export function SpeakingGradePanel({
           onClick={start}
           disabled={running}
         >
-          {stored ? "Chấm lại phần Nói" : "Chấm phần Nói"}
+          {running
+            ? "Đang chấm…"
+            : stored
+              ? "Chấm lại phần Nói"
+              : "Chấm phần Nói"}
         </button>
-        {running && (
-          <button
-            type="button"
-            className="button ghost small"
-            onClick={() => abort.current?.abort()}
-          >
-            Dừng
-          </button>
-        )}
       </div>
       {asking && !running && (
         <ConsentBox
@@ -267,20 +279,18 @@ export function SpeakingGradePanel({
         />
       )}
       {running && (
-        <p role="status" className="help-copy">
-          Đang nghe và chấm — thường mất vài phút. Bản ghi của bạn vẫn nằm yên ở
-          máy này.
-        </p>
+        <Waiting
+          progress={progress}
+          what="bản ghi"
+          onStop={() => abort.current?.abort()}
+        />
       )}
-      {phase.name === "problem" && (
-        <p role="alert" className="notice error">
-          {phase.text}
-        </p>
-      )}
+      {phase.name === "problem" && <ErrorNotice text={phase.text} />}
       {phase.name === "error" && (
-        <p role="alert" className="notice error">
-          {failureText[phase.kind](phase.wait)}
-        </p>
+        <ErrorNotice
+          text={failureText[phase.kind](phase.wait)}
+          detail={phase.detail}
+        />
       )}
       {phase.name === "silent" && (
         <p role="status" className="notice">

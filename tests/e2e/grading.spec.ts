@@ -302,6 +302,10 @@ test("says what went wrong in plain words and keeps the writing", async ({
   await expect(panel(page).getByRole("alert")).toContainText(
     "Không kết nối được",
   );
+  // Every error says what happened, in a line she can read out.
+  await expect(panel(page).locator(".grade-detail")).toContainText(
+    "Chi tiết kỹ thuật",
+  );
   await ask().click();
   await expect(
     panel(page).getByRole("status").filter({ hasText: "ngắn hơn 20 từ" }),
@@ -327,9 +331,9 @@ test("can be stopped while it works", async ({ page }) => {
   });
   await openTask1(page);
   await panel(page).getByRole("button", { name: "Chấm bài viết này" }).click();
-  await expect(panel(page).getByRole("status")).toContainText("Đang chấm");
+  await expect(panel(page).locator(".grade-wait")).toContainText("Đang chấm");
   await expect(
-    panel(page).getByRole("button", { name: "Chấm bài viết này" }),
+    panel(page).getByRole("button", { name: "Đang chấm…" }),
   ).toBeDisabled();
   await panel(page).getByRole("button", { name: "Dừng" }).click();
   await expect(panel(page).getByRole("alert")).toHaveCount(0);
@@ -490,4 +494,123 @@ test("the real server says grading is off, and refuses a request, when it has no
   expect(await refused.json()).toEqual({ error: "not-configured" });
   // Only POST is allowed.
   expect((await request.get("/api/grade/writing")).status()).toBe(405);
+});
+
+test("looks alive while it works: a moving clock, a bar, and what it is doing", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await seed(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("may.ai.consent", "yes");
+    localStorage.setItem("may.ai.passcode", "open sesame");
+  });
+  await grading(page, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 3500));
+    await route.fulfill({
+      contentType: "application/x-ndjson",
+      body: [
+        { type: "progress", stage: "started" },
+        { type: "progress", stage: "runs", done: 0, total: 3 },
+        { type: "progress", stage: "runs", done: 3, total: 3 },
+        { type: "grade", grade: gradeBody(false) },
+      ]
+        .map((event) => JSON.stringify(event))
+        .join("\n"),
+    });
+  });
+  await openTask1(page);
+  await panel(page).getByRole("button", { name: "Chấm bài viết này" }).click();
+  const wait = panel(page).locator(".grade-wait");
+  await expect(wait).toBeVisible();
+  await expect(wait.locator(".grade-spinner")).toBeVisible();
+  await expect(wait.getByRole("status")).toContainText("đang chờ máy chủ");
+  // Nothing known yet: a bar that slides (no value), never a frozen one.
+  expect(await wait.locator("progress").getAttribute("value")).toBeNull();
+  await expect(wait).toContainText("Thường mất một đến ba phút");
+  // The clock moves.
+  await expect(wait.locator(".grade-clock")).not.toHaveText("0:00");
+  // The answer is read from the stream and shown.
+  await expect(panel(page).locator(".grade-result")).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(wait).toHaveCount(0);
+  expect(Object.keys((await saved(page)).grades)).toEqual([
+    `paper:run-done:${task1.id}`,
+  ]);
+});
+
+test("says why it failed, with a technical line, when the answer cannot be read or the stream breaks", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await seed(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("may.ai.consent", "yes");
+    localStorage.setItem("may.ai.passcode", "open sesame");
+  });
+  const lines = (...events: object[]) => ({
+    contentType: "application/x-ndjson",
+    body: events.map((event) => JSON.stringify(event)).join("\n"),
+  });
+  let attempt = 0;
+  await grading(page, (route) => {
+    attempt++;
+    // The connection ends before any result.
+    if (attempt === 1)
+      return route.fulfill(lines({ type: "progress", stage: "started" }));
+    // The server reports a failure inside the stream.
+    if (attempt === 2)
+      return route.fulfill(
+        lines(
+          { type: "progress", stage: "started" },
+          { type: "error", error: "model" },
+        ),
+      );
+    // A grade arrives that this device cannot store.
+    if (attempt === 3)
+      return route.fulfill(
+        lines({ type: "grade", grade: { status: "graded" } }),
+      );
+    // A gateway answers with a page instead of JSON.
+    return route.fulfill({
+      status: 504,
+      contentType: "text/html",
+      body: "<html>timeout</html>",
+    });
+  });
+  await openTask1(page);
+  const ask = () =>
+    panel(page).getByRole("button", { name: "Chấm bài viết này" });
+  const alert = () => panel(page).getByRole("alert");
+  await ask().click();
+  await expect(alert()).toContainText("Không kết nối được");
+  await expect(alert()).toContainText("kết nối đứt trước khi có kết quả");
+  await ask().click();
+  await expect(alert()).toContainText("Dịch vụ chấm đang gặp lỗi");
+  await ask().click();
+  await expect(alert()).toContainText("Có lỗi khi xử lý kết quả trên máy này");
+  await expect(alert()).toContainText("TypeError");
+  await ask().click();
+  await expect(alert()).toContainText("Dịch vụ chấm đang gặp lỗi");
+  await expect(alert()).toContainText("HTTP 504");
+  expect((await saved(page)).grades).toBeUndefined();
+});
+
+test("the content of a review is not pressed against its edges", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await seed(page);
+  const details = await openTask1(page);
+  const box = await details.boundingBox();
+  const label = await details
+    .getByRole("heading", { name: "Bài viết của bạn" })
+    .boundingBox();
+  const grade = await panel(page).boundingBox();
+  expect(label!.x - box!.x).toBeGreaterThanOrEqual(12);
+  expect(grade!.x - box!.x).toBeGreaterThanOrEqual(12);
+  expect(
+    box!.x + box!.width - (grade!.x + grade!.width),
+  ).toBeGreaterThanOrEqual(12);
 });

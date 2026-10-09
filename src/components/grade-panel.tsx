@@ -10,8 +10,11 @@ import { Sparkles } from "lucide-react";
 import {
   CriteriaList,
   ConsentBox,
+  ErrorNotice,
+  Waiting,
   scoreText,
   useAvailable,
+  type Progress,
 } from "./grade-parts";
 import { useStudy } from "./study-provider";
 import { formatNoteDate } from "./note-box";
@@ -22,6 +25,7 @@ import {
 } from "@/lib/grading/config";
 import {
   GradeRequestError,
+  describeError,
   getAiSettings,
   getServerAiSettings,
   requestWritingGrade,
@@ -47,6 +51,8 @@ export const failureText: Record<RequestFailure, (wait?: number) => string> = {
     "Dịch vụ chấm đang gặp lỗi. Bài làm của bạn vẫn còn nguyên; thử lại sau ít phút.",
   network: () => "Không kết nối được. Kiểm tra mạng rồi thử lại.",
   aborted: () => "Đã dừng chấm.",
+  client: () =>
+    "Có lỗi khi xử lý kết quả trên máy này (kết quả đã về nhưng chưa lưu được).",
   "bad-reply": () =>
     "Kết quả chấm trả về không đọc được. Thử lại; nếu vẫn vậy, báo người quản lý Mây.",
   invalid: () => "Bài này chưa gửi chấm được (dữ liệu không hợp lệ).",
@@ -67,7 +73,7 @@ const blockText: Record<WritingBlock, string> = {
 type Phase =
   | { name: "idle" }
   | { name: "running" }
-  | { name: "error"; kind: RequestFailure; wait?: number }
+  | { name: "error"; kind: RequestFailure; wait?: number; detail?: string }
   | { name: "blocked"; reason: WritingBlock };
 
 export type GradePanelProps = {
@@ -104,6 +110,7 @@ export function GradePanel({
   const available = useAvailable();
   const [phase, setPhase] = useState<Phase>({ name: "idle" });
   const [asking, setAsking] = useState(false);
+  const [progress, setProgress] = useState<Progress>(null);
   const abort = useRef<AbortController | null>(null);
   const requirements = useMemo(
     () => requirementsFor(slotId, prompt),
@@ -135,6 +142,7 @@ export function GradePanel({
   async function grade(code: string) {
     setAsking(false);
     setPhase({ name: "running" });
+    setProgress(null);
     const controller = new AbortController();
     abort.current = controller;
     try {
@@ -142,6 +150,7 @@ export function GradePanel({
         { task, slotId, prompt, text, samples },
         code,
         controller.signal,
+        setProgress,
       );
       if (reply.status === "blocked") {
         setPhase({ name: "blocked", reason: reply.reason });
@@ -166,9 +175,19 @@ export function GradePanel({
         if (error.kind === "aborted") setPhase({ name: "idle" });
         else {
           if (error.kind === "passcode") saveAiSettings({ passcode: "" });
-          setPhase({ name: "error", kind: error.kind, wait: error.retryAfter });
+          setPhase({
+            name: "error",
+            kind: error.kind,
+            wait: error.retryAfter,
+            detail: error.detail,
+          });
         }
-      } else setPhase({ name: "error", kind: "network" });
+      } else
+        setPhase({
+          name: "error",
+          kind: "client",
+          detail: describeError(error),
+        });
     } finally {
       abort.current = null;
     }
@@ -208,16 +227,11 @@ export function GradePanel({
               onClick={start}
               disabled={running}
             >
-              {stored ? "Chấm lại" : "Chấm bài viết này"}
-            </button>
-          )}
-          {running && (
-            <button
-              type="button"
-              className="button ghost small"
-              onClick={() => abort.current?.abort()}
-            >
-              Dừng
+              {running
+                ? "Đang chấm…"
+                : stored
+                  ? "Chấm lại"
+                  : "Chấm bài viết này"}
             </button>
           )}
         </div>
@@ -231,15 +245,17 @@ export function GradePanel({
         />
       )}
       {running && (
-        <p role="status" className="help-copy">
-          Đang chấm — thường mất một đến ba phút. Bài làm của bạn vẫn nằm yên ở
-          máy này.
-        </p>
+        <Waiting
+          progress={progress}
+          what="bài viết"
+          onStop={() => abort.current?.abort()}
+        />
       )}
       {phase.name === "error" && (
-        <p role="alert" className="notice error">
-          {failureText[phase.kind](phase.wait)}
-        </p>
+        <ErrorNotice
+          text={failureText[phase.kind](phase.wait)}
+          detail={phase.detail}
+        />
       )}
       {phase.name === "blocked" && (
         <p role="status" className="notice">
