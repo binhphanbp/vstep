@@ -108,3 +108,40 @@ test("the paper bank puts five papers three and two across, not four and one", a
   expect(columns).toHaveLength(5);
   expect(new Set(columns).size).toBe(3);
 });
+
+test("the listening check on the mock exam page keeps its three buttons apart", async ({
+  page,
+}) => {
+  await open(page, "/exam");
+  const row = page.locator(".audio-seek-row");
+  await expect(row).toBeVisible();
+  const area = (await row.boundingBox())!;
+  const boxes = [];
+  for (const button of await row.getByRole("button").all()) {
+    await expect(button).toBeVisible();
+    boxes.push((await button.boundingBox())!);
+  }
+  expect(boxes).toHaveLength(3);
+  for (const box of boxes) {
+    // Inside the card, not spilling out of it…
+    expect(box.x).toBeGreaterThanOrEqual(area.x - 1);
+    expect(box.x + box.width).toBeLessThanOrEqual(area.x + area.width + 1);
+    // …and its words fit in the button.
+  }
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const apart =
+        boxes[i].x + boxes[i].width <= boxes[j].x + 1 ||
+        boxes[j].x + boxes[j].width <= boxes[i].x + 1 ||
+        boxes[i].y + boxes[i].height <= boxes[j].y + 1 ||
+        boxes[j].y + boxes[j].height <= boxes[i].y + 1;
+      expect(apart, `buttons ${i} and ${j} overlap`).toBe(true);
+    }
+  const clipped = await row
+    .getByRole("button")
+    .evaluateAll(
+      (nodes) =>
+        nodes.filter((node) => node.scrollWidth > node.clientWidth + 1).length,
+    );
+  expect(clipped).toBe(0);
+});

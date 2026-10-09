@@ -1672,6 +1672,16 @@ textarea:focus-visible {
 .audio-seek-row .button {
   justify-content: center;
 }
+/* In a narrow column (the check-in card of the mock exam) three buttons side by
+   side overran each other: they go one under another there. */
+.audio-panel {
+  container-type: inline-size;
+}
+@container (max-width: 340px) {
+  .audio-seek-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .audio-position {
   grid-column: 1 / -1;
   font-size: 12px;

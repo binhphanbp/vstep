@@ -2,6 +2,14 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Rà UX/UI đợt bốn: các màn không phải chấm AI — 09/10/2026
+
+Quét 59 route thật (11 màn chính, 14 bài học, các đề trong kho) bằng trình duyệt: không có lỗi console, không có yêu cầu mạng thất bại hay HTTP 4xx/5xx (trừ trang 404 cố ý); `npm audit --omit=dev` không có lỗ hổng. Chụp các màn chính ở 1280×720 với dữ liệu đã học và xem từng ảnh.
+
+- **Lỗi bố cục thấy được:** ở thẻ "Kiểm tra trước khi bắt đầu" của trang Phòng thi thử (cột phải hẹp), ba nút "Câu trước / Nghe lại / Câu sau" của bài nghe xếp ba cột quá hẹp nên chữ chồng lên nhau và một biểu tượng tràn ra ngoài khung. Nay khung bài nghe dùng container query: dưới 340 px ba nút xếp thành ba hàng, còn ở bài học (khung rộng) vẫn một hàng ba cột. Có ca E2E đo: ba nút nằm trong khung, không chồng nhau, chữ không bị cắt (đã xác nhận ca này đỏ trên bản cũ, 3 nút bị cắt).
+- **Không thấy lỗi khác** ở trang chủ, lộ trình, vườn từ vựng, sổ lỗi sai, kết quả bài học, hướng dẫn.
+- **Kiểm tra:** 404 unit, 194 E2E (Chromium 186; thêm một ca), ESLint và TypeScript sạch.
+
 ## Chấm AI: chấm Nói cho bài học Nói và buổi thi rút gọn; thử âm thanh AAC — 09/10/2026
 
 - **Bài học Nói.** Sau khi nộp bài học Nói có bản ghi, khung "Chấm phần Nói bằng AI" hiện dưới biểu ngữ kết quả (khi máy chủ đã bật). Nộp bài chuyển bản ghi sang khóa theo mã lượt làm, nên khung đọc bản ghi từ đó; lần chấm lưu theo `attempt:<mã lượt làm>`.
@@ -493,7 +501,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 404 unit / 193 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 404 unit / 194 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -703,7 +711,7 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 ## Bằng chứng kiểm tra
 
 - 404 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 193 kiểm thử Playwright trên bản production: 185 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 194 kiểm thử Playwright trên bản production: 186 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
