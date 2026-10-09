@@ -1,9 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Generate } from "../../src/lib/grading/generate";
 import {
   GradeLimiter,
+  HEARTBEAT_MS,
   PASSCODE_HEADER,
   REQUEST_LIMITS,
+  AUDIO_LIMITS,
+  handleGradeSpeaking as handleSpeaking,
   handleGradeWriting,
   handleStatus,
   isConfigured,
@@ -173,7 +176,10 @@ describe("grading", () => {
       deps({ generate: () => failing, limiter, log: (e) => logged.push(e) }),
     );
     expect(reply.status).toBe(502);
-    expect(await reply.json()).toEqual({ error: "model" });
+    expect(await reply.json()).toEqual({
+      error: "model",
+      detail: "Gemini trả về HTTP 429",
+    });
     expect(logged).toEqual(["model-error:429"]);
     expect(JSON.stringify(logged)).not.toContain("secret");
     // The slot was released, so the next request is not refused as busy.
@@ -224,5 +230,273 @@ describe("the brake", () => {
     expect(reply.status).toBe(429);
     expect(reply.headers.get("retry-after")).toBe("15");
     expect(await reply.json()).toEqual({ error: "rate", retryAfter: 15 });
+  });
+});
+
+describe("grading a Speaking performance", () => {
+  const meta = (over: object = {}) =>
+    JSON.stringify({
+      parts: [
+        {
+          id: "p1",
+          title: "Part 1",
+          prompt: "Where are you from?",
+          durationSeconds: 40,
+        },
+      ],
+      ...over,
+    });
+  const audio = (size = 4000, type = "audio/webm;codecs=opus") =>
+    new File([new Uint8Array(size)], "a.webm", { type });
+  function form(parts: { meta?: string; files?: (File | null)[] } = {}) {
+    const data = new FormData();
+    data.set("meta", parts.meta ?? meta());
+    (parts.files ?? [audio()]).forEach((file, i) => {
+      if (file) data.set(`audio${i}`, file);
+    });
+    return data;
+  }
+  const send = (
+    data: FormData,
+    over: Partial<GradeDeps> = {},
+    passcode: string | null = "open sesame",
+    calls: string[] = [],
+  ) =>
+    handleSpeaking(
+      new Request("http://localhost/api/grade/speaking", {
+        method: "POST",
+        headers: passcode ? { [PASSCODE_HEADER]: passcode } : {},
+        body: data,
+      }),
+      deps({ generate: () => speakingGenerate(calls), ...over }, calls),
+    );
+
+  it("uses the same door as writing: not configured, wrong passcode, lockout", async () => {
+    expect((await send(form(), { env: {} })).status).toBe(503);
+    expect((await send(form(), {}, "nope")).status).toBe(401);
+    expect((await send(form(), {}, null)).status).toBe(401);
+    const limiter = new GradeLimiter(20, 2);
+    for (let i = 0; i < 10; i++) await send(form(), { limiter }, "nope");
+    expect((await send(form(), { limiter })).status).toBe(429);
+  });
+
+  it("grades what was sent: transcribes once, scores three times, strips the codec suffix", async () => {
+    const calls: string[] = [];
+    const reply = await send(form(), {}, "open sesame", calls);
+    expect(reply.status).toBe(200);
+    const { grade } = await reply.json();
+    expect(grade.status).toBe("graded");
+    expect(grade.criteria.fluency.showScore).toBe(false); // the real gates are closed
+    expect(
+      calls.filter((c) => c.startsWith("speaking-transcribe")),
+    ).toHaveLength(1);
+    expect(calls.filter((c) => c.startsWith("speaking-score"))).toHaveLength(3);
+  });
+
+  it("rejects bad requests before the model: no meta, bad meta, missing file, wrong type, tiny file, too big", async () => {
+    const calls: string[] = [];
+    const bad = async (data: FormData) =>
+      (await send(data, {}, "open sesame", calls)).status;
+    expect(await bad(form({ meta: "not json" }))).toBe(400);
+    expect(await bad(form({ meta: meta({ parts: [] }) }))).toBe(400);
+    expect(
+      await bad(
+        form({
+          meta: meta({
+            parts: [
+              { id: "p", title: "t", prompt: "q", durationSeconds: 5000 },
+            ],
+          }),
+        }),
+      ),
+    ).toBe(400);
+    expect(await bad(form({ files: [null] }))).toBe(400);
+    expect(await bad(form({ files: [audio(4000, "video/mp4")] }))).toBe(415);
+    expect(await bad(form({ files: [audio(100)] }))).toBe(400);
+    expect(await bad(form({ files: [audio(AUDIO_LIMITS.bytes + 1)] }))).toBe(
+      413,
+    );
+    const data = new FormData();
+    expect(await bad(data)).toBe(400);
+    expect(calls).toEqual([]);
+  });
+
+  it("counts all the audio together against one limit", async () => {
+    const two = meta({
+      parts: [
+        { id: "a", title: "A", prompt: "q", durationSeconds: 60 },
+        { id: "b", title: "B", prompt: "q", durationSeconds: 60 },
+      ],
+    });
+    const half = Math.floor(AUDIO_LIMITS.bytes / 2) + 10;
+    const reply = await send(
+      form({ meta: two, files: [audio(half), audio(half)] }),
+    );
+    expect(reply.status).toBe(413);
+  });
+
+  it("returns a block, not an error, for a silent recording", async () => {
+    const reply = await send(form(), {
+      generate: () => speakingGenerate([], true),
+    });
+    expect((await reply.json()).grade).toMatchObject({
+      status: "blocked",
+      reason: "silent",
+    });
+  });
+
+  it("says only what kind of failure it was", async () => {
+    const logged: string[] = [];
+    const failing: Generate = async () => {
+      throw Object.assign(new Error("secret speech"), { status: 503 });
+    };
+    const reply = await send(form(), {
+      generate: () => failing,
+      log: (e) => logged.push(e),
+    });
+    expect(reply.status).toBe(502);
+    expect(logged).toEqual(["model-error:503"]);
+  });
+});
+
+function speakingGenerate(calls: string[] = [], silent = false): Generate {
+  const sentence =
+    "I am from Hue and it is a quiet city with many old buildings and a lovely river";
+  return async (request) => {
+    calls.push(request.label);
+    if (request.label.startsWith("speaking-transcribe"))
+      return silent
+        ? { transcript: "", words: [] }
+        : {
+            transcript: sentence,
+            words: sentence
+              .split(" ")
+              .map((word, i) => ({ word, start: i * 1.5, end: i * 1.5 + 0.6 })),
+          };
+    return {
+      criteria: [
+        "grammar",
+        "vocabulary",
+        "pronunciation",
+        "fluency",
+        "discourse",
+      ].map((criterion) => ({
+        criterion,
+        score: 6,
+        evidence: [],
+        whyNotHigher: "a",
+        whyNotLower: "b",
+        toRaise: "c",
+      })),
+      summary: "s",
+    };
+  };
+}
+
+async function lines(response: Response) {
+  const text = await response.text();
+  return text
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as Record<string, unknown>);
+}
+const streaming = (payload: string) =>
+  new Request("http://localhost/api/grade/writing", {
+    method: "POST",
+    headers: {
+      [PASSCODE_HEADER]: "open sesame",
+      accept: "application/x-ndjson",
+    },
+    body: payload,
+  });
+
+describe("progress while grading", () => {
+  it("streams what has been done, then the grade, as lines of JSON", async () => {
+    const reply = await handleGradeWriting(streaming(body()), deps());
+    expect(reply.status).toBe(200);
+    expect(reply.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(reply.headers.get("cache-control")).toBe("no-store");
+    const events = await lines(reply);
+    expect(events[0]).toEqual({ type: "progress", stage: "started" });
+    const runs = events.filter(
+      (e) => e.type === "progress" && e.stage === "runs",
+    );
+    expect(runs.map((e) => e.done)).toEqual([0, 1, 2, 3]);
+    expect(runs.every((e) => e.total === 3)).toBe(true);
+    const last = events[events.length - 1] as {
+      type: string;
+      grade: { status: string };
+    };
+    expect(last.type).toBe("grade");
+    expect(last.grade.status).toBe("graded");
+  });
+
+  it("answers a plain request with one JSON body, as before", async () => {
+    const reply = await handleGradeWriting(post(body()), deps());
+    expect(reply.headers.get("content-type")).toContain("application/json");
+    expect((await reply.json()).grade.status).toBe("graded");
+  });
+
+  it("says in the stream that it failed, with only the kind of failure", async () => {
+    const logged: string[] = [];
+    const failing: Generate = async () => {
+      throw Object.assign(new Error("secret essay"), { status: 429 });
+    };
+    const reply = await handleGradeWriting(
+      streaming(body()),
+      deps({ generate: () => failing, log: (e) => logged.push(e) }),
+    );
+    const events = await lines(reply);
+    expect(events[events.length - 1]).toEqual({
+      type: "error",
+      error: "model",
+      detail: "Gemini trả về HTTP 429",
+    });
+    expect(JSON.stringify(events)).not.toContain("secret");
+    expect(logged).toEqual(["model-error:429"]);
+  });
+
+  it("keeps a quiet connection alive with a ping, and frees its slot at the end", async () => {
+    vi.useFakeTimers();
+    try {
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => (release = resolve));
+      const slow: Generate = async (request) => {
+        await gate;
+        return fakeGenerate()(request);
+      };
+      const limiter = new GradeLimiter(20, 1);
+      const reply = await handleGradeWriting(
+        streaming(body()),
+        deps({ generate: () => slow, limiter }),
+      );
+      const reader = reply.body!.getReader();
+      const decoder = new TextDecoder();
+      const first = decoder.decode((await reader.read()).value);
+      expect(first).toContain('"stage":"started"');
+      await vi.advanceTimersByTimeAsync(HEARTBEAT_MS * 2 + 10);
+      let seen = "";
+      // The pings are already queued: read until both are seen.
+      while ((seen.match(/"type":"ping"/g) ?? []).length < 2) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        seen += decoder.decode(chunk.value);
+      }
+      expect((seen.match(/"type":"ping"/g) ?? []).length).toBe(2);
+      // The one slot is still held while it works…
+      expect("retryAfter" in limiter.take()).toBe(true);
+      release();
+      let rest = "";
+      for (;;) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        rest += decoder.decode(chunk.value);
+      }
+      expect(rest).toContain('"type":"grade"');
+      // …and free again once it is over.
+      expect("release" in limiter.take()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

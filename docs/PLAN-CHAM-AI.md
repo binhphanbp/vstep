@@ -225,6 +225,7 @@ Cần: việc 1, 2 ở mục 11.
 
 - **Máy chủ.** `POST /api/grade/writing` và `GET /api/grade/status` (`src/app/api/grade/`, logic ở `src/lib/grading/server.ts` để kiểm thử không cần máy chủ). Chỉ bật khi có đủ `GEMINI_API_KEY` và `GRADER_PASSCODE`; so mã bằng `timingSafeEqual` trên băm SHA-256; mười lần sai mã trong 15 phút thì khóa 15 phút; tối đa 2 lần chấm cùng lúc và 20 lần mỗi giờ mỗi instance (chỉ là phanh, không phải ranh giới bảo mật: các instance serverless không chung bộ nhớ, nên chặn thật là mã truy cập và cảnh báo ngân sách bên Google); giới hạn 48 KB mỗi yêu cầu, 8.000 ký tự bài viết; nhật ký chỉ ghi loại lỗi (ví dụ `model-error:429`), không ghi nội dung. `maxDuration = 300` giây; nếu gói Vercel của dự án không cho 300 giây, bản xem trước của PR sẽ báo lỗi triển khai và phải hạ xuống.
 - **Dữ liệu.** Mục `grades` trong hồ sơ học (`src/lib/grades.ts`): tối đa 40 lần chấm và 0,5 MB, cũ nhất bị bỏ trước; chấm lại cùng một bài thì thay lần cũ; lần chấm đi theo bản sao lưu và cloud; mất theo lượt thi khi lượt đó bị bỏ vì vượt trần 100 lượt; thêm vào cơ chế phục hồi khi một tab bản cũ làm rơi (không đổi `STATE_REV`: mọi bản đã đóng dấu 2 đều giữ trường lạ nhờ schema `looseObject`, nên chỉ bản không có dấu mới làm rơi `grades`). File báo lỗi không chứa gì từ đây (có ca kiểm).
+- **Báo tiến độ khi chấm (sửa sau lần thử thật đầu tiên, 09/10/2026).** Một lần chấm mất vài phút, nên cả hai đường chấm gửi từng dòng JSON khi trình duyệt xin `application/x-ndjson`: `progress` mỗi khi một lần chấm xong, `ping` mười giây một lần để không bên trung gian nào cắt kết nối im lặng, rồi `grade` hoặc `error` (kèm một dòng chi tiết an toàn như “Gemini trả về HTTP 404”, không chứa nội dung bài). Màn hình hiện vòng xoay, đồng hồ, thanh tiến độ và đang làm bước nào; lỗi nào cũng kèm “Chi tiết kỹ thuật”.
 - **Giao diện.** Ở màn chữa đề, dưới bài viết của từng bài Viết: nút “Chấm bài viết này”; hộp đồng ý lần đầu nói rõ gửi gì và đi đâu, kèm ô nhập mã chấm bài; trạng thái đang chấm có nút “Dừng”; câu báo riêng cho sai mã, bận hoặc hết lượt, lỗi dịch vụ, mất mạng, bài quá ngắn, không phải tiếng Anh, chép đề; kết quả có dòng “điểm ước lượng… không phải điểm chính thức”, nhãn thang chưa chính thức, mức mô tả gần nhất của từng tiêu chí, lý do và việc cần làm để lên nửa bậc, các ý đề yêu cầu, lỗi được tô ngay trong bài kèm câu sửa, cảnh báo khi bài đã đổi sau lần chấm hoặc lần chấm dùng thang cũ. Mã chấm bài và sự đồng ý chỉ nằm ở máy Gùa (không vào bản sao lưu). Cài đặt có thẻ “Chấm bài bằng AI” (bật/tắt đồng ý, lưu/xóa mã, xóa các lần chấm) và dòng dung lượng trong “Chỗ ở của dữ liệu”.
 - **Nút chỉ hiện khi máy chủ báo đã bật** (hoặc khi bài đã có kết quả lưu), nên không có gì đổi cho đến khi chủ dự án đặt hai biến môi trường.
 - Kiểm thử: 26 ca unit mới (`grades`, `grade-server`, `grade-locate`), 10 ca E2E mới (`tests/e2e/grading.spec.ts`: ẩn khi máy chủ tắt, đồng ý rồi chấm, hiện số khi cổng mở, các loại lỗi, dừng giữa chừng, bài chưa có danh sách ý, cảnh báo bài đã đổi, Cài đặt, axe, máy chủ thật trả 503 khi chưa có khóa).
@@ -242,6 +243,22 @@ Cần: việc 1, 2, 4 ở mục 11.
 
 - Đổi bitrate ghi âm; đường gửi âm thanh (kể cả bản ghi lớn); chép lời có thời điểm; số đo trôi chảy bằng code; chấm năm tiêu chí; giao diện như Viết, có trình phát cho nghe lại đúng đoạn được trích.
 - **Xong khi:** qua ngưỡng ở mục 7.2 cho các tiêu chí được hiện điểm; CI xanh.
+
+**Đã làm (09/10/2026), kiểm bằng unit test và E2E với API giả:**
+
+- **Ghi âm nhẹ hơn.** Bản ghi mới đặt `audioBitsPerSecond: 32000` (cả bài học và phòng thi), năm phút khoảng 1,2 MB; bản cũ vẫn phát như trước. Có ca E2E kiểm tùy chọn này đi vào `MediaRecorder`.
+- **Máy chủ.** `POST /api/grade/speaking` nhận một form nhiều phần (`meta` là JSON gồm câu hỏi và độ dài từng phần, rồi `audio0`, `audio1`… là tệp nhị phân, không phải base64) và dùng chung cổng bảo vệ với đường chấm Viết (bật tắt, khóa sai mã, mã). Giới hạn 4,2 MB cho toàn bộ âm thanh (Vercel nhận khoảng 4,5 MB một yêu cầu), tối đa 3 phần, mỗi phần tối đa 15 phút, chỉ nhận định dạng webm, ogg, mp4, mpeg, wav; phần chép lời gọi một lần cho mỗi phần, sau đó chấm ba lần độc lập (thêm hai lần khi lệch) như phần Viết.
+- **Chấm cả bài thi Nói cùng lúc**, đúng cách giám khảo nghe hết ba phần rồi cho một điểm mỗi tiêu chí. Đọc độ dài bản ghi ở trình duyệt bằng cách giải mã âm thanh (bản ghi WebM không có độ dài trong tiêu đề).
+- **Lưu trữ.** Lần chấm Nói lưu ở mục `grades` cùng lần chấm Viết (mã `paper:<lượt>:speaking`), có bản chép lời (tối đa 12.000 ký tự mỗi phần), số đo trôi chảy và dấu băm của bản ghi (mỗi bản ghi lúc ghi và dung lượng) để biết khi nào đã ghi lại sau lần chấm.
+- **Giao diện.** Ở cuối phần Nói của màn chữa đề: nút “Chấm phần Nói”, hộp đồng ý riêng nói rõ gửi bản ghi âm, dừng giữa chừng, báo trước khi gửi nếu thiếu bản ghi của một phần hoặc âm thanh quá nặng (bản ghi cũ), kết quả có năm tiêu chí, bản chép lời từng phần và tốc độ, số chỗ ngừng, từ đệm đo được. Điểm Nói chỉ hiện khi cả năm tiêu chí được mở cổng, kèm câu nói rõ cách tính (trung bình năm tiêu chí, chưa có văn bản chính thức).
+
+**Chưa làm, và vì sao:**
+
+- **Chưa có lần gọi Gemini thật nào.** Chưa biết: dịch vụ có đọc `audio/mp4` của Safari không, `audio/webm` ghi bởi MediaRecorder có được chép lời đúng không, thời điểm từng từ do model trả về có khớp độ dài bản ghi không (nếu không khớp, tiêu chí trôi chảy tự mất điểm và chỉ còn nhận xét), một lượt chấm Nói mất bao lâu và tốn bao nhiêu.
+- **Bản ghi cũ lớn hơn 4,2 MB** chưa gửi được: giao diện báo và mời ghi lại. Chưa thử đường tải lên qua Files API (cần khóa thật).
+- **Chưa có trình phát nghe lại đúng đoạn được trích** (chưa có thời điểm đáng tin để nhảy tới).
+- **Chưa gắn vào bài học Nói đơn lẻ**: bài đó chỉ có một phần, không phải bài thi Nói; kế hoạch muốn ghi rõ “chấm trên một phần”, để làm cùng lúc với việc duyệt cách chấm một phần.
+- **Cổng điểm vẫn đóng hết**: chưa đối chiếu với speechocean762 và Speak & Improve, nên kết quả chỉ có nhận xét và bản chép lời, chưa có số.
 
 ### Đợt 4: Theo dõi và điểm tổng
 

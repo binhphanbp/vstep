@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import {
   useEffect,
   useMemo,
@@ -8,6 +7,15 @@ import {
   useSyncExternalStore,
 } from "react";
 import { Sparkles } from "lucide-react";
+import {
+  CriteriaList,
+  ConsentBox,
+  ErrorNotice,
+  Waiting,
+  scoreText,
+  useAvailable,
+  type Progress,
+} from "./grade-parts";
 import { useStudy } from "./study-provider";
 import { formatNoteDate } from "./note-box";
 import {
@@ -17,9 +25,9 @@ import {
 } from "@/lib/grading/config";
 import {
   GradeRequestError,
+  describeError,
   getAiSettings,
   getServerAiSettings,
-  gradingAvailable,
   requestWritingGrade,
   saveAiSettings,
   subscribeAiSettings,
@@ -33,7 +41,7 @@ import { RUBRIC_SOURCE, WRITING_RUBRIC } from "@/lib/rubric/vstep-3-5";
 import { addGrade, inputHashOf, type StoredGrade } from "@/lib/grades";
 import { wordCount } from "@/lib/learning";
 
-const failureText: Record<RequestFailure, (wait?: number) => string> = {
+export const failureText: Record<RequestFailure, (wait?: number) => string> = {
   passcode: () =>
     "Mã chấm bài chưa đúng. Nhập lại mã (người quản lý Mây giữ mã này).",
   "not-configured": () => "Máy chủ chưa bật chức năng chấm bằng AI.",
@@ -43,10 +51,14 @@ const failureText: Record<RequestFailure, (wait?: number) => string> = {
     "Dịch vụ chấm đang gặp lỗi. Bài làm của bạn vẫn còn nguyên; thử lại sau ít phút.",
   network: () => "Không kết nối được. Kiểm tra mạng rồi thử lại.",
   aborted: () => "Đã dừng chấm.",
+  client: () =>
+    "Có lỗi khi xử lý kết quả trên máy này (kết quả đã về nhưng chưa lưu được).",
   "bad-reply": () =>
     "Kết quả chấm trả về không đọc được. Thử lại; nếu vẫn vậy, báo người quản lý Mây.",
   invalid: () => "Bài này chưa gửi chấm được (dữ liệu không hợp lệ).",
   "too-large": () => "Bài viết dài quá mức cho phép chấm (8.000 ký tự).",
+  "unsupported-audio": () =>
+    "Bản ghi có định dạng mà dịch vụ chấm chưa đọc được (thử ghi lại bằng Chrome hoặc Edge).",
   "no-requirements": () =>
     "Đề này chưa có danh sách ý bắt buộc đã được duyệt nên chưa chấm được.",
 };
@@ -61,7 +73,7 @@ const blockText: Record<WritingBlock, string> = {
 type Phase =
   | { name: "idle" }
   | { name: "running" }
-  | { name: "error"; kind: RequestFailure; wait?: number }
+  | { name: "error"; kind: RequestFailure; wait?: number; detail?: string }
   | { name: "blocked"; reason: WritingBlock };
 
 export type GradePanelProps = {
@@ -74,18 +86,6 @@ export type GradePanelProps = {
   /** Model answers for this task, so a copied sample is noticed. */
   samples?: string[];
 };
-
-function useAvailable() {
-  const [available, setAvailable] = useState<boolean | null>(null);
-  useEffect(() => {
-    let alive = true;
-    void gradingAvailable().then((value) => alive && setAvailable(value));
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return available;
-}
 
 /**
  * "Chấm bằng AI" for one piece of writing: asks once for agreement, sends the
@@ -109,8 +109,8 @@ export function GradePanel({
   );
   const available = useAvailable();
   const [phase, setPhase] = useState<Phase>({ name: "idle" });
-  const [typedCode, setTypedCode] = useState("");
   const [asking, setAsking] = useState(false);
+  const [progress, setProgress] = useState<Progress>(null);
   const abort = useRef<AbortController | null>(null);
   const requirements = useMemo(
     () => requirementsFor(slotId, prompt),
@@ -142,6 +142,7 @@ export function GradePanel({
   async function grade(code: string) {
     setAsking(false);
     setPhase({ name: "running" });
+    setProgress(null);
     const controller = new AbortController();
     abort.current = controller;
     try {
@@ -149,6 +150,7 @@ export function GradePanel({
         { task, slotId, prompt, text, samples },
         code,
         controller.signal,
+        setProgress,
       );
       if (reply.status === "blocked") {
         setPhase({ name: "blocked", reason: reply.reason });
@@ -173,9 +175,19 @@ export function GradePanel({
         if (error.kind === "aborted") setPhase({ name: "idle" });
         else {
           if (error.kind === "passcode") saveAiSettings({ passcode: "" });
-          setPhase({ name: "error", kind: error.kind, wait: error.retryAfter });
+          setPhase({
+            name: "error",
+            kind: error.kind,
+            wait: error.retryAfter,
+            detail: error.detail,
+          });
         }
-      } else setPhase({ name: "error", kind: "network" });
+      } else
+        setPhase({
+          name: "error",
+          kind: "client",
+          detail: describeError(error),
+        });
     } finally {
       abort.current = null;
     }
@@ -188,8 +200,8 @@ export function GradePanel({
     }
     void grade(ai.passcode);
   }
-  function agree() {
-    const code = ai.passcode || typedCode.trim();
+  function agree(typedCode: string) {
+    const code = ai.passcode || typedCode;
     if (!code) return;
     saveAiSettings({ consent: true, passcode: code });
     void grade(code);
@@ -215,74 +227,35 @@ export function GradePanel({
               onClick={start}
               disabled={running}
             >
-              {stored ? "Chấm lại" : "Chấm bài viết này"}
-            </button>
-          )}
-          {running && (
-            <button
-              type="button"
-              className="button ghost small"
-              onClick={() => abort.current?.abort()}
-            >
-              Dừng
+              {running
+                ? "Đang chấm…"
+                : stored
+                  ? "Chấm lại"
+                  : "Chấm bài viết này"}
             </button>
           )}
         </div>
       )}
       {asking && !running && (
-        <form
-          className="grade-consent"
-          onSubmit={(event) => {
-            event.preventDefault();
-            agree();
-          }}
-        >
-          <p>
-            Khi bạn bấm đồng ý, <strong>đề bài và bài viết này</strong> sẽ được
-            gửi tới máy chủ của Mây rồi tới Google (Gemini, gói trả phí: Google
-            không dùng nội dung gửi lên để cải thiện sản phẩm của họ) để chấm.
-            Không gửi tên, ghi chú hay dữ liệu nào khác. Chỉ gửi khi bạn bấm nút
-            chấm; tắt lúc nào cũng được ở <Link href="/settings">Cài đặt</Link>.
-          </p>
-          {!ai.passcode && (
-            <label>
-              Mã chấm bài (người quản lý Mây đưa)
-              <input
-                type="password"
-                autoComplete="off"
-                value={typedCode}
-                onChange={(event) => setTypedCode(event.target.value)}
-              />
-            </label>
-          )}
-          <div className="button-row">
-            <button
-              type="submit"
-              className="button primary small"
-              disabled={!ai.passcode && !typedCode.trim()}
-            >
-              Đồng ý và chấm
-            </button>
-            <button
-              type="button"
-              className="button ghost small"
-              onClick={() => setAsking(false)}
-            >
-              Để sau
-            </button>
-          </div>
-        </form>
+        <ConsentBox
+          what={<strong>đề bài và bài viết này</strong>}
+          hasPasscode={Boolean(ai.passcode)}
+          onAgree={agree}
+          onCancel={() => setAsking(false)}
+        />
       )}
       {running && (
-        <p role="status" className="help-copy">
-          Đang chấm — thường mất một đến ba phút. Bài làm của bạn vẫn nằm yên ở
-          máy này.
-        </p>
+        <Waiting
+          progress={progress}
+          what="bài viết"
+          onStop={() => abort.current?.abort()}
+        />
       )}
       {phase.name === "error" && (
-        <p role="alert" className="notice error">
-          {failureText[phase.kind](phase.wait)}
-        </p>
+        <ErrorNotice
+          text={failureText[phase.kind](phase.wait)}
+          detail={phase.detail}
+        />
       )}
       {phase.name === "blocked" && (
         <p role="status" className="notice">
@@ -308,10 +281,6 @@ export function GradePanel({
       )}
     </section>
   );
-}
-
-function scoreText(value: number) {
-  return String(value).replace(".", ",");
 }
 
 export function GradeResult({
@@ -356,55 +325,11 @@ export function GradeResult({
           tin cậy thấp.
         </p>
       )}
-      <ul className="grade-criteria">
-        {WRITING_CRITERIA.map((key) => {
-          const item = grade.criteria[key];
-          const rubric = WRITING_RUBRIC[key];
-          return (
-            <li key={key}>
-              <div className="grade-criterion-head">
-                <strong>{rubric.label}</strong>
-                {item.showScore ? (
-                  <span className="pill">
-                    {scoreText(item.score)}/10
-                    {item.low !== item.high
-                      ? ` (các lần chấm: ${scoreText(item.low)}–${scoreText(item.high)})`
-                      : ""}
-                  </span>
-                ) : (
-                  <span className="pill">chưa hiện điểm</span>
-                )}
-                {item.unsure && <span className="pill">độ tin cậy thấp</span>}
-              </div>
-              <p className="help-copy">
-                Gần mức nào: {BAND_LABEL[item.band]} —{" "}
-                {rubric.scale[item.band].vi}
-              </p>
-              <details>
-                <summary>Vì sao và làm gì để lên mức</summary>
-                {item.evidence.length > 0 && (
-                  <ul>
-                    {item.evidence.map((quote, i) => (
-                      <li key={i} lang="en">
-                        “{quote}”
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <p>
-                  <strong>Chưa cao hơn vì:</strong> {item.whyNotHigher}
-                </p>
-                <p>
-                  <strong>Không thấp hơn vì:</strong> {item.whyNotLower}
-                </p>
-                <p>
-                  <strong>Để lên thêm nửa bậc:</strong> {item.toRaise}
-                </p>
-              </details>
-            </li>
-          );
-        })}
-      </ul>
+      <CriteriaList
+        keys={WRITING_CRITERIA}
+        rubric={WRITING_RUBRIC}
+        criteria={grade.criteria}
+      />
       <h5>Các ý đề yêu cầu</h5>
       <ul className="grade-requirements">
         {grade.requirements.map((requirement) => (

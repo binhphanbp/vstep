@@ -3359,7 +3359,7 @@ details .passage {
 }
 .paper-review details {
   border-top: 1px solid var(--line);
-  padding: 10px 0;
+  padding: 12px 18px;
 }
 .paper-review summary {
   cursor: pointer;
@@ -4564,4 +4564,108 @@ mark.grade-err sup {
   .grade-consent {
     display: none;
   }
+}
+
+/* While a grading runs: it takes minutes, so it has to look alive */
+.grade-wait {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #ecd3df;
+  border-radius: 10px;
+  background: #fff;
+  max-width: 62ch;
+}
+.grade-wait-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.grade-wait-head .button {
+  margin-left: auto;
+}
+.grade-clock {
+  font-variant-numeric: tabular-nums;
+  color: #7d5a6b;
+}
+.grade-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #f1cddd;
+  border-top-color: #c24178;
+  animation: grade-spin 0.9s linear infinite;
+}
+@keyframes grade-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grade-spinner {
+    animation-duration: 3s;
+  }
+}
+.grade-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  margin: 10px 0;
+  border: 0;
+  border-radius: 99px;
+  overflow: hidden;
+  appearance: none;
+  background: #f6e7ee;
+}
+.grade-bar::-webkit-progress-bar {
+  background: #f6e7ee;
+}
+.grade-bar::-webkit-progress-value {
+  background: #c24178;
+  border-radius: 99px;
+  transition: width 0.4s;
+}
+.grade-bar::-moz-progress-bar {
+  background: #c24178;
+  border-radius: 99px;
+}
+/* No value yet: a bar that slides, so "waiting" never looks like "stuck". */
+.grade-bar:indeterminate {
+  background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #c24178 40%,
+      transparent 80%
+    )
+    #f6e7ee;
+  background-size: 200% 100%;
+  animation: grade-slide 1.4s linear infinite;
+}
+.grade-bar:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+@keyframes grade-slide {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.grade-detail {
+  margin-top: 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  opacity: 0.85;
+}
+.grade-panel .notice p {
+  margin: 0;
+}
+.paper-review details > h4 {
+  margin: 22px 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.paper-review details > .help-copy {
+  margin-bottom: 10px;
 }

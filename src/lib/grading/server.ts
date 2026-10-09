@@ -1,7 +1,9 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import * as z from "zod/mini";
-import type { Generate } from "./generate";
+import type { Generate, OnProgress } from "./generate";
 import { requirementsFor } from "./requirements";
+import { AUDIO_LIMITS } from "./audio-limits";
+import { gradeSpeaking, type SpeakingGrade } from "./speaking";
 import { gradeWriting, type WritingGrade } from "./writing";
 
 /**
@@ -124,16 +126,105 @@ export type GradeFailure =
   | "invalid"
   | "too-large"
   | "no-requirements"
+  | "unsupported-audio"
   | "rate"
   | "model";
 
 export type GradeReply =
   { grade: WritingGrade } | { error: GradeFailure; retryAfter?: number };
+export type SpeakingReply =
+  { grade: SpeakingGrade } | { error: GradeFailure; retryAfter?: number };
 
-export async function handleGradeWriting(
+/** A client that asks for `application/x-ndjson` gets progress as it happens. */
+function wantsStream(request: Request) {
+  return (request.headers.get("accept") ?? "").includes("application/x-ndjson");
+}
+
+/** How often a quiet stream says it is still alive, so no hop in between closes it. */
+export const HEARTBEAT_MS = 10_000;
+
+type Slot = { release: () => void };
+
+/**
+ * Runs a grading and answers it. For a plain request the answer is one JSON
+ * body when the work ends. For a streaming one it is a line of JSON at a time:
+ * `progress` as stages finish, `ping` every few seconds, then one `grade` or
+ * `error`. A grading takes minutes; a connection that carries nothing for that
+ * long is the first thing a proxy or a browser drops, and a learner looking at
+ * a button cannot tell a long wait from a dead page.
+ */
+async function finish(
   request: Request,
   deps: GradeDeps,
+  slot: Slot,
+  work: (onProgress: OnProgress) => Promise<unknown>,
 ): Promise<Response> {
+  /** What kind of failure, never what was being graded: the model's own status code, or the error's name. */
+  const failed = (error: unknown) => {
+    const status = (error as { status?: number }).status;
+    deps.log?.(`model-error:${status ?? (error as Error).name}`);
+    return status ? `Gemini trả về HTTP ${status}` : `${(error as Error).name}`;
+  };
+  if (!wantsStream(request)) {
+    try {
+      const grade = await work(() => {});
+      return json({ grade });
+    } catch (error) {
+      return json({ error: "model", detail: failed(error) }, 502);
+    } finally {
+      slot.release();
+    }
+  }
+  const encoder = new TextEncoder();
+  let timer: ReturnType<typeof setInterval> | undefined;
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        const send = (event: object) => {
+          try {
+            controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+          } catch {
+            // The reader has gone away; the work still finishes and frees its slot.
+          }
+        };
+        send({ type: "progress", stage: "started" });
+        timer = setInterval(() => send({ type: "ping" }), HEARTBEAT_MS);
+        try {
+          const grade = await work((progress) =>
+            send({ type: "progress", ...progress }),
+          );
+          send({ type: "grade", grade });
+        } catch (error) {
+          send({ type: "error", error: "model", detail: failed(error) });
+        } finally {
+          clearInterval(timer);
+          slot.release();
+          try {
+            controller.close();
+          } catch {
+            // Already closed by a reader that left.
+          }
+        }
+      },
+      cancel() {
+        clearInterval(timer);
+      },
+    }),
+    {
+      headers: {
+        "content-type": "application/x-ndjson; charset=utf-8",
+        "cache-control": "no-store",
+        "x-accel-buffering": "no",
+      },
+    },
+  );
+}
+
+/**
+ * The checks every grading request passes first: switched on, not locked out,
+ * and the right passcode. Returns the refusal to send, or null to go on.
+ */
+function guard(request: Request, deps: GradeDeps): Response | null {
   if (!isConfigured(deps.env)) return json({ error: "not-configured" }, 503);
   const wait = deps.limiter.locked();
   if (wait)
@@ -149,6 +240,15 @@ export async function handleGradeWriting(
     deps.limiter.miss();
     return json({ error: "passcode" }, 401);
   }
+  return null;
+}
+
+export async function handleGradeWriting(
+  request: Request,
+  deps: GradeDeps,
+): Promise<Response> {
+  const refused = guard(request, deps);
+  if (refused) return refused;
 
   const declared = Number(request.headers.get("content-length") ?? 0);
   if (declared > REQUEST_LIMITS.body) return json({ error: "too-large" }, 413);
@@ -169,8 +269,8 @@ export async function handleGradeWriting(
     return json({ error: "rate", retryAfter: slot.retryAfter }, 429, {
       "retry-after": String(slot.retryAfter),
     });
-  try {
-    const grade = await gradeWriting(
+  return finish(request, deps, slot, (onProgress) =>
+    gradeWriting(
       {
         task: parsed.task,
         prompt: parsed.prompt,
@@ -178,20 +278,116 @@ export async function handleGradeWriting(
         text: parsed.text,
         samples: parsed.samples,
       },
-      { generate: deps.generate() },
-    );
-    deps.log?.(`graded:${grade.status}`);
-    return json({ grade });
-  } catch (error) {
-    // Say what kind of failure it was, never what was being graded.
-    const status = (error as { status?: number }).status;
-    deps.log?.(`model-error:${status ?? (error as Error).name}`);
-    return json({ error: "model" }, 502);
-  } finally {
-    slot.release();
-  }
+      { generate: deps.generate(), onProgress },
+    ).then((grade) => {
+      deps.log?.(`graded:${grade.status}`);
+      return grade;
+    }),
+  );
 }
 
 export function handleStatus(env: GradeEnv) {
   return json({ available: isConfigured(env) });
 }
+
+/* ---------------- Speaking ---------------- */
+
+/** Container types Gemini reads. The `;codecs=` part is dropped before the check. */
+export const AUDIO_TYPES = [
+  "audio/webm",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/x-wav",
+] as const;
+
+const speakingMeta = z.object({
+  parts: z
+    .array(
+      z.object({
+        id: z.string().check(z.minLength(1), z.maxLength(AUDIO_LIMITS.id)),
+        title: z.string().check(z.maxLength(AUDIO_LIMITS.title)),
+        prompt: z.string().check(z.maxLength(AUDIO_LIMITS.prompt)),
+        durationSeconds: z
+          .number()
+          .check(z.minimum(1), z.maximum(AUDIO_LIMITS.seconds)),
+      }),
+    )
+    .check(z.minLength(1), z.maxLength(AUDIO_LIMITS.parts)),
+});
+
+/**
+ * Grades a Speaking performance from recordings sent as a multipart form: a
+ * `meta` field (JSON: the parts, their questions and lengths) and one file per
+ * part, `audio0`, `audio1`… Sent as binary, not base64, so more fits the limit.
+ */
+export async function handleGradeSpeaking(
+  request: Request,
+  deps: GradeDeps,
+): Promise<Response> {
+  const refused = guard(request, deps);
+  if (refused) return refused;
+
+  const declared = Number(request.headers.get("content-length") ?? 0);
+  if (declared > AUDIO_LIMITS.bytes + 16 * 1024)
+    return json({ error: "too-large" }, 413);
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ error: "invalid" }, 400);
+  }
+  let meta: z.infer<typeof speakingMeta>;
+  try {
+    const field = form.get("meta");
+    if (typeof field !== "string") throw new Error("no meta");
+    meta = z.parse(speakingMeta, JSON.parse(field));
+  } catch {
+    return json({ error: "invalid" }, 400);
+  }
+  const files: File[] = [];
+  let total = 0;
+  for (let i = 0; i < meta.parts.length; i++) {
+    const file = form.get(`audio${i}`);
+    if (!(file instanceof File)) return json({ error: "invalid" }, 400);
+    total += file.size;
+    files.push(file);
+  }
+  if (total > AUDIO_LIMITS.bytes) return json({ error: "too-large" }, 413);
+  for (const file of files) {
+    const type = file.type.split(";")[0].trim().toLowerCase();
+    if (!(AUDIO_TYPES as readonly string[]).includes(type))
+      return json({ error: "unsupported-audio" }, 415);
+    if (file.size < AUDIO_LIMITS.minBytes)
+      return json({ error: "invalid" }, 400);
+  }
+
+  const slot = deps.limiter.take();
+  if ("retryAfter" in slot)
+    return json({ error: "rate", retryAfter: slot.retryAfter }, 429, {
+      "retry-after": String(slot.retryAfter),
+    });
+  return finish(request, deps, slot, async (onProgress) => {
+    const inputs = await Promise.all(
+      meta.parts.map(async (part, i) => ({
+        id: part.id,
+        title: part.title,
+        prompt: part.prompt,
+        durationSeconds: part.durationSeconds,
+        audio: {
+          mimeType: files[i].type.split(";")[0].trim().toLowerCase(),
+          base64: Buffer.from(await files[i].arrayBuffer()).toString("base64"),
+        },
+      })),
+    );
+    const grade = await gradeSpeaking(inputs, {
+      generate: deps.generate(),
+      onProgress,
+    });
+    deps.log?.(`graded-speaking:${grade.status}`);
+    return grade;
+  });
+}
+
+export { AUDIO_LIMITS };

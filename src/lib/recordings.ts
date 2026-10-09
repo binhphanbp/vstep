@@ -164,3 +164,36 @@ export async function deleteRecordingsBefore(cutoff: number): Promise<number> {
     database.close();
   }
 }
+
+/**
+ * Speech needs far less than the browser's default (about 128 kbps): 32 kbps
+ * of Opus is clear for a voice, and keeps five minutes near 1.2 MB, which is
+ * what lets a whole Speaking test travel in one request to the grading server
+ * (a Vercel function accepts about 4.5 MB). Takes made before this are larger
+ * and are still played back as before; they can be too big to send for grading.
+ */
+export const SPEECH_BITS_PER_SECOND = 32000;
+
+/**
+ * How long a take is, in seconds, read by decoding it. A recorded WebM has no
+ * length in its header, so an audio element reports Infinity; decoding is the
+ * one way that works in every browser. Null when it cannot be decoded.
+ */
+export async function recordingSeconds(blob: Blob): Promise<number | null> {
+  try {
+    const Context =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!Context) return null;
+    const context = new Context();
+    try {
+      const decoded = await context.decodeAudioData(await blob.arrayBuffer());
+      return Number.isFinite(decoded.duration) ? decoded.duration : null;
+    } finally {
+      void context.close().catch(() => {});
+    }
+  } catch {
+    return null;
+  }
+}

@@ -13,7 +13,7 @@ import {
   RUBRIC_VERSION,
   TRANSCRIBE_MODEL,
 } from "./config";
-import type { Generate, Part } from "./generate";
+import type { Generate, OnProgress, Part } from "./generate";
 import { GATES, type Gates } from "./gates";
 import {
   fluencyMeasures,
@@ -159,12 +159,15 @@ export async function gradeSpeaking(
     model?: string;
     transcribeModel?: string;
     gates?: Gates;
+    onProgress?: OnProgress;
   },
 ): Promise<SpeakingGrade> {
   const model = deps.model ?? GRADER_MODEL;
   const gates = deps.gates ?? GATES;
 
   // One transcript per part, made once: the scoring runs all read the same one.
+  let transcribed = 0;
+  deps.onProgress?.({ stage: "transcribe", done: 0, total: inputs.length });
   const parts = await Promise.all(
     inputs.map(async (input, index) => {
       const heard = z.parse(
@@ -182,6 +185,11 @@ export async function gradeSpeaking(
         heard.words,
         input.durationSeconds,
       );
+      deps.onProgress?.({
+        stage: "transcribe",
+        done: ++transcribed,
+        total: inputs.length,
+      });
       return {
         input,
         transcript: heard.transcript,
@@ -194,19 +202,25 @@ export async function gradeSpeaking(
   if (words < MIN_SPOKEN_WORDS)
     return { status: "blocked", reason: "silent", words };
 
-  const runs = await Promise.all(
-    Array.from({ length: FIRST_RUNS }, (_, i) =>
-      scoreRun(parts, deps.generate, model, i),
-    ),
-  );
-  if (disagrees(collect(runs.map((r) => r.marks))))
-    runs.push(
-      ...(await Promise.all(
-        Array.from({ length: EXTRA_RUNS }, (_, i) =>
-          scoreRun(parts, deps.generate, model, FIRST_RUNS + i),
-        ),
-      )),
+  const track = async (
+    count: number,
+    first: number,
+    stage: "runs" | "extra",
+  ) => {
+    let done = 0;
+    deps.onProgress?.({ stage, done, total: count });
+    return Promise.all(
+      Array.from({ length: count }, (_, i) =>
+        scoreRun(parts, deps.generate, model, first + i).then((run) => {
+          deps.onProgress?.({ stage, done: ++done, total: count });
+          return run;
+        }),
+      ),
     );
+  };
+  const runs = await track(FIRST_RUNS, 0, "runs");
+  if (disagrees(collect(runs.map((r) => r.marks))))
+    runs.push(...(await track(EXTRA_RUNS, FIRST_RUNS, "extra")));
 
   const summary = summarise(collect(runs.map((r) => r.marks)));
   // Fluency numbers rest on word times; without believable times in every

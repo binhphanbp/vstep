@@ -1,4 +1,6 @@
-import type { GradeFailure, GradeReply } from "./server";
+import type { GradeFailure } from "./server";
+import type { GradeProgress } from "./generate";
+import type { SpeakingGrade } from "./speaking";
 import type { WritingGrade } from "./writing";
 
 /**
@@ -80,16 +82,135 @@ export function forgetAvailability() {
   availability = undefined;
 }
 
-export type RequestFailure = GradeFailure | "network" | "aborted" | "bad-reply";
+export type RequestFailure =
+  | GradeFailure
+  | "network"
+  | "aborted"
+  | "bad-reply"
+  /** Something went wrong on this device after the answer came back. */
+  | "client";
 
 export class GradeRequestError extends Error {
   constructor(
     readonly kind: RequestFailure,
     readonly retryAfter?: number,
+    /** A short technical note for the error box (an HTTP status, an error name): never content. */
+    readonly detail?: string,
   ) {
     super(kind);
   }
 }
+
+export const describeError = (error: unknown) =>
+  error instanceof Error
+    ? `${error.name}: ${error.message}`.slice(0, 200)
+    : String(error).slice(0, 200);
+
+/**
+ * Reads the answer to a grading request: either one JSON body, or a stream of
+ * JSON lines (`progress`, `ping`, then `grade` or `error`). Returns the grade
+ * or throws what went wrong, naming the HTTP status or how the stream ended.
+ */
+async function readReply<G extends { status: string }>(
+  response: Response,
+  onProgress?: (progress: GradeProgress | { stage: "started" }) => void,
+): Promise<G> {
+  const kind = response.headers.get("content-type") ?? "";
+  if (!kind.includes("application/x-ndjson")) {
+    let body: {
+      grade?: G;
+      error?: GradeFailure;
+      retryAfter?: number;
+      detail?: string;
+    };
+    try {
+      body = await response.json();
+    } catch {
+      throw new GradeRequestError(
+        response.ok ? "bad-reply" : "model",
+        undefined,
+        `HTTP ${response.status}, không phải JSON`,
+      );
+    }
+    if (body.grade && response.ok) {
+      if (body.grade.status === "graded" || body.grade.status === "blocked")
+        return body.grade;
+      throw new GradeRequestError("bad-reply", undefined, "trạng thái lạ");
+    }
+    throw new GradeRequestError(
+      body.error ?? "model",
+      body.retryAfter,
+      [`HTTP ${response.status}`, body.detail].filter(Boolean).join(" · "),
+    );
+  }
+  const reader = response.body?.getReader();
+  if (!reader)
+    throw new GradeRequestError("network", undefined, "không có luồng trả về");
+  const decoder = new TextDecoder();
+  let buffer = "";
+  /** Reads one line; returns the grade when it is the last event. */
+  const take = (raw: string): G | undefined => {
+    const line = raw.trim();
+    if (!line) return undefined;
+    let event: Record<string, unknown>;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      throw new GradeRequestError(
+        "bad-reply",
+        undefined,
+        "dòng không đọc được",
+      );
+    }
+    if (event.type === "progress") onProgress?.(event as never);
+    else if (event.type === "grade") {
+      const grade = event.grade as G | undefined;
+      if (grade?.status === "graded" || grade?.status === "blocked")
+        return grade;
+      throw new GradeRequestError("bad-reply", undefined, "trạng thái lạ");
+    } else if (event.type === "error")
+      throw new GradeRequestError(
+        (event.error as GradeFailure) ?? "model",
+        undefined,
+        ["lỗi báo từ máy chủ trong lúc chấm", event.detail]
+          .filter(Boolean)
+          .join(" · "),
+      );
+    return undefined;
+  };
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      buffer += decoder.decode(chunk.value, { stream: true });
+      let newline: number;
+      while ((newline = buffer.indexOf("\n")) >= 0) {
+        const found = take(buffer.slice(0, newline));
+        buffer = buffer.slice(newline + 1);
+        if (found) return found;
+      }
+    }
+    // A last line the server did not end with a newline still counts.
+    const found = take(buffer + decoder.decode());
+    if (found) return found;
+  } catch (error) {
+    if (error instanceof GradeRequestError) throw error;
+    throw new GradeRequestError(
+      (error as Error).name === "AbortError" ? "aborted" : "network",
+      undefined,
+      describeError(error),
+    );
+  }
+  throw new GradeRequestError(
+    "network",
+    undefined,
+    "kết nối đứt trước khi có kết quả",
+  );
+}
+
+export type ProgressListener = (
+  progress: GradeProgress | { stage: "started" },
+) => void;
 
 export type WritingRequest = {
   task: 1 | 2;
@@ -103,6 +224,7 @@ export async function requestWritingGrade(
   payload: WritingRequest,
   passcode: string,
   signal?: AbortSignal,
+  onProgress?: ProgressListener,
 ): Promise<WritingGrade> {
   let response: Response;
   try {
@@ -110,6 +232,7 @@ export async function requestWritingGrade(
       method: "POST",
       headers: {
         "content-type": "application/json",
+        accept: "application/x-ndjson, application/json",
         "x-grader-passcode": passcode,
       },
       body: JSON.stringify(payload),
@@ -118,22 +241,58 @@ export async function requestWritingGrade(
   } catch (error) {
     throw new GradeRequestError(
       (error as Error).name === "AbortError" ? "aborted" : "network",
+      undefined,
+      describeError(error),
     );
   }
-  let body: GradeReply | undefined;
-  try {
-    body = (await response.json()) as GradeReply;
-  } catch {
-    throw new GradeRequestError(response.ok ? "bad-reply" : "model");
-  }
-  if ("grade" in body && response.ok) {
-    if (body.grade?.status === "graded" || body.grade?.status === "blocked")
-      return body.grade;
-    throw new GradeRequestError("bad-reply");
-  }
-  const failure = "error" in body ? body.error : "model";
-  throw new GradeRequestError(
-    failure,
-    "retryAfter" in body ? body.retryAfter : undefined,
+  return readReply<WritingGrade>(response, onProgress);
+}
+
+export type SpeakingPartRequest = {
+  id: string;
+  title: string;
+  prompt: string;
+  durationSeconds: number;
+  audio: Blob;
+};
+
+/** Sends the recordings of one Speaking test as a multipart form (binary, not base64). */
+export async function requestSpeakingGrade(
+  parts: SpeakingPartRequest[],
+  passcode: string,
+  signal?: AbortSignal,
+  onProgress?: ProgressListener,
+): Promise<SpeakingGrade> {
+  const form = new FormData();
+  form.set(
+    "meta",
+    JSON.stringify({
+      parts: parts.map(({ id, title, prompt, durationSeconds }) => ({
+        id,
+        title,
+        prompt,
+        durationSeconds,
+      })),
+    }),
   );
+  parts.forEach((part, i) => form.set(`audio${i}`, part.audio, `part${i}`));
+  let response: Response;
+  try {
+    response = await fetch("/api/grade/speaking", {
+      method: "POST",
+      headers: {
+        accept: "application/x-ndjson, application/json",
+        "x-grader-passcode": passcode,
+      },
+      body: form,
+      signal,
+    });
+  } catch (error) {
+    throw new GradeRequestError(
+      (error as Error).name === "AbortError" ? "aborted" : "network",
+      undefined,
+      describeError(error),
+    );
+  }
+  return readReply<SpeakingGrade>(response, onProgress);
 }
