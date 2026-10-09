@@ -21,6 +21,7 @@ const criterion = (score: number, showScore: boolean) => ({
   whyNotLower: "Trả lời đúng các câu hỏi.",
   toRaise: "Nói liền mạch hơn ở phần hai.",
   showScore,
+  validated: false,
 });
 function gradeBody(showScore: boolean, over: Record<string, unknown> = {}) {
   const fluency = {
@@ -300,6 +301,9 @@ test("shows the Speaking score, with how it is worked out, only when the grade s
   await expect(result).toContainText("độ tin cậy thấp");
   await expect(result.locator(".pill", { hasText: "6/10" })).toHaveCount(3);
   await expect(result.locator(".pill", { hasText: "7/10" })).toHaveCount(2);
+  await expect(result.getByRole("note").first()).toContainText(
+    "chưa được so với điểm của người chấm",
+  );
 });
 
 test("says what is wrong with the recordings before sending anything", async ({

@@ -10,7 +10,7 @@ import {
 } from "./aggregate";
 import { GRADER_MODEL, PROMPT_VERSION, RUBRIC_VERSION } from "./config";
 import type { Generate, OnProgress } from "./generate";
-import { GATES, type Gates } from "./gates";
+import { GATES, SHOW_UNVALIDATED_SCORES, type Gates } from "./gates";
 import {
   writingMeasures,
   writingBlock,
@@ -59,8 +59,10 @@ export type CriterionGrade = CriterionResult & {
   whyNotHigher: string;
   whyNotLower: string;
   toRaise: string;
-  /** False until this criterion has met its bar against human raters (gates.ts). */
+  /** Whether the mark is shown (see SHOW_UNVALIDATED_SCORES in gates.ts). */
   showScore: boolean;
+  /** True only once this criterion has met its bar against human raters. */
+  validated: boolean;
 };
 
 export type WritingGrade =
@@ -244,11 +246,14 @@ export async function gradeWriting(
     generate: Generate;
     model?: string;
     gates?: Gates;
+    /** Show marks that no harness report has validated yet (default: SHOW_UNVALIDATED_SCORES). */
+    showUnvalidated?: boolean;
     onProgress?: OnProgress;
   },
 ): Promise<WritingGrade> {
   const model = deps.model ?? GRADER_MODEL;
   const gates = deps.gates ?? GATES;
+  const showUnvalidated = deps.showUnvalidated ?? SHOW_UNVALIDATED_SCORES;
   const measures = writingMeasures(input);
   const block = writingBlock(measures);
   if (block) return { status: "blocked", reason: block, measures };
@@ -287,7 +292,8 @@ export async function gradeWriting(
       ...result,
       band: bandOfMark(result.score),
       ...closest.detail[key],
-      showScore: gates.writing[key],
+      showScore: gates.writing[key] || showUnvalidated,
+      validated: gates.writing[key],
     };
   }
   const rawTaskScore = writingTaskScore(

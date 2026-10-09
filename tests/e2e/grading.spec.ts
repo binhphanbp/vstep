@@ -25,6 +25,7 @@ const criterion = (score: number, showScore: boolean) => ({
   whyNotLower: "Đủ các ý chính của đề.",
   toRaise: "Thêm một ví dụ cụ thể cho lời khuyên ăn uống.",
   showScore,
+  validated: false,
 });
 function gradeBody(showScore: boolean, over: Record<string, unknown> = {}) {
   return {
@@ -241,6 +242,10 @@ test("shows the numbers only when the grade says the criteria may show", async (
   const result = panel(page).locator(".grade-result");
   await expect(result).toContainText("Điểm bài (ước lượng): 6,25/10");
   await expect(result).toContainText("Bậc 4 (B2)");
+  // Shown, but never passed off as checked: a note and a label on every score.
+  await expect(result.getByRole("note").first()).toContainText(
+    "chưa được so với điểm của người chấm",
+  );
   await expect(result.locator(".pill", { hasText: "6/10" })).toHaveCount(3);
   await expect(result.locator(".pill", { hasText: "7/10" })).toHaveCount(1);
   await expect(result).toContainText("độ tin cậy thấp");
@@ -342,23 +347,49 @@ test("can be stopped while it works", async ({ page }) => {
   ).toBeEnabled();
 });
 
-test("will not grade a task that has no approved list of required points", async ({
+test("grades Task 2 too, and then works out the Writing mark from both tasks", async ({
   page,
 }) => {
   await serverIs(page, true);
   await seed(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("may.ai.consent", "yes");
+    localStorage.setItem("may.ai.passcode", "open sesame");
+  });
+  const requests = await grading(page, (route) => {
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    return route.fulfill({
+      json: {
+        grade: gradeBody(true, { taskScore: body.task === 1 ? 6 : 7 }),
+      },
+    });
+  });
   await page.goto("/papers/132");
   const details = page
     .locator(".paper-review details")
-    .filter({ hasText: "Bài viết của bạn" })
-    .nth(1);
-  await details.locator("summary").first().click();
-  await expect(details).toContainText(
-    "chưa có danh sách ý bắt buộc đã được duyệt",
-  );
-  await expect(
-    details.getByRole("button", { name: /Chấm bài viết này/ }),
-  ).toHaveCount(0);
+    .filter({ hasText: "Bài viết của bạn" });
+  // No Writing mark until both tasks are graded.
+  await expect(page.locator("#writing-total")).toHaveCount(0);
+  await details.nth(0).locator("summary").first().click();
+  await details
+    .nth(0)
+    .getByRole("button", { name: "Chấm bài viết này" })
+    .click();
+  await expect(details.nth(0).locator(".grade-result")).toBeVisible();
+  await expect(page.locator("#writing-total")).toHaveCount(0);
+  await details.nth(1).locator("summary").first().click();
+  await details
+    .nth(1)
+    .getByRole("button", { name: "Chấm bài viết này" })
+    .click();
+  await expect(details.nth(1).locator(".grade-result")).toBeVisible();
+  expect(requests.map((r) => r.body.task)).toEqual([1, 2]);
+  // (6 + 2 × 7) / 3 = 6,67 → 6,5
+  const total = page.getByRole("region", { name: /Điểm Viết của lượt này/ });
+  await expect(total).toContainText("6,5/10");
+  await expect(total).toContainText("Bài 1 chiếm 1/3 (6)");
+  await expect(total).toContainText("Bài 2 chiếm 2/3 (7)");
+  await expect(total).toContainText("chưa được so với điểm của người chấm");
 });
 
 test("warns when the writing is not what was graded", async ({ page }) => {
@@ -613,4 +644,42 @@ test("the content of a review is not pressed against its edges", async ({
   expect(
     box!.x + box!.width - (grade!.x + grade!.width),
   ).toBeGreaterThanOrEqual(12);
+});
+
+test("a Writing lesson can be graded after it is filed, with the lesson's own points", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await page.addInitScript(() => {
+    localStorage.setItem("may.ai.consent", "yes");
+    localStorage.setItem("may.ai.passcode", "open sesame");
+  });
+  const requests = await grading(page, (route) =>
+    route.fulfill({ json: { grade: gradeBody(true) } }),
+  );
+  await page.goto("/practice/writing-email");
+  // Nothing to grade before the lesson is filed.
+  await expect(page.getByRole("region", { name: "Chấm bằng AI" })).toHaveCount(
+    0,
+  );
+  await page.getByRole("textbox", { name: "Bài viết của bạn" }).fill(essay);
+  for (const row of await page.locator(".self-check .criteria-list li").all())
+    await row.getByRole("button", { name: "Tạm ổn" }).click();
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  const grade = page.getByRole("region", { name: "Chấm bằng AI" });
+  await grade.getByRole("button", { name: "Chấm bài viết này" }).click();
+  const result = grade.locator(".grade-result");
+  await expect(result).toContainText("Điểm bài (ước lượng): 6,25/10");
+  await expect(result.getByRole("note").first()).toContainText(
+    "chưa được so với điểm của người chấm",
+  );
+  expect(requests).toHaveLength(1);
+  expect(requests[0].body).toMatchObject({
+    task: 1,
+    slotId: "writing-email",
+    text: essay,
+  });
+  const state = await saved(page);
+  expect(Object.keys(state.grades)).toHaveLength(1);
+  expect(Object.keys(state.grades)[0]).toMatch(/^attempt:/);
 });

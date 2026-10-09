@@ -4,14 +4,14 @@ Lập ngày 08/10/2026, sửa lần 2 cùng ngày theo các quyết định củ
 
 ## 1. Quyết định đã chốt
 
-| # | Quyết định của chủ dự án | Hệ quả trong kế hoạch |
-| --- | --- | --- |
-| 1 | Bỏ hết phần giáo viên, Mây chỉ dùng cho Gùa | Đợt 0 bỏ cả “Gói gửi giáo viên” lẫn “Gói duyệt học liệu” |
-| 2 | Được gửi bài làm ra dịch vụ AI | Đổi nguyên tắc riêng tư một cách công khai (mục 9) |
-| 3 | Dùng **Gemini**, chủ dự án cấp khóa API; tối ưu, không gò bó chi phí | Một nhà cung cấp duy nhất cho cả Viết và Nói; không dùng thêm dịch vụ giọng nói riêng |
-| 4 | Thang chấm phải hợp lý và giống thật | Dựng thang theo cấu trúc chính thức đã xác minh (mục 3); phần mô tả từng mức lấy từ văn bản gốc của ĐH Ngoại ngữ khi có |
-| 5 | Không thuê được giám khảo | Đo độ chính xác bằng **dữ liệu công khai có điểm người chấm** (mục 7), kiểm đi kiểm lại bằng nhiều lớp |
-| 6 | Có điểm tổng bốn kỹ năng nếu thang rõ ràng | Làm khi có bảng quy đổi chính thức của Nghe và Đọc; chưa có thì không tự đặt (mục 3.4) |
+| #   | Quyết định của chủ dự án                                             | Hệ quả trong kế hoạch                                                                                                   |
+| --- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 1   | Bỏ hết phần giáo viên, Mây chỉ dùng cho Gùa                          | Đợt 0 bỏ cả “Gói gửi giáo viên” lẫn “Gói duyệt học liệu”                                                                |
+| 2   | Được gửi bài làm ra dịch vụ AI                                       | Đổi nguyên tắc riêng tư một cách công khai (mục 9)                                                                      |
+| 3   | Dùng **Gemini**, chủ dự án cấp khóa API; tối ưu, không gò bó chi phí | Một nhà cung cấp duy nhất cho cả Viết và Nói; không dùng thêm dịch vụ giọng nói riêng                                   |
+| 4   | Thang chấm phải hợp lý và giống thật                                 | Dựng thang theo cấu trúc chính thức đã xác minh (mục 3); phần mô tả từng mức lấy từ văn bản gốc của ĐH Ngoại ngữ khi có |
+| 5   | Không thuê được giám khảo                                            | Đo độ chính xác bằng **dữ liệu công khai có điểm người chấm** (mục 7), kiểm đi kiểm lại bằng nhiều lớp                  |
+| 6   | Có điểm tổng bốn kỹ năng nếu thang rõ ràng                           | Làm khi có bảng quy đổi chính thức của Nghe và Đọc; chưa có thì không tự đặt (mục 3.4)                                  |
 
 ## 2. Điều phải nói thẳng: “chính xác 100%” nghĩa là gì ở đây
 
@@ -23,7 +23,7 @@ Vì thế “chuẩn chỉnh” trong kế hoạch này có nghĩa cụ thể, k
 2. **Mỗi lỗi AI chỉ ra là có thật**: AI phải trích nguyên văn; code kiểm câu trích có nằm trong bài không; không khớp thì loại trước khi chấm.
 3. **Không cảm tính**: mỗi điểm phải gắn với mô tả của mức đó trong thang và bằng chứng trong bài; mỗi bài chấm độc lập nhiều lần, lấy trung vị.
 4. **Cùng một bài, cùng một điểm**: kết quả lưu lại theo dấu của bài làm, đề, phiên bản thang, phiên bản lời nhắc và model; mở lại thấy đúng kết quả cũ.
-5. **Biết mình lệch bao nhiêu so với người chấm**: đo trên dữ liệu có điểm người chấm (mục 7); **tiêu chí nào không qua ngưỡng thì không hiện điểm**, chỉ hiện nhận xét và lỗi.
+5. **Biết mình lệch bao nhiêu so với người chấm**: đo trên dữ liệu có điểm người chấm (mục 7); **tiêu chí nào chưa qua ngưỡng thì điểm kèm nhãn “chưa đối chiếu giám khảo”** (quyết định ngày 09/10/2026; trước đó là không hiện điểm).
 6. **Không chắc thì nói là không chắc**: các lần chấm lệch quá ngưỡng thì hiện khoảng điểm và “độ tin cậy thấp”.
 
 Mọi điểm hiện ra đều ghi: **“Điểm ước lượng theo thang VSTEP do AI chấm, không phải điểm chính thức.”**
@@ -34,24 +34,24 @@ Phân loại nguồn: **CHÍNH THỨC** (Bộ GD&ĐT, ĐH Ngoại ngữ – ĐHQ
 
 ### 3.1 Viết (đã đủ để tính điểm)
 
-| Nội dung | Quy tắc | Nguồn |
-| --- | --- | --- |
-| Bài 1 | Thư hoặc email, “khoảng 120 từ” (QĐ 729) / “ít nhất 120 từ” (trang của ĐH Ngoại ngữ); chiếm 1/3 điểm Viết | CHÍNH THỨC |
-| Bài 2 | Bài luận “khoảng 250 từ” / “ít nhất 250 từ”, dùng lý do và ví dụ cụ thể; chiếm 2/3 điểm Viết | CHÍNH THỨC |
-| Tiêu chí | Bốn tiêu chí, mỗi tiêu chí 0–10: **hoàn thành nhiệm vụ** (ý chính và phát triển ý), **tổ chức bài** (mạch lạc và liên kết), **từ vựng** (độ rộng và độ phù hợp), **ngữ pháp** (độ rộng và độ chính xác) | HỌC THUẬT (Nguyễn Thị Ngọc Quỳnh 2018, VNU Journal of Foreign Studies) |
-| Điểm một bài | Trung bình bốn tiêu chí, thang 10 | HỌC THUẬT (như trên) |
-| Điểm Viết | (Bài 1 + Bài 2 × 2) / 3, làm tròn đến 0,5 | HỌC THUẬT, trọng số 1/3 – 2/3 là CHÍNH THỨC |
-| Làm tròn | Phần lẻ từ 0,25 đến dưới 0,75 thành 0,5; từ 0,75 thành 1 (tức làm tròn đến 0,5 gần nhất, đúng nửa thì lên) | CHÍNH THỨC (Thông tư 23/2017) |
-| Thiếu từ, lạc đề | **Không tìm thấy quy định riêng.** Mây xử lý trong tiêu chí hoàn thành nhiệm vụ: thiếu từ làm giảm mức của tiêu chí này theo mô tả thang; bài lạc đề hoàn toàn rơi vào mức thấp nhất | Giả định, ghi rõ trên màn kết quả |
+| Nội dung         | Quy tắc                                                                                                                                                                                                 | Nguồn                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Bài 1            | Thư hoặc email, “khoảng 120 từ” (QĐ 729) / “ít nhất 120 từ” (trang của ĐH Ngoại ngữ); chiếm 1/3 điểm Viết                                                                                               | CHÍNH THỨC                                                             |
+| Bài 2            | Bài luận “khoảng 250 từ” / “ít nhất 250 từ”, dùng lý do và ví dụ cụ thể; chiếm 2/3 điểm Viết                                                                                                            | CHÍNH THỨC                                                             |
+| Tiêu chí         | Bốn tiêu chí, mỗi tiêu chí 0–10: **hoàn thành nhiệm vụ** (ý chính và phát triển ý), **tổ chức bài** (mạch lạc và liên kết), **từ vựng** (độ rộng và độ phù hợp), **ngữ pháp** (độ rộng và độ chính xác) | HỌC THUẬT (Nguyễn Thị Ngọc Quỳnh 2018, VNU Journal of Foreign Studies) |
+| Điểm một bài     | Trung bình bốn tiêu chí, thang 10                                                                                                                                                                       | HỌC THUẬT (như trên)                                                   |
+| Điểm Viết        | (Bài 1 + Bài 2 × 2) / 3, làm tròn đến 0,5                                                                                                                                                               | HỌC THUẬT, trọng số 1/3 – 2/3 là CHÍNH THỨC                            |
+| Làm tròn         | Phần lẻ từ 0,25 đến dưới 0,75 thành 0,5; từ 0,75 thành 1 (tức làm tròn đến 0,5 gần nhất, đúng nửa thì lên)                                                                                              | CHÍNH THỨC (Thông tư 23/2017)                                          |
+| Thiếu từ, lạc đề | **Không tìm thấy quy định riêng.** Mây xử lý trong tiêu chí hoàn thành nhiệm vụ: thiếu từ làm giảm mức của tiêu chí này theo mô tả thang; bài lạc đề hoàn toàn rơi vào mức thấp nhất                    | Giả định, ghi rõ trên màn kết quả                                      |
 
 ### 3.2 Nói (đủ tiêu chí, còn một khoảng trống về cách cộng)
 
-| Nội dung | Quy tắc | Nguồn |
-| --- | --- | --- |
-| Cấu trúc | 12 phút, ba phần: tương tác xã hội; thảo luận giải pháp; phát triển chủ đề có câu hỏi thêm | CHÍNH THỨC |
-| Tiêu chí | Năm tiêu chí, mỗi tiêu chí 0–10 (0 là không trả lời, 10 là thành thạo): **ngữ pháp** (độ chính xác, độ phức tạp), **từ vựng** (độ chính xác, độ tinh tế), **phát âm** (âm, trọng âm, ngữ điệu), **độ trôi chảy** (ngập ngừng, tốc độ, tự sửa), **quản lý diễn ngôn / phát triển nội dung** (liên kết, đúng trọng tâm, mở rộng ý); tổng tối đa 50 | HỌC THUẬT (Thai & Sheehan 2022; Language Testing in Asia 2024) |
-| Chấm theo phần hay cả bài | Giám khảo chấm sau khi nghe cả ba phần, cho một điểm mỗi tiêu chí | HỌC THUẬT (gián tiếp) |
-| Điểm Nói | **Khoảng trống:** chưa nguồn nào nêu công thức. Mây dùng **trung bình năm tiêu chí** (tổng /50 chia 5), làm tròn 0,5, và ghi là giả định cho đến khi có văn bản | Giả định |
+| Nội dung                  | Quy tắc                                                                                                                                                                                                                                                                                                                                          | Nguồn                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Cấu trúc                  | 12 phút, ba phần: tương tác xã hội; thảo luận giải pháp; phát triển chủ đề có câu hỏi thêm                                                                                                                                                                                                                                                       | CHÍNH THỨC                                                     |
+| Tiêu chí                  | Năm tiêu chí, mỗi tiêu chí 0–10 (0 là không trả lời, 10 là thành thạo): **ngữ pháp** (độ chính xác, độ phức tạp), **từ vựng** (độ chính xác, độ tinh tế), **phát âm** (âm, trọng âm, ngữ điệu), **độ trôi chảy** (ngập ngừng, tốc độ, tự sửa), **quản lý diễn ngôn / phát triển nội dung** (liên kết, đúng trọng tâm, mở rộng ý); tổng tối đa 50 | HỌC THUẬT (Thai & Sheehan 2022; Language Testing in Asia 2024) |
+| Chấm theo phần hay cả bài | Giám khảo chấm sau khi nghe cả ba phần, cho một điểm mỗi tiêu chí                                                                                                                                                                                                                                                                                | HỌC THUẬT (gián tiếp)                                          |
+| Điểm Nói                  | **Khoảng trống:** chưa nguồn nào nêu công thức. Mây dùng **trung bình năm tiêu chí** (tổng /50 chia 5), làm tròn 0,5, và ghi là giả định cho đến khi có văn bản                                                                                                                                                                                  | Giả định                                                       |
 
 ### 3.3 Mô tả từng mức điểm (phần còn thiếu, việc đầu tiên của Đợt 1)
 
@@ -64,11 +64,11 @@ Thang được lưu là **dữ liệu có phiên bản** (`rubricVersion`), khô
 
 ### 3.4 Điểm tổng bốn kỹ năng
 
-| Nội dung | Quy tắc | Nguồn |
-| --- | --- | --- |
-| Điểm mỗi kỹ năng | Thang 0–10, làm tròn 0,5 | CHÍNH THỨC (QĐ 729) |
-| Điểm tổng | Trung bình bốn kỹ năng, làm tròn 0,5 | CHÍNH THỨC (QĐ 729) |
-| Bậc | Dưới 4,0 không xét; 4,0–5,5 bậc 3 (B1); 6,0–8,0 bậc 4 (B2); 8,5–10 bậc 5 (C1) | CHÍNH THỨC (ĐH Ngoại ngữ) |
+| Nội dung                              | Quy tắc                                                                                                                                                                                                         | Nguồn                        |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Điểm mỗi kỹ năng                      | Thang 0–10, làm tròn 0,5                                                                                                                                                                                        | CHÍNH THỨC (QĐ 729)          |
+| Điểm tổng                             | Trung bình bốn kỹ năng, làm tròn 0,5                                                                                                                                                                            | CHÍNH THỨC (QĐ 729)          |
+| Bậc                                   | Dưới 4,0 không xét; 4,0–5,5 bậc 3 (B1); 6,0–8,0 bậc 4 (B2); 8,5–10 bậc 5 (C1)                                                                                                                                   | CHÍNH THỨC (ĐH Ngoại ngữ)    |
 | Nghe 35 câu, Đọc 40 câu sang thang 10 | Có một **bảng quy đổi cố định** dựng bằng phương pháp Angoff, áp cho mọi đề (luận án Nguyễn Thị Quỳnh Yến, ĐH Ngoại ngữ 2017), nhưng **chưa lấy được các con số**. Các bảng trên trang luyện thi mâu thuẫn nhau | HỌC THUẬT, số liệu còn thiếu |
 
 Quyết định: **chưa có bảng chính thức thì Mây không hiện điểm tổng và bậc tổng**; Nghe và Đọc tiếp tục hiện số câu đúng như hiện nay. Khi lấy được bảng (từ bản tóm tắt luận án hoặc văn bản của ĐH Ngoại ngữ), Đợt 4 thêm điểm tổng. Không dùng phép chia tuyến tính, vì bảng thật dựa trên điểm cắt chứ không tuyến tính.
@@ -77,10 +77,10 @@ Quyết định: **chưa có bảng chính thức thì Mây không hiện điể
 
 Thông tin dưới đây đọc từ tài liệu và SDK chính thức của Google ngày 08/10/2026; **kiểm lại ngay trước khi viết code** vì Google thay model thường xuyên.
 
-| Model | Trạng thái | Giá mỗi triệu token (vào / ra, gồm suy nghĩ) | Ghi chú |
-| --- | --- | --- | --- |
-| `gemini-3.1-pro-preview` | Bản xem trước | 2 / 12 USD | Model “Pro” mạnh nhất cho suy luận phức tạp; bản xem trước có thể đổi và giới hạn chặt hơn; không tắt được phần suy nghĩ |
-| `gemini-3.8-flash` | Ổn định | 0,75 / 3,75 USD (đến 31/12/2026) | Bản Flash mạnh nhất; nhận âm thanh; mức suy nghĩ thấp, vừa, cao |
+| Model                    | Trạng thái    | Giá mỗi triệu token (vào / ra, gồm suy nghĩ) | Ghi chú                                                                                                                  |
+| ------------------------ | ------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `gemini-3.1-pro-preview` | Bản xem trước | 2 / 12 USD                                   | Model “Pro” mạnh nhất cho suy luận phức tạp; bản xem trước có thể đổi và giới hạn chặt hơn; không tắt được phần suy nghĩ |
+| `gemini-3.8-flash`       | Ổn định       | 0,75 / 3,75 USD (đến 31/12/2026)             | Bản Flash mạnh nhất; nhận âm thanh; mức suy nghĩ thấp, vừa, cao                                                          |
 
 - **Không chọn theo cảm tính:** Đợt 1 chạy cả hai model trên cùng bộ dữ liệu đo (mục 7), chọn model đồng thuận với người chấm cao hơn. Model được **ghim theo tên chính xác** trong cấu hình; đổi model là một thay đổi có đo lại.
 - **Mức suy nghĩ:** `thinkingLevel: HIGH`.
@@ -121,28 +121,28 @@ Không có dữ liệu VSTEP công khai nào có điểm của giám khảo. K�
 
 ### 7.1 Dữ liệu dùng để đo
 
-| Bộ dữ liệu | Có gì | Dùng để kiểm | Điều kiện |
-| --- | --- | --- | --- |
-| **Write & Improve 2024** (Cambridge) | ~5.000 bộ bài viết, mỗi bài có mức CEFR do giám khảo có chứng chỉ gán; tiếng Việt là một trong năm tiếng mẹ đẻ đông nhất | AI xếp đúng bậc B1/B2/C1 cho bài Viết | Chủ dự án tự ký giấy phép (phi thương mại, nghiên cứu và giáo dục); dữ liệu không đưa vào repo; không công bố số liệu suy ra khi chưa được Cambridge cho phép; gọi API thương mại chỉ khi dữ liệu không bị giữ để huấn luyện (tầng trả phí của Gemini đáp ứng) |
-| **ELLIPSE** | ~6.500 bài nghị luận, hai người chấm, sáu tiêu chí (gồm ngữ pháp, từ vựng, liên kết) | AI chấm đúng **từng tiêu chí** (ngữ pháp, từ vựng, tổ chức) | Giấy phép CC BY-NC-SA 4.0, tải tự do; người viết là học sinh trung học ở Mỹ, nên chỉ dùng cho tương quan tiêu chí, không dùng cho bậc |
-| **Speak & Improve 2025** (Cambridge) | ~315 giờ nói, điểm CEFR cho từng phần, các phần gần giống Phần 1 và Phần 3 của VSTEP | AI xếp đúng bậc cho bài Nói | Như Write & Improve |
-| **speechocean762** | 5.000 câu đọc, năm chuyên gia chấm độ chính xác, trôi chảy, ngữ điệu | Điểm **phát âm** và **trôi chảy** | CC BY 4.0, dùng tự do; là bài đọc của người nói tiếng Trung nên chỉ kiểm phần phát âm |
-| **Bài mẫu có lời chấm của giám khảo** (Cambridge B1/B2/C1, Linguaskill thư + bài luận, LanguageCert, IELTS, Council of Europe) | Vài chục bài có bậc và lời nhận xét chính thức | Bài neo cho lời nhắc, và kiểm tra cuối | Tải công khai; chỉ dùng trong lời nhắc và bộ đo, không chép vào repo |
+| Bộ dữ liệu                                                                                                                     | Có gì                                                                                                                    | Dùng để kiểm                                                | Điều kiện                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Write & Improve 2024** (Cambridge)                                                                                           | ~5.000 bộ bài viết, mỗi bài có mức CEFR do giám khảo có chứng chỉ gán; tiếng Việt là một trong năm tiếng mẹ đẻ đông nhất | AI xếp đúng bậc B1/B2/C1 cho bài Viết                       | Chủ dự án tự ký giấy phép (phi thương mại, nghiên cứu và giáo dục); dữ liệu không đưa vào repo; không công bố số liệu suy ra khi chưa được Cambridge cho phép; gọi API thương mại chỉ khi dữ liệu không bị giữ để huấn luyện (tầng trả phí của Gemini đáp ứng) |
+| **ELLIPSE**                                                                                                                    | ~6.500 bài nghị luận, hai người chấm, sáu tiêu chí (gồm ngữ pháp, từ vựng, liên kết)                                     | AI chấm đúng **từng tiêu chí** (ngữ pháp, từ vựng, tổ chức) | Giấy phép CC BY-NC-SA 4.0, tải tự do; người viết là học sinh trung học ở Mỹ, nên chỉ dùng cho tương quan tiêu chí, không dùng cho bậc                                                                                                                          |
+| **Speak & Improve 2025** (Cambridge)                                                                                           | ~315 giờ nói, điểm CEFR cho từng phần, các phần gần giống Phần 1 và Phần 3 của VSTEP                                     | AI xếp đúng bậc cho bài Nói                                 | Như Write & Improve                                                                                                                                                                                                                                            |
+| **speechocean762**                                                                                                             | 5.000 câu đọc, năm chuyên gia chấm độ chính xác, trôi chảy, ngữ điệu                                                     | Điểm **phát âm** và **trôi chảy**                           | CC BY 4.0, dùng tự do; là bài đọc của người nói tiếng Trung nên chỉ kiểm phần phát âm                                                                                                                                                                          |
+| **Bài mẫu có lời chấm của giám khảo** (Cambridge B1/B2/C1, Linguaskill thư + bài luận, LanguageCert, IELTS, Council of Europe) | Vài chục bài có bậc và lời nhận xét chính thức                                                                           | Bài neo cho lời nhắc, và kiểm tra cuối                      | Tải công khai; chỉ dùng trong lời nhắc và bộ đo, không chép vào repo                                                                                                                                                                                           |
 
 ### 7.2 Ngưỡng để được hiện điểm
 
 Ngưỡng đặt theo **mức đồng thuận giữa chính người chấm** trên cùng dữ liệu (đo lại trên dữ liệu ở Đợt 1) và theo các kết quả đã công bố:
 
-| Kiểm định | Chỉ số | Ngưỡng đề xuất | Căn cứ |
-| --- | --- | --- | --- |
-| Bậc của bài Viết (Write & Improve, các bài B1–C1) | QWK; trùng bậc; lệch tối đa một bậc | QWK ≥ 0,75; trùng ≥ 60%; lệch ≤ 1 bậc ≥ 95% | GPT-4 có bài neo đạt QWK 0,81, người – người 0,87 (Yancey và cộng sự 2023) |
-| Từng tiêu chí Viết (ELLIPSE) | QWK với điểm người chấm | ≥ 0,45 và độ lệch có dấu trung bình (sau khi quy điểm 0–10 về thang 1–5 của ELLIPSE bằng phép quy đổi tuyến tính cố định `1 + 0,4 × điểm`) không quá 0,25 | Người – người 0,48–0,53 |
-| Bậc của bài Nói (Speak & Improve) | Tương quan Pearson | ≥ 0,75 | Model không huấn luyện thêm đạt 0,76; huấn luyện riêng 0,82 |
-| Phát âm, trôi chảy (speechocean762) | Tương quan Pearson | ≥ 0,60 | Chuyên gia – chuyên gia 0,66–0,71 |
-| Độ ổn định | Cùng bài chấm 10 lần | Trung vị dao động ≤ 0,5 điểm ở ≥ 95% bài | — |
-| Câu trích sai | Tỉ lệ câu trích không có trong bài | ≤ 2% | — |
+| Kiểm định                                         | Chỉ số                              | Ngưỡng đề xuất                                                                                                                                            | Căn cứ                                                                     |
+| ------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Bậc của bài Viết (Write & Improve, các bài B1–C1) | QWK; trùng bậc; lệch tối đa một bậc | QWK ≥ 0,75; trùng ≥ 60%; lệch ≤ 1 bậc ≥ 95%                                                                                                               | GPT-4 có bài neo đạt QWK 0,81, người – người 0,87 (Yancey và cộng sự 2023) |
+| Từng tiêu chí Viết (ELLIPSE)                      | QWK với điểm người chấm             | ≥ 0,45 và độ lệch có dấu trung bình (sau khi quy điểm 0–10 về thang 1–5 của ELLIPSE bằng phép quy đổi tuyến tính cố định `1 + 0,4 × điểm`) không quá 0,25 | Người – người 0,48–0,53                                                    |
+| Bậc của bài Nói (Speak & Improve)                 | Tương quan Pearson                  | ≥ 0,75                                                                                                                                                    | Model không huấn luyện thêm đạt 0,76; huấn luyện riêng 0,82                |
+| Phát âm, trôi chảy (speechocean762)               | Tương quan Pearson                  | ≥ 0,60                                                                                                                                                    | Chuyên gia – chuyên gia 0,66–0,71                                          |
+| Độ ổn định                                        | Cùng bài chấm 10 lần                | Trung vị dao động ≤ 0,5 điểm ở ≥ 95% bài                                                                                                                  | —                                                                          |
+| Câu trích sai                                     | Tỉ lệ câu trích không có trong bài  | ≤ 2%                                                                                                                                                      | —                                                                          |
 
-Tiêu chí nào không đạt: app **chỉ hiện nhận xét và lỗi** cho tiêu chí đó, không hiện điểm, và điểm bài, điểm kỹ năng cũng không hiện (vì không đủ thành phần). Đạt hay không là số đo, không phải ý kiến.
+Tiêu chí nào không đạt: từ 09/10/2026 app vẫn hiện điểm của tiêu chí đó nhưng kèm một ghi chú ở đầu kết quả (điểm là ước lượng của AI, chưa được so với điểm người chấm; ngày 09/10/2026 chủ dự án nói rõ không có người chấm nào, nên không còn nhãn lặp trên từng tiêu chí) (trước đó: ẩn điểm; công tắc là `SHOW_UNVALIDATED_SCORES`). Đạt hay không là số đo, không phải ý kiến; nhãn chỉ biến mất khi có số đo cho tiêu chí đó.
 
 ### 7.3 Bài neo
 
@@ -192,7 +192,7 @@ Cần từ chủ dự án: việc 1, 3, 4 ở mục 11.
 
 **Đã làm (08/10/2026), kiểm bằng unit test và chạy thử bằng `--dry` trên dữ liệu ELLIPSE thật:**
 
-- `src/lib/grading/`: `scores.ts` (làm tròn theo Thông tư 23/2017, điểm bài Viết, điểm Viết = (Bài 1 + 2 × Bài 2)/3, điểm Nói, điểm tổng, bậc), `aggregate.ts` (trung vị, ba lần rồi thêm hai lần khi lệch quá 1 điểm), `verify.ts` (câu trích phải nằm trong bài), `measures.ts` (số từ, đoạn, câu, chép đề, chép bài mẫu, tiếng Việt; số đo trôi chảy từ thời điểm từng từ; kiểm thời điểm từng từ có khớp độ dài bản ghi), `schema.ts` (khuôn JSON và Zod), `prompts.ts` (lời nhắc có phiên bản, bài làm đóng khung như dữ liệu), `writing.ts` và `speaking.ts` (quy trình đầy đủ, nhận một hàm gọi model để thay bằng bản giả khi kiểm thử), `gemini.ts` (lời gọi thật, chỉ phía máy chủ), `gates.ts` (**mọi tiêu chí đang đóng**: chưa đo thì chưa hiện điểm), `requirements.ts` (ý bắt buộc lấy từ chính các dòng gạch đầu dòng của đề Task 1; mẫu cho Task 2 **chưa dùng cho đến khi chủ dự án duyệt**), `metrics.ts` (Pearson, QWK, sai số).
+- `src/lib/grading/`: `scores.ts` (làm tròn theo Thông tư 23/2017, điểm bài Viết, điểm Viết = (Bài 1 + 2 × Bài 2)/3, điểm Nói, điểm tổng, bậc), `aggregate.ts` (trung vị, ba lần rồi thêm hai lần khi lệch quá 1 điểm), `verify.ts` (câu trích phải nằm trong bài), `measures.ts` (số từ, đoạn, câu, chép đề, chép bài mẫu, tiếng Việt; số đo trôi chảy từ thời điểm từng từ; kiểm thời điểm từng từ có khớp độ dài bản ghi), `schema.ts` (khuôn JSON và Zod), `prompts.ts` (lời nhắc có phiên bản, bài làm đóng khung như dữ liệu), `writing.ts` và `speaking.ts` (quy trình đầy đủ, nhận một hàm gọi model để thay bằng bản giả khi kiểm thử), `gemini.ts` (lời gọi thật, chỉ phía máy chủ), `gates.ts` (mọi tiêu chí **chưa được đối chiếu giám khảo**; từ 09/10/2026 điểm vẫn hiện nhưng luôn kèm nhãn nhờ `SHOW_UNVALIDATED_SCORES`, đặt `false` để ẩn lại), `requirements.ts` (ý bắt buộc lấy từ chính các dòng gạch đầu dòng của đề Task 1; mẫu cho Task 2 đã được chấp nhận ngày 09/10/2026 (`ESSAY_TEMPLATES_APPROVED = true`, thu hồi được)), `metrics.ts` (Pearson, QWK, sai số).
 - `src/lib/rubric/vstep-3-5.ts`: thang bốn bậc cho cả chín tiêu chí, dựng theo CEFR, **ghi rõ chưa phải văn bản chính thức** (`official: false`).
 - `scripts/grading-eval/run.ts` (chạy bằng `npx tsx`): các chế độ `ellipse`, `samples`, `stability`, `perturb`, `speech`; chia dữ liệu chỉnh và giữ kín cố định theo mã; báo cáo ghi vào `.data/reports/` (không commit). `perturb.ts` gồm bốn phép sửa có chiều tác động biết trước (cắt còn 80 từ, xáo câu, thêm lỗi ngữ pháp, chèn lời dặn cho người chấm).
 - Kiểm thử: 57 ca unit mới (`tests/unit/grading-*.test.ts`), gồm cả hai quy trình với model giả (ba lần chấm, thêm hai lần khi lệch, câu trích bịa bị loại, ý bắt buộc không có câu trích thì không được tính, bài lạc loại không gọi model, ô cổng đóng thì không có điểm).
@@ -204,7 +204,7 @@ Cần từ chủ dự án: việc 1, 3, 4 ở mục 11.
 - Dữ liệu Write & Improve, Speak & Improve (cần ký giấy phép) và file WAV của speechocean762: chưa có. Chỉ có ELLIPSE (đã tải sẵn) và điểm của speechocean762 (không kèm âm thanh).
 - Bài mẫu có bậc do giám khảo gán (chế độ `samples`): cần tải về `.data/samples/`.
 - Chưa có cách lấy thời điểm từng từ đáng tin: kế hoạch dùng `audioTranscriptionConfig` của Gemini hoặc model `gemini-3.5-transcribe`; chưa thử được. Trong code, nếu thời điểm không khớp độ dài bản ghi thì tiêu chí trôi chảy tự mất điểm, chỉ còn nhận xét.
-- Chủ dự án duyệt mẫu ý bắt buộc của bài luận (Task 2) ở `src/lib/grading/requirements.ts`, rồi đổi `ESSAY_TEMPLATES_APPROVED` thành `true`; bài Task 2 của đề Review 13/09 và các bài học có đề không thuộc ba mẫu đó cần danh sách riêng (`APPROVED_REQUIREMENTS`).
+- Mẫu ý bắt buộc của bài luận (Task 2) đã được chấp nhận ngày 09/10/2026 (`ESSAY_TEMPLATES_APPROVED = true` ở `src/lib/grading/requirements.ts`); các bài học Viết và Task 2 của Review 13/09 có danh sách riêng trong `APPROVED_REQUIREMENTS`, do tôi tách từ câu lệnh của đề và chủ dự án nên đọc lại.
 
 **Việc tiếp theo ngay khi có khóa:** `npx tsx scripts/grading-eval/run.ts ellipse --model gemini-3.8-flash --n 60` rồi `--model gemini-3.1-pro-preview`; sau đó `stability` và `perturb`; đọc bảng, chọn model, sửa `gates.ts` theo báo cáo.
 
@@ -233,9 +233,9 @@ Cần: việc 1, 2 ở mục 11.
 **Chưa làm, và vì sao:**
 
 - **Chưa có lần gọi Gemini thật nào** (chưa có khóa), nên chưa thấy một kết quả thật hiện lên giao diện; mọi ca E2E dùng API giả.
-- **Hầu hết bài Viết chưa chấm được**: chỉ bài Task 1 của năm đề nhập (đọc ý bắt buộc từ chính đề) và đề Review 13/09 Task 1. Task 2 và bài học Viết cần danh sách ý bắt buộc đã được chủ dự án duyệt (mục Đợt 1); giao diện nói rõ lý do thay vì ẩn.
-- **Chưa gắn vào kết quả bài học Viết và buổi thi rút gọn**: các bài đó chưa có danh sách ý bắt buộc đã duyệt, nên nút sẽ không dùng được; gắn cùng lúc với việc duyệt danh sách để không có nút chết.
-- **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo), nên màn kết quả hiện nhận xét, ý còn thiếu và lỗi, không hiện điểm.
+- ~~Hầu hết bài Viết chưa chấm được~~ (đã giải quyết 09/10/2026: Task 2 dùng mẫu theo dạng đề đã được chấp nhận; bài học Viết và Task 2 của Review 13/09 có danh sách riêng). Đề không khớp mẫu hay danh sách nào vẫn không chấm và giao diện nói rõ lý do.
+- Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). **Buổi thi rút gọn (`/exam`) vẫn chưa gắn.**
+- **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo). Từ 09/10/2026 điểm vẫn hiện nhưng đầu kết quả có một ghi chú nói rõ đây là ước lượng của AI; ghi chú chỉ biến mất khi mọi tiêu chí có cổng mở sau khi đo bằng các phép tự thân.
 
 ### Đợt 3: Chấm Nói
 
@@ -268,12 +268,12 @@ Cần: việc 1, 2, 4 ở mục 11.
 
 ## 11. Việc chỉ chủ dự án làm được
 
-| # | Việc | Cần cho | Ghi chú |
-| --- | --- | --- | --- |
-| 1 | **Khóa Gemini API ở tầng trả phí** (dự án Google AI Studio đã gắn tài khoản thanh toán). Đặt vào biến môi trường `GEMINI_API_KEY` của Vercel và của môi trường làm việc này (mục Secrets) | Đợt 1, 2, 3 | Không gửi khóa qua tin nhắn chat; đặt trong phần cài đặt của Vercel và của môi trường. Nên bật cảnh báo ngân sách trên Google Cloud |
-| 2 | Đặt `GRADER_PASSCODE` trên Vercel (một chuỗi dài, ngẫu nhiên) và đưa Gùa mã này | Đợt 2 | |
-| 3 | **Cho môi trường làm việc truy cập** `vstep.vnu.edu.vn`, `js.vnu.edu.vn`, `jfs.ulis.vnu.edu.vn`, `saudaihoc.ulis.vnu.edu.vn`, `ai.google.dev`, `researchdatasets.cambridge.org`, `github.com` (mục Network access → Allowed domains trong cài đặt môi trường), **hoặc** tải giúp file “Mô tả khái quát các điểm Viết, Nói VSTEP.3-5” và bản tóm tắt luận án Nguyễn Thị Quỳnh Yến rồi gửi vào repo | Đợt 1 | Thiếu văn bản gốc thì thang dựng theo CEFR và ghi rõ như vậy (mục 3.3) |
-| 4 | **Ký giấy phép** Write & Improve 2024 và Speak & Improve 2025 trên trang của Cambridge (bằng tên và email của chủ dự án, mục đích học tập cá nhân, phi thương mại), tải dữ liệu và đưa vào `.data/` của môi trường làm việc | Đợt 1, 3 | Nếu Cambridge không chấp nhận mục đích này, các kiểm định bậc dựa vào bài mẫu có lời chấm chính thức (mục 7.1, dòng cuối) với cỡ mẫu nhỏ hơn, và kế hoạch ghi rõ độ chắc chắn thấp hơn |
+| #   | Việc                                                                                                                                                                                                                                                                                                                                                                                              | Cần cho     | Ghi chú                                                                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Khóa Gemini API ở tầng trả phí** (dự án Google AI Studio đã gắn tài khoản thanh toán). Đặt vào biến môi trường `GEMINI_API_KEY` của Vercel và của môi trường làm việc này (mục Secrets)                                                                                                                                                                                                         | Đợt 1, 2, 3 | Không gửi khóa qua tin nhắn chat; đặt trong phần cài đặt của Vercel và của môi trường. Nên bật cảnh báo ngân sách trên Google Cloud                                                    |
+| 2   | Đặt `GRADER_PASSCODE` trên Vercel (một chuỗi dài, ngẫu nhiên) và đưa Gùa mã này                                                                                                                                                                                                                                                                                                                   | Đợt 2       |                                                                                                                                                                                        |
+| 3   | **Cho môi trường làm việc truy cập** `vstep.vnu.edu.vn`, `js.vnu.edu.vn`, `jfs.ulis.vnu.edu.vn`, `saudaihoc.ulis.vnu.edu.vn`, `ai.google.dev`, `researchdatasets.cambridge.org`, `github.com` (mục Network access → Allowed domains trong cài đặt môi trường), **hoặc** tải giúp file “Mô tả khái quát các điểm Viết, Nói VSTEP.3-5” và bản tóm tắt luận án Nguyễn Thị Quỳnh Yến rồi gửi vào repo | Đợt 1       | Thiếu văn bản gốc thì thang dựng theo CEFR và ghi rõ như vậy (mục 3.3)                                                                                                                 |
+| 4   | **Ký giấy phép** Write & Improve 2024 và Speak & Improve 2025 trên trang của Cambridge (bằng tên và email của chủ dự án, mục đích học tập cá nhân, phi thương mại), tải dữ liệu và đưa vào `.data/` của môi trường làm việc                                                                                                                                                                       | Đợt 1, 3    | Nếu Cambridge không chấp nhận mục đích này, các kiểm định bậc dựa vào bài mẫu có lời chấm chính thức (mục 7.1, dòng cuối) với cỡ mẫu nhỏ hơn, và kế hoạch ghi rõ độ chắc chắn thấp hơn |
 
 ## 12. Chi phí ước lượng (đo thật ở Đợt 1)
 
@@ -282,7 +282,7 @@ Một bài Viết: ba lần × (phân tích + chấm), mỗi lần khoảng 6–
 ## 13. Nguồn
 
 - **Quy chế, định dạng (chính thức):** Quyết định 729/QĐ-BGDĐT ngày 11/3/2015; Thông tư 23/2017/TT-BGDĐT và Thông tư 24/2021/TT-BGDĐT (chấm hai vòng, làm tròn); trang định dạng đề và điểm, bậc của ĐH Ngoại ngữ – ĐHQGHN: <https://vstep.vnu.edu.vn/dinh-dang-de-thi-vstep-3-5/>, <https://vstep.vnu.edu.vn/scores-levels/>. Cần kiểm thêm Thông tư 09/2026/TT-BGDĐT (hiệu lực 15/4/2026) thay Thông tư 23/2017.
-- **Học thuật:** Nguyễn Thị Ngọc Quỳnh (2018), *VNU Journal of Foreign Studies* 34(4):115–128, doi 10.25073/2525-2445/vnufs.4285; Thai & Sheehan (2022), *Language Education & Assessment* 5(1):34–51, <https://files.eric.ed.gov/fulltext/EJ1382369.pdf>; *Language Testing in Asia* (2024), <https://link.springer.com/article/10.1186/s40468-024-00277-1>; Nguyễn Thị Quỳnh Yến (2017), luận án về điểm cắt bài Nghe VSTEP.3-5, ĐH Ngoại ngữ; Dunlea và cộng sự, nghiên cứu đối sánh Aptis–VSTEP (British Council).
+- **Học thuật:** Nguyễn Thị Ngọc Quỳnh (2018), _VNU Journal of Foreign Studies_ 34(4):115–128, doi 10.25073/2525-2445/vnufs.4285; Thai & Sheehan (2022), _Language Education & Assessment_ 5(1):34–51, <https://files.eric.ed.gov/fulltext/EJ1382369.pdf>; _Language Testing in Asia_ (2024), <https://link.springer.com/article/10.1186/s40468-024-00277-1>; Nguyễn Thị Quỳnh Yến (2017), luận án về điểm cắt bài Nghe VSTEP.3-5, ĐH Ngoại ngữ; Dunlea và cộng sự, nghiên cứu đối sánh Aptis–VSTEP (British Council).
 - **Gemini API:** tài liệu và SDK chính thức của Google (`@google/genai`, tài liệu khám phá API v1beta, Google Cloud pricing), đọc ngày 08/10/2026.
 - **Dữ liệu đo:** Write & Improve 2024 và Speak & Improve 2025 (Cambridge University Press & Assessment); ELLIPSE (<https://github.com/scrosseye/ELLIPSE-Corpus>); speechocean762 (<https://github.com/jimbozhang/speechocean762>); bài mẫu có lời chấm của Cambridge English, Linguaskill, LanguageCert, IELTS, Council of Europe.
 - **Kết quả đã công bố về AI chấm bài:** Yancey và cộng sự (2023, BEA); Bannò và cộng sự (2025, SLaTE, Speak & Improve).

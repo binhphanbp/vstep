@@ -5,6 +5,7 @@ import {
   ConsentBox,
   CriteriaList,
   ErrorNotice,
+  EstimateNotice,
   Waiting,
   scoreText,
   useAvailable,
@@ -253,8 +254,8 @@ export function SpeakingGradePanel({
       </h3>
       <p className="help-copy">
         Mây gửi bản ghi của cả {mine.length} phần bạn đã nói để chấm như một bài
-        thi Nói. Phát âm do AI nghe và ước lượng, chưa được đối chiếu với người
-        chấm, nên chưa hiện điểm cho tiêu chí này.
+        thi Nói. Phát âm và độ trôi chảy do AI nghe và ước lượng nên kém chắc
+        chắn hơn ngữ pháp và từ vựng.
       </p>
       <div className="button-row">
         <button
@@ -351,6 +352,7 @@ export function SpeakingResult({
           bạn.
         </p>
       )}
+      <EstimateNotice criteria={grade.criteria} />
       {grade.lowConfidence && (
         <p className="notice" role="status">
           Các lần chấm độc lập chênh nhau khá nhiều ở một vài tiêu chí, nên độ

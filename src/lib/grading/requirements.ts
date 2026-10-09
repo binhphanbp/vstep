@@ -12,10 +12,59 @@
  */
 export type Requirement = { id: string; text: string };
 
-export const APPROVED_REQUIREMENTS: Record<string, Requirement[]> = {};
+const point = (id: string, text: string): Requirement => ({ id, text });
 
-/** Flip to true when the owner has read the templates below and accepted them. */
-export const ESSAY_TEMPLATES_APPROVED = false;
+/**
+ * Lists for the tasks whose points are sentences, not bullets. Each one is the
+ * task's own instruction split at its commas: nothing is added to what the
+ * task says, so nothing is expected of the learner that the task did not ask.
+ * Keyed by the lesson id or the paper slot id.
+ */
+export const APPROVED_REQUIREMENTS: Record<string, Requirement[]> = {
+  "writing-email": [
+    point("r1", "recommend a place or area to stay"),
+    point("r2", "suggest activities you could do together"),
+    point("r3", "give advice about what to pack"),
+  ],
+  "writing-request": [
+    point("r1", "explain why you want to join"),
+    point("r2", "ask about evening or weekend classes"),
+    point("r3", "request information about fees and learning materials"),
+  ],
+  "writing-complaint": [
+    point("r1", "describe the problem"),
+    point("r2", "explain when and where you bought the fan"),
+    point("r3", "say what you would like the shop to do"),
+  ],
+  "writing-apology": [
+    point("r1", "apologise and explain the situation"),
+    point("r2", "suggest another way you can help"),
+    point("r3", "propose a new time to meet"),
+  ],
+  "writing-directions": [
+    point("r1", "explain how to travel there by bus or motorbike"),
+    point("r2", "describe what to look for near your home"),
+    point("r3", "say what to do if they get lost"),
+  ],
+  "review-1309-writing-2": [
+    point(
+      "r1",
+      "explain the reasons some learners prefer attending classes in person",
+    ),
+    point(
+      "r2",
+      "support the answer with examples from the writer's own learning experience",
+    ),
+  ],
+};
+
+/**
+ * The three templates below read the kind of essay off the task's own wording
+ * ("discuss both views", "to what extent do you agree", "causes… solutions…").
+ * Accepted by the owner on 09/10/2026, when Task 2 could not be graded without
+ * them; they can be reviewed in this file and set back to false at any time.
+ */
+export const ESSAY_TEMPLATES_APPROVED = true;
 
 const LIST_LINE = /^(?:[•·*-]|\d+[.)])\s+\S/;
 

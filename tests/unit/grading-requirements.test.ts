@@ -48,12 +48,39 @@ describe("what each task requires", () => {
       { id: "r3", text: "say thanks" },
     ]);
   });
-  it("does not grade an essay against a template nobody has approved", () => {
-    expect(ESSAY_TEMPLATES_APPROVED).toBe(false);
+  it("grades the Task 2 of every imported paper now that the templates are approved", () => {
+    expect(ESSAY_TEMPLATES_APPROVED).toBe(true);
     for (const paper of ["132", "133", "134", "135"]) {
       const task2 = writingSlots(paper)[1];
-      expect(requirementsFor(task2.id, task2.prompt), task2.id).toBeNull();
+      expect(requirementsFor(task2.id, task2.prompt), task2.id).not.toBeNull();
     }
+  });
+  it("does not grade an essay against a template when approval is withheld", () => {
+    for (const paper of ["132", "133", "134", "135"]) {
+      const task2 = writingSlots(paper)[1];
+      expect(
+        requirementsFor(task2.id, task2.prompt, { templatesApproved: false }),
+        task2.id,
+      ).toBeNull();
+    }
+  });
+  it("has a three-point list for each Writing lesson and the review-1309 essay", () => {
+    for (const id of [
+      "writing-email",
+      "writing-request",
+      "writing-complaint",
+      "writing-apology",
+      "writing-directions",
+    ])
+      expect(requirementsFor(id, "anything"), id).toHaveLength(3);
+    expect(requirementsFor("review-1309-writing-2", "anything")).toHaveLength(
+      2,
+    );
+  });
+  it("does not guess for a task with no list and no known template", () => {
+    expect(
+      requirementsFor("some-new-task", "Describe your favourite place."),
+    ).toBeNull();
   });
   it("recognises the essay types of all four imported Task 2 prompts once approved", () => {
     const types = ["132", "133", "134", "135"].map((paper) => {

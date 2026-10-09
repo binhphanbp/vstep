@@ -42,6 +42,8 @@ const criterionSchema = z.looseObject({
   whyNotLower: short(1000),
   toRaise: short(1000),
   showScore: z.boolean(),
+  /** Absent in grades saved before marks were shown unvalidated. */
+  validated: z.optional(z.boolean()),
 });
 
 export const storedGradeSchema = z.looseObject({

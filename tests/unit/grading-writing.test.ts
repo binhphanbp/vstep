@@ -130,20 +130,56 @@ describe("grading a piece of writing", () => {
     expect(grade.lowConfidence).toBe(true);
   });
 
-  it("shows no number for a criterion whose gate is closed, but still computes it", async () => {
+  it("shows the score by default but marks it as not yet checked against examiners", async () => {
     const { generate } = fake([
       { task: 6, organization: 6, vocabulary: 6, grammar: 6 },
     ]);
     const grade = await gradeWriting(input, { generate }); // the real gates: all closed
     if (grade.status !== "graded") throw new Error("expected a grade");
-    expect(grade.criteria.task.showScore).toBe(false);
-    expect(grade.taskScore).toBeNull();
+    expect(grade.criteria.task.showScore).toBe(true);
+    expect(grade.criteria.task.validated).toBe(false);
+    expect(grade.taskScore).toBe(6);
     expect(grade.rawTaskScore).toBe(6);
+  });
+
+  it("marks a criterion as validated only when its gate is open", async () => {
+    const { generate } = fake([
+      { task: 6, organization: 6, vocabulary: 6, grammar: 6 },
+    ]);
+    const full = await gradeWriting(input, { generate, gates: open });
+    if (full.status !== "graded") throw new Error("expected a grade");
+    expect(full.criteria.grammar.validated).toBe(true);
     const partial: Gates = {
       ...open,
       writing: { ...open.writing, grammar: false },
     };
     const second = await gradeWriting(input, { generate, gates: partial });
+    if (second.status !== "graded") throw new Error("expected a grade");
+    expect(second.criteria.grammar.validated).toBe(false);
+    expect(second.criteria.task.validated).toBe(true);
+  });
+
+  it("hides the numbers when showing unvalidated scores is switched off", async () => {
+    const { generate } = fake([
+      { task: 6, organization: 6, vocabulary: 6, grammar: 6 },
+    ]);
+    const grade = await gradeWriting(input, {
+      generate,
+      showUnvalidated: false,
+    });
+    if (grade.status !== "graded") throw new Error("expected a grade");
+    expect(grade.criteria.task.showScore).toBe(false);
+    expect(grade.taskScore).toBeNull();
+    expect(grade.rawTaskScore).toBe(6); // still computed, just not shown
+    const partial: Gates = {
+      ...open,
+      writing: { ...open.writing, grammar: false },
+    };
+    const second = await gradeWriting(input, {
+      generate,
+      gates: partial,
+      showUnvalidated: false,
+    });
     if (second.status !== "graded") throw new Error("expected a grade");
     expect(second.taskScore).toBeNull(); // one closed gate hides the task score
   });
