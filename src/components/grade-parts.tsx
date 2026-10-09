@@ -29,7 +29,7 @@ export function useAvailable() {
 export function AiGradeHint() {
   const available = useAvailable();
   return available
-    ? " Muốn có điểm ước lượng thì bấm “Chấm bằng AI” ở khung bên dưới."
+    ? " Muốn có điểm ước lượng thì bấm nút chấm ở khung bên dưới."
     : null;
 }
 

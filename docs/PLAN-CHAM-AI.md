@@ -234,7 +234,7 @@ Cần: việc 1, 2 ở mục 11.
 
 - **Chưa có lần gọi Gemini thật nào** (chưa có khóa), nên chưa thấy một kết quả thật hiện lên giao diện; mọi ca E2E dùng API giả.
 - ~~Hầu hết bài Viết chưa chấm được~~ (đã giải quyết 09/10/2026: Task 2 dùng mẫu theo dạng đề đã được chấp nhận; bài học Viết và Task 2 của Review 13/09 có danh sách riêng). Đề không khớp mẫu hay danh sách nào vẫn không chấm và giao diện nói rõ lý do.
-- Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). Buổi thi rút gọn (`/exam`) đã gắn nút chấm bài Viết ở màn kết thúc (09/10/2026); bài Nói của buổi thi chưa có. Trang tiến bộ có biểu đồ điểm AI theo thời gian.
+- Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). Buổi thi rút gọn (`/exam`) đã gắn nút chấm bài Viết và bài Nói ở màn kết thúc, bài học Nói đơn lẻ cũng có nút chấm (09/10/2026). Trang tiến bộ có biểu đồ điểm AI theo thời gian.
 - **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo). Từ 09/10/2026 điểm vẫn hiện nhưng đầu kết quả có một ghi chú nói rõ đây là ước lượng của AI; ghi chú chỉ biến mất khi mọi tiêu chí có cổng mở sau khi đo bằng các phép tự thân.
 
 ### Đợt 3: Chấm Nói

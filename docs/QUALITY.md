@@ -2,6 +2,15 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: chấm Nói cho bài học Nói và buổi thi rút gọn; thử âm thanh AAC — 09/10/2026
+
+- **Bài học Nói.** Sau khi nộp bài học Nói có bản ghi, khung "Chấm phần Nói bằng AI" hiện dưới biểu ngữ kết quả (khi máy chủ đã bật). Nộp bài chuyển bản ghi sang khóa theo mã lượt làm, nên khung đọc bản ghi từ đó; lần chấm lưu theo `attempt:<mã lượt làm>`.
+- **Buổi thi `/exam`.** Màn kết thúc có khung chấm Nói cho những phần có bản ghi trên máy (một phần ở buổi rút gọn, tối đa ba ở đề đầy đủ), lưu theo `attempt:exam:<mã>:<bài đầu>`. Phần chỉ đánh dấu "đã nói thành tiếng" mà không có bản ghi thì không gửi.
+- **`SpeakingGradePanel` nay nhận `gradeId` và `recordingIdOf`** thay vì mã lượt thi, dùng chung cho kho đề, bài học và buổi thi; câu mở đầu nói "bản ghi bài nói này" khi chỉ có một phần.
+- **Lỗi tìm thấy khi làm:** `gradeTarget` không nhận mã lượt làm có dấu hai chấm (`exam:<mã>:<bài>`), nên các lần chấm của buổi thi (kể cả bài Viết gắn ở đợt trước) bị coi là "dạng chưa biết" và không bao giờ bị dọn khi lượt làm bị xóa. Nay `attemptId` lấy cả phần sau dấu hai chấm; có hai ca unit (nhận dạng mã, và dọn đúng khi lượt làm mất).
+- **Thử AAC của Safari: chưa chạy được.** Tôi dựng hai file AAC bằng ffmpeg (MP4 phân mảnh giống `MediaRecorder` của Safari, và `.m4a` thường) rồi gửi cho Gemini, nhưng cả hai yêu cầu bị từ chối: HTTP 429 "dự án đã vượt hạn mức chi tiêu hằng tháng" (đợt đo trước đã dùng hết hạn mức đặt bên Google). Cần nâng hạn mức ở Google AI Studio rồi chạy `npx tsx scripts/grading-eval/audio-probe.ts <file>` (script mới, kèm lệnh ffmpeg trong phần đầu file). File từ một máy Safari thật vẫn là phép thử tốt hơn. **Hệ quả cho trang live: khi hạn mức hết, mọi lần chấm trả 429 và giao diện báo "hết lượt/bận".**
+- **Kiểm tra:** 404 unit (thêm 2), 193 E2E (Chromium 185; thêm ca chấm Nói bài học và ca chấm Nói buổi thi), ESLint và TypeScript sạch.
+
 ## Sửa lời ghi chú điểm AI — 09/10/2026
 
 Chủ dự án chỉ ra rằng câu "chưa được so với điểm của người chấm" vô nghĩa với Mây: app chấm hoàn toàn bằng AI, không có và sẽ không có người chấm nào để so, nên câu đó nghe như một việc còn dang dở. Nay ghi chú ở kết quả, ở điểm Viết tổng và ở biểu đồ chỉ nói điều đúng và hữu ích: điểm do AI chấm theo mô tả mức điểm công khai của VSTEP, chỉ là ước lượng, có thể lệch so với điểm thi thật, dùng để theo dõi tiến bộ. Dòng "Thang chấm: dựng theo mô tả CEFR công khai, chưa đối chiếu văn bản chính thức của VSTEP" giữ nguyên vì nó nói về văn bản thang chấm, không phải về người chấm. Các ca E2E đổi theo chữ mới.
@@ -484,7 +493,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 403 unit / 191 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 404 unit / 193 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -693,8 +702,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 403 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 191 kiểm thử Playwright trên bản production: 183 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 404 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 193 kiểm thử Playwright trên bản production: 185 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

@@ -53,6 +53,7 @@ import {
 } from "@/lib/work";
 import { applyChange } from "./apply-change";
 import { GradePanel } from "./grade-panel";
+import { LessonSpeakingGrade } from "./speaking-grade-panel";
 import { AiGradeHint } from "./grade-parts";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
@@ -635,7 +636,10 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               {result.total
                 ? "Đây là kết quả bài ngắn, không quy đổi thành điểm VSTEP. Câu sai đã vào sổ tay."
                 : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm cho bài này."}
-              {!result.total && lesson.skill === "writing" && <AiGradeHint />}
+              {!result.total &&
+                (lesson.skill === "writing" || lesson.skill === "speaking") && (
+                  <AiGradeHint />
+                )}
             </p>
             <div className="result-actions">
               {upNext?.next && (
@@ -686,6 +690,9 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           text={result.text ?? ""}
           samples={lesson.sample ? [lesson.sample] : undefined}
         />
+      )}
+      {result && lesson.skill === "speaking" && (
+        <LessonSpeakingGrade lesson={lesson} attemptId={result.id} />
       )}
       {insights && (
         <section

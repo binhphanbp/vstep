@@ -232,7 +232,7 @@ test("sends every recording as one form after agreement, and shows the transcrip
   await panel(page).getByRole("button", { name: "Chấm phần Nói" }).click();
   expect(requests).toHaveLength(0);
   const consent = panel(page).locator(".grade-consent");
-  await expect(consent).toContainText("bản ghi âm phần Nói của lượt này");
+  await expect(consent).toContainText("bản ghi âm phần Nói này");
   await consent.getByLabel(/Mã chấm bài/).fill("open sesame");
   await consent.getByRole("button", { name: "Đồng ý và chấm" }).click();
   const result = panel(page).locator(".grade-result");
@@ -474,4 +474,95 @@ test("the real server refuses a Speaking request when it has no key", async ({
   expect(refused.status()).toBe(503);
   expect(await refused.json()).toEqual({ error: "not-configured" });
   expect((await request.get("/api/grade/speaking")).status()).toBe(405);
+});
+
+/** One spoken part in the lesson's own words, as the server would send it back. */
+const lessonGrade = (slotId: string) => {
+  const done = gradeBody(true);
+  return {
+    ...done,
+    parts: [{ ...done.parts[0], id: slotId }],
+  };
+};
+async function record(page: Page) {
+  await page
+    .getByRole("button", { name: "Bắt đầu ghi âm", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Dừng ghi âm", exact: true }),
+  ).toBeVisible();
+  await page.waitForTimeout(1500);
+  await page.getByRole("button", { name: "Dừng ghi âm", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "Tải bản ghi", exact: true }),
+  ).toBeVisible();
+}
+
+test("a Speaking lesson can be graded after it is filed, on its own recording", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await agreed(page);
+  const requests = await grading(page, (route) =>
+    route.fulfill({ json: { grade: lessonGrade("speaking-social") } }),
+  );
+  await page.goto("/practice/speaking-social");
+  // Nothing to grade before there is a recording and a filed lesson.
+  await expect(
+    page.getByRole("heading", { name: /Chấm phần Nói/ }),
+  ).toHaveCount(0);
+  await record(page);
+  for (const row of await page.locator(".self-check .criteria-list li").all())
+    await row.getByRole("button", { name: "Tạm ổn" }).click();
+  await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  await expect(page.locator(".result-banner")).toContainText(
+    "bấm nút chấm ở khung bên dưới",
+  );
+  const here = page.getByRole("region", { name: "Chấm phần Nói bằng AI" });
+  await expect(here).toContainText("Mây gửi bản ghi bài nói này để chấm.");
+  await here.getByRole("button", { name: "Chấm phần Nói" }).click();
+  await expect(here.locator(".grade-result")).toContainText(
+    "Điểm Nói (ước lượng): 6,5/10",
+  );
+  expect(requests).toHaveLength(1);
+  expect(requests[0].body).toContain("Your neighbourhood");
+  const state = await saved(page);
+  expect(Object.keys(state.grades)).toHaveLength(1);
+  expect(Object.keys(state.grades)[0]).toMatch(/^attempt:/);
+});
+
+test("a mock sitting's Speaking can be graded when it ends", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await agreed(page);
+  const requests = await grading(page, (route) =>
+    route.fulfill({
+      json: { grade: lessonGrade("speaking-social") },
+    }),
+  );
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/exam");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Bắt đầu 51 phút của mình" }).click();
+  for (let stage = 0; stage < 3; stage++)
+    await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
+  await record(page);
+  await page
+    .getByRole("button", { name: "Kết thúc buổi luyện", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Buổi luyện đã khép lại." }),
+  ).toBeVisible();
+  const here = page.getByRole("region", { name: "Chấm phần Nói bằng AI" });
+  await here.getByRole("button", { name: "Chấm phần Nói" }).click();
+  await expect(here.locator(".grade-result")).toBeVisible();
+  expect(requests).toHaveLength(1);
+  const state = await saved(page);
+  const ids = Object.keys(state.grades);
+  expect(ids).toHaveLength(1);
+  expect(ids[0]).toMatch(/^attempt:exam:/);
+  // Starting a new sitting does not take the grade away.
+  await page.getByRole("button", { name: "Chuẩn bị lượt mới" }).click();
+  expect(Object.keys((await saved(page)).grades)).toEqual(ids);
 });

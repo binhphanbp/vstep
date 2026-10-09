@@ -677,7 +677,7 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
   // The banner no longer says only "no mark"; it points at the button below.
   await expect(page.locator(".result-banner")).toContainText(
-    "bấm “Chấm bằng AI” ở khung bên dưới",
+    "bấm nút chấm ở khung bên dưới",
   );
   const grade = page.getByRole("region", { name: "Chấm bằng AI" });
   await grade.getByRole("button", { name: "Chấm bài viết này" }).click();
