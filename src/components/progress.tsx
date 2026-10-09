@@ -24,6 +24,7 @@ import { skillNames, type Skill } from "@/lib/content";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { RecordingHistory } from "./audio-tools";
+import { GradeTrend } from "./grade-trend";
 import { paperCatalog } from "@/lib/papers";
 // A learner who studies for months has hundreds of rows; the newest are what
 // she came to look at, and the rest are one tap away.
@@ -186,13 +187,14 @@ export function ProgressPage() {
           </p>
         </section>
       </div>
+      <GradeTrend />
       <ExamSittings state={state} />
       {sittings.length > 0 && (
         <section className="panel" style={{ marginTop: 25 }}>
           <h2>Kho đề nhập đã luyện</h2>
           <p className="help-copy">
-            Mở từng đề để xem bài làm và đáp án. Viết/Nói của mọi đề chưa được
-            chấm.
+            Mở từng đề để xem bài làm và đáp án. Viết/Nói chấm bằng AI ở màn
+            chữa đề của từng đề.
           </p>
           {[...sittings].reverse().map((run) => (
             <div className="history-row" key={run.id}>

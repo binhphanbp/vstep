@@ -683,3 +683,148 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   expect(Object.keys(state.grades)).toHaveLength(1);
   expect(Object.keys(state.grades)[0]).toMatch(/^attempt:/);
 });
+
+test("a mock sitting's two essays can be graded when it ends, and the Writing mark follows", async ({
+  page,
+}) => {
+  await serverIs(page, true);
+  await page.addInitScript(() => {
+    localStorage.setItem("may.ai.consent", "yes");
+    localStorage.setItem("may.ai.passcode", "open sesame");
+  });
+  const requests = await grading(page, (route) => {
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    return route.fulfill({
+      json: { grade: gradeBody(true, { taskScore: body.task === 1 ? 6 : 7 }) },
+    });
+  });
+  const essay2 =
+    "Some people think that learning online is better than learning in a classroom, while others disagree. In my opinion both ways have clear strengths. Online classes save travel time and let students repeat lessons as often as they need. However, a classroom gives learners real conversation and a teacher who can see who is confused. For example, my English speaking improved faster when I could talk with classmates every day. Therefore I believe the best choice is a mix of both.";
+  page.on("dialog", (d) => d.accept());
+  await page.goto("/exam");
+  await page.getByRole("button", { name: "Đề 01 · 172 phút" }).click();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Bắt đầu 172 phút của mình" }).click();
+  await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
+  await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
+  await page.getByLabel("Bài viết trong phòng thi").fill(essay);
+  await page.getByLabel("Chọn bài viết").selectOption("1");
+  await page.getByLabel("Bài viết trong phòng thi").fill(essay2);
+  await page.getByRole("button", { name: "Nộp phần này & tiếp tục" }).click();
+  await page
+    .getByRole("button", { name: "Kết thúc buổi luyện", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Buổi luyện đã khép lại." }),
+  ).toBeVisible();
+  const panels = page.getByRole("region", { name: "Chấm bằng AI" });
+  await expect(panels).toHaveCount(2);
+  await expect(page.locator("#writing-total")).toHaveCount(0);
+  await panels
+    .nth(0)
+    .getByRole("button", { name: "Chấm bài viết này" })
+    .click();
+  await expect(panels.nth(0).locator(".grade-result")).toBeVisible();
+  await panels
+    .nth(1)
+    .getByRole("button", { name: "Chấm bài viết này" })
+    .click();
+  await expect(panels.nth(1).locator(".grade-result")).toBeVisible();
+  expect(requests.map((r) => r.body.task)).toEqual([1, 2]);
+  expect(requests[0].body.text).toBe(essay);
+  expect(requests[1].body.text).toBe(essay2);
+  // (6 + 2 × 7) / 3 = 6,67 → 6,5
+  await expect(
+    page.getByRole("region", { name: /Điểm Viết của lượt này/ }),
+  ).toContainText("6,5/10");
+  const state = await saved(page);
+  expect(
+    Object.keys(state.grades).every((k) => k.startsWith("attempt:exam:")),
+  ).toBe(true);
+  // Starting a new sitting does not take the grades away with it.
+  await page.getByRole("button", { name: "Chuẩn bị lượt mới" }).click();
+  expect(Object.keys((await saved(page)).grades)).toHaveLength(2);
+});
+
+test("the progress page charts the AI's marks, says they are estimates, and has a table", async ({
+  page,
+}) => {
+  const grade = (id: string, at: string, over: Record<string, unknown>) => ({
+    id,
+    at,
+    inputHash: "h",
+    grade: gradeBody(true, over),
+  });
+  const speaking = {
+    id: "paper:run-done:speaking",
+    at: "2026-10-08T09:00:00.000Z",
+    inputHash: "h",
+    grade: {
+      status: "graded",
+      model: "gemini-3.8-flash",
+      promptVersion: "p1",
+      rubricVersion: "cefr-fallback-1",
+      parts: [],
+      criteria: {},
+      speakingScore: 5.5,
+      rawSpeakingScore: 5.5,
+      droppedQuotes: 0,
+      totalQuotes: 0,
+      runs: 3,
+      lowConfidence: false,
+      summary: "x",
+    },
+  };
+  await seed(page, {
+    grades: {
+      [`paper:run-done:${task1.id}`]: grade(
+        `paper:run-done:${task1.id}`,
+        "2026-10-06T09:00:00.000Z",
+        { taskScore: 5 },
+      ),
+      [`paper:run-done:${task2.id}`]: grade(
+        `paper:run-done:${task2.id}`,
+        "2026-10-07T09:00:00.000Z",
+        { taskScore: 6.5 },
+      ),
+      "paper:run-done:speaking": speaking,
+    },
+  });
+  await page.goto("/progress");
+  const section = page.getByRole("region", {
+    name: /Điểm AI ước lượng theo thời gian/,
+  });
+  await expect(section).toBeVisible();
+  const chart = section.getByRole("img");
+  await expect(chart).toHaveAttribute("aria-label", /Viết 06\/10 5\/10/);
+  await expect(chart).toHaveAttribute("aria-label", /Nói 08\/10 5,5\/10/);
+  await expect(chart.locator(".trend-mark")).toHaveCount(3);
+  await expect(chart.locator("polyline.writing")).toHaveCount(1);
+  // One Speaking mark makes no line: a line needs two points.
+  await expect(chart.locator("polyline.speaking")).toHaveCount(0);
+  await expect(section).toContainText("chưa được so với điểm của người chấm");
+  await section.getByText("Xem dạng bảng").click();
+  const rows = section.locator("tbody tr");
+  await expect(rows).toHaveCount(3);
+  await expect(rows.first()).toContainText("08/10");
+  await expect(rows.first()).toContainText("Nói");
+  await expect(rows.first()).toContainText("5,5/10");
+  const results = await new AxeBuilder({ page })
+    .include("main")
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
+});
+
+test("the progress page shows no chart before anything is graded", async ({
+  page,
+}) => {
+  await seed(page);
+  await page.goto("/progress");
+  await expect(
+    page.getByRole("heading", { name: "Nhịp học 7 ngày gần nhất" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: /Điểm AI ước lượng theo thời gian/ }),
+  ).toHaveCount(0);
+});

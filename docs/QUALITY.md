@@ -2,6 +2,13 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: chấm trong buổi thi rút gọn và biểu đồ điểm theo thời gian — 09/10/2026
+
+- **Buổi thi `/exam`.** Khi buổi thi khép lại, mỗi bài Viết đã nộp (email, và essay ở đề đầy đủ) có khung "Chấm bằng AI" như ở bài học; điểm Viết tổng (Bài 1 + 2 × Bài 2) / 3 hiện khi cả hai bài đã chấm. Bài Viết của buổi thi vốn đã được lưu thành lượt làm (`exam:<mã>:<bài>`) kèm văn bản, nên lần chấm lưu theo `attempt:exam:…`, không mất khi bấm "Chuẩn bị lượt mới". Bài Nói của buổi thi vẫn chưa có chấm tự động; chấm Nói làm ở màn chữa đề của kho đề.
+- **`WritingTotal`** nay nhận mã hai lần chấm (`task1Id`, `task2Id`) thay vì lượt thi, nên dùng chung cho kho đề và buổi thi.
+- **Biểu đồ "Điểm AI ước lượng theo thời gian"** ở trang tiến bộ (`src/lib/grade-trend.ts`, `src/components/grade-trend.tsx`): mỗi lần chấm Viết (điểm từng bài) và Nói (điểm cả bài thi) là một điểm, tối đa 24 điểm mới nhất, xếp theo thời gian chấm. Chỉ vẽ điểm đã hiện cho Gùa (điểm bị ẩn thì bỏ). Hai chuỗi dùng hồng `#c24178` và xanh `#2a7fb5` (đã chạy bộ kiểm màu của kỹ năng dataviz: đạt cả năm kiểm, khác biệt màu cho người mù màu 11,7), thêm hình tròn/hình thoi để không chỉ dựa vào màu, có chú giải, bảng số liệu dạng thu gọn và nói rõ đây là điểm ước lượng, chưa so với người chấm. Đã chụp ảnh kiểm bằng mắt.
+- **Kiểm tra:** 403 unit (thêm 5 ca cho dữ liệu biểu đồ), 191 E2E (Chromium 183; thêm ca chấm buổi thi + điểm Viết tổng, ca biểu đồ có axe, ca không có biểu đồ khi chưa chấm), ESLint và TypeScript sạch.
+
 ## Chấm AI: hiện điểm ước lượng có nhãn, chấm được Task 2 và bài học Viết — 09/10/2026
 
 Chủ dự án thử bài Viết thật và thấy hai điều: kết quả ghi “Chưa hiện điểm số” (họ kỳ vọng phải chấm được) và Task 2 báo “chưa có danh sách ý bắt buộc đã được duyệt nên chưa chấm được”. Cả hai là chủ ý của bản trước (không đưa ra số chưa đối chiếu), nhưng với một app luyện tập cá nhân thì nó không dùng được. Đã đổi như sau; mọi thứ vẫn nói thật rằng điểm chưa được kiểm với giám khảo.
@@ -431,7 +438,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 398 unit / 188 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 403 unit / 191 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -640,8 +647,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 398 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 188 kiểm thử Playwright trên bản production: 180 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 403 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 191 kiểm thử Playwright trên bản production: 183 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

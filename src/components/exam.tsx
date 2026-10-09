@@ -19,6 +19,9 @@ import {
 } from "@/lib/learning";
 import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
+import { GradePanel } from "./grade-panel";
+import { WritingTotal } from "./writing-total";
+import { attemptGradeId } from "@/lib/grades";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { QuestionCard } from "./practice";
 import { QuestionNotes } from "./note-box";
@@ -253,9 +256,9 @@ export function ExamPage() {
             </div>
             <div className="notice" style={{ marginTop: 22 }}>
               {paper2
-                ? "Đề số 02 không dùng chung ngữ liệu, câu hỏi, đề Viết hay đề Nói nào với đề 01 và với thư viện, nên có thể dùng để đo lại sau một giai đoạn học. Nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                ? "Đề số 02 không dùng chung ngữ liệu, câu hỏi, đề Viết hay đề Nói nào với đề 01 và với thư viện, nên có thể dùng để đo lại sau một giai đoạn học. Nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp; không phải bản thu kỳ thi thật. Bài Viết có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật); bài Nói chưa có chấm tự động ở buổi này."
                 : full
-                  ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Viết/Nói chưa được chấm."
+                  ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Bài Viết có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật); bài Nói chưa có chấm tự động ở buổi này."
                   : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
               Không quy đổi kết quả buổi này sang B1/B2/C1.
             </div>
@@ -327,6 +330,24 @@ export function ExamPage() {
     const result = state.attempts.filter((a) =>
       a.id.startsWith(`exam:${exam.id}:`),
     );
+    // Each essay that was filed is kept as an attempt with its text, so it can be
+    // graded like a lesson's; the sitting's own copy goes when "new sitting" is pressed.
+    const writingGrades = examStages
+      .filter((stage) => stage.skill === "writing")
+      .flatMap((stage) => stage.lessonIds)
+      .flatMap((id) => {
+        const attempt = result.find((a) => a.id === `exam:${exam.id}:${id}`);
+        const lesson = examLessons.find((l) => l.id === id);
+        return attempt?.text?.trim() && lesson
+          ? [
+              {
+                attempt,
+                lesson,
+                task: isTask2(id) ? (2 as const) : (1 as const),
+              },
+            ]
+          : [];
+      });
     const objective = result.filter((a) => a.total > 0);
     const correct = objective.reduce((s, a) => s + a.correct, 0);
     const total = objective.reduce((s, a) => s + a.total, 0);
@@ -355,7 +376,7 @@ export function ExamPage() {
             </strong>
             <small>
               {exam.writing || exam.writingTask2
-                ? "Đã lưu · chưa được chấm"
+                ? "Đã lưu · có thể chấm bằng AI bên dưới"
                 : "Chưa có bài làm"}
             </small>
           </div>
@@ -381,7 +402,7 @@ export function ExamPage() {
         </div>
         <p className="help-copy">
           Kết quả lượt cũ vẫn nằm trong lịch sử. Bài Nói được lưu trên thiết bị
-          nếu bạn đã ghi âm; chưa có điểm chấm tự động.
+          nếu bạn đã ghi âm; chấm bài Nói bằng AI làm ở màn chữa đề của kho đề.
         </p>
         <section className="panel" style={{ marginTop: 25 }}>
           <h2>Nghe lại phần Nói</h2>
@@ -412,6 +433,25 @@ export function ExamPage() {
               {exam.writingTask2}
             </div>
           </details>
+        )}
+        {writingGrades.map(({ attempt, lesson, task }) => (
+          <div key={attempt.id} style={{ marginTop: 18 }}>
+            <h2>Chấm bài {task === 2 ? "essay" : "email"} bằng AI</h2>
+            <GradePanel
+              id={attemptGradeId(attempt.id)}
+              task={task}
+              slotId={lesson.id}
+              prompt={lesson.text}
+              text={attempt.text ?? ""}
+              samples={lesson.sample ? [lesson.sample] : undefined}
+            />
+          </div>
+        ))}
+        {writingGrades.length === 2 && (
+          <WritingTotal
+            task1Id={attemptGradeId(writingGrades[0].attempt.id)}
+            task2Id={attemptGradeId(writingGrades[1].attempt.id)}
+          />
         )}
         {examStages
           .slice(0, 2)
