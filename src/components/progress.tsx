@@ -109,39 +109,42 @@ export function ProgressPage() {
           the height of the skills column left a tall empty box for anyone with
           no minutes logged yet. */}
       <div className="content-grid" style={{ alignItems: "start" }}>
-        <section className="panel">
-          <div className="panel-heading">
-            <h2>Nhịp học 7 ngày gần nhất</h2>
-            <span className="pill">Phút luyện kỹ năng</span>
-          </div>
-          <div
-            className="activity-chart"
-            role="img"
-            aria-label={week
-              .map((d) => `${d.day}: ${d.minutes} phút`)
-              .join(", ")}
-          >
-            {week.map((d) => (
-              <div className="activity-column" key={d.day}>
-                <span>{d.minutes}</span>
-                <div
-                  className="activity-bar"
-                  style={{
-                    height: `${Math.max(2, (d.minutes / max) * 115)}px`,
-                  }}
-                />
-                <span>
-                  {d.day.slice(8)}/{d.day.slice(5, 7)}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="help-copy">
-            Ngày tính theo giờ Việt Nam. Buổi luyện thường chỉ tính khi trang
-            đang mở và có hoạt động gần đây; bài có giờ tính theo thời gian của
-            từng phần.
-          </p>
-        </section>
+        <div style={{ display: "grid", gap: 25 }}>
+          <section className="panel">
+            <div className="panel-heading">
+              <h2>Nhịp học 7 ngày gần nhất</h2>
+              <span className="pill">Phút luyện kỹ năng</span>
+            </div>
+            <div
+              className="activity-chart"
+              role="img"
+              aria-label={week
+                .map((d) => `${d.day}: ${d.minutes} phút`)
+                .join(", ")}
+            >
+              {week.map((d) => (
+                <div className="activity-column" key={d.day}>
+                  <span>{d.minutes}</span>
+                  <div
+                    className="activity-bar"
+                    style={{
+                      height: `${Math.max(2, (d.minutes / max) * 115)}px`,
+                    }}
+                  />
+                  <span>
+                    {d.day.slice(8)}/{d.day.slice(5, 7)}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="help-copy">
+              Ngày tính theo giờ Việt Nam. Buổi luyện thường chỉ tính khi trang
+              đang mở và có hoạt động gần đây; bài có giờ tính theo thời gian
+              của từng phần.
+            </p>
+          </section>
+          <GradeTrend />
+        </div>
         <section className="panel">
           <h2>Bức tranh từng kỹ năng</h2>
           {(["listening", "reading", "writing", "speaking"] as Skill[]).map(
@@ -187,7 +190,6 @@ export function ProgressPage() {
           </p>
         </section>
       </div>
-      <GradeTrend />
       <ExamSittings state={state} />
       {sittings.length > 0 && (
         <section className="panel" style={{ marginTop: 25 }}>

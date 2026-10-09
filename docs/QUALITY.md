@@ -2,6 +2,17 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Rà UX/UI đợt ba: các màn chấm AI — 09/10/2026
+
+Chụp ảnh 1280×720 và 1440×900 các màn có chấm AI (kết quả Viết, kết quả Nói, điểm Viết tổng, trang tiến bộ, Cài đặt, kết quả bài học Viết) với dữ liệu đã chấm, xem từng ảnh và sửa các lỗi thấy được:
+
+- **Kết quả chấm ba lần nhắc cùng một ý.** Đầu kết quả có dòng "Điểm ước lượng… không phải điểm chính thức", rồi "Thang chấm…", rồi mới tới điểm, rồi một hộp ghi chú lặp lại "do AI ước lượng". Nay điểm đứng đầu, chữ to; ngay sau là một dòng ước lượng, một hộp ghi chú ngắn (chỉ còn ý "chưa so với điểm người chấm"), rồi mới tới dòng thang chấm. Ở bài Nói, câu "tính bằng trung bình năm tiêu chí…" tách thành dòng riêng thay vì dính vào dòng điểm.
+- **Điểm từng tiêu chí quá nhỏ.** Nay đậm và to hơn tên tiêu chí.
+- **Trang tiến bộ có khoảng trống lớn dưới biểu đồ nhịp học** vì cột bên phải dài. Biểu đồ điểm AI chuyển vào cột trái, dưới biểu đồ nhịp học, hai cột cân nhau (có ca E2E đo vị trí).
+- **Thẻ "Chấm bài bằng AI" ở Cài đặt** là một đoạn dài đặc. Nay là một câu mở đầu và bốn gạch đầu dòng (gửi gì, Google làm gì, kết quả là gì, file báo lỗi).
+- **Mâu thuẫn ở kết quả bài học Viết:** biểu ngữ ghi "Chưa có điểm chấm cho bài này" ngay trên nút chấm. Khi máy chủ đã bật, biểu ngữ nói thêm "bấm Chấm bằng AI ở khung bên dưới" (có ca E2E).
+- **Kiểm tra:** ESLint, TypeScript sạch; E2E các màn chấm AI, axe và laptop đều đạt.
+
 ## Chấm AI: chấm trong buổi thi rút gọn và biểu đồ điểm theo thời gian — 09/10/2026
 
 - **Buổi thi `/exam`.** Khi buổi thi khép lại, mỗi bài Viết đã nộp (email, và essay ở đề đầy đủ) có khung "Chấm bằng AI" như ở bài học; điểm Viết tổng (Bài 1 + 2 × Bài 2) / 3 hiện khi cả hai bài đã chấm. Bài Viết của buổi thi vốn đã được lưu thành lượt làm (`exam:<mã>:<bài>`) kèm văn bản, nên lần chấm lưu theo `attempt:exam:…`, không mất khi bấm "Chuẩn bị lượt mới". Bài Nói của buổi thi vẫn chưa có chấm tự động; chấm Nói làm ở màn chữa đề của kho đề.

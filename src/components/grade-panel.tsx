@@ -304,10 +304,6 @@ export function GradeResult({
   const official = RUBRIC_SOURCE.official;
   return (
     <div className="grade-result">
-      <p className="grade-estimate">{ESTIMATE_LABEL}</p>
-      {!official && grade.rubricVersion.startsWith("cefr-fallback") && (
-        <p className="help-copy">Thang chấm: {RUBRIC_SOURCE.label}.</p>
-      )}
       {grade.taskScore !== null ? (
         <p className="grade-total">
           Điểm bài (ước lượng): <strong>{scoreText(grade.taskScore)}/10</strong>{" "}
@@ -320,7 +316,11 @@ export function GradeResult({
           của bạn.
         </p>
       )}
+      <p className="grade-estimate">{ESTIMATE_LABEL}</p>
       <EstimateNotice criteria={grade.criteria} />
+      {!official && grade.rubricVersion.startsWith("cefr-fallback") && (
+        <p className="help-copy">Thang chấm: {RUBRIC_SOURCE.label}.</p>
+      )}
       {grade.lowConfidence && (
         <p className="notice" role="status">
           Các lần chấm độc lập chênh nhau khá nhiều ở một vài tiêu chí, nên độ

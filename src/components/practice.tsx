@@ -53,6 +53,7 @@ import {
 } from "@/lib/work";
 import { applyChange } from "./apply-change";
 import { GradePanel } from "./grade-panel";
+import { AiGradeHint } from "./grade-parts";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
 import { SCRATCH_HINTS } from "./paper-work";
@@ -634,6 +635,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               {result.total
                 ? "Đây là kết quả bài ngắn, không quy đổi thành điểm VSTEP. Câu sai đã vào sổ tay."
                 : "Đã lưu bài làm và phần tự kiểm tra. Chưa có điểm chấm cho bài này."}
+              {!result.total && lesson.skill === "writing" && <AiGradeHint />}
             </p>
             <div className="result-actions">
               {upNext?.next && (

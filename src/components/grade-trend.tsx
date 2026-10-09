@@ -70,11 +70,7 @@ export function GradeTrend() {
     points.some((point) => point.skill === skill),
   );
   return (
-    <section
-      className="panel"
-      style={{ marginTop: 25 }}
-      aria-labelledby="grade-trend-title"
-    >
+    <section className="panel" aria-labelledby="grade-trend-title">
       <div className="panel-heading">
         <h2 id="grade-trend-title">Điểm AI ước lượng theo thời gian</h2>
         <span className="pill">{points.length} lần chấm</span>

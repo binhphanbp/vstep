@@ -4494,7 +4494,19 @@ mark.hl,
 }
 .grade-total {
   font-size: 15px;
-  margin: 8px 0;
+  margin: 8px 0 2px;
+  color: var(--muted);
+}
+.grade-total strong {
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 2px;
+}
+.grade-criterion-head .pill:first-of-type {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
 }
 .grade-criteria,
 .grade-requirements,
@@ -4735,4 +4747,14 @@ mark.grade-err sup {
   text-align: left;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
+}
+
+.help-list {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
 }

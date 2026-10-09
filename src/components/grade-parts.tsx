@@ -25,6 +25,14 @@ export function useAvailable() {
   return available;
 }
 
+/** One sentence pointing at the grading panel, only while the server can grade. */
+export function AiGradeHint() {
+  const available = useAvailable();
+  return available
+    ? " Muốn có điểm ước lượng thì bấm “Chấm bằng AI” ở khung bên dưới."
+    : null;
+}
+
 export const scoreText = (value: number) => String(value).replace(".", ",");
 
 /**
@@ -255,10 +263,9 @@ export function EstimateNotice({
   if (!unchecked) return null;
   return (
     <p className="notice" role="note">
-      Các điểm dưới đây do AI ước lượng theo thang VSTEP và{" "}
-      <strong>chưa được so với điểm của người chấm</strong>, nên có thể lệch so
-      với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần sửa gì, đừng
-      coi là điểm dự đoán chắc chắn.
+      Các điểm này <strong>chưa được so với điểm của người chấm</strong>, nên có
+      thể lệch so với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần
+      sửa gì, đừng coi là điểm dự đoán chắc chắn.
     </p>
   );
 }

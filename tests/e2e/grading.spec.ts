@@ -242,6 +242,15 @@ test("shows the numbers only when the grade says the criteria may show", async (
   const result = panel(page).locator(".grade-result");
   await expect(result).toContainText("Điểm bài (ước lượng): 6,25/10");
   await expect(result).toContainText("Bậc 4 (B2)");
+  // The mark comes first; the caveat follows it rather than leading the result.
+  const order = await result.evaluate((node) => {
+    const total = node.querySelector(".grade-total")!;
+    const note = node.querySelector('[role="note"]')!;
+    return Boolean(
+      total.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+  expect(order).toBe(true);
   // Shown, but never passed off as checked: a note and a label on every score.
   await expect(result.getByRole("note").first()).toContainText(
     "chưa được so với điểm của người chấm",
@@ -666,6 +675,10 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   for (const row of await page.locator(".self-check .criteria-list li").all())
     await row.getByRole("button", { name: "Tạm ổn" }).click();
   await page.getByRole("button", { name: "Hoàn thành buổi luyện" }).click();
+  // The banner no longer says only "no mark"; it points at the button below.
+  await expect(page.locator(".result-banner")).toContainText(
+    "bấm “Chấm bằng AI” ở khung bên dưới",
+  );
   const grade = page.getByRole("region", { name: "Chấm bằng AI" });
   await grade.getByRole("button", { name: "Chấm bài viết này" }).click();
   const result = grade.locator(".grade-result");
@@ -803,6 +816,14 @@ test("the progress page charts the AI's marks, says they are estimates, and has 
   // One Speaking mark makes no line: a line needs two points.
   await expect(chart.locator("polyline.speaking")).toHaveCount(0);
   await expect(section).toContainText("chưa được so với điểm của người chấm");
+  // It sits under the weekly chart, beside the skills panel, not below both.
+  const skills = page.locator("section.panel", {
+    has: page.getByRole("heading", { name: "Bức tranh từng kỹ năng" }),
+  });
+  const here = (await section.boundingBox())!;
+  const there = (await skills.boundingBox())!;
+  expect(here.x).toBeLessThan(there.x);
+  expect(here.x + here.width).toBeLessThanOrEqual(there.x);
   await section.getByText("Xem dạng bảng").click();
   const rows = section.locator("tbody tr");
   await expect(rows).toHaveCount(3);
