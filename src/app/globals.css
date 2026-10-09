@@ -4494,7 +4494,19 @@ mark.hl,
 }
 .grade-total {
   font-size: 15px;
-  margin: 8px 0;
+  margin: 8px 0 2px;
+  color: var(--muted);
+}
+.grade-total strong {
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 2px;
+}
+.grade-criterion-head .pill:first-of-type {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
 }
 .grade-criteria,
 .grade-requirements,
@@ -4668,4 +4680,81 @@ mark.grade-err sup {
 }
 .paper-review details > .help-copy {
   margin-bottom: 10px;
+}
+
+/* Chart of the AI's marks over time. Two series: rose and blue (checked with the
+   dataviz palette validator), circle and diamond so colour is never the only cue. */
+.trend-chart {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  display: block;
+}
+.trend-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.trend-axis {
+  fill: var(--muted);
+  font-size: 12px;
+}
+.trend-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.trend-line.writing,
+.trend-mark.writing {
+  stroke: #c24178;
+}
+.trend-line.speaking,
+.trend-mark.speaking {
+  stroke: #2a7fb5;
+}
+.trend-mark {
+  stroke-width: 2;
+}
+.trend-mark.writing {
+  fill: #c24178;
+}
+.trend-mark.speaking {
+  fill: #2a7fb5;
+}
+.trend-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  color: var(--ink);
+  font-size: 14px;
+}
+.trend-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.trend-table {
+  border-collapse: collapse;
+  margin-top: 10px;
+  min-width: 260px;
+}
+.trend-table th,
+.trend-table td {
+  padding: 6px 14px 6px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.help-list {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
 }

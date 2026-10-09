@@ -329,21 +329,11 @@ export function SpeakingResult({
   const grade = stored.grade;
   return (
     <div className="grade-result">
-      <p className="grade-estimate">{ESTIMATE_LABEL}</p>
-      {!RUBRIC_SOURCE.official &&
-        grade.rubricVersion.startsWith("cefr-fallback") && (
-          <p className="help-copy">Thang chấm: {RUBRIC_SOURCE.label}.</p>
-        )}
       {grade.speakingScore !== null ? (
         <p className="grade-total">
           Điểm Nói (ước lượng):{" "}
           <strong>{scoreText(grade.speakingScore)}/10</strong> ·{" "}
           {BAND_LABEL[bandOf(grade.speakingScore)]}
-          <span className="help-copy">
-            {" "}
-            Tính bằng trung bình năm tiêu chí; chưa tìm thấy văn bản chính thức
-            nói cách cộng điểm Nói.
-          </span>
         </p>
       ) : (
         <p className="help-copy">
@@ -352,7 +342,18 @@ export function SpeakingResult({
           bạn.
         </p>
       )}
+      {grade.speakingScore !== null && (
+        <p className="help-copy">
+          Điểm Nói là trung bình năm tiêu chí; chưa tìm thấy văn bản chính thức
+          nói cách cộng điểm Nói.
+        </p>
+      )}
+      <p className="grade-estimate">{ESTIMATE_LABEL}</p>
       <EstimateNotice criteria={grade.criteria} />
+      {!RUBRIC_SOURCE.official &&
+        grade.rubricVersion.startsWith("cefr-fallback") && (
+          <p className="help-copy">Thang chấm: {RUBRIC_SOURCE.label}.</p>
+        )}
       {grade.lowConfidence && (
         <p className="notice" role="status">
           Các lần chấm độc lập chênh nhau khá nhiều ở một vài tiêu chí, nên độ

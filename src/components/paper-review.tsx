@@ -830,9 +830,18 @@ export function PaperReview({
                 </details>
               );
             })}
-            {section.skill === "writing" && sameMaterial && (
-              <WritingTotal runId={run.id} slots={section.slots} />
-            )}
+            {section.skill === "writing" &&
+              sameMaterial &&
+              (() => {
+                const first = section.slots.find((s) => s.part.includes("1"));
+                const second = section.slots.find((s) => s.part.includes("2"));
+                return first && second ? (
+                  <WritingTotal
+                    task1Id={paperGradeId(run.id, first.id)}
+                    task2Id={paperGradeId(run.id, second.id)}
+                  />
+                ) : null;
+              })()}
             {section.skill === "speaking" && sameMaterial && (
               <SpeakingGradePanel
                 runId={run.id}

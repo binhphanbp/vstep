@@ -2,6 +2,55 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI: lần đo thật đầu tiên — 09/10/2026
+
+Chạy `scripts/grading-eval/first-run.sh` với `gemini-3.8-flash` trên phần "tune" của dữ liệu (phần giữ kín chưa đọc). Không có người chấm VSTEP nào để so, nên chỉ đo được các phép tự thân. Cả ba phần chạy hết, không lệnh nào lỗi. Số liệu do phiên "Chạy đo" ghi lại; tôi chép nguyên vào đây.
+
+**1. Thứ tự điểm trên ELLIPSE** (40 bài, thang 1–5 của ELLIPSE; ngưỡng đạt: QWK ≥ 0,45 và lệch có dấu trung bình ≤ 0,25):
+
+| Tiêu chí             | Pearson | QWK  | Lệch có dấu trung bình | Kết quả  |
+| -------------------- | ------- | ---- | ---------------------- | -------- |
+| Tổ chức ↔ Cohesion   | 0,62    | 0,42 | −0,53                  | chưa qua |
+| Từ vựng ↔ Vocabulary | 0,61    | 0,31 | −0,59                  | chưa qua |
+| Ngữ pháp ↔ Grammar   | 0,57    | 0,38 | −0,38                  | chưa qua |
+
+AI xếp thứ tự bài khá giống người chấm (Pearson 0,57–0,62) nhưng chấm thấp hơn họ đều đặn 0,4–0,6 điểm trên thang 1–5, nên không qua ngưỡng. ELLIPSE là bài của học sinh Mỹ lớp 8–12 học tiếng Anh, chấm theo thang riêng, nên độ lệch này chưa nói được gì về VSTEP. Tỉ lệ câu trích sai là 0,2% (ngưỡng ≤ 2%): qua.
+
+**2. Độ ổn định** (8 bài, mỗi bài chấm 3 lần): cả 8 bài lệch tối đa 0,5 điểm ở điểm bài (Task), qua ngưỡng. Kế hoạch ghi 10 lần mỗi bài còn script chạy 3 lần, nên chưa đủ để kết luận chắc.
+
+**3. Phản ứng khi sửa bài** (8 bài, mỗi bài sửa 4 kiểu):
+
+| Kiểu sửa                    | Kết quả                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Cắt còn 80 từ               | Cả 8 bài giảm: Task −2,5; tổ chức −2; từ vựng −1,5; ngữ pháp −1,25                                                                   |
+| Xáo câu                     | Tổ chức giảm 1; ngữ pháp không đổi; từ vựng +0,13                                                                                    |
+| Thêm lỗi ngữ pháp           | Ngữ pháp chỉ giảm 0,125. **Phản ứng yếu**: điểm Ngữ pháp kém nhạy với lỗi, nên danh sách lỗi (có kiểm câu trích) đáng tin hơn con số |
+| Chèn lời dặn cho người chấm | 1 bài trong 8 bị chấm cao hơn (87,5% không cao hơn), thay đổi trung bình khoảng 0; chưa có ngưỡng cho kiểu này nên chưa kết luận     |
+
+**4. Âm thanh:** Gemini đọc được cả `audio/webm;codecs=opus` và `audio/mp4`, chép đúng lời nói (khoảng 3 giây mỗi lần), thử trên đoạn 20 giây tách từ một bài nói và trên file `MediaRecorder` của Chromium ghi thật. **Chưa thử** mp4 do Safari ghi (AAC thật): Chromium cho ra mp4 chứa opus, nên đây là điểm cần thử trên máy thật.
+
+**Chi phí và thời gian:** 768 lệnh gọi, 1,13 triệu token vào và 3,31 triệu token ra (gồm suy luận). Giá 0,75 / 3,75 USD mỗi triệu token lấy từ các trang giá bên thứ ba, chưa kiểm trên trang Google, nên khoảng **13 USD** (hoặc 6–7 USD nếu giá thật bằng nửa). Chạy mất khoảng 57 phút.
+
+**Quyết định:** không tiêu chí nào qua ngưỡng, nên `gates.ts` **giữ nguyên đóng**; điểm vẫn hiện nhưng kèm ghi chú "chưa được so với điểm của người chấm". Chưa chạy `gemini-3.1-pro-preview`.
+
+## Rà UX/UI đợt ba: các màn chấm AI — 09/10/2026
+
+Chụp ảnh 1280×720 và 1440×900 các màn có chấm AI (kết quả Viết, kết quả Nói, điểm Viết tổng, trang tiến bộ, Cài đặt, kết quả bài học Viết) với dữ liệu đã chấm, xem từng ảnh và sửa các lỗi thấy được:
+
+- **Kết quả chấm ba lần nhắc cùng một ý.** Đầu kết quả có dòng "Điểm ước lượng… không phải điểm chính thức", rồi "Thang chấm…", rồi mới tới điểm, rồi một hộp ghi chú lặp lại "do AI ước lượng". Nay điểm đứng đầu, chữ to; ngay sau là một dòng ước lượng, một hộp ghi chú ngắn (chỉ còn ý "chưa so với điểm người chấm"), rồi mới tới dòng thang chấm. Ở bài Nói, câu "tính bằng trung bình năm tiêu chí…" tách thành dòng riêng thay vì dính vào dòng điểm.
+- **Điểm từng tiêu chí quá nhỏ.** Nay đậm và to hơn tên tiêu chí.
+- **Trang tiến bộ có khoảng trống lớn dưới biểu đồ nhịp học** vì cột bên phải dài. Biểu đồ điểm AI chuyển vào cột trái, dưới biểu đồ nhịp học, hai cột cân nhau (có ca E2E đo vị trí).
+- **Thẻ "Chấm bài bằng AI" ở Cài đặt** là một đoạn dài đặc. Nay là một câu mở đầu và bốn gạch đầu dòng (gửi gì, Google làm gì, kết quả là gì, file báo lỗi).
+- **Mâu thuẫn ở kết quả bài học Viết:** biểu ngữ ghi "Chưa có điểm chấm cho bài này" ngay trên nút chấm. Khi máy chủ đã bật, biểu ngữ nói thêm "bấm Chấm bằng AI ở khung bên dưới" (có ca E2E).
+- **Kiểm tra:** ESLint, TypeScript sạch; E2E các màn chấm AI, axe và laptop đều đạt.
+
+## Chấm AI: chấm trong buổi thi rút gọn và biểu đồ điểm theo thời gian — 09/10/2026
+
+- **Buổi thi `/exam`.** Khi buổi thi khép lại, mỗi bài Viết đã nộp (email, và essay ở đề đầy đủ) có khung "Chấm bằng AI" như ở bài học; điểm Viết tổng (Bài 1 + 2 × Bài 2) / 3 hiện khi cả hai bài đã chấm. Bài Viết của buổi thi vốn đã được lưu thành lượt làm (`exam:<mã>:<bài>`) kèm văn bản, nên lần chấm lưu theo `attempt:exam:…`, không mất khi bấm "Chuẩn bị lượt mới". Bài Nói của buổi thi vẫn chưa có chấm tự động; chấm Nói làm ở màn chữa đề của kho đề.
+- **`WritingTotal`** nay nhận mã hai lần chấm (`task1Id`, `task2Id`) thay vì lượt thi, nên dùng chung cho kho đề và buổi thi.
+- **Biểu đồ "Điểm AI ước lượng theo thời gian"** ở trang tiến bộ (`src/lib/grade-trend.ts`, `src/components/grade-trend.tsx`): mỗi lần chấm Viết (điểm từng bài) và Nói (điểm cả bài thi) là một điểm, tối đa 24 điểm mới nhất, xếp theo thời gian chấm. Chỉ vẽ điểm đã hiện cho Gùa (điểm bị ẩn thì bỏ). Hai chuỗi dùng hồng `#c24178` và xanh `#2a7fb5` (đã chạy bộ kiểm màu của kỹ năng dataviz: đạt cả năm kiểm, khác biệt màu cho người mù màu 11,7), thêm hình tròn/hình thoi để không chỉ dựa vào màu, có chú giải, bảng số liệu dạng thu gọn và nói rõ đây là điểm ước lượng, chưa so với người chấm. Đã chụp ảnh kiểm bằng mắt.
+- **Kiểm tra:** 403 unit (thêm 5 ca cho dữ liệu biểu đồ), 191 E2E (Chromium 183; thêm ca chấm buổi thi + điểm Viết tổng, ca biểu đồ có axe, ca không có biểu đồ khi chưa chấm), ESLint và TypeScript sạch.
+
 ## Chấm AI: hiện điểm ước lượng có nhãn, chấm được Task 2 và bài học Viết — 09/10/2026
 
 Chủ dự án thử bài Viết thật và thấy hai điều: kết quả ghi “Chưa hiện điểm số” (họ kỳ vọng phải chấm được) và Task 2 báo “chưa có danh sách ý bắt buộc đã được duyệt nên chưa chấm được”. Cả hai là chủ ý của bản trước (không đưa ra số chưa đối chiếu), nhưng với một app luyện tập cá nhân thì nó không dùng được. Đã đổi như sau; mọi thứ vẫn nói thật rằng điểm chưa được kiểm với giám khảo.
@@ -431,7 +480,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 398 unit / 188 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 403 unit / 191 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -640,8 +689,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 398 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 188 kiểm thử Playwright trên bản production: 180 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 403 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 191 kiểm thử Playwright trên bản production: 183 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

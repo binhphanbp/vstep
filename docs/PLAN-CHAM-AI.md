@@ -234,7 +234,7 @@ Cần: việc 1, 2 ở mục 11.
 
 - **Chưa có lần gọi Gemini thật nào** (chưa có khóa), nên chưa thấy một kết quả thật hiện lên giao diện; mọi ca E2E dùng API giả.
 - ~~Hầu hết bài Viết chưa chấm được~~ (đã giải quyết 09/10/2026: Task 2 dùng mẫu theo dạng đề đã được chấp nhận; bài học Viết và Task 2 của Review 13/09 có danh sách riêng). Đề không khớp mẫu hay danh sách nào vẫn không chấm và giao diện nói rõ lý do.
-- Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). **Buổi thi rút gọn (`/exam`) vẫn chưa gắn.**
+- Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). Buổi thi rút gọn (`/exam`) đã gắn nút chấm bài Viết ở màn kết thúc (09/10/2026); bài Nói của buổi thi chưa có. Trang tiến bộ có biểu đồ điểm AI theo thời gian.
 - **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo). Từ 09/10/2026 điểm vẫn hiện nhưng đầu kết quả có một ghi chú nói rõ đây là ước lượng của AI; ghi chú chỉ biến mất khi mọi tiêu chí có cổng mở sau khi đo bằng các phép tự thân.
 
 ### Đợt 3: Chấm Nói
@@ -259,6 +259,8 @@ Cần: việc 1, 2, 4 ở mục 11.
 - **Chưa có trình phát nghe lại đúng đoạn được trích** (chưa có thời điểm đáng tin để nhảy tới).
 - **Chưa gắn vào bài học Nói đơn lẻ**: bài đó chỉ có một phần, không phải bài thi Nói; kế hoạch muốn ghi rõ “chấm trên một phần”, để làm cùng lúc với việc duyệt cách chấm một phần.
 - **Cổng điểm vẫn đóng hết**: chưa đối chiếu với speechocean762 và Speak & Improve, nên kết quả chỉ có nhận xét và bản chép lời, chưa có số.
+
+**Lần đo đầu (09/10/2026):** không tiêu chí Viết nào qua ngưỡng ELLIPSE (QWK 0,31–0,42, AI chấm thấp hơn khoảng 0,4–0,6 điểm trên thang 1–5), độ ổn định đạt trên 8 bài, điểm Ngữ pháp phản ứng yếu với lỗi thêm vào; Gemini đọc được webm và mp4. Chi tiết và cảnh báo ở [QUALITY.md](QUALITY.md). Cổng điểm giữ đóng.
 
 ### Đợt 4: Theo dõi và điểm tổng
 

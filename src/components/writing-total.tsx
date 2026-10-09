@@ -1,7 +1,7 @@
 "use client";
 import { useStudy } from "./study-provider";
 import { scoreText } from "./grade-parts";
-import { paperGradeId, type StoredGrade } from "@/lib/grades";
+import { type StoredGrade } from "@/lib/grades";
 import { BAND_LABEL, bandOf, writingScore } from "@/lib/grading/scores";
 
 /**
@@ -10,19 +10,18 @@ import { BAND_LABEL, bandOf, writingScore } from "@/lib/grading/scores";
  * the nearest 0.5), done in code from the two task marks.
  */
 export function WritingTotal({
-  runId,
-  slots,
+  task1Id,
+  task2Id,
 }: {
-  runId: string;
-  slots: { id: string; part: string }[];
+  /** Where each task's grade is kept: see `paperGradeId` and `attemptGradeId`. */
+  task1Id: string;
+  task2Id: string;
 }) {
   const { state } = useStudy();
   const grades = state.grades as Record<string, StoredGrade> | undefined;
-  const task1 = slots.find((slot) => slot.part.includes("1"));
-  const task2 = slots.find((slot) => slot.part.includes("2"));
-  if (!task1 || !task2 || !grades) return null;
-  const first = grades[paperGradeId(runId, task1.id)]?.grade;
-  const second = grades[paperGradeId(runId, task2.id)]?.grade;
+  if (!grades) return null;
+  const first = grades[task1Id]?.grade;
+  const second = grades[task2Id]?.grade;
   if (
     !first ||
     !second ||
