@@ -162,9 +162,8 @@ export function GradeTrend() {
       </svg>
       <p className="help-copy">
         Mỗi điểm là một lần chấm, xếp theo thời gian chấm, không theo khoảng
-        cách ngày. Đây là điểm AI ước lượng, chưa được so với điểm của người
-        chấm: xem đường đi lên hay đi xuống thì có ích, còn từng con số thì chỉ
-        là ước lượng.
+        cách ngày. Đây là điểm AI ước lượng: xem đường đi lên hay đi xuống thì
+        có ích, còn từng con số thì có thể lệch.
       </p>
       <details>
         <summary>Xem dạng bảng</summary>
