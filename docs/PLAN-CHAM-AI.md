@@ -142,7 +142,7 @@ Ngưỡng đặt theo **mức đồng thuận giữa chính người chấm** tr
 | Độ ổn định                                        | Cùng bài chấm 10 lần                | Trung vị dao động ≤ 0,5 điểm ở ≥ 95% bài                                                                                                                  | —                                                                          |
 | Câu trích sai                                     | Tỉ lệ câu trích không có trong bài  | ≤ 2%                                                                                                                                                      | —                                                                          |
 
-Tiêu chí nào không đạt: từ 09/10/2026 app vẫn hiện điểm của tiêu chí đó nhưng **luôn kèm nhãn “chưa đối chiếu giám khảo”** và một ghi chú ở đầu kết quả (trước đó: ẩn điểm; công tắc là `SHOW_UNVALIDATED_SCORES`). Đạt hay không là số đo, không phải ý kiến; nhãn chỉ biến mất khi có số đo cho tiêu chí đó.
+Tiêu chí nào không đạt: từ 09/10/2026 app vẫn hiện điểm của tiêu chí đó nhưng kèm một ghi chú ở đầu kết quả (điểm là ước lượng của AI, chưa được so với điểm người chấm; ngày 09/10/2026 chủ dự án nói rõ không có người chấm nào, nên không còn nhãn lặp trên từng tiêu chí) (trước đó: ẩn điểm; công tắc là `SHOW_UNVALIDATED_SCORES`). Đạt hay không là số đo, không phải ý kiến; nhãn chỉ biến mất khi có số đo cho tiêu chí đó.
 
 ### 7.3 Bài neo
 
@@ -235,7 +235,7 @@ Cần: việc 1, 2 ở mục 11.
 - **Chưa có lần gọi Gemini thật nào** (chưa có khóa), nên chưa thấy một kết quả thật hiện lên giao diện; mọi ca E2E dùng API giả.
 - ~~Hầu hết bài Viết chưa chấm được~~ (đã giải quyết 09/10/2026: Task 2 dùng mẫu theo dạng đề đã được chấp nhận; bài học Viết và Task 2 của Review 13/09 có danh sách riêng). Đề không khớp mẫu hay danh sách nào vẫn không chấm và giao diện nói rõ lý do.
 - Bài học Viết đã gắn nút chấm ở kết quả (09/10/2026). **Buổi thi rút gọn (`/exam`) vẫn chưa gắn.**
-- **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo). Từ 09/10/2026 điểm vẫn hiện nhưng mỗi tiêu chí kèm nhãn “chưa đối chiếu giám khảo” và đầu kết quả có ghi chú nói rõ; khi cổng của một tiêu chí mở sau khi đo, nhãn của tiêu chí đó biến mất.
+- **Cổng điểm vẫn đóng hết** (Đợt 1 chưa đo). Từ 09/10/2026 điểm vẫn hiện nhưng đầu kết quả có một ghi chú nói rõ đây là ước lượng của AI; ghi chú chỉ biến mất khi mọi tiêu chí có cổng mở sau khi đo bằng các phép tự thân.
 
 ### Đợt 3: Chấm Nói
 

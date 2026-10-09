@@ -47,7 +47,7 @@ export function WritingTotal({
         Bài 2 chiếm 2/3 ({scoreText(second.taskScore)}), rồi làm tròn đến 0,5.
         {validated
           ? ""
-          : " Hai điểm bài do AI ước lượng và chưa được đối chiếu với giám khảo thật, nên điểm Viết cũng vậy."}
+          : " Hai điểm bài do AI ước lượng và chưa được so với điểm của người chấm, nên điểm Viết cũng vậy."}
       </p>
     </section>
   );

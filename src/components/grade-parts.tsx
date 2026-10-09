@@ -127,9 +127,6 @@ export function CriteriaList({
                       ? ` (các lần chấm: ${scoreText(item.low)}–${scoreText(item.high)})`
                       : ""}
                   </span>
-                  {item.validated !== true && (
-                    <span className="pill">chưa đối chiếu giám khảo</span>
-                  )}
                 </>
               ) : (
                 <span className="pill">chưa hiện điểm</span>
@@ -259,9 +256,9 @@ export function EstimateNotice({
   return (
     <p className="notice" role="note">
       Các điểm dưới đây do AI ước lượng theo thang VSTEP và{" "}
-      <strong>chưa được đối chiếu với giám khảo thật</strong>, nên có thể lệch
-      so với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần sửa gì,
-      đừng coi là điểm dự đoán chắc chắn.
+      <strong>chưa được so với điểm của người chấm</strong>, nên có thể lệch so
+      với điểm thi thật. Dùng để theo dõi mình tiến bộ và biết cần sửa gì, đừng
+      coi là điểm dự đoán chắc chắn.
     </p>
   );
 }

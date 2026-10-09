@@ -244,11 +244,8 @@ test("shows the numbers only when the grade says the criteria may show", async (
   await expect(result).toContainText("Bậc 4 (B2)");
   // Shown, but never passed off as checked: a note and a label on every score.
   await expect(result.getByRole("note").first()).toContainText(
-    "chưa được đối chiếu với giám khảo thật",
+    "chưa được so với điểm của người chấm",
   );
-  await expect(
-    result.locator(".pill", { hasText: "chưa đối chiếu giám khảo" }),
-  ).toHaveCount(4);
   await expect(result.locator(".pill", { hasText: "6/10" })).toHaveCount(3);
   await expect(result.locator(".pill", { hasText: "7/10" })).toHaveCount(1);
   await expect(result).toContainText("độ tin cậy thấp");
@@ -392,7 +389,7 @@ test("grades Task 2 too, and then works out the Writing mark from both tasks", a
   await expect(total).toContainText("6,5/10");
   await expect(total).toContainText("Bài 1 chiếm 1/3 (6)");
   await expect(total).toContainText("Bài 2 chiếm 2/3 (7)");
-  await expect(total).toContainText("chưa được đối chiếu với giám khảo thật");
+  await expect(total).toContainText("chưa được so với điểm của người chấm");
 });
 
 test("warns when the writing is not what was graded", async ({ page }) => {
@@ -674,7 +671,7 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   const result = grade.locator(".grade-result");
   await expect(result).toContainText("Điểm bài (ước lượng): 6,25/10");
   await expect(result.getByRole("note").first()).toContainText(
-    "chưa được đối chiếu với giám khảo thật",
+    "chưa được so với điểm của người chấm",
   );
   expect(requests).toHaveLength(1);
   expect(requests[0].body).toMatchObject({
