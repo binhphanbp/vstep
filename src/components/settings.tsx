@@ -970,13 +970,14 @@ function AiPanel() {
             : "Máy chủ của Mây chưa bật chức năng này (người quản lý cần đặt khóa và mã chấm bài), nên nút “Chấm bằng AI” chưa hiện."}
       </p>
       <p className="help-copy">
-        Khi bạn bấm “Chấm bằng AI” ở một bài viết,{" "}
-        <strong>đề bài và bài viết</strong> được gửi tới máy chủ của Mây rồi tới
-        Google (Gemini, gói trả phí: Google không dùng nội dung gửi lên để cải
-        thiện sản phẩm của họ, chỉ lưu nhật ký có thời hạn để phát hiện lạm
+        Khi bạn bấm “Chấm bằng AI” ở một bài viết (hoặc “Chấm phần Nói” ở màn
+        chữa đề), <strong>đề bài và bài viết</strong> (hoặc{" "}
+        <strong>bản ghi âm phần Nói</strong>) được gửi tới máy chủ của Mây rồi
+        tới Google (Gemini, gói trả phí: Google không dùng nội dung gửi lên để
+        cải thiện sản phẩm của họ, chỉ lưu nhật ký có thời hạn để phát hiện lạm
         dụng). Không có gì được gửi nếu bạn không bấm nút. Kết quả là điểm ước
         lượng theo thang VSTEP, không phải điểm chính thức. File báo lỗi không
-        bao giờ chứa bài viết hay kết quả chấm.
+        bao giờ chứa bài viết, bản ghi hay kết quả chấm.
       </p>
       <label className="paper-agree">
         <input

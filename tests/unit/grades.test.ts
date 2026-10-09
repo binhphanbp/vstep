@@ -6,6 +6,7 @@ import {
 } from "../../src/lib/learning";
 import type { Generate } from "../../src/lib/grading/generate";
 import { GATES, type Gates } from "../../src/lib/grading/gates";
+import { gradeSpeaking } from "../../src/lib/grading/speaking";
 import { gradeWriting } from "../../src/lib/grading/writing";
 import {
   GRADE_LIMITS,
@@ -14,6 +15,10 @@ import {
   fitGrade,
   gradeTarget,
   inputHashOf,
+  isSpeakingGrade,
+  paperSpeakingGradeId,
+  speakingInputHashOf,
+  type StoredSpeakingGrade,
   paperGradeId,
   pruneGrades,
   removeGrade,
@@ -272,5 +277,150 @@ describe("saved AI grades", () => {
     expect(report).not.toContain("Sau could");
     expect(report).not.toContain("Tổng kết.");
     expect(report).not.toContain("practise every day");
+  });
+});
+
+describe("saved Speaking grades", () => {
+  async function speakingEntry(runId: string, at: string) {
+    const sentence =
+      "I am from Hue and it is a quiet city with many old buildings and a lovely river";
+    const generate: Generate = async (request) =>
+      request.label.startsWith("speaking-transcribe")
+        ? {
+            transcript: sentence,
+            words: sentence
+              .split(" ")
+              .map((word, i) => ({ word, start: i * 1.5, end: i * 1.5 + 0.6 })),
+          }
+        : {
+            criteria: [
+              "grammar",
+              "vocabulary",
+              "pronunciation",
+              "fluency",
+              "discourse",
+            ].map((criterion) => ({
+              criterion,
+              score: 6,
+              evidence: ["a quiet city"],
+              whyNotHigher: "a",
+              whyNotLower: "b",
+              toRaise: "c",
+            })),
+            summary: "Tổng kết.",
+          };
+    const grade = await gradeSpeaking(
+      [
+        {
+          id: "s1",
+          title: "Part 1",
+          prompt: "Where are you from?",
+          audio: { mimeType: "audio/webm", base64: "AAAA" },
+          durationSeconds: 40,
+        },
+      ],
+      {
+        generate,
+        gates: {
+          writing: open.writing,
+          speaking: {
+            grammar: true,
+            vocabulary: true,
+            pronunciation: true,
+            fluency: true,
+            discourse: true,
+          },
+          measuredOn: "test",
+        },
+      },
+    );
+    if (grade.status !== "graded") throw new Error("expected a grade");
+    return {
+      id: paperSpeakingGradeId(runId),
+      at,
+      inputHash: await speakingInputHashOf([
+        { id: "s1", prompt: "Where are you from?", savedAt: 1, bytes: 10 },
+      ]),
+      grade,
+    } satisfies StoredSpeakingGrade;
+  }
+
+  it("round-trips through the schema next to a Writing grade, and each is read as its own kind", async () => {
+    let state = withRuns("r1");
+    state = addGrade(
+      state,
+      await speakingEntry("r1", "2026-10-08T10:00:00.000Z"),
+    ).state;
+    state = addGrade(
+      state,
+      await entry(
+        paperGradeId("r1", "132-writing-1"),
+        "2026-10-08T10:01:00.000Z",
+      ),
+    ).state;
+    const parsed = stateSchema.parse(JSON.parse(JSON.stringify(state)));
+    const kinds = Object.entries(parsed.grades ?? {}).map(([id, stored]) => [
+      id,
+      isSpeakingGrade(stored as never),
+    ]);
+    expect(kinds.sort()).toEqual([
+      ["paper:r1:132-writing-1", false],
+      ["paper:r1:speaking", true],
+    ]);
+  });
+
+  it("is named for the sitting, replaced when graded again, and dropped with the sitting", async () => {
+    expect(paperSpeakingGradeId("r1")).toBe("paper:r1:speaking");
+    let state = withRuns("r1", "r2");
+    state = addGrade(
+      state,
+      await speakingEntry("r1", "2026-10-08T10:00:00.000Z"),
+    ).state;
+    state = addGrade(
+      state,
+      await speakingEntry("r1", "2026-10-08T11:00:00.000Z"),
+    ).state;
+    state = addGrade(
+      state,
+      await speakingEntry("r2", "2026-10-08T11:30:00.000Z"),
+    ).state;
+    expect(Object.keys(state.grades ?? {}).sort()).toEqual([
+      "paper:r1:speaking",
+      "paper:r2:speaking",
+    ]);
+    const pruned = pruneGrades({ ...state, paperRuns: [run("r2")] });
+    expect(Object.keys(pruned.grades ?? {})).toEqual(["paper:r2:speaking"]);
+  });
+
+  it("cuts a very long transcript to what the schema accepts, so saving never makes the profile unreadable", async () => {
+    const stored = await speakingEntry("r1", "2026-10-08T10:00:00.000Z");
+    const long: StoredSpeakingGrade = {
+      ...stored,
+      grade: {
+        ...stored.grade,
+        parts: [
+          { ...stored.grade.parts[0], transcript: "word ".repeat(10000) },
+        ],
+      },
+    };
+    const state = addGrade(withRuns("r1"), long).state;
+    const kept = (state.grades as Record<string, StoredSpeakingGrade>)[
+      "paper:r1:speaking"
+    ];
+    expect(kept.grade.parts[0].transcript.length).toBeLessThanOrEqual(12000);
+    expect(() =>
+      stateSchema.parse(JSON.parse(JSON.stringify(state))),
+    ).not.toThrow();
+  });
+
+  it("hashes the questions and each recording, so a take made again is noticed", async () => {
+    const base = [{ id: "s1", prompt: "q", savedAt: 1, bytes: 100 }];
+    const a = await speakingInputHashOf(base);
+    expect(await speakingInputHashOf(base)).toBe(a);
+    expect(await speakingInputHashOf([{ ...base[0], savedAt: 2 }])).not.toBe(a);
+    expect(await speakingInputHashOf([{ ...base[0], bytes: 101 }])).not.toBe(a);
+    expect(
+      await speakingInputHashOf([{ ...base[0], prompt: "other" }]),
+    ).not.toBe(a);
   });
 });

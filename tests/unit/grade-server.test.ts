@@ -4,6 +4,8 @@ import {
   GradeLimiter,
   PASSCODE_HEADER,
   REQUEST_LIMITS,
+  AUDIO_LIMITS,
+  handleGradeSpeaking as handleSpeaking,
   handleGradeWriting,
   handleStatus,
   isConfigured,
@@ -226,3 +228,163 @@ describe("the brake", () => {
     expect(await reply.json()).toEqual({ error: "rate", retryAfter: 15 });
   });
 });
+
+describe("grading a Speaking performance", () => {
+  const meta = (over: object = {}) =>
+    JSON.stringify({
+      parts: [
+        {
+          id: "p1",
+          title: "Part 1",
+          prompt: "Where are you from?",
+          durationSeconds: 40,
+        },
+      ],
+      ...over,
+    });
+  const audio = (size = 4000, type = "audio/webm;codecs=opus") =>
+    new File([new Uint8Array(size)], "a.webm", { type });
+  function form(parts: { meta?: string; files?: (File | null)[] } = {}) {
+    const data = new FormData();
+    data.set("meta", parts.meta ?? meta());
+    (parts.files ?? [audio()]).forEach((file, i) => {
+      if (file) data.set(`audio${i}`, file);
+    });
+    return data;
+  }
+  const send = (
+    data: FormData,
+    over: Partial<GradeDeps> = {},
+    passcode: string | null = "open sesame",
+    calls: string[] = [],
+  ) =>
+    handleSpeaking(
+      new Request("http://localhost/api/grade/speaking", {
+        method: "POST",
+        headers: passcode ? { [PASSCODE_HEADER]: passcode } : {},
+        body: data,
+      }),
+      deps({ generate: () => speakingGenerate(calls), ...over }, calls),
+    );
+
+  it("uses the same door as writing: not configured, wrong passcode, lockout", async () => {
+    expect((await send(form(), { env: {} })).status).toBe(503);
+    expect((await send(form(), {}, "nope")).status).toBe(401);
+    expect((await send(form(), {}, null)).status).toBe(401);
+    const limiter = new GradeLimiter(20, 2);
+    for (let i = 0; i < 10; i++) await send(form(), { limiter }, "nope");
+    expect((await send(form(), { limiter })).status).toBe(429);
+  });
+
+  it("grades what was sent: transcribes once, scores three times, strips the codec suffix", async () => {
+    const calls: string[] = [];
+    const reply = await send(form(), {}, "open sesame", calls);
+    expect(reply.status).toBe(200);
+    const { grade } = await reply.json();
+    expect(grade.status).toBe("graded");
+    expect(grade.criteria.fluency.showScore).toBe(false); // the real gates are closed
+    expect(
+      calls.filter((c) => c.startsWith("speaking-transcribe")),
+    ).toHaveLength(1);
+    expect(calls.filter((c) => c.startsWith("speaking-score"))).toHaveLength(3);
+  });
+
+  it("rejects bad requests before the model: no meta, bad meta, missing file, wrong type, tiny file, too big", async () => {
+    const calls: string[] = [];
+    const bad = async (data: FormData) =>
+      (await send(data, {}, "open sesame", calls)).status;
+    expect(await bad(form({ meta: "not json" }))).toBe(400);
+    expect(await bad(form({ meta: meta({ parts: [] }) }))).toBe(400);
+    expect(
+      await bad(
+        form({
+          meta: meta({
+            parts: [
+              { id: "p", title: "t", prompt: "q", durationSeconds: 5000 },
+            ],
+          }),
+        }),
+      ),
+    ).toBe(400);
+    expect(await bad(form({ files: [null] }))).toBe(400);
+    expect(await bad(form({ files: [audio(4000, "video/mp4")] }))).toBe(415);
+    expect(await bad(form({ files: [audio(100)] }))).toBe(400);
+    expect(await bad(form({ files: [audio(AUDIO_LIMITS.bytes + 1)] }))).toBe(
+      413,
+    );
+    const data = new FormData();
+    expect(await bad(data)).toBe(400);
+    expect(calls).toEqual([]);
+  });
+
+  it("counts all the audio together against one limit", async () => {
+    const two = meta({
+      parts: [
+        { id: "a", title: "A", prompt: "q", durationSeconds: 60 },
+        { id: "b", title: "B", prompt: "q", durationSeconds: 60 },
+      ],
+    });
+    const half = Math.floor(AUDIO_LIMITS.bytes / 2) + 10;
+    const reply = await send(
+      form({ meta: two, files: [audio(half), audio(half)] }),
+    );
+    expect(reply.status).toBe(413);
+  });
+
+  it("returns a block, not an error, for a silent recording", async () => {
+    const reply = await send(form(), {
+      generate: () => speakingGenerate([], true),
+    });
+    expect((await reply.json()).grade).toMatchObject({
+      status: "blocked",
+      reason: "silent",
+    });
+  });
+
+  it("says only what kind of failure it was", async () => {
+    const logged: string[] = [];
+    const failing: Generate = async () => {
+      throw Object.assign(new Error("secret speech"), { status: 503 });
+    };
+    const reply = await send(form(), {
+      generate: () => failing,
+      log: (e) => logged.push(e),
+    });
+    expect(reply.status).toBe(502);
+    expect(logged).toEqual(["model-error:503"]);
+  });
+});
+
+function speakingGenerate(calls: string[] = [], silent = false): Generate {
+  const sentence =
+    "I am from Hue and it is a quiet city with many old buildings and a lovely river";
+  return async (request) => {
+    calls.push(request.label);
+    if (request.label.startsWith("speaking-transcribe"))
+      return silent
+        ? { transcript: "", words: [] }
+        : {
+            transcript: sentence,
+            words: sentence
+              .split(" ")
+              .map((word, i) => ({ word, start: i * 1.5, end: i * 1.5 + 0.6 })),
+          };
+    return {
+      criteria: [
+        "grammar",
+        "vocabulary",
+        "pronunciation",
+        "fluency",
+        "discourse",
+      ].map((criterion) => ({
+        criterion,
+        score: 6,
+        evidence: [],
+        whyNotHigher: "a",
+        whyNotLower: "b",
+        toRaise: "c",
+      })),
+      summary: "s",
+    };
+  };
+}

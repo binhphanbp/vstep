@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Recorder } from "./audio-tools";
 import { GradePanel } from "./grade-panel";
+import { SpeakingGradePanel } from "./speaking-grade-panel";
 import { MarkablePassage } from "./marked-text";
 import { QuestionNotes } from "./note-box";
 import { PaperText } from "./paper-exam";
@@ -828,6 +829,13 @@ export function PaperReview({
                 </details>
               );
             })}
+            {section.skill === "speaking" && sameMaterial && (
+              <SpeakingGradePanel
+                runId={run.id}
+                slots={section.slots}
+                spoken={run.spoken}
+              />
+            )}
           </section>
         );
       })}

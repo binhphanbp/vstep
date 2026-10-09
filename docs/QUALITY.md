@@ -2,6 +2,17 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Chấm AI, đợt 3: chấm phần Nói trong app — 09/10/2026
+
+Yêu cầu: làm Đợt 3 của [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md). Máy chủ, lưu trữ và giao diện đã làm và kiểm bằng API giả; chưa có lần gọi Gemini thật nào (chưa có khóa).
+
+- **Ghi âm 32 kbps** cho bản mới, để cả bài thi Nói vừa một yêu cầu tới máy chủ; **`/api/grade/speaking`** nhận form nhiều phần (âm thanh nhị phân), dùng chung cổng bảo vệ với đường chấm Viết; giới hạn 4,2 MB, ba phần, định dạng cho phép.
+- **Lưu trữ:** lần chấm Nói trong `grades` (bản chép lời cắt ở 12.000 ký tự mỗi phần để không làm hồ sơ không đọc được), dấu băm của bản ghi để biết khi ghi lại.
+- **Giao diện:** nút “Chấm phần Nói” ở màn chữa đề, hộp đồng ý riêng, kiểm bản ghi trước khi gửi, kết quả có bản chép lời và số đo trôi chảy; Cài đặt và dòng chú thích dưới ô ghi âm nói đúng điều kiện gửi.
+- **Lỗi tìm thấy khi làm:** một ca E2E đỏ vì ca kiểm giả định mã chấm bài lưu lại có tác dụng ngay khi chỉ ghi vào bộ nhớ trình duyệt (sửa ca kiểm: dùng đúng đường nhập mã trong giao diện); một lần tách nhầm đoạn mã khi sắp xếp lại bảng chấm (phát hiện ngay bằng TypeScript, làm lại).
+- **Giới hạn đã biết:** chưa chạy thật nên chưa biết định dạng nào Gemini đọc được, thời điểm từng từ có đáng tin không, thời gian và chi phí; bản ghi cũ nặng hơn 4,2 MB phải ghi lại; chưa có bài học Nói đơn lẻ; cổng điểm vẫn đóng.
+- **Kiểm tra:** 375 unit (thêm 10), 184 E2E (thêm 9; Chromium 176), build 106 route, ESLint và TypeScript sạch.
+
 ## Chấm AI, đợt 2: chấm bài Viết trong app — 08/10/2026
 
 Yêu cầu: làm Đợt 2 của [PLAN-CHAM-AI.md](PLAN-CHAM-AI.md). Phần máy chủ, lưu trữ và giao diện đã làm và kiểm bằng API giả; chưa có lần gọi Gemini thật nào (chưa có khóa).
@@ -398,7 +409,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 365 unit / 175 E2E / 105 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 375 unit / 184 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -607,8 +618,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 365 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 175 kiểm thử Playwright trên bản production: 167 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 375 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 184 kiểm thử Playwright trên bản production: 176 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

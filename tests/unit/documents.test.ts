@@ -52,12 +52,12 @@ const crossBrowserTests = cases(
 const e2eTests = chromiumTests + crossBrowserTests * 2;
 /**
  * Pages `next build` prerenders: one per lesson and one per paper, plus the
- * seventeen other pages the build generates (the fixed routes, the two
+ * eighteen other pages the build generates (the fixed routes, the three
  * `/api/grade` handlers, and the `/practice/[id]` and `/papers/[id]` rows
  * themselves). Taken from the build output ("Generating static pages (n/n)"),
- * which read 105 with 83 lessons and 5 papers.
+ * which read 106 with 83 lessons and 5 papers.
  */
-const NON_LESSON_ROUTES = 17;
+const NON_LESSON_ROUTES = 18;
 const routes = allLessons.length + paperCatalog.length + NON_LESSON_ROUTES;
 const questions = allLessons.reduce(
   (sum, lesson) => sum + lesson.questions.length,

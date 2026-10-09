@@ -243,6 +243,22 @@ Cần: việc 1, 2, 4 ở mục 11.
 - Đổi bitrate ghi âm; đường gửi âm thanh (kể cả bản ghi lớn); chép lời có thời điểm; số đo trôi chảy bằng code; chấm năm tiêu chí; giao diện như Viết, có trình phát cho nghe lại đúng đoạn được trích.
 - **Xong khi:** qua ngưỡng ở mục 7.2 cho các tiêu chí được hiện điểm; CI xanh.
 
+**Đã làm (09/10/2026), kiểm bằng unit test và E2E với API giả:**
+
+- **Ghi âm nhẹ hơn.** Bản ghi mới đặt `audioBitsPerSecond: 32000` (cả bài học và phòng thi), năm phút khoảng 1,2 MB; bản cũ vẫn phát như trước. Có ca E2E kiểm tùy chọn này đi vào `MediaRecorder`.
+- **Máy chủ.** `POST /api/grade/speaking` nhận một form nhiều phần (`meta` là JSON gồm câu hỏi và độ dài từng phần, rồi `audio0`, `audio1`… là tệp nhị phân, không phải base64) và dùng chung cổng bảo vệ với đường chấm Viết (bật tắt, khóa sai mã, mã). Giới hạn 4,2 MB cho toàn bộ âm thanh (Vercel nhận khoảng 4,5 MB một yêu cầu), tối đa 3 phần, mỗi phần tối đa 15 phút, chỉ nhận định dạng webm, ogg, mp4, mpeg, wav; phần chép lời gọi một lần cho mỗi phần, sau đó chấm ba lần độc lập (thêm hai lần khi lệch) như phần Viết.
+- **Chấm cả bài thi Nói cùng lúc**, đúng cách giám khảo nghe hết ba phần rồi cho một điểm mỗi tiêu chí. Đọc độ dài bản ghi ở trình duyệt bằng cách giải mã âm thanh (bản ghi WebM không có độ dài trong tiêu đề).
+- **Lưu trữ.** Lần chấm Nói lưu ở mục `grades` cùng lần chấm Viết (mã `paper:<lượt>:speaking`), có bản chép lời (tối đa 12.000 ký tự mỗi phần), số đo trôi chảy và dấu băm của bản ghi (mỗi bản ghi lúc ghi và dung lượng) để biết khi nào đã ghi lại sau lần chấm.
+- **Giao diện.** Ở cuối phần Nói của màn chữa đề: nút “Chấm phần Nói”, hộp đồng ý riêng nói rõ gửi bản ghi âm, dừng giữa chừng, báo trước khi gửi nếu thiếu bản ghi của một phần hoặc âm thanh quá nặng (bản ghi cũ), kết quả có năm tiêu chí, bản chép lời từng phần và tốc độ, số chỗ ngừng, từ đệm đo được. Điểm Nói chỉ hiện khi cả năm tiêu chí được mở cổng, kèm câu nói rõ cách tính (trung bình năm tiêu chí, chưa có văn bản chính thức).
+
+**Chưa làm, và vì sao:**
+
+- **Chưa có lần gọi Gemini thật nào.** Chưa biết: dịch vụ có đọc `audio/mp4` của Safari không, `audio/webm` ghi bởi MediaRecorder có được chép lời đúng không, thời điểm từng từ do model trả về có khớp độ dài bản ghi không (nếu không khớp, tiêu chí trôi chảy tự mất điểm và chỉ còn nhận xét), một lượt chấm Nói mất bao lâu và tốn bao nhiêu.
+- **Bản ghi cũ lớn hơn 4,2 MB** chưa gửi được: giao diện báo và mời ghi lại. Chưa thử đường tải lên qua Files API (cần khóa thật).
+- **Chưa có trình phát nghe lại đúng đoạn được trích** (chưa có thời điểm đáng tin để nhảy tới).
+- **Chưa gắn vào bài học Nói đơn lẻ**: bài đó chỉ có một phần, không phải bài thi Nói; kế hoạch muốn ghi rõ “chấm trên một phần”, để làm cùng lúc với việc duyệt cách chấm một phần.
+- **Cổng điểm vẫn đóng hết**: chưa đối chiếu với speechocean762 và Speak & Improve, nên kết quả chỉ có nhận xét và bản chép lời, chưa có số.
+
 ### Đợt 4: Theo dõi và điểm tổng
 
 - Biểu đồ điểm từng tiêu chí theo thời gian ở trang Tiến bộ (chỉ điểm đã qua ngưỡng).

@@ -18,7 +18,11 @@ import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 import { NOTE_LIMITS } from "./notes";
 import { MARK_LIMITS } from "./marks";
 import { WORK_LIMITS } from "./work";
-import { GRADE_LIMITS, storedGradeSchema } from "./grades";
+import {
+  GRADE_LIMITS,
+  storedGradeSchema,
+  storedSpeakingGradeSchema,
+} from "./grades";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -434,7 +438,10 @@ export const stateSchema = z
     // written (`src/lib/grades.ts`).
     grades: z.optional(
       z
-        .record(z.string(), storedGradeSchema)
+        .record(
+          z.string(),
+          z.union([storedGradeSchema, storedSpeakingGradeSchema]),
+        )
         .check(
           z.refine(
             (grades) => Object.keys(grades).length <= GRADE_LIMITS.schemaCount,

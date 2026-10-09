@@ -66,7 +66,7 @@ Migration bật RLS, chỉ tài khoản được cấp phép truy cập snapshot
 
 ## Chấm bài Viết bằng AI (tùy chọn)
 
-Nút “Chấm bằng AI” ở màn chữa đề **chỉ hiện khi máy chủ có đủ hai biến môi trường** (không bao giờ đặt trong `NEXT_PUBLIC_*` hay trong repo): `GEMINI_API_KEY` (khóa Gemini của dự án Google đã gắn thanh toán, vì gói miễn phí cho Google dùng nội dung gửi lên) và `GRADER_PASSCODE` (một chuỗi dài, ngẫu nhiên; Gùa nhập một lần ở Cài đặt). Khi bấm nút, chỉ đề bài và bài viết đó đi qua `/api/grade/writing` tới Gemini; kết quả lưu cùng dữ liệu học. Hiện chưa tiêu chí nào được hiện điểm vì chưa đối chiếu với người chấm; xem [docs/PLAN-CHAM-AI.md](docs/PLAN-CHAM-AI.md). Bộ đo: `npx tsx scripts/grading-eval/run.ts <chế độ>` (chạy tay, không chạy trong CI).
+Nút “Chấm bằng AI” ở màn chữa đề **chỉ hiện khi máy chủ có đủ hai biến môi trường** (không bao giờ đặt trong `NEXT_PUBLIC_*` hay trong repo): `GEMINI_API_KEY` (khóa Gemini của dự án Google đã gắn thanh toán, vì gói miễn phí cho Google dùng nội dung gửi lên) và `GRADER_PASSCODE` (một chuỗi dài, ngẫu nhiên; Gùa nhập một lần ở Cài đặt). Khi bấm nút, chỉ đề bài và bài viết đó đi qua `/api/grade/writing` tới Gemini (hoặc, với phần Nói của một lượt thi, các bản ghi âm đi qua `/api/grade/speaking`); kết quả lưu cùng dữ liệu học. Hiện chưa tiêu chí nào được hiện điểm vì chưa đối chiếu với người chấm; xem [docs/PLAN-CHAM-AI.md](docs/PLAN-CHAM-AI.md). Bộ đo: `npx tsx scripts/grading-eval/run.ts <chế độ>` (chạy tay, không chạy trong CI).
 
 ## Kiểm tra và triển khai
 

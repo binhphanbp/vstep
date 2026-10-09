@@ -12,7 +12,12 @@ import {
   Download,
   Trash2,
 } from "lucide-react";
-import { saveRecording, getRecording, deleteRecording } from "@/lib/recordings";
+import {
+  SPEECH_BITS_PER_SECOND,
+  saveRecording,
+  getRecording,
+  deleteRecording,
+} from "@/lib/recordings";
 import { speechChunks } from "@/lib/speech";
 let speechOwner: symbol | null = null;
 export function RecordingHistory({ id }: { id: string }) {
@@ -447,10 +452,10 @@ export function Recorder({
       const type = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(
         (t) => MediaRecorder.isTypeSupported(t),
       );
-      const rec = new MediaRecorder(
-        media,
-        type ? { mimeType: type } : undefined,
-      );
+      const rec = new MediaRecorder(media, {
+        ...(type ? { mimeType: type } : {}),
+        audioBitsPerSecond: SPEECH_BITS_PER_SECOND,
+      });
       recorder.current = rec;
       chunks.current = [];
       rec.ondataavailable = (e) => {
@@ -571,7 +576,7 @@ export function Recorder({
       {!readOnly && (
         <p className="help-copy">
           Micro chỉ mở khi bạn bấm ghi âm. Bản mới thay bản cũ của bài này; lưu
-          trên thiết bị, không gửi lên máy chủ. Tối đa 10 phút mỗi bản.
+          trên thiết bị, không tự gửi đi đâu. Tối đa 10 phút mỗi bản.
         </p>
       )}
       {error && (

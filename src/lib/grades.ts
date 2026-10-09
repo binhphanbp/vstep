@@ -1,5 +1,6 @@
 import * as z from "zod/mini";
 import type { StudyState } from "./learning";
+import type { SpeakingGrade } from "./grading/speaking";
 import type { WritingGrade } from "./grading/writing";
 import { gradeKey } from "./grading/generate";
 
@@ -22,7 +23,10 @@ export const GRADE_LIMITS = {
 } as const;
 
 export type DoneWritingGrade = Extract<WritingGrade, { status: "graded" }>;
+export type DoneSpeakingGrade = Extract<SpeakingGrade, { status: "graded" }>;
 
+/** What a stored transcript may hold: five minutes of speech is about 4,000 characters. */
+const TRANSCRIPT_MAX = 12000;
 const short = (max: number) => z.string().check(z.maxLength(max));
 const count = z.number().check(z.minimum(0));
 
@@ -82,6 +86,37 @@ export const storedGradeSchema = z.looseObject({
     measures: z.looseObject({ words: count }),
   }),
 });
+export const storedSpeakingGradeSchema = z.looseObject({
+  /** `paper:<run id>:speaking` — the whole Speaking test of one sitting. */
+  id: short(200),
+  at: z.iso.datetime(),
+  /** Hash of the questions and of the recordings (when each was taken, and its size). */
+  inputHash: short(64),
+  grade: z.looseObject({
+    status: z.literal("graded"),
+    model: short(100),
+    promptVersion: short(40),
+    rubricVersion: short(60),
+    parts: z
+      .array(
+        z.looseObject({
+          id: short(120),
+          transcript: short(TRANSCRIPT_MAX),
+          timesPlausible: z.boolean(),
+        }),
+      )
+      .check(z.maxLength(3)),
+    criteria: z.record(z.string(), criterionSchema),
+    speakingScore: z.nullable(z.number()),
+    rawSpeakingScore: z.number(),
+    droppedQuotes: count,
+    totalQuotes: count,
+    runs: count,
+    lowConfidence: z.boolean(),
+    summary: short(1400),
+  }),
+});
+
 /** What is kept: the schema above checks the shape on load; this is the type code works with. */
 export type StoredGrade = {
   id: string;
@@ -89,11 +124,25 @@ export type StoredGrade = {
   inputHash: string;
   grade: DoneWritingGrade;
 };
-type Stored = Record<string, StoredGrade>;
+export type StoredSpeakingGrade = {
+  id: string;
+  at: string;
+  inputHash: string;
+  grade: DoneSpeakingGrade;
+};
+/** A saved grade of either kind; a Speaking grade is the one that carries `parts`. */
+export type AnyStoredGrade = StoredGrade | StoredSpeakingGrade;
+export const isSpeakingGrade = (
+  stored: AnyStoredGrade,
+): stored is StoredSpeakingGrade => "parts" in stored.grade;
+type Stored = Record<string, AnyStoredGrade>;
 const asState = (grades: Stored) => grades as unknown as StudyState["grades"];
 
 export const paperGradeId = (runId: string, slotId: string) =>
   `paper:${runId}:${slotId}`;
+/** The whole Speaking test of a sitting is graded as one performance. */
+export const paperSpeakingGradeId = (runId: string) =>
+  paperGradeId(runId, "speaking");
 export const attemptGradeId = (attemptId: string) => `attempt:${attemptId}`;
 
 /** Which piece of work a grade id points at, or null for a form this build does not know. */
@@ -116,6 +165,16 @@ export function inputHashOf(input: {
   text: string;
 }) {
   return gradeKey(["writing-input", input.task, input.prompt, input.text]);
+}
+
+/** Hash of the questions and recordings a Speaking grade was made from. */
+export function speakingInputHashOf(
+  parts: { id: string; prompt: string; savedAt: number; bytes: number }[],
+) {
+  return gradeKey([
+    "speaking-input",
+    ...parts.flatMap((p) => [p.id, p.prompt, p.savedAt, p.bytes]),
+  ]);
 }
 
 /** Keep what the schema and the caps above can hold: long lists and quotes are cut, not rejected. */
@@ -146,6 +205,31 @@ export function fitGrade(grade: DoneWritingGrade): DoneWritingGrade {
       correction: cut(e.correction, 500),
       explanation: cut(e.explanation, 700),
     })),
+    summary: cut(grade.summary, 1400),
+  };
+}
+
+export function fitSpeakingGrade(grade: DoneSpeakingGrade): DoneSpeakingGrade {
+  const cut = (text: string, max: number) =>
+    text.length > max ? text.slice(0, max) : text;
+  return {
+    ...grade,
+    parts: grade.parts.slice(0, 3).map((part) => ({
+      ...part,
+      transcript: cut(part.transcript, TRANSCRIPT_MAX),
+    })),
+    criteria: Object.fromEntries(
+      Object.entries(grade.criteria).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          evidence: value.evidence.slice(0, 8).map((q) => cut(q, 700)),
+          whyNotHigher: cut(value.whyNotHigher, 1000),
+          whyNotLower: cut(value.whyNotLower, 1000),
+          toRaise: cut(value.toRaise, 1000),
+        },
+      ]),
+    ) as DoneSpeakingGrade["criteria"],
     summary: cut(grade.summary, 1400),
   };
 }
@@ -183,8 +267,13 @@ const FULL =
   "Các lần chấm đã dùng hết phần dung lượng dành cho chúng (0,5 MB). Xóa bớt lần chấm ở các lượt cũ rồi thử lại.";
 
 /** Saves a grade, replacing an earlier one for the same work and dropping the oldest when full. */
-export function addGrade(state: StudyState, entry: StoredGrade): GradeResult {
-  const fitted: StoredGrade = { ...entry, grade: fitGrade(entry.grade) };
+export function addGrade(
+  state: StudyState,
+  entry: AnyStoredGrade,
+): GradeResult {
+  const fitted: AnyStoredGrade = isSpeakingGrade(entry)
+    ? { ...entry, grade: fitSpeakingGrade(entry.grade) }
+    : { ...entry, grade: fitGrade(entry.grade) };
   const grades: Stored = {
     ...((pruneGrades(state).grades as Stored | undefined) ?? {}),
     [fitted.id]: fitted,

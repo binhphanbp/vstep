@@ -20,7 +20,7 @@ import {
   type PaperSlot,
 } from "@/lib/papers";
 import { wordCount, type PaperRun } from "@/lib/learning";
-import { saveRecording } from "@/lib/recordings";
+import { SPEECH_BITS_PER_SECOND, saveRecording } from "@/lib/recordings";
 import { MarkablePassage } from "./marked-text";
 import {
   SCRATCH_HINTS,
@@ -739,10 +739,10 @@ function useCapture(id: string) {
         const type = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(
           (candidate) => MediaRecorder.isTypeSupported(candidate),
         );
-        const next = new MediaRecorder(
-          media,
-          type ? { mimeType: type } : undefined,
-        );
+        const next = new MediaRecorder(media, {
+          ...(type ? { mimeType: type } : {}),
+          audioBitsPerSecond: SPEECH_BITS_PER_SECOND,
+        });
         chunks.current = [];
         next.ondataavailable = (event) => {
           if (event.data.size) chunks.current.push(event.data);

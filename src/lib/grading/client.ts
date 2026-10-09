@@ -1,4 +1,5 @@
-import type { GradeFailure, GradeReply } from "./server";
+import type { GradeFailure, GradeReply, SpeakingReply } from "./server";
+import type { SpeakingGrade } from "./speaking";
 import type { WritingGrade } from "./writing";
 
 /**
@@ -134,6 +135,63 @@ export async function requestWritingGrade(
   const failure = "error" in body ? body.error : "model";
   throw new GradeRequestError(
     failure,
+    "retryAfter" in body ? body.retryAfter : undefined,
+  );
+}
+
+export type SpeakingPartRequest = {
+  id: string;
+  title: string;
+  prompt: string;
+  durationSeconds: number;
+  audio: Blob;
+};
+
+/** Sends the recordings of one Speaking test as a multipart form (binary, not base64). */
+export async function requestSpeakingGrade(
+  parts: SpeakingPartRequest[],
+  passcode: string,
+  signal?: AbortSignal,
+): Promise<SpeakingGrade> {
+  const form = new FormData();
+  form.set(
+    "meta",
+    JSON.stringify({
+      parts: parts.map(({ id, title, prompt, durationSeconds }) => ({
+        id,
+        title,
+        prompt,
+        durationSeconds,
+      })),
+    }),
+  );
+  parts.forEach((part, i) => form.set(`audio${i}`, part.audio, `part${i}`));
+  let response: Response;
+  try {
+    response = await fetch("/api/grade/speaking", {
+      method: "POST",
+      headers: { "x-grader-passcode": passcode },
+      body: form,
+      signal,
+    });
+  } catch (error) {
+    throw new GradeRequestError(
+      (error as Error).name === "AbortError" ? "aborted" : "network",
+    );
+  }
+  let body: SpeakingReply | undefined;
+  try {
+    body = (await response.json()) as SpeakingReply;
+  } catch {
+    throw new GradeRequestError(response.ok ? "bad-reply" : "model");
+  }
+  if ("grade" in body && response.ok) {
+    if (body.grade?.status === "graded" || body.grade?.status === "blocked")
+      return body.grade;
+    throw new GradeRequestError("bad-reply");
+  }
+  throw new GradeRequestError(
+    "error" in body ? body.error : "model",
     "retryAfter" in body ? body.retryAfter : undefined,
   );
 }
