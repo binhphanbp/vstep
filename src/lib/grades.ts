@@ -152,8 +152,12 @@ export function gradeTarget(id: string) {
   const [kind, first, ...rest] = id.split(":");
   if (kind === "paper" && first && rest.length)
     return { kind: "paper" as const, runId: first, slotId: rest.join(":") };
-  if (kind === "attempt" && first && !rest.length)
-    return { kind: "attempt" as const, attemptId: first };
+  // A sitting's own attempts are named `exam:<id>:<lesson>`, so the id may hold colons.
+  if (kind === "attempt" && first)
+    return {
+      kind: "attempt" as const,
+      attemptId: [first, ...rest].join(":"),
+    };
   return null;
 }
 

@@ -230,6 +230,20 @@ describe("saved AI grades", () => {
     expect(removeGrade(state, "nope")).toBe(state);
   });
 
+  it("drops the grade of a sitting's attempt once the attempt is gone", async () => {
+    const id = attemptGradeId("exam:e1:speaking-social");
+    const state = addGrade(
+      withRuns(),
+      await entry(id, "2026-10-08T10:00:00.000Z"),
+    ).state;
+    const kept = pruneGrades({
+      ...state,
+      attempts: [{ id: "exam:e1:speaking-social" }] as StudyState["attempts"],
+    });
+    expect(Object.keys(kept.grades ?? {})).toEqual([id]);
+    expect(Object.keys(pruneGrades(state).grades ?? {})).toEqual([]);
+  });
+
   it("names where a grade belongs", () => {
     expect(gradeTarget(paperGradeId("r1", "132-writing-1"))).toEqual({
       kind: "paper",
@@ -239,6 +253,11 @@ describe("saved AI grades", () => {
     expect(gradeTarget(attemptGradeId("a1"))).toEqual({
       kind: "attempt",
       attemptId: "a1",
+    });
+    // A sitting's attempts are named `exam:<id>:<lesson>`: the colons belong to the id.
+    expect(gradeTarget(attemptGradeId("exam:e1:speaking-social"))).toEqual({
+      kind: "attempt",
+      attemptId: "exam:e1:speaking-social",
     });
     expect(gradeTarget("garbage")).toBeNull();
   });

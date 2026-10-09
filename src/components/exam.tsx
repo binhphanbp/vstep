@@ -21,6 +21,7 @@ import { allLessons as lessons } from "@/lib/full-exam-content";
 import { SkillIcon } from "./icons";
 import { GradePanel } from "./grade-panel";
 import { WritingTotal } from "./writing-total";
+import { ExamSpeakingGrade } from "./speaking-grade-panel";
 import { attemptGradeId } from "@/lib/grades";
 import { AudioPlayer, Recorder } from "./audio-tools";
 import { QuestionCard } from "./practice";
@@ -256,9 +257,9 @@ export function ExamPage() {
             </div>
             <div className="notice" style={{ marginTop: 22 }}>
               {paper2
-                ? "Đề số 02 không dùng chung ngữ liệu, câu hỏi, đề Viết hay đề Nói nào với đề 01 và với thư viện, nên có thể dùng để đo lại sau một giai đoạn học. Nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp; không phải bản thu kỳ thi thật. Bài Viết có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật); bài Nói chưa có chấm tự động ở buổi này."
+                ? "Đề số 02 không dùng chung ngữ liệu, câu hỏi, đề Viết hay đề Nói nào với đề 01 và với thư viện, nên có thể dùng để đo lại sau một giai đoạn học. Nội dung chưa được giáo viên thẩm định độ khó. Bài nghe dùng giọng tổng hợp; không phải bản thu kỳ thi thật. Bài Viết và bài Nói có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật)."
                 : full
-                  ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Bài Viết có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật); bài Nói chưa có chấm tự động ở buổi này."
+                  ? "Đủ số câu và thời lượng theo khung, nhưng nội dung chưa được giáo viên thẩm định độ khó. Bốn bài Đọc mở rộng từ bốn bài ngắn trong thư viện, nhưng cả 40 câu hỏi đều là câu riêng của đề; nếu đã luyện các bài ngắn thì phần đầu mỗi văn bản sẽ quen, còn câu hỏi thì chưa gặp. Phần Nghe gồm 35 câu hoàn toàn mới. Bài nghe dùng giọng tổng hợp, cho phép nghe lại; không phải bản thu kỳ thi thật. Bài Viết và bài Nói có thể chấm bằng AI sau khi nộp (chưa phải điểm thi thật)."
                   : "Đây chưa phải một đề VSTEP đầy đủ. Bài thi chính thức dài hơn, có 35 câu Nghe, 40 câu Đọc, 2 bài Viết và 3 phần Nói."}{" "}
               Không quy đổi kết quả buổi này sang B1/B2/C1.
             </div>
@@ -402,7 +403,8 @@ export function ExamPage() {
         </div>
         <p className="help-copy">
           Kết quả lượt cũ vẫn nằm trong lịch sử. Bài Nói được lưu trên thiết bị
-          nếu bạn đã ghi âm; chấm bài Nói bằng AI làm ở màn chữa đề của kho đề.
+          nếu bạn đã ghi âm; muốn có điểm ước lượng thì dùng khung chấm bên
+          dưới.
         </p>
         <section className="panel" style={{ marginTop: 25 }}>
           <h2>Nghe lại phần Nói</h2>
@@ -418,6 +420,14 @@ export function ExamPage() {
             </div>
           ))}
         </section>
+        <ExamSpeakingGrade
+          examId={exam.id}
+          full={full}
+          lessons={examStages[3].lessonIds.flatMap((id) => {
+            const lesson = examLessons.find((l) => l.id === id);
+            return lesson ? [lesson] : [];
+          })}
+        />
         {exam.writing && (
           <details>
             <summary>Xem bài email đã nộp</summary>

@@ -35,8 +35,8 @@ import { BAND_LABEL, SPEAKING_CRITERIA, bandOf } from "@/lib/grading/scores";
 import { RUBRIC_SOURCE, SPEAKING_RUBRIC } from "@/lib/rubric/vstep-3-5";
 import {
   addGrade,
+  attemptGradeId,
   isSpeakingGrade,
-  paperSpeakingGradeId,
   speakingInputHashOf,
   type StoredSpeakingGrade,
 } from "@/lib/grades";
@@ -57,8 +57,35 @@ type Phase =
   | { name: "error"; kind: RequestFailure; wait?: number; detail?: string }
   | { name: "silent" };
 
-const recordingId = (runId: string, slotId: string) =>
-  `paper-${runId}-${slotId}`;
+/** Which of these parts have a recording on this device (null until it has looked). */
+export function useRecorded(
+  ids: string[],
+  recordingIdOf: (slotId: string) => string,
+) {
+  const [found, setFound] = useState<string[] | null>(null);
+  const key = ids.join("|");
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const takes = await Promise.all(
+          ids.map(async (id) =>
+            (await getRecording(recordingIdOf(id))) ? id : null,
+          ),
+        );
+        if (alive) setFound(takes.filter((id): id is string => id !== null));
+      } catch {
+        if (alive) setFound([]);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+    // `ids` and `recordingIdOf` are rebuilt each render; `key` stands for the ids.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return found;
+}
 
 const questionsOf = (slot: SpeakingSlot) =>
   [slot.prompt, ...slot.cues].join("\n").slice(0, AUDIO_LIMITS.prompt);
@@ -69,11 +96,15 @@ const questionsOf = (slot: SpeakingSlot) =>
  * whole test before marking. Nothing is sent until the button is pressed.
  */
 export function SpeakingGradePanel({
-  runId,
+  gradeId,
+  recordingIdOf,
   slots,
   spoken,
 }: {
-  runId: string;
+  /** Where the grade is kept: see `paperSpeakingGradeId` and `attemptGradeId`. */
+  gradeId: string;
+  /** Where the recording of a part is kept. */
+  recordingIdOf: (slotId: string) => string;
   slots: SpeakingSlot[];
   spoken: string[];
 }) {
@@ -88,7 +119,7 @@ export function SpeakingGradePanel({
   const [asking, setAsking] = useState(false);
   const [progress, setProgress] = useState<Progress>(null);
   const abort = useRef<AbortController | null>(null);
-  const id = paperSpeakingGradeId(runId);
+  const id = gradeId;
   const mine = slots.filter((slot) => spoken.includes(slot.id));
   const found = (state.grades as Record<string, unknown> | undefined)?.[id] as
     StoredSpeakingGrade | undefined;
@@ -100,7 +131,7 @@ export function SpeakingGradePanel({
       try {
         const metas = await Promise.all(
           mine.map(async (slot) => {
-            const take = await getRecording(recordingId(runId, slot.id));
+            const take = await getRecording(recordingIdOf(slot.id));
             return take
               ? {
                   id: slot.id,
@@ -126,7 +157,7 @@ export function SpeakingGradePanel({
     };
     // `mine` is rebuilt each render; its content is what these three describe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runId, slots, spoken]);
+  }, [gradeId, slots, spoken]);
   useEffect(() => () => abort.current?.abort(), []);
 
   if (mine.length === 0 || (available !== true && !stored)) return null;
@@ -146,7 +177,7 @@ export function SpeakingGradePanel({
       const parts: SpeakingPartRequest[] = [];
       const metas = [];
       for (const slot of mine) {
-        const take = await getRecording(recordingId(runId, slot.id));
+        const take = await getRecording(recordingIdOf(slot.id));
         if (!take) {
           setPhase({
             name: "problem",
@@ -253,9 +284,11 @@ export function SpeakingGradePanel({
         <Sparkles size={15} aria-hidden="true" /> Chấm phần Nói bằng AI
       </h3>
       <p className="help-copy">
-        Mây gửi bản ghi của cả {mine.length} phần bạn đã nói để chấm như một bài
-        thi Nói. Phát âm và độ trôi chảy do AI nghe và ước lượng nên kém chắc
-        chắn hơn ngữ pháp và từ vựng.
+        {mine.length === 1
+          ? "Mây gửi bản ghi bài nói này để chấm."
+          : `Mây gửi bản ghi của cả ${mine.length} phần bạn đã nói để chấm như một bài thi Nói.`}{" "}
+        Phát âm và độ trôi chảy do AI nghe và ước lượng nên kém chắc chắn hơn
+        ngữ pháp và từ vựng.
       </p>
       <div className="button-row">
         <button
@@ -273,7 +306,7 @@ export function SpeakingGradePanel({
       </div>
       {asking && !running && (
         <ConsentBox
-          what={<strong>bản ghi âm phần Nói của lượt này</strong>}
+          what={<strong>bản ghi âm phần Nói này</strong>}
           hasPasscode={Boolean(ai.passcode)}
           onAgree={agree}
           onCancel={() => setAsking(false)}
@@ -396,5 +429,69 @@ export function SpeakingResult({
         bản chép đã bị loại
       </p>
     </div>
+  );
+}
+
+type SpeakingLesson = { id: string; part: string; title: string; text: string };
+const slotOf = (lesson: SpeakingLesson): SpeakingSlot => ({
+  id: lesson.id,
+  part: lesson.part,
+  title: lesson.title,
+  prompt: lesson.text,
+  cues: [],
+});
+
+/**
+ * Grading for one filed Speaking lesson. Filing moves the take under the
+ * attempt's own id, so this offers the button only while that recording is on
+ * this device.
+ */
+export function LessonSpeakingGrade({
+  lesson,
+  attemptId,
+}: {
+  lesson: SpeakingLesson;
+  attemptId: string;
+}) {
+  const found = useRecorded([lesson.id], () => attemptId);
+  if (!found?.length) return null;
+  return (
+    <SpeakingGradePanel
+      gradeId={attemptGradeId(attemptId)}
+      recordingIdOf={() => attemptId}
+      slots={[slotOf(lesson)]}
+      spoken={found}
+    />
+  );
+}
+
+/**
+ * Grading for the Speaking part of a finished mock sitting: the parts that
+ * have a recording go together. The short sitting has one recording, the full
+ * ones one per part; the grade is kept under the first graded part's attempt.
+ */
+export function ExamSpeakingGrade({
+  examId,
+  full,
+  lessons,
+}: {
+  examId: string;
+  full: boolean;
+  lessons: SpeakingLesson[];
+}) {
+  const recordingIdOf = (id: string) =>
+    full ? `exam-${examId}-${id}` : `exam-${examId}`;
+  const found = useRecorded(
+    lessons.map((lesson) => lesson.id),
+    recordingIdOf,
+  );
+  if (!found?.length) return null;
+  return (
+    <SpeakingGradePanel
+      gradeId={attemptGradeId(`exam:${examId}:${found[0]}`)}
+      recordingIdOf={recordingIdOf}
+      slots={lessons.map(slotOf)}
+      spoken={found}
+    />
   );
 }

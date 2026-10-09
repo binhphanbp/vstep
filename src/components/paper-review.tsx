@@ -26,7 +26,7 @@ import {
   type PaperItem,
   type PaperSlot,
 } from "@/lib/papers";
-import { paperGradeId } from "@/lib/grades";
+import { paperGradeId, paperSpeakingGradeId } from "@/lib/grades";
 import { wordCount, type PaperRun } from "@/lib/learning";
 import {
   paperItemPlace,
@@ -844,7 +844,8 @@ export function PaperReview({
               })()}
             {section.skill === "speaking" && sameMaterial && (
               <SpeakingGradePanel
-                runId={run.id}
+                gradeId={paperSpeakingGradeId(run.id)}
+                recordingIdOf={(slotId) => `paper-${run.id}-${slotId}`}
                 slots={section.slots}
                 spoken={run.spoken}
               />
