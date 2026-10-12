@@ -3,6 +3,7 @@ import * as z from "zod/mini";
 import type { Generate, OnProgress } from "./generate";
 import { requirementsFor } from "./requirements";
 import { AUDIO_LIMITS } from "./audio-limits";
+import { MIN_PASSCODE_LENGTH } from "./config";
 import { gradeSpeaking, type SpeakingGrade } from "./speaking";
 import { gradeWriting, type WritingGrade } from "./writing";
 
@@ -42,9 +43,22 @@ const requestSchema = z.object({
 
 export type GradeEnv = { GEMINI_API_KEY?: string; GRADER_PASSCODE?: string };
 
-/** The feature is on only when both the key and the passcode are set. */
+/** The feature is on only when the key is set and the passcode is long enough. */
 export function isConfigured(env: GradeEnv) {
-  return Boolean(env.GEMINI_API_KEY && env.GRADER_PASSCODE);
+  return Boolean(
+    env.GEMINI_API_KEY &&
+    env.GRADER_PASSCODE &&
+    env.GRADER_PASSCODE.length >= MIN_PASSCODE_LENGTH,
+  );
+}
+
+/** A passcode is set but too short: the feature is off, and the owner can be told why. */
+export function passcodeTooShort(env: GradeEnv) {
+  return Boolean(
+    env.GEMINI_API_KEY &&
+    env.GRADER_PASSCODE &&
+    env.GRADER_PASSCODE.length < MIN_PASSCODE_LENGTH,
+  );
 }
 
 /** Compares without leaking how much of the passcode was right. */
@@ -287,7 +301,10 @@ export async function handleGradeWriting(
 }
 
 export function handleStatus(env: GradeEnv) {
-  return json({ available: isConfigured(env) });
+  return json({
+    available: isConfigured(env),
+    ...(passcodeTooShort(env) ? { weakPasscode: true } : {}),
+  });
 }
 
 /* ---------------- Speaking ---------------- */

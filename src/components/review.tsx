@@ -27,6 +27,7 @@ import {
   openVocabulary,
   searchFold,
   wordHasAuthoredCard,
+  dayLabel,
 } from "@/lib/learning";
 import { vocabulary } from "@/lib/content";
 import { useStudy } from "./study-provider";
@@ -109,7 +110,7 @@ export function VocabularyPage() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <Leaf size={15} />A LITTLE GARDEN OF WORDS
           </div>
           <h1>Gieo một từ. Nuôi một thói quen.</h1>
@@ -165,7 +166,7 @@ export function VocabularyPage() {
                     flipped ? "Lật về mặt từ" : "Lật thẻ để xem nghĩa"
                   }
                 >
-                  <span className="panel-label">
+                  <span className="panel-label" lang="en">
                     {flipped ? "A WORD TO KEEP" : "CAN YOU REMEMBER?"}
                   </span>
                   <h2>{card.word}</h2>
@@ -238,7 +239,7 @@ export function VocabularyPage() {
               </div>
             )}
           </div>
-          <aside className="stack">
+          <aside className="stack" aria-label="Cách ôn lại">
             <section className="panel">
               <h2>Nhớ lâu, không nhồi nhét</h2>
               <ul className="tips-list">
@@ -482,7 +483,7 @@ export function MistakesPage() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <NotebookPen size={15} />
             MISTAKES ARE PART OF LEARNING
           </div>
@@ -548,8 +549,8 @@ export function MistakesPage() {
                       )}
                     </div>
                     <p>
-                      {item.lesson.title} ·{" "}
-                      {new Date(item.date).toLocaleDateString("vi-VN")}
+                      <span lang="en">{item.lesson.title}</span> ·{" "}
+                      {dayLabel(item.date)}
                     </p>
                   </div>
                   <Link

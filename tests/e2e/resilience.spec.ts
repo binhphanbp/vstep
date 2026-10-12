@@ -390,7 +390,7 @@ test("every page of the app opens with the network gone, not just the last one v
   // renders the app's error screen instead. This is what CI caught.
   const chunks = await page.evaluate(async () => {
     const shell = (await caches.keys()).find((name) =>
-      /^may-v\d+-shell$/.test(name),
+      /^may-.+-shell$/.test(name),
     );
     if (!shell) return 0;
     const cache = await caches.open(shell);
@@ -400,6 +400,76 @@ test("every page of the app opens with the network gone, not just the last one v
   });
   expect(chunks, "phải lưu cả chunk của từng trang").toBeGreaterThan(10);
   await context.setOffline(false);
+});
+
+test("the offline caches of old deployments do not pile up, and the newest answers first", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(180_000);
+  // Each deployment registers the worker under its own address, so each gets
+  // caches of its own. Before, one fixed name collected every chunk of every
+  // deployment for ever.
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  const generations = () =>
+    page.evaluate(async () =>
+      [
+        ...new Set(
+          (await caches.keys())
+            .map((key) => /^may-(.+)-(?:shell|pages)$/.exec(key)?.[1])
+            .filter(Boolean),
+        ),
+      ].sort(),
+    );
+  const install = async (build: string) => {
+    await page.evaluate(
+      (build) =>
+        navigator.serviceWorker
+          .register(`/sw.js?v=${build}`)
+          .then(() => undefined),
+      build,
+    );
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            async () =>
+              (await navigator.serviceWorker.getRegistration())?.active
+                ?.scriptURL ?? "",
+          ),
+        { timeout: 60_000 },
+      )
+      .toContain(`v=${build}`);
+  };
+  await install("build-a");
+  await install("build-b");
+  // This deployment and the one before it: a tab opened before the deployment
+  // can still fetch the chunks it asks for.
+  await expect
+    .poll(generations, { timeout: 60_000 })
+    .toEqual(["build-a", "build-b"]);
+  // The newest copy of a file answers first, not the oldest.
+  await page.evaluate(async () => {
+    const plant = async (name: string, text: string) =>
+      (await caches.open(name)).put(
+        "/manifest.webmanifest",
+        new Response(text),
+      );
+    await plant("may-build-a-pages", "old");
+    await plant("may-build-b-pages", "new");
+  });
+  await context.setOffline(true);
+  expect(
+    await page.evaluate(async () =>
+      (await fetch("/manifest.webmanifest")).text(),
+    ),
+  ).toBe("new");
+  await context.setOffline(false);
+  await install("build-c");
+  await expect
+    .poll(generations, { timeout: 60_000 })
+    .toEqual(["build-b", "build-c"]);
 });
 
 test("today's lessons are kept for the train, and they open with no network", async ({

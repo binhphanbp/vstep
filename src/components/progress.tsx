@@ -11,6 +11,7 @@ import { useStudy } from "./study-provider";
 import {
   attemptLesson,
   compareSittings,
+  dayLabel,
   dayOffset,
   examSittings,
   localDay,
@@ -58,7 +59,7 @@ export function ProgressPage() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <ChartNoAxesCombined size={15} />
             LOOK HOW FAR YOU’VE COME
           </div>
@@ -363,8 +364,7 @@ function ExamSittings({ state }: { state: StudyState }) {
           <div>
             <h3>{paperNames[sitting.paper]}</h3>
             <small>
-              {new Date(sitting.date).toLocaleDateString("vi-VN")} ·{" "}
-              {sitting.minutes} phút
+              {dayLabel(sitting.date)} · {sitting.minutes} phút
               {sitting.writing || sitting.speaking
                 ? ` · đã nộp ${sitting.writing} bài viết, ${sitting.speaking} phần nói`
                 : ""}

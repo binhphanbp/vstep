@@ -512,7 +512,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
         {slot.items.map((item) => (
           <fieldset className="paper-question" key={item.id}>
             <legend>
-              {item.number}. {item.text}
+              {item.number}. <span lang="en">{item.text}</span>
             </legend>
             {item.options.map((option, index) => (
               <label className="paper-option" key={index}>
@@ -529,7 +529,7 @@ export function PaperRunner({ paperId }: { paperId: string }) {
                   }
                 />
                 <span>
-                  {"ABCD"[index]}. {option.text}
+                  {"ABCD"[index]}. <span lang="en">{option.text}</span>
                 </span>
               </label>
             ))}

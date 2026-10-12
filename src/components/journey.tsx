@@ -9,7 +9,7 @@ import {
   Target,
 } from "lucide-react";
 import { useStudy } from "./study-provider";
-import { daysUntil, todayPlan, skillStats } from "@/lib/learning";
+import { dayLabel, daysUntil, todayPlan, skillStats } from "@/lib/learning";
 import { useNow } from "@/lib/use-now";
 import { lessons } from "@/lib/content";
 export function JourneyPage() {
@@ -62,7 +62,7 @@ export function JourneyPage() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <Route size={15} />
             YOUR OWN PACE
           </div>
@@ -106,7 +106,7 @@ export function JourneyPage() {
             </section>
           ))}
         </div>
-        <aside className="stack">
+        <aside className="stack" aria-label="Mốc hẹn và gợi ý">
           <section className="panel">
             <div className="section-title">
               <CalendarDays size={20} />
@@ -123,7 +123,7 @@ export function JourneyPage() {
               {days === null
                 ? "Bạn vẫn có thể học ngay khi chưa có lịch thi."
                 : days >= 0
-                  ? `Đến ${new Date(`${state.profile.examDate}T12:00:00+07:00`).toLocaleDateString("vi-VN")}. Mục tiêu là kế hoạch cá nhân, không phải xác nhận lịch từ trường.`
+                  ? `Đến ${dayLabel(`${state.profile.examDate}T12:00:00+07:00`)}. Mục tiêu là kế hoạch cá nhân, không phải xác nhận lịch từ trường.`
                   : "Ngày dự kiến đã qua. Bạn có thể đặt mốc mới hoặc để trống."}
             </p>
             <Link className="text-link" href="/guide" style={{ marginTop: 15 }}>

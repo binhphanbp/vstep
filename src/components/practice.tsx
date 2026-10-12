@@ -89,7 +89,7 @@ export function PracticeLibrary() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <BookOpen size={15} />
             PRACTICE MAKES PROGRESS
           </div>
@@ -177,7 +177,7 @@ export function PracticeLibrary() {
                 <div className="lesson-kicker">
                   {skillNames[l.skill]} · {l.part}
                 </div>
-                <h2>{l.title}</h2>
+                <h2 lang="en">{l.title}</h2>
                 <p>{l.subtitle}</p>
                 <div className="card-bottom">
                   <span>
@@ -252,7 +252,7 @@ export function QuestionCard({
   return (
     <fieldset className="question">
       <legend>
-        {index + 1}. {question.text}
+        {index + 1}. <span lang="en">{question.text}</span>
       </legend>
       {question.options.map((option, i) => (
         <label
@@ -268,7 +268,8 @@ export function QuestionCard({
             onChange={() => onChoose(i)}
           />
           <span>
-            <strong style={{ fontWeight: 500 }}>{"ABCD"[i]}.</strong> {option}
+            <strong style={{ fontWeight: 500 }}>{"ABCD"[i]}.</strong>{" "}
+            <span lang="en">{option}</span>
           </span>
         </label>
       ))}
@@ -598,7 +599,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
           <div className="eyebrow">
             {skillNames[lesson.skill]} · {lesson.part} · {lesson.level}
           </div>
-          <h1>{lesson.title}</h1>
+          <h1 lang="en">{lesson.title}</h1>
           <p>{lesson.subtitle}</p>
           <p className="provenance">
             <BadgeCheck size={13} />
@@ -758,7 +759,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
             role="region"
             aria-label="Ngữ liệu và hướng dẫn bài học"
           >
-            <div className="panel-label">
+            <div className="panel-label" lang="en">
               {lesson.skill === "reading"
                 ? "READ THE PASSAGE"
                 : lesson.skill === "listening"
@@ -805,7 +806,7 @@ export function PracticeSession({ lesson }: { lesson: Lesson }) {
               <div style={{ marginTop: 24 }}>
                 <div className="section-title" style={{ marginBottom: 0 }}>
                   <Lightbulb size={18} />
-                  <h3>Một gợi ý nhỏ</h3>
+                  <h2 className="heading-small">Một gợi ý nhỏ</h2>
                 </div>
                 <ul className="tips-list">
                   {lesson.tips.map((t) => (

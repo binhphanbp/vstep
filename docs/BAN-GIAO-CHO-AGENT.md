@@ -28,7 +28,7 @@ Mọi con số dưới đây là số đo thật tại thời điểm viết; s�
 
 - `main` = `73a6ea7` (PR #63). Production đã chạy bản này; _Validate Mây_ và _Smoke production_ đạt.
 - Nhánh `claude/loving-feynman-1smqzs` **hơn `main` các commit chưa merge** (sửa nút bài nghe bị chồng chữ ở Phòng thi thử, bản bàn giao này, và ba ca E2E quét toàn bộ trang `routes-health.spec.ts`). CI trên các commit này chưa chạy vì chưa có PR. **Việc đầu tiên nếu chủ dự án đồng ý: mở PR, chờ CI, merge.**
-- Số đo ở đầu nhánh hiện tại: **404 unit (Vitest), 197 E2E** (189 ca Chromium, bốn Firefox, bốn WebKit), build 106 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
+- Số đo ở đầu nhánh hiện tại: **410 unit (Vitest), 204 E2E** (196 ca Chromium, bốn Firefox, bốn WebKit), build 107 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
 - **Tính năng AI hiện không dùng được trên trang live vì khóa Gemini đã hết hạn mức chi tiêu hằng tháng** (HTTP 429 từ Google). Chủ dự án nói **tạm bỏ qua AI** cho đến khi họ nâng hạn mức ở https://ai.studio/spend. Đừng tốn công vào AI trừ khi họ nâng hạn mức hoặc yêu cầu.
 
 ## 4. Môi trường và lệnh chạy
@@ -89,7 +89,7 @@ Quy ước trạng thái: `StudyState` do Zod (`looseObject`) đọc/ghi và **g
 ### 6.1 Nguyên lý
 
 - Chỉ chấm khi người học **bấm nút** và đã đồng ý (cờ `may.ai.consent`, mã `may.ai.passcode` trong localStorage, không vào sao lưu). Bài viết/bản ghi đi: trình duyệt → máy chủ Mây (`/api/grade/*`) → Google Gemini (`generateContent`, gói trả phí, không dùng Interactions API vì nó giữ nội dung).
-- Máy chủ chỉ bật khi có **`GEMINI_API_KEY` và `GRADER_PASSCODE`** (biến môi trường phía máy chủ, Vercel). Bảo vệ: so mã bằng `timingSafeEqual` trên SHA-256, khóa sau 10 lần sai/15 phút, tối đa 2 lần chấm đồng thời và 20 lần/giờ mỗi instance, giới hạn kích thước (48 KB Viết; 4,2 MB âm thanh, ≤3 phần, ≤900 giây mỗi phần), `maxDuration = 300`.
+- Máy chủ chỉ bật khi có **`GEMINI_API_KEY` và `GRADER_PASSCODE` dài ít nhất 12 ký tự** (`MIN_PASSCODE_LENGTH` ở `config.ts`; biến môi trường phía máy chủ, Vercel). Mã ngắn hơn thì máy chủ tắt tính năng, `/api/grade/status` trả `weakPasscode` và Cài đặt nói rõ lý do: giới hạn số lần sai được giữ theo từng instance serverless (không dùng chung bộ nhớ) nên mã yếu là lỗ hổng thật, và khoản tiền Google là thứ bị đốt. Bảo vệ: so mã bằng `timingSafeEqual` trên SHA-256, khóa sau 10 lần sai/15 phút, tối đa 2 lần chấm đồng thời và 20 lần/giờ mỗi instance, giới hạn kích thước (48 KB Viết; 4,2 MB âm thanh, ≤3 phần, ≤900 giây mỗi phần), `maxDuration = 300`.
 - Phản hồi dạng **NDJSON** khi trình duyệt xin (`progress`, `ping` mỗi 10 giây, rồi `grade` hoặc `error` kèm "chi tiết kỹ thuật" an toàn); không thì một JSON thường.
 - Mỗi lần chấm: **median của 3 lần độc lập** (thêm 2 lần nếu lệch >1 điểm); câu trích của model phải có trong bài (`verify.ts`); số đo tính bằng mã (số từ, chép đề, trôi chảy từ thời điểm từng từ…). Thang 0–10; làm tròn 0,5 (Thông tư 23/2017). Điểm bài Viết = trung bình 4 tiêu chí; **điểm Viết = (Bài 1 + 2 × Bài 2) / 3**, làm tròn 0,5, tính trong mã; điểm Nói = trung bình 5 tiêu chí (giả định, chưa có văn bản chính thức). **Chưa có điểm tổng bốn kỹ năng** vì chưa tìm được bảng quy đổi Nghe/Đọc chính thức — **đừng tự bịa phép chia tuyến tính**.
 - Hằng quan trọng: `GRADER_MODEL = "gemini-3.8-flash"`, `PROMPT_VERSION = "p1"`, `RUBRIC_VERSION = "cefr-fallback-1"` (`config.ts`); `SHOW_UNVALIDATED_SCORES = true` và các cổng `GATES` (`gates.ts`); `ESSAY_TEMPLATES_APPROVED = true` (`requirements.ts`, mẫu ý bắt buộc cho Task 2, thu hồi được); `APPROVED_REQUIREMENTS` (danh sách ý riêng của 5 bài học Viết và Task 2 của Review 13/09, do agent tách từ câu lệnh đề — chủ dự án nên đọc lại).
@@ -148,6 +148,11 @@ Chạy `bash scripts/grading-eval/first-run.sh` (cần khóa; **tốn khoảng 1
 - Kiểm thử màu biểu đồ bằng `validate_palette.js` của kỹ năng dataviz: hồng `#c24178` + xanh `#2a7fb5` đạt (khác biệt cho người mù màu 11,7). `#2b7a9b` không đạt (độ chói màu thấp).
 - Khi trạng thái localStorage của test dựng sai schema, cả trang báo "Không đọc được dữ liệu thiết bị"; dùng đủ trường của `storedGradeSchema` khi seed lần chấm.
 - Nguyên nhân gốc của lỗi "Không kết nối được" lần thử thật đầu tiên **chưa xác định** (không có nhật ký Vercel); nay mọi lỗi kèm dòng "Chi tiết kỹ thuật" để biết thêm.
+- **Bộ nhớ ngoại tuyến (`public/sw.js`) tính theo bản phát hành.** Ứng dụng đăng ký `/sw.js?v=<mã trong thẻ meta may-release>`; chỉ giữ bản phát hành hiện tại và bản ngay trước. Đừng quay lại tên bộ nhớ cố định (rò rỉ vô hạn, đã đo) và đừng dùng `caches.match` trần để tra (nó hỏi bộ nhớ cũ nhất trước): dùng `lookup()`. Ca `resilience.spec.ts` "do not pile up" giữ cả hai điều.
+- **Hồ sơ đọc nghiêm, trừ `grades`.** Một mục sai dạng ở bất kỳ phần nào do người học tự viết làm cả hồ sơ bị báo "không đọc được" (cố ý: bản gốc được giữ). Riêng `grades` (lần chấm AI, hỏi lại được) đọc khoan dung (`readableGrades`): đừng làm nó nghiêm lại.
+- **Mọi ngày hiển thị qua `dayLabel`/`whenLabel` (giờ Việt Nam).** Đừng gọi `toLocaleDateString("vi-VN")` trần.
+- **Trợ năng có ca kiểm đủ bộ luật** (`accessibility.spec.ts`, `accessibility-states.spec.ts`): mốc trang phải có tên riêng hoặc là `role="group"`, cấp tiêu đề chỉ nhảy một bậc, và chữ tiếng Anh của đề phải có `lang="en"` (`language.spec.ts`).
+- **Safari xóa dữ liệu trang** (localStorage, IndexedDB) sau bảy ngày dùng Safari không tương tác (chính sách chống theo dõi của WebKit từ 2020; ứng dụng thêm vào Màn hình chính có bộ đếm riêng). Chưa kiểm trên máy thật. Nếu Gùa dùng Safari: thêm vào Màn hình chính/Dock hoặc đăng nhập đồng bộ.
 
 ## 9. Việc chỉ chủ dự án làm được
 

@@ -6,7 +6,7 @@ export default function Page() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <BookOpen size={15} />
             KNOW THE TEST, FEEL MORE PREPARED
           </div>

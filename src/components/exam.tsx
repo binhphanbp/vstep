@@ -168,7 +168,7 @@ export function ExamPage() {
       <div className="page">
         <div className="page-heading">
           <div>
-            <div className="eyebrow">
+            <div className="eyebrow" lang="en">
               <Timer size={15} />A QUIET PLACE TO CHALLENGE YOURSELF
             </div>
             <h1>Tập bình tĩnh, trước ngày thi thật.</h1>
@@ -295,7 +295,7 @@ export function ExamPage() {
               <ArrowRight size={16} />
             </button>
           </section>
-          <aside className="stack">
+          <aside className="stack" aria-label="Chuẩn bị và gợi ý">
             <section className="panel">
               <h2>
                 <Headphones
@@ -473,11 +473,12 @@ export function ExamPage() {
                 <summary>{lesson.title} · Xem đáp án và giải thích</summary>
                 <section
                   className="exam-transcript"
-                  aria-label={
+                  role="group"
+                  aria-label={`${
                     lesson.skill === "listening"
                       ? "Bản chép lời"
                       : "Ngữ liệu bài đọc"
-                  }
+                  }: ${lesson.title}`}
                 >
                   <h3>
                     {lesson.skill === "listening"
@@ -603,7 +604,9 @@ export function ExamPage() {
             className={`practice-side ${lesson.skill === "reading" ? "passage-side" : ""}`}
           >
             <section className="panel reading-panel">
-              <div className="panel-label">{lesson.title}</div>
+              <div className="panel-label" lang="en">
+                {lesson.title}
+              </div>
               {lesson.skill === "listening" ? (
                 <AudioPlayer text={lesson.text} allowSpeed={false} />
               ) : (

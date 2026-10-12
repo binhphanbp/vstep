@@ -72,6 +72,11 @@ h3 {
   font-size: 15px;
   font-weight: 600;
 }
+/* A second-level heading that keeps the look of a third-level one. */
+.heading-small {
+  font-size: 15px;
+  letter-spacing: normal;
+}
 p {
   line-height: 1.75;
 }
@@ -4458,14 +4463,14 @@ mark.hl,
   border-radius: 12px;
   background: #fffafc;
 }
-.grade-panel h4 {
+.grade-panel h3 {
   display: flex;
   align-items: center;
   gap: 7px;
   margin: 0 0 8px;
   color: #9f2f63;
 }
-.grade-panel h5 {
+.grade-panel h4 {
   margin: 18px 0 6px;
   font-size: 13px;
   font-weight: 600;
@@ -4683,7 +4688,7 @@ mark.grade-err sup {
 .grade-panel .notice p {
   margin: 0;
 }
-.paper-review details > h4 {
+.paper-review details > h3 {
   margin: 22px 0 6px;
   font-size: 15px;
   font-weight: 600;

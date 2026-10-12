@@ -397,7 +397,7 @@ export function SpeakingResult({
         rubric={SPEAKING_RUBRIC}
         criteria={grade.criteria}
       />
-      <h5>Bản chép lời (do máy nghe và chép)</h5>
+      <h4>Bản chép lời (do máy nghe và chép)</h4>
       {grade.parts.map((part) => {
         const slot = slots.find((candidate) => candidate.id === part.id);
         return (

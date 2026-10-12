@@ -27,7 +27,7 @@ import {
   type PaperSlot,
 } from "@/lib/papers";
 import { paperGradeId, paperSpeakingGradeId } from "@/lib/grades";
-import { wordCount, type PaperRun } from "@/lib/learning";
+import { dayLabel, wordCount, type PaperRun } from "@/lib/learning";
 import {
   paperItemPlace,
   paperSlotPlace,
@@ -57,7 +57,7 @@ function SampleAnswers({ slot }: { slot: PaperSlot }) {
       <summary>Bài mẫu để đối chiếu sau khi nộp</summary>
       {slot.samples.map((sample, index) => (
         <section key={index} className="paper-sample">
-          <h4>{sample.title || `Bài mẫu ${index + 1}`}</h4>
+          <h3>{sample.title || `Bài mẫu ${index + 1}`}</h3>
           {sample.band && (
             <p className="help-copy">Nhãn nguồn: {sample.band}</p>
           )}
@@ -134,10 +134,19 @@ function Mark({ status }: { status: ItemStatus }) {
   return <span className={`review-mark ${status}`}>{MARKS[status]}</span>;
 }
 
-function chosenText(item: PaperItem, chosen: number | undefined) {
-  return chosen === undefined
-    ? "Bỏ trống"
-    : `${LETTERS[chosen]}. ${item.options[chosen].text}`;
+function Chosen({
+  item,
+  chosen,
+}: {
+  item: PaperItem;
+  chosen: number | undefined;
+}) {
+  if (chosen === undefined) return <>Bỏ trống</>;
+  return (
+    <>
+      {LETTERS[chosen]}. <span lang="en">{item.options[chosen].text}</span>
+    </>
+  );
 }
 
 /** Explanation, evidence and per-option notes, shown once an answer is known. */
@@ -146,7 +155,8 @@ function Explanation({ item }: { item: PaperItem }) {
   return (
     <>
       <p>
-        Đáp án: {LETTERS[item.answer]}. {item.options[item.answer].text}
+        Đáp án: {LETTERS[item.answer]}.{" "}
+        <span lang="en">{item.options[item.answer].text}</span>
       </p>
       {item.explanation && <p>{item.explanation}</p>}
       {item.evidence && (
@@ -290,7 +300,7 @@ function RetryDrill({
       )}
       <fieldset className="paper-question">
         <legend>
-          {item.number}. {item.text}
+          {item.number}. <span lang="en">{item.text}</span>
         </legend>
         {item.options.map((option, optionIndex) => (
           <label className="paper-option" key={optionIndex}>
@@ -304,7 +314,7 @@ function RetryDrill({
               }
             />
             <span>
-              {LETTERS[optionIndex]}. {option.text}
+              {LETTERS[optionIndex]}. <span lang="en">{option.text}</span>
             </span>
           </label>
         ))}
@@ -501,7 +511,7 @@ export function PaperReview({
             {runs.map((entry, index) => (
               <option key={entry.id} value={entry.id}>
                 Lượt {index + 1} · {scopeLabel(entry)} ·{" "}
-                {new Date(entry.startedAt).toLocaleDateString("vi-VN")}
+                {dayLabel(entry.startedAt)}
               </option>
             ))}
           </select>
@@ -606,9 +616,7 @@ export function PaperReview({
                     aria-current={entry.id === run.id ? "true" : undefined}
                   >
                     <th scope="row">{runs.indexOf(entry) + 1}</th>
-                    <td>
-                      {new Date(entry.startedAt).toLocaleDateString("vi-VN")}
-                    </td>
+                    <td>{dayLabel(entry.startedAt)}</td>
                     <td>{scopeLabel(entry)}</td>
                     <td>{cell(0, listening)}</td>
                     <td>{cell(1, reading)}</td>
@@ -753,10 +761,13 @@ export function PaperReview({
                       id={`item-${item.id}`}
                     >
                       <strong>
-                        {item.number}. {item.text}
+                        {item.number}. <span lang="en">{item.text}</span>
                       </strong>{" "}
                       {sameMaterial && <Mark status={itemStatus(item, run)} />}
-                      <p>Đã chọn: {chosenText(item, run.answers[item.id])}</p>
+                      <p>
+                        Đã chọn:{" "}
+                        <Chosen item={item} chosen={run.answers[item.id]} />
+                      </p>
                       {(item.translation ||
                         item.options.some((option) => option.translation)) && (
                         <details>
@@ -784,7 +795,7 @@ export function PaperReview({
                   ))}
                   {section.skill === "writing" && (
                     <>
-                      <h4>Bài viết của bạn</h4>
+                      <h3>Bài viết của bạn</h3>
                       <p className="help-copy">
                         {wordCount(run.essays[slot.id] ?? "")} từ
                         {slot.wordMin

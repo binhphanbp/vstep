@@ -18,11 +18,7 @@ import { SAVED_WORD_PREFIX, wordCards } from "./word-cards";
 import { NOTE_LIMITS } from "./notes";
 import { MARK_LIMITS } from "./marks";
 import { WORK_LIMITS } from "./work";
-import {
-  GRADE_LIMITS,
-  storedGradeSchema,
-  storedSpeakingGradeSchema,
-} from "./grades";
+import { readableGrades } from "./grades";
 
 // The production CSP intentionally disallows eval. Configure Zod before any
 // schema is created so its optional JIT probe does not trigger a violation.
@@ -435,18 +431,12 @@ export const stateSchema = z
     ),
     // The AI grades Gùa asked for, by the work they belong to. Optional, like
     // notes, so every earlier backup parses; caps are enforced where a grade is
-    // written (`src/lib/grades.ts`).
+    // written (`src/lib/grades.ts`). Unlike everything else here, an entry that
+    // no longer fits is dropped on reading rather than failing the whole
+    // profile: a grade can be asked for again, and the shape of a grade is the
+    // part of this file most likely to change.
     grades: z.optional(
-      z
-        .record(
-          z.string(),
-          z.union([storedGradeSchema, storedSpeakingGradeSchema]),
-        )
-        .check(
-          z.refine(
-            (grades) => Object.keys(grades).length <= GRADE_LIMITS.schemaCount,
-          ),
-        ),
+      z.pipe(z.record(z.string(), z.unknown()), z.transform(readableGrades)),
     ),
     // Stamped on every save by a build that knows the fields above. A build
     // that does not know them drops this one too, which is how a profile an
@@ -1415,7 +1405,7 @@ const LONG_SESSION_REST_DAYS = 14;
  *
  * `toLocaleString("vi-VN")` prints "03:36:27 7/10/2026" - seconds nobody reads,
  * and the clock before the date, which is not how anyone writes it down. The
- * history, the teacher pack and the restore prompt all used it.
+ * history and the restore prompt both used it.
  */
 export function whenLabel(iso: string): string {
   const at = new Date(iso);
@@ -1429,6 +1419,17 @@ export function whenLabel(iso: string): string {
     minute: "2-digit",
   });
   return `${at.toLocaleDateString("vi-VN", zone)} · ${time}`;
+}
+
+/**
+ * A date on its own, "7/10/2026", in Vietnam time like every other day in the
+ * app. Without the zone a sitting finished at half past midnight in Hà Nội
+ * read as the day before on a phone set to another country's time.
+ */
+export function dayLabel(date: Date | string | number): string {
+  const at = new Date(date);
+  if (Number.isNaN(at.getTime())) return "";
+  return at.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
 }
 
 /**

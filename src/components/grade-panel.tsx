@@ -211,10 +211,11 @@ export function GradePanel({
   const running = phase.name === "running";
   const headingId = `grade-${id}`;
   return (
-    <section className="grade-panel" aria-labelledby={headingId}>
-      <h4 id={headingId}>
+    // A group, not a landmark: a sitting has one panel per essay, with the same name.
+    <section className="grade-panel" role="group" aria-labelledby={headingId}>
+      <h3 id={headingId}>
         <Sparkles size={15} aria-hidden="true" /> Chấm bằng AI
-      </h4>
+      </h3>
       {!requirements && !stored ? (
         <p className="help-copy">{failureText["no-requirements"]()}</p>
       ) : !hasText && !stored ? (
@@ -331,7 +332,7 @@ export function GradeResult({
         rubric={WRITING_RUBRIC}
         criteria={grade.criteria}
       />
-      <h5>Các ý đề yêu cầu</h5>
+      <h4>Các ý đề yêu cầu</h4>
       <ul className="grade-requirements">
         {grade.requirements.map((requirement) => (
           <li key={requirement.id}>
@@ -353,7 +354,7 @@ export function GradeResult({
           </li>
         ))}
       </ul>
-      <h5>Lỗi tìm thấy ({grade.errors.length})</h5>
+      <h4>Lỗi tìm thấy ({grade.errors.length})</h4>
       {grade.errors.length === 0 ? (
         <p className="help-copy">
           Không có lỗi nào được xác nhận qua các lần chấm.

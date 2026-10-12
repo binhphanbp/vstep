@@ -58,10 +58,18 @@ export function Shell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
+    // The release is part of the worker's address, so each deployment installs
+    // a worker of its own and the caches of the one before last are dropped.
+    const release =
+      document
+        .querySelector('meta[name="may-release"]')
+        ?.getAttribute("content") || "local";
     const register = () =>
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        // Offline is a bonus; a browser that refuses the worker still works.
-      });
+      navigator.serviceWorker
+        .register(`/sw.js?v=${encodeURIComponent(release)}`)
+        .catch(() => {
+          // Offline is a bonus; a browser that refuses the worker still works.
+        });
     if (document.readyState === "complete") register();
     else window.addEventListener("load", register, { once: true });
   }, []);
@@ -144,7 +152,11 @@ export function Shell({ children }: { children: ReactNode }) {
           onClick={() => setMobile(false)}
         />
       )}
-      <aside ref={sidebar} className={`sidebar ${mobile ? "open" : ""}`}>
+      <aside
+        ref={sidebar}
+        className={`sidebar ${mobile ? "open" : ""}`}
+        aria-label="Menu của Mây"
+      >
         <Link
           className="brand"
           href="/"
@@ -156,7 +168,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </span>
           <span>
             mây<span className="brand-dot">.</span>
-            <small>A LITTLE SPACE FOR GÙA</small>
+            <small lang="en">A LITTLE SPACE FOR GÙA</small>
           </span>
         </Link>
         <button

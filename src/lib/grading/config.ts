@@ -21,3 +21,11 @@ export { RUBRIC_VERSION };
 /** The sentence every grade carries on screen and in exports. */
 export const ESTIMATE_LABEL =
   "Điểm ước lượng theo thang VSTEP do AI chấm, không phải điểm chính thức.";
+
+/**
+ * The shortest passcode the server will work with. The limits on wrong guesses
+ * are kept per server instance and instances do not share memory, so the
+ * passcode itself is what stands between the Internet and the Google bill: a
+ * six-letter one falls to a list of common passwords.
+ */
+export const MIN_PASSCODE_LENGTH = 12;

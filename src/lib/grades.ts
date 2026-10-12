@@ -132,6 +132,39 @@ export type StoredSpeakingGrade = {
   inputHash: string;
   grade: DoneSpeakingGrade;
 };
+const gradeEntrySchema = z.union([
+  storedGradeSchema,
+  storedSpeakingGradeSchema,
+]);
+type GradeEntry = z.infer<typeof gradeEntrySchema>;
+
+/**
+ * What of a saved `grades` record can still be read. An entry that no longer
+ * fits the schema - written by a build with another idea of a grade - is left
+ * out instead of making the whole profile unreadable: a grade can be asked for
+ * again, while her answers, notes and history cannot. More entries than the
+ * schema allows are cut back to the newest rather than refused.
+ */
+export function readableGrades(
+  raw: Record<string, unknown>,
+): Record<string, GradeEntry> {
+  const kept: [string, GradeEntry][] = [];
+  for (const [id, value] of Object.entries(raw)) {
+    const parsed = z.safeParse(gradeEntrySchema, value);
+    if (parsed.success) kept.push([id, parsed.data]);
+  }
+  if (kept.length > GRADE_LIMITS.schemaCount) {
+    const newest = new Set(
+      [...kept]
+        .sort((a, b) => Date.parse(b[1].at) - Date.parse(a[1].at))
+        .slice(0, GRADE_LIMITS.schemaCount)
+        .map(([id]) => id),
+    );
+    return Object.fromEntries(kept.filter(([id]) => newest.has(id)));
+  }
+  return Object.fromEntries(kept);
+}
+
 /** A saved grade of either kind; a Speaking grade is the one that carries `parts`. */
 export type AnyStoredGrade = StoredGrade | StoredSpeakingGrade;
 export const isSpeakingGrade = (

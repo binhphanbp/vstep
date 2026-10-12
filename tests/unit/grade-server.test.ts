@@ -11,10 +11,11 @@ import {
   handleStatus,
   isConfigured,
   passcodeMatches,
+  passcodeTooShort,
   type GradeDeps,
 } from "../../src/lib/grading/server";
 
-const env = { GEMINI_API_KEY: "k", GRADER_PASSCODE: "open sesame" };
+const env = { GEMINI_API_KEY: "k", GRADER_PASSCODE: "open sesame now" };
 const prompt =
   "You have received an email from Jo.\n\nWrite an email replying to Jo. In your email, you should:\n• suggest how Jo can prepare\n• respond to practising together\n• give advice about food";
 const text =
@@ -52,7 +53,7 @@ function deps(over: Partial<GradeDeps> = {}, calls: string[] = []): GradeDeps {
 }
 const post = (
   payload: string,
-  passcode: string | null = "open sesame",
+  passcode: string | null = "open sesame now",
   extra: Record<string, string> = {},
 ) =>
   new Request("http://localhost/api/grade/writing", {
@@ -65,16 +66,41 @@ describe("who may ask", () => {
   it("is on only when both the key and the passcode are set", () => {
     expect(isConfigured(env)).toBe(true);
     expect(isConfigured({ GEMINI_API_KEY: "k" })).toBe(false);
-    expect(isConfigured({ GRADER_PASSCODE: "p" })).toBe(false);
-    expect(isConfigured({ GEMINI_API_KEY: "", GRADER_PASSCODE: "p" })).toBe(
-      false,
+    expect(isConfigured({ GRADER_PASSCODE: "open sesame now" })).toBe(false);
+    expect(
+      isConfigured({ GEMINI_API_KEY: "", GRADER_PASSCODE: "open sesame now" }),
+    ).toBe(false);
+  });
+  it("will not work with a passcode shorter than twelve characters, and says why", async () => {
+    const short = { GEMINI_API_KEY: "k", GRADER_PASSCODE: "123456" };
+    expect(isConfigured(short)).toBe(false);
+    expect(passcodeTooShort(short)).toBe(true);
+    expect(isConfigured({ ...short, GRADER_PASSCODE: "x".repeat(12) })).toBe(
+      true,
     );
+    // Not "too short" when there is nothing to be short: the key or the code is missing.
+    expect(passcodeTooShort({ GRADER_PASSCODE: "123456" })).toBe(false);
+    expect(passcodeTooShort({ GEMINI_API_KEY: "k" })).toBe(false);
+    expect(await handleStatus(short).json()).toEqual({
+      available: false,
+      weakPasscode: true,
+    });
+    // Even the right short passcode is refused: the door stays shut.
+    const calls: string[] = [];
+    const reply = await handleGradeWriting(
+      post(body(), "123456"),
+      deps({ env: short }, calls),
+    );
+    expect(reply.status).toBe(503);
+    expect(calls).toEqual([]);
   });
   it("compares passcodes exactly, of any length, and never accepts an empty one", () => {
-    expect(passcodeMatches("open sesame", "open sesame")).toBe(true);
-    expect(passcodeMatches("open sesamE", "open sesame")).toBe(false);
-    expect(passcodeMatches("open", "open sesame")).toBe(false);
-    expect(passcodeMatches("open sesame and more", "open sesame")).toBe(false);
+    expect(passcodeMatches("open sesame now", "open sesame now")).toBe(true);
+    expect(passcodeMatches("open sesamE now", "open sesame now")).toBe(false);
+    expect(passcodeMatches("open", "open sesame now")).toBe(false);
+    expect(passcodeMatches("open sesame now and more", "open sesame now")).toBe(
+      false,
+    );
     expect(passcodeMatches("", "")).toBe(false);
     expect(passcodeMatches(null, "x")).toBe(false);
     expect(passcodeMatches("x", undefined)).toBe(false);
@@ -101,7 +127,7 @@ describe("what may be sent", () => {
     const calls: string[] = [];
     const answer = (payload: string, headers: Record<string, string> = {}) =>
       handleGradeWriting(
-        post(payload, "open sesame", headers),
+        post(payload, "open sesame now", headers),
         deps({}, calls),
       );
     expect((await answer("not json")).status).toBe(400);
@@ -261,7 +287,7 @@ describe("grading a Speaking performance", () => {
   const send = (
     data: FormData,
     over: Partial<GradeDeps> = {},
-    passcode: string | null = "open sesame",
+    passcode: string | null = "open sesame now",
     calls: string[] = [],
   ) =>
     handleSpeaking(
@@ -284,7 +310,7 @@ describe("grading a Speaking performance", () => {
 
   it("grades what was sent: transcribes once, scores three times, strips the codec suffix", async () => {
     const calls: string[] = [];
-    const reply = await send(form(), {}, "open sesame", calls);
+    const reply = await send(form(), {}, "open sesame now", calls);
     expect(reply.status).toBe(200);
     const { grade } = await reply.json();
     expect(grade.status).toBe("graded");
@@ -299,7 +325,7 @@ describe("grading a Speaking performance", () => {
   it("rejects bad requests before the model: no meta, bad meta, missing file, wrong type, tiny file, too big", async () => {
     const calls: string[] = [];
     const bad = async (data: FormData) =>
-      (await send(data, {}, "open sesame", calls)).status;
+      (await send(data, {}, "open sesame now", calls)).status;
     expect(await bad(form({ meta: "not json" }))).toBe(400);
     expect(await bad(form({ meta: meta({ parts: [] }) }))).toBe(400);
     expect(
@@ -407,7 +433,7 @@ const streaming = (payload: string) =>
   new Request("http://localhost/api/grade/writing", {
     method: "POST",
     headers: {
-      [PASSCODE_HEADER]: "open sesame",
+      [PASSCODE_HEADER]: "open sesame now",
       accept: "application/x-ndjson",
     },
     body: payload,

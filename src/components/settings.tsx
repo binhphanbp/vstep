@@ -39,10 +39,12 @@ import {
   forgetAvailability,
   getAiSettings,
   getServerAiSettings,
-  gradingAvailable,
+  gradingStatus,
   saveAiSettings,
   subscribeAiSettings,
+  type GradingStatus,
 } from "@/lib/grading/client";
+import { MIN_PASSCODE_LENGTH } from "@/lib/grading/config";
 import {
   CLOUD_REQUEST_TIMEOUT,
   isCloudTimeout,
@@ -142,7 +144,7 @@ export function SettingsPage() {
     <div className="page">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" lang="en">
             <Heart size={15} />
             MADE FOR {profile.name.toLocaleUpperCase("vi")}
           </div>
@@ -946,11 +948,12 @@ function AiPanel() {
     getAiSettings,
     getServerAiSettings,
   );
-  const [available, setAvailable] = useState<boolean | null>(null);
+  const [server, setServer] = useState<GradingStatus | null>(null);
+  const available = server === null ? null : server.available;
   const [code, setCode] = useState("");
   useEffect(() => {
     let alive = true;
-    void gradingAvailable().then((value) => alive && setAvailable(value));
+    void gradingStatus().then((value) => alive && setServer(value));
     return () => {
       alive = false;
     };
@@ -967,11 +970,13 @@ function AiPanel() {
           ? "Đang hỏi máy chủ…"
           : available
             ? "Máy chủ của Mây đã bật chức năng này."
-            : "Máy chủ của Mây chưa bật chức năng này (người quản lý cần đặt khóa và mã chấm bài), nên nút “Chấm bằng AI” chưa hiện."}
+            : server?.weakPasscode
+              ? `Máy chủ của Mây đang tắt chức năng này vì mã chấm bài đặt trên máy chủ (biến GRADER_PASSCODE) quá ngắn: cần ít nhất ${MIN_PASSCODE_LENGTH} ký tự, nên dùng một chuỗi dài ngẫu nhiên. Đổi mã ở Vercel rồi triển khai lại.`
+              : "Máy chủ của Mây chưa bật chức năng này (người quản lý cần đặt khóa và mã chấm bài), nên nút “Chấm bằng AI” chưa hiện."}
       </p>
       <p className="help-copy">
-        Chỉ khi bạn bấm “Chấm bằng AI” (hoặc “Chấm phần Nói” ở màn chữa đề) thì
-        bài mới được gửi đi. Không bấm thì không có gì rời khỏi máy bạn.
+        Chỉ khi bạn bấm “Chấm bằng AI” (hoặc “Chấm phần Nói”) thì bài mới được
+        gửi đi. Không bấm thì không có gì rời khỏi máy bạn.
       </p>
       <ul className="help-list">
         <li>

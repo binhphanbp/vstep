@@ -127,7 +127,7 @@ async function openTask1(page: Page) {
   return details;
 }
 const panel = (page: Page) =>
-  page.getByRole("region", { name: "Chấm bằng AI" }).first();
+  page.getByRole("group", { name: "Chấm bằng AI" }).first();
 
 test("nothing about AI grading shows while the server has it switched off", async ({
   page,
@@ -668,7 +668,7 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   );
   await page.goto("/practice/writing-email");
   // Nothing to grade before the lesson is filed.
-  await expect(page.getByRole("region", { name: "Chấm bằng AI" })).toHaveCount(
+  await expect(page.getByRole("group", { name: "Chấm bằng AI" })).toHaveCount(
     0,
   );
   await page.getByRole("textbox", { name: "Bài viết của bạn" }).fill(essay);
@@ -679,7 +679,7 @@ test("a Writing lesson can be graded after it is filed, with the lesson's own po
   await expect(page.locator(".result-banner")).toContainText(
     "bấm nút chấm ở khung bên dưới",
   );
-  const grade = page.getByRole("region", { name: "Chấm bằng AI" });
+  const grade = page.getByRole("group", { name: "Chấm bằng AI" });
   await grade.getByRole("button", { name: "Chấm bài viết này" }).click();
   const result = grade.locator(".grade-result");
   await expect(result).toContainText("Điểm bài (ước lượng): 6,25/10");
@@ -730,7 +730,7 @@ test("a mock sitting's two essays can be graded when it ends, and the Writing ma
   await expect(
     page.getByRole("heading", { name: "Buổi luyện đã khép lại." }),
   ).toBeVisible();
-  const panels = page.getByRole("region", { name: "Chấm bằng AI" });
+  const panels = page.getByRole("group", { name: "Chấm bằng AI" });
   await expect(panels).toHaveCount(2);
   await expect(page.locator("#writing-total")).toHaveCount(0);
   await panels
@@ -848,4 +848,22 @@ test("the progress page shows no chart before anything is graded", async ({
   await expect(
     page.getByRole("region", { name: /Điểm AI ước lượng theo thời gian/ }),
   ).toHaveCount(0);
+});
+
+test("Settings says why grading is off when the server's passcode is too short", async ({
+  page,
+}) => {
+  await page.route("**/api/grade/status", (route) =>
+    route.fulfill({ json: { available: false, weakPasscode: true } }),
+  );
+  await seed(page);
+  await page.goto("/settings");
+  const section = page.getByRole("region", { name: "Chấm bài bằng AI" });
+  await expect(section).toContainText("GRADER_PASSCODE");
+  await expect(section).toContainText("ít nhất 12 ký tự");
+  // And no grading button shows anywhere while it is off.
+  await page.goto("/papers/132");
+  await expect(page.getByRole("heading", { name: "Chấm bằng AI" })).toHaveCount(
+    0,
+  );
 });

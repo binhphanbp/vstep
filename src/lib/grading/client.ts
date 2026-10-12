@@ -68,18 +68,25 @@ export function subscribeAiSettings(listener: () => void) {
   };
 }
 
-/** Is grading switched on at the server? Asked once per page load. */
-let availability: Promise<boolean> | undefined;
-export function gradingAvailable(): Promise<boolean> {
-  availability ??= fetch("/api/grade/status", { cache: "no-store" })
-    .then((response) => (response.ok ? response.json() : { available: false }))
-    .then((body: { available?: unknown }) => body.available === true)
-    .catch(() => false);
-  return availability;
+/** What the server says about grading. Asked once per page load. */
+export type GradingStatus = { available: boolean; weakPasscode: boolean };
+let status: Promise<GradingStatus> | undefined;
+export function gradingStatus(): Promise<GradingStatus> {
+  status ??= fetch("/api/grade/status", { cache: "no-store" })
+    .then((response) => (response.ok ? response.json() : {}))
+    .then((body: { available?: unknown; weakPasscode?: unknown }) => ({
+      available: body.available === true,
+      weakPasscode: body.weakPasscode === true,
+    }))
+    .catch(() => ({ available: false, weakPasscode: false }));
+  return status;
 }
+/** Is grading switched on at the server? */
+export const gradingAvailable = () =>
+  gradingStatus().then((value) => value.available);
 /** For tests and for the Settings page after the passcode changes. */
 export function forgetAvailability() {
-  availability = undefined;
+  status = undefined;
 }
 
 export type RequestFailure =

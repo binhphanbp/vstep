@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   GradeRequestError,
+  forgetAvailability,
+  gradingStatus,
   requestSpeakingGrade,
   requestWritingGrade,
 } from "../../src/lib/grading/client";
@@ -205,5 +207,38 @@ describe("what the screen says while it waits", () => {
     expect(progressText({ stage: "transcribe", done: 1, total: 3 })).toMatch(
       /chép lời: xong 1\/3/,
     );
+  });
+});
+
+describe("asking whether grading is on", () => {
+  const ask = async (response: Response | Error) => {
+    forgetAvailability();
+    reply(response);
+    return gradingStatus();
+  };
+  it("reads the server's answer, including a passcode that is too short", async () => {
+    expect(await ask(Response.json({ available: true }))).toEqual({
+      available: true,
+      weakPasscode: false,
+    });
+    expect(
+      await ask(Response.json({ available: false, weakPasscode: true })),
+    ).toEqual({ available: false, weakPasscode: true });
+  });
+  it("treats anything it cannot read as off, and asks once per page", async () => {
+    expect(await ask(new Response("no", { status: 500 }))).toEqual({
+      available: false,
+      weakPasscode: false,
+    });
+    expect(await ask(new Error("offline"))).toEqual({
+      available: false,
+      weakPasscode: false,
+    });
+    forgetAvailability();
+    const fetcher = vi.fn(async () => Response.json({ available: true }));
+    vi.stubGlobal("fetch", fetcher);
+    await gradingStatus();
+    await gradingStatus();
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
 });

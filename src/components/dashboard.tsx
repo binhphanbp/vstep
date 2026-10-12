@@ -144,13 +144,13 @@ export function Dashboard() {
             >
               <div className="orbit-ring outer" />
               <div className="orbit-ring inner" />
-              <div className="orbit-label top">
+              <div className="orbit-label top" lang="en">
                 <Sparkles size={15} />a little every day
               </div>
               <div className="orbit-center">
-                <span>GÙA · NEXT CHAPTER</span>
+                <span lang="en">GÙA · NEXT CHAPTER</span>
                 <strong>{state.profile.target}</strong>
-                <span>I can. I will.</span>
+                <span lang="en">I can. I will.</span>
               </div>
               <span className="orbit-badge headphones">
                 <Headphones size={22} />
@@ -161,7 +161,7 @@ export function Dashboard() {
               <span className="orbit-star">
                 <Plus size={22} />
               </span>
-              <span className="orbit-label bottom">
+              <span className="orbit-label bottom" lang="en">
                 one step closer <ArrowUpRight size={14} />
               </span>
             </div>
@@ -215,7 +215,7 @@ export function Dashboard() {
               <ol className="quick-list">
                 <li>
                   <Link href={`/practice/${quick.lesson.id}`}>
-                    <strong>{quick.lesson.title}</strong>
+                    <strong lang="en">{quick.lesson.title}</strong>
                     <span>
                       {skillNames[quick.lesson.skill]} · {quick.lesson.minutes}{" "}
                       phút
@@ -299,7 +299,7 @@ export function Dashboard() {
                         {lesson.part}
                         <span className="mini-tag">{lesson.level}</span>
                       </div>
-                      <h3>{lesson.title}</h3>
+                      <h3 lang="en">{lesson.title}</h3>
                       <p>{lesson.subtitle}</p>
                       <div className="plan-reasons" aria-label="Lý do chọn bài">
                         {(plan.reasons[lesson.id] ?? []).map((reason) => (
@@ -401,7 +401,7 @@ export function Dashboard() {
             </div>
           </section>
         </div>
-        <aside className="dashboard-aside">
+        <aside className="dashboard-aside" aria-label="Nhịp học và lời nhắc">
           <section className="panel daily-progress">
             <div className="panel-heading">
               <h2>Nhịp học của mình</h2>
@@ -457,7 +457,9 @@ export function Dashboard() {
               <span className="icon-soft">
                 <Leaf size={20} />
               </span>
-              <span className="capsule">SPACED REPETITION</span>
+              <span className="capsule" lang="en">
+                SPACED REPETITION
+              </span>
             </div>
             <h2>
               Chăm một chút,
@@ -495,7 +497,7 @@ export function Dashboard() {
               </ul>
             ) : (
               <>
-                <blockquote>
+                <blockquote lang="en">
                   “You don’t have to be great to start. You have to start to
                   grow.”
                 </blockquote>

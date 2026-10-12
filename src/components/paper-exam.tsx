@@ -282,7 +282,7 @@ function Question({
   return (
     <fieldset className="paper-question" id={`q-${item.id}`}>
       <legend>
-        {item.number}. {item.text}
+        {item.number}. <span lang="en">{item.text}</span>
       </legend>
       {item.options.map((option, index) => (
         <label className="paper-option" key={index}>
@@ -298,7 +298,7 @@ function Question({
             }
           />
           <span>
-            {"ABCD"[index]}. {option.text}
+            {"ABCD"[index]}. <span lang="en">{option.text}</span>
           </span>
         </label>
       ))}

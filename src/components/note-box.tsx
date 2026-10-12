@@ -399,6 +399,7 @@ export function NoteEditor({
 
 export function formatNoteDate(iso: string) {
   return new Date(iso).toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
     day: "numeric",
     month: "numeric",
     year: "numeric",
@@ -570,7 +571,13 @@ export function QuestionNotes({
   const clearUndo = useCallback(() => setDeleted(null), []);
   const label = `Ghi chú của ${state.profile.name} cho ${noun}`;
   return (
-    <section className="question-notes" aria-label={label}>
+    // A group, not a landmark: a page of forty questions would otherwise have
+    // forty landmarks to wade through. The name says which question it is.
+    <section
+      className="question-notes"
+      role="group"
+      aria-label={`${label} — ${place.anchor.label}`}
+    >
       {notes
         .filter((note) => note.id !== composing)
         .map((note) =>

@@ -244,6 +244,50 @@ describe("saved AI grades", () => {
     expect(Object.keys(pruneGrades(state).grades ?? {})).toEqual([]);
   });
 
+  it("never lets a grade that no longer fits make the whole profile unreadable", async () => {
+    const good = await entry("paper:r1:a", "2026-10-08T10:00:00.000Z");
+    const broken = { ...good, id: "paper:r1:b", grade: { status: "graded" } };
+    const garbage = "not even an object";
+    const stored = JSON.parse(
+      JSON.stringify({
+        ...freshState(),
+        grades: { [good.id]: good, "paper:r1:b": broken, "x:y": garbage },
+      }),
+    );
+    const parsed = stateSchema.safeParse(stored);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    // The readable grade is kept exactly; the two that do not fit are left out.
+    expect(Object.keys(parsed.data.grades ?? {})).toEqual([good.id]);
+    expect(parsed.data.grades?.[good.id]).toEqual(
+      JSON.parse(JSON.stringify(good)),
+    );
+    // Everything else in the profile is untouched.
+    expect(parsed.data.attempts).toEqual([]);
+  });
+  it("cuts too many grades back to the newest instead of refusing the profile", async () => {
+    const base = await entry("paper:r1:a", "2026-01-01T00:00:00.000Z");
+    const grades: Record<string, unknown> = {};
+    for (let i = 0; i < GRADE_LIMITS.schemaCount + 5; i++) {
+      const id = `attempt:${i}`;
+      grades[id] = {
+        ...base,
+        id,
+        at: new Date(Date.UTC(2026, 0, 1) + i * 60_000).toISOString(),
+      };
+    }
+    const parsed = stateSchema.parse(
+      JSON.parse(JSON.stringify({ ...freshState(), grades })),
+    );
+    const ids = Object.keys(parsed.grades ?? {});
+    expect(ids).toHaveLength(GRADE_LIMITS.schemaCount);
+    // The five oldest are the ones that went.
+    expect(ids).not.toContain("attempt:0");
+    expect(ids).not.toContain("attempt:4");
+    expect(ids).toContain("attempt:5");
+    expect(ids).toContain(`attempt:${GRADE_LIMITS.schemaCount + 4}`);
+  });
+
   it("names where a grade belongs", () => {
     expect(gradeTarget(paperGradeId("r1", "132-writing-1"))).toEqual({
       kind: "paper",

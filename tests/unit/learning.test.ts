@@ -7,6 +7,7 @@ import {
   TYPE_EVIDENCE_MINIMUM,
   TYPE_STEP_MINIMUM,
   addSavedWord,
+  dayLabel,
   dueVocabulary,
   searchFold,
   vocabularyDeck,
@@ -1894,5 +1895,17 @@ describe("the vocabulary garden's own cards and rare paths", () => {
     expect(searchFold("e\u0302\u0301")).toBe(searchFold("\u1ebf"));
     expect(searchFold("BỀN").includes(searchFold("ben"))).toBe(true);
     expect(searchFold("")).toBe("");
+  });
+});
+
+describe("dates are written in Vietnam time", () => {
+  it("names the day in Hà Nội, whatever the device's zone", () => {
+    // 17:30 UTC on the 8th is already half past midnight on the 9th in Vietnam.
+    expect(dayLabel("2026-10-08T17:30:00.000Z")).toBe("9/10/2026");
+    expect(dayLabel("2026-10-08T16:59:00.000Z")).toBe("8/10/2026");
+    // An exam day is stored as a date and read at noon Vietnam time.
+    expect(dayLabel("2026-10-09T12:00:00+07:00")).toBe("9/10/2026");
+    expect(dayLabel(Date.parse("2026-10-08T17:30:00.000Z"))).toBe("9/10/2026");
+    expect(dayLabel("not a date")).toBe("");
   });
 });
