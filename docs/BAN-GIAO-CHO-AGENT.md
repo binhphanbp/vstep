@@ -27,8 +27,8 @@ Mọi con số dưới đây là số đo thật tại thời điểm viết; s�
 ## 3. Trạng thái hiện tại
 
 - `main` = `73a6ea7` (PR #63). Production đã chạy bản này; _Validate Mây_ và _Smoke production_ đạt.
-- Nhánh `claude/loving-feynman-1smqzs` **hơn `main` một commit chưa merge: `bc5e7f2`** — sửa ba nút "Câu trước / Nghe lại / Câu sau" của bài nghe bị chồng chữ ở khung hẹp (thẻ kiểm tra của trang Phòng thi thử), thêm một ca E2E và ghi tài liệu. CI trên commit này chưa chạy vì chưa có PR. **Việc đầu tiên nếu chủ dự án đồng ý: mở PR, chờ CI, merge.**
-- Số đo ở `bc5e7f2`: **404 unit (Vitest), 194 E2E** (186 ca Chromium, bốn Firefox, bốn WebKit), build 106 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
+- Nhánh `claude/loving-feynman-1smqzs` **hơn `main` các commit chưa merge** (sửa nút bài nghe bị chồng chữ ở Phòng thi thử, bản bàn giao này, và ba ca E2E quét toàn bộ trang `routes-health.spec.ts`). CI trên các commit này chưa chạy vì chưa có PR. **Việc đầu tiên nếu chủ dự án đồng ý: mở PR, chờ CI, merge.**
+- Số đo ở đầu nhánh hiện tại: **404 unit (Vitest), 197 E2E** (189 ca Chromium, bốn Firefox, bốn WebKit), build 106 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
 - **Tính năng AI hiện không dùng được trên trang live vì khóa Gemini đã hết hạn mức chi tiêu hằng tháng** (HTTP 429 từ Google). Chủ dự án nói **tạm bỏ qua AI** cho đến khi họ nâng hạn mức ở https://ai.studio/spend. Đừng tốn công vào AI trừ khi họ nâng hạn mức hoặc yêu cầu.
 
 ## 4. Môi trường và lệnh chạy

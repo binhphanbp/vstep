@@ -8,7 +8,9 @@ Quét 59 route thật (11 màn chính, 14 bài học, các đề trong kho) bằ
 
 - **Lỗi bố cục thấy được:** ở thẻ "Kiểm tra trước khi bắt đầu" của trang Phòng thi thử (cột phải hẹp), ba nút "Câu trước / Nghe lại / Câu sau" của bài nghe xếp ba cột quá hẹp nên chữ chồng lên nhau và một biểu tượng tràn ra ngoài khung. Nay khung bài nghe dùng container query: dưới 340 px ba nút xếp thành ba hàng, còn ở bài học (khung rộng) vẫn một hàng ba cột. Có ca E2E đo: ba nút nằm trong khung, không chồng nhau, chữ không bị cắt (đã xác nhận ca này đỏ trên bản cũ, 3 nút bị cắt).
 - **Không thấy lỗi khác** ở trang chủ, lộ trình, vườn từ vựng, sổ lỗi sai, kết quả bài học, hướng dẫn.
-- **Kiểm tra:** 404 unit, 194 E2E (Chromium 186; thêm một ca), ESLint và TypeScript sạch.
+- **Quét thêm, không thấy lỗi:** 59 route × 5 độ rộng (390, 768, 1024, 1280, 1920 px) không trang nào cuộn ngang và không nút/nhãn nào bị cắt chữ; duyệt bằng phím Tab qua 14 trang chính, mọi phần tử nhận tiêu điểm đều có kiểu hiển thị tiêu điểm; mỗi trang tải khoảng 1 MB JS chưa nén (chunk lớn nhất 455 KB, 150 KB khi nén, chứa nội dung bài học) và dưới 1,3 giây trên bản local: chấp nhận được cho ứng dụng cá nhân, không đổi.
+- **Ba ca E2E mới giữ các phép quét ở trên** (`routes-health.spec.ts`): không trang nào ghi lỗi console, ngoại lệ hay tải file hỏng (bỏ qua các yêu cầu bị hủy khi rời trang); không trang nào cuộn ngang ở 390 px và ở 1280 px. Danh sách trang lấy từ chính nội dung (bài học, đề), nên bài hay đề mới tự được kiểm.
+- **Kiểm tra:** 404 unit, 197 E2E (Chromium 189; thêm bốn ca: nút bài nghe và ba ca quét), ESLint và TypeScript sạch.
 
 ## Chấm AI: chấm Nói cho bài học Nói và buổi thi rút gọn; thử âm thanh AAC — 09/10/2026
 
@@ -501,7 +503,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 186 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 404 unit / 194 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 189 unit / 67 E2E / 106 route / 16 màn axe. Bản làm việc hiện tại có đủ 404 unit / 197 E2E / 106 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -711,7 +713,7 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 ## Bằng chứng kiểm tra
 
 - 404 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 194 kiểm thử Playwright trên bản production: 186 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 197 kiểm thử Playwright trên bản production: 189 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.
