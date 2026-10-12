@@ -2,6 +2,46 @@
 
 Rà lại sau yêu cầu kiểm tra kỹ, gồm đọc code, tái hiện lỗi, sửa và kiểm thử hồi quy. Đây là bằng chứng cho phạm vi đã kiểm tra, không phải chứng nhận không còn lỗi hoặc hoàn thành mọi yêu cầu production.
 
+## Kiểm tra sâu đợt sáu: Chrome, Brave, Edge (Chromium) — 12/10/2026
+
+Yêu cầu của chủ dự án: kiểm kỹ trên Chrome, Brave…, **không cần Safari**. Từ đây Safari/iOS nằm ngoài phạm vi: bỏ khỏi các danh sách việc chờ (ghi chú rủi ro của Safari ở đợt năm giữ lại để tham khảo). CI vẫn chạy bốn ca Firefox và bốn ca WebKit như cũ; không ai cần lo chúng.
+
+**Phạm vi thật của các phép đo.** Máy này không có Chrome, Brave hay Edge; chỉ có Chromium 141 của Playwright, cùng engine Blink với cả ba. Nên bố cục, CSS, JavaScript, service worker, ghi âm, in ra PDF và điều kiện cài đặt PWA được đo ở mức engine của chính Chrome; còn những gì nằm ngoài engine (khiên Shields của Brave, giọng đọc có sẵn trên máy Windows của Gùa, bộ gõ Unikey/EVKey, độ dày thanh cuộn của Windows, phông chữ hệ thống) thì chưa kiểm được, nói rõ ở cuối mục.
+
+**1. Thanh cuộn thật.** Playwright chạy Chromium không đầu mà *giấu thanh cuộn* (`--hide-scrollbars`); Chrome, Brave và Edge trên Windows và Linux thì vẽ thanh rộng 15–17 px và nội dung hẹp đi chừng ấy. Mọi ca kiểm bố cục từ trước tới nay đo trên một cửa sổ rộng hơn cửa sổ của Gùa. Nay `playwright.config.ts` giữ thanh cuộn (`ignoreDefaultArgs`), có một ca kiểm giữ cho khỏi ai bỏ mất cấu hình đó. Chạy lại cả 196 ca Chromium với thanh cuộn thật: 194 đạt, 2 bỏ qua (hai ca chấm AI tự bỏ qua vì máy này có khóa), không ca nào đổi kết quả. Quét thêm mọi trang trong danh sách của `routes-health.spec.ts` ở 20 tổ hợp cỡ cửa sổ và tỉ lệ hiển thị (1366×768, 1440×900, 1536×864, 1280×720, 1920×1080, các cỡ tương đương phóng to 125–200%, tỉ lệ điểm ảnh 1; 1,25; 1,5; 1,75, không cho lệch quá 0 px): không trang nào cuộn ngang, không phần tử nào thò ra ngoài. Ba tổ hợp tiêu biểu nay có ca E2E riêng.
+
+**2. Chiều cao thật của trang thấp hơn 720 px nhiều.** Trình duyệt chiếm một phần màn bằng thanh tab, thanh địa chỉ và thanh tác vụ: màn 1366×768 còn khoảng 625 px trang, màn 1080p vẽ ở 150% còn khoảng 570 px, màn 1080p ở 125% còn khoảng 716 px. Bố cục đã được vặn theo 720. Đo ở 625 và 570 (chụp, xem từng ảnh): phòng thi vẫn vừa khung (hai thanh, hai ô cuộn riêng, bảng câu hỏi), nhưng:
+
+- ở **Vườn từ vựng**, sau khi lật thẻ, bốn nút chọn mức nhớ nằm dưới mép màn (đáy nút ở 702 px trên màn cao 625); mỗi thẻ phải cuộn một lần;
+- **cột bên** không vừa nên có thanh cuộn riêng (thiếu 49 px ở 625, 104 px ở 570), hồ sơ ở cuối bị che.
+
+Nay dưới 680 px chiều cao: thanh trên mỏng còn 52 px, lề trang gọn hơn, bỏ khẩu hiệu tiếng Anh ở đầu trang (`.eyebrow[lang="en"]`; ngày hay tên trang vẫn giữ) và dòng phụ của logo, cột bên dùng mục điều hướng thấp hơn; dưới 600 px cột bên bỏ thêm dòng "Góc học của Gùa". Kết quả đo: ở 625 và 570 cả bốn nút mức nhớ nằm trọn trong màn (còn dư 14 px ở 570) và cột bên vừa tới hồ sơ không cần cuộn. Ca E2E mới đo ở cả hai cỡ; ca cũ ở 1280×720 giữ nguyên.
+
+**3. Trang giật 15 px giữa trang dài và trang ngắn.** Với thanh cuộn thật, phần bên phải của thanh trên cùng (số ngày, "Mục tiêu") dịch 15 px giữa trang có thanh cuộn và trang không có (Sổ ghi chú và Sổ lỗi sai khi còn trống); trang bài học dựng nội dung sau khi tải nên thanh cuộn hiện muộn và cả trang giật theo. Nay `scrollbar-gutter: stable` giữ sẵn chỗ (trừ phòng thi: khung cố định không bao giờ cuộn, dùng đủ bề ngang). Ca E2E đo mép phải của thanh trên ở một trang dài và một trang ngắn.
+
+**4. Kho đề ra "bốn thẻ rồi một thẻ" ở màn rộng.** Dòng chú thích trong CSS nói "tối đa ba cột: năm đề rơi 3 + 2" nhưng không có giới hạn nào, nên từ cỡ khoảng 1600 px trở lên ra 4 + 1. Nay thẻ không hẹp hơn một phần ba hàng nên tối đa ba cột; ca E2E có thêm phép đo ở 1920 px.
+
+**5. Gợi ý dịch trang của trình duyệt.** Chrome, Edge và Brave đề nghị dịch trang họ cho là tiếng Anh (các đoạn đề dài tiếng Anh làm nhiễu phép đoán ngôn ngữ của trang tiếng Việt), và bấm dịch là viết đè lên đúng đoạn văn Gùa cần đọc. Mô phỏng trình dịch (bọc mọi đoạn chữ trong thẻ `<font>`, như Google Translate) trên chín trang (năm trang có nút để bấm, mỗi trang bấm 30 lần): không lỗi nào *sau khi* trang đã tải xong; có lỗi hydration của React (#418, tự phục hồi) khi trình dịch chạy trước lúc trang tải xong. Nay `<html translate="no">` và `<meta name="google" content="notranslate">`, có ca kiểm. Chưa thấy trình dịch thật làm vỡ gì; đây là tắt một lời mời không ích gì cho ứng dụng học tiếng Anh.
+
+**6. Giọng đọc của Chrome** (phần Nghe của bài học dùng giọng đọc có sẵn trong trình duyệt). Ba thói quen của Chrome mà bản thử trước chưa mô phỏng; cả ba là hành vi đã được nhiều người báo cáo, chưa tái hiện được ở đây vì máy này không có giọng nào:
+
+- danh sách giọng nạp **chậm** sau lần chạm đầu (`voiceschanged`), nên lần phát đầu tiên không có giọng để chọn và dùng giọng mặc định, khác với mọi lần sau. Nay bộ phát hỏi danh sách ngay khi hiện;
+- giọng **mạng** của Chrome ("Google UK English…") ngừng một đoạn sau khoảng 15 giây mà không báo kết thúc, nên bộ phát đứng im ở chữ "Dừng". Ba câu của bài học dài hơn 160 ký tự (dài nhất 177) và ở tốc độ 0,8× có thể chạm ngưỡng ấy (ước tính theo tốc độ đọc thường gặp, chưa đo bằng giọng thật). Nay câu dài hơn 140 ký tự được đọc theo từng đoạn, cắt ở dấu phẩy, chấm phẩy, hai chấm hoặc gạch ngang gần giữa câu nhất; bộ đếm "câu 3/12" và nút "Nghe lại câu này" không đổi (đơn vị vẫn là câu);
+- Chrome có thể thu gom đối tượng đang đọc trước khi nó kết thúc, khi đó sự kiện kết thúc (thứ duy nhất đẩy sang câu sau) không bao giờ tới. Nay các đối tượng đang đọc được giữ lại tới lúc kết thúc.
+
+Ca E2E dựng một bộ giả lập có cả hai thói quen đầu (giọng đến chậm 150 ms; đoạn quá dài không bao giờ kết thúc) và kiểm lần phát đầu có đủ giọng, mọi câu được đọc đủ theo thứ tự, không đoạn nào quá 140 ký tự. Ca unit chạy qua mọi câu của mọi bài nghe: đoạn nào cũng dưới ngưỡng, nối lại thì ra đúng câu gốc, chỉ vài câu bị cắt. Đã thử đảo ngược: bỏ phần khởi động danh sách giọng hoặc phần chia đoạn thì ca tương ứng đỏ.
+
+**7. Đã đo, không cần sửa.**
+
+- **Cài như ứng dụng:** Chromium báo manifest không lỗi và không còn trở ngại cài đặt nào ngoài "đang ở chế độ ẩn danh" (do cửa sổ thử), nên Chrome, Edge và Brave đều có thể cài Mây thành ứng dụng riêng không có thanh tab.
+- **In ra PDF** qua engine in của Chromium (cũng là của Chrome): 26 ghi chú thành 5 trang A4, không tràn ngang; mỗi thẻ có `break-inside: avoid` (chưa xem từng trang của file PDF, chỉ xem trang đầu qua ảnh chụp ở khổ A4).
+- **Micro:** lỗi từ chối quyền có thông báo riêng; mọi lỗi khác (không có thiết bị, thiết bị đang bận ở một ứng dụng khác như Zoom) có chung một thông báo bảo kiểm tra thiết bị (đọc mã, đã có ca E2E cho trường hợp từ chối).
+- **Tự động phát âm thanh:** phần Nghe của đề kho đã xử lý trường hợp trình duyệt không cho tự phát (`NotAllowedError`) bằng nút bấm.
+
+**Chưa kiểm được, nói rõ.** (1) Brave thật: khiên Shields, trình dịch của Brave, tùy chọn "quên dữ liệu khi đóng trang". (2) Chrome và Edge thật trên Windows: thanh cuộn 17 px, phông chữ hệ thống, giọng Microsoft và giọng mạng của Google, bộ gõ Unikey, EVKey và Telex của Windows. (3) Loa, micro, tai nghe của Gùa. (4) Chrome có thể dọn dữ liệu của một trang khi ổ đĩa gần đầy nếu trang chưa được đánh dấu giữ lâu dài; ứng dụng chỉ xin giữ lâu dài khi Gùa ghi âm lần đầu, và việc được cấp hay không do Chrome quyết định theo mức dùng; theo tài liệu công khai của Chrome, cài Mây thành ứng dụng (hoặc đánh dấu trang) làm tăng khả năng ấy, chưa kiểm ở máy này. Sao lưu và đồng bộ đám mây vẫn là phòng ngừa chắc chắn.
+
+- **Kiểm tra:** 415 unit (thêm 5), 210 E2E (Chromium 202; thêm sáu ca: thanh cuộn thật, thanh trên đứng yên, ba cỡ laptop, màn thấp, tắt dịch trang, giọng đọc của Chrome), build 107 route, ESLint và TypeScript sạch. Lượt Chromium đầy đủ trên bản production cuối (có thanh cuộn thật): 200 đạt, 2 bỏ qua (hai ca chấm AI tự bỏ qua vì máy này có khóa; CI không có khóa nên chạy đủ 202). Mỗi sửa ở trên đã thử đảo ngược trên một bản build hỏng có chủ ý và ca tương ứng đỏ đúng chỗ: bỏ khởi động danh sách giọng (giọng của lần phát đầu là rỗng), đọc câu dài nguyên một đoạn (bộ phát đứng ở "Dừng"), bỏ `scrollbar-gutter` (thanh trên lệch 15 px), tắt khối CSS màn thấp (nút mức nhớ ngoài màn), bỏ giới hạn ba cột (bốn cột ở 1920 px).
+
 ## Kiểm tra sâu đợt năm: trợ năng đầy đủ, ngôn ngữ, múi giờ, bộ nhớ ngoại tuyến, bảo mật, độ bền dữ liệu — 12/10/2026
 
 Yêu cầu: tạm bỏ qua phần AI (hết hạn mức), "check thật kỹ" phần còn lại. Mỗi phép quét dưới đây chạy trên bản production local; chỗ nào tìm ra lỗi thì sửa và có ca kiểm giữ lại.
@@ -25,7 +65,7 @@ Yêu cầu: tạm bỏ qua phần AI (hết hạn mức), "check thật kỹ" ph
 
 **7. Quét không thấy gì:** ba lần quét đã báo ở đợt bốn (console/mạng, cuộn ngang ở 390 và 1280 px) vẫn đạt sau các thay đổi; quét chữ tiếng Anh trong giao diện tiếng Việt (ngoài đề thi) chỉ thấy các khẩu hiệu cố ý ở mục 2, không có chuỗi nào bỏ sót chưa dịch; địa chỉ lạ (`/practice/xyz`, `/Practice/…`, `/papers/../etc/passwd`, `/.env`, `/package.json`, `/src/…`) đều ra trang "không tìm thấy" hoặc 404, không lộ file; trước đây `/robots.txt` là 404, nay có (cấm mọi trình thu thập; một câu kiểm trong ca "server serves security headers" giữ nội dung đó); `knip` không thấy file chết (chỉ các hằng số xuất ra mà dùng nội bộ); build và ESLint không có cảnh báo.
 
-**Rủi ro đã biết, không sửa được bằng mã:** chính sách chống theo dõi của Safari (WebKit, từ Safari 13.1 năm 2020) có thể xóa dữ liệu script ghi được của một trang (localStorage, IndexedDB, đăng ký service worker) nếu người dùng không tương tác với trang trong bảy ngày dùng Safari; ứng dụng thêm vào Màn hình chính có bộ đếm riêng, và một kỹ sư WebKit nói (2022) bộ nhớ HTML của miền chính của ứng dụng như vậy không nằm trong diện bị xóa. Đây là thông tin từ các bài phân tích công khai, chưa kiểm trên máy Safari thật. Nếu Gùa học bằng Safari, nên thêm Mây vào Màn hình chính/Dock hoặc đăng nhập đồng bộ đám mây; nhắc sao lưu đã có.
+**Rủi ro đã biết, không sửa được bằng mã (ngoài phạm vi từ 12/10/2026: Gùa dùng Chrome và Brave, ghi lại để khỏi mất):** chính sách chống theo dõi của Safari (WebKit, từ Safari 13.1 năm 2020) có thể xóa dữ liệu script ghi được của một trang (localStorage, IndexedDB, đăng ký service worker) nếu người dùng không tương tác với trang trong bảy ngày dùng Safari; ứng dụng thêm vào Màn hình chính có bộ đếm riêng, và một kỹ sư WebKit nói (2022) bộ nhớ HTML của miền chính của ứng dụng như vậy không nằm trong diện bị xóa. Đây là thông tin từ các bài phân tích công khai, chưa kiểm trên máy Safari thật. Nếu Gùa học bằng Safari, nên thêm Mây vào Màn hình chính/Dock hoặc đăng nhập đồng bộ đám mây; nhắc sao lưu đã có.
 
 - **Kiểm tra:** 410 unit (thêm 6), 204 E2E (Chromium 196; thêm bảy ca), build 107 route (thêm `robots.txt`: cấm mọi trình thu thập, bổ sung cho `noindex` sẵn có), ESLint và TypeScript sạch.
 
@@ -530,7 +570,7 @@ Lớp chú giải bằng chứng theo đó phủ **64/111** câu (trước là 5
 
 - Bản DOCX bàn giao được dựng lại từ `docs/HANDOVER.md` theo mốc hiện hành.
 - **Sửa nguyên nhân chứ không chỉ sửa con số.** Trang bìa báo cáo ghi cứng "57 unit test và 40 E2E" và đã sai suốt ba release, vì con số tồn tại ở hai nơi. Script nay **đọc số liệu từ chính HANDOVER.md** (unit, E2E, số route, số màn axe, ngày cập nhật); thiếu dòng số liệu đó thì script **dừng với lỗi** thay vì in ra con số cũ một cách tự tin.
-- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 189 unit / 67 E2E / 107 route / 16 màn axe. Bản làm việc hiện tại có đủ 410 unit / 204 E2E / 107 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
+- Kiểm lại báo cáo Word ở mốc trước: 219 đoạn, 9 bảng, 189 unit / 67 E2E / 107 route / 16 màn axe. Bản làm việc hiện tại có đủ 415 unit / 210 E2E / 107 route; báo cáo Word cần đồng bộ ở lần bàn giao tiếp theo.
 
 ## Đợt 1 của kế hoạch tiếp theo: so được hai lần thi, và dùng hết giờ đã hẹn
 
@@ -739,8 +779,8 @@ Phạm vi: Reading, Listening, từ vựng, phòng thi, trên desktop. Ba lớp:
 
 ## Bằng chứng kiểm tra
 
-- 410 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
-- 204 kiểm thử Playwright trên bản production: 196 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
+- 415 kiểm thử Vitest: logic học, version học liệu, confidence, chẩn đoán theo dạng câu và planner, cá nhân hóa dữ liệu cũ, độ đầy đủ cấu trúc, dữ liệu/khôi phục và SQL/RLS trên PostgreSQL qua PGlite. Sáu ca mới kiểm chứng chú giải bằng chứng: trích dẫn phải trùng nguyên văn ngữ liệu, mỗi lựa chọn có đúng một ghi chú, chỉ đáp án đúng được đánh dấu “Đúng:”, không có chú giải mồ côi và chú giải theo đúng câu được dùng lại trong đề đầy đủ.
+- 210 kiểm thử Playwright trên bản production: 202 ca Chromium, bốn ca Firefox và bốn ca WebKit. Phạm vi gồm mười ca cloud giả lập, toàn bộ tám bài Reading/Listening trên mobile ở cả ba engine, tải backup JSON đa trình duyệt, phục hồi bài, lưu hai bài Viết, ghi âm khi chuyển phần, nhiều tab, import/export, dung lượng bị chặn, micro bị từ chối, con trỏ tùy biến, manifest, CSP không dùng eval, header bảo vệ và HTTP 404.
 - Axe WCAG A/AA trên 19 màn, gồm kho đề nhập và trang đề 132; cộng kết quả đề đầy đủ mở giải thích trên mobile; kiểm tra chiều rộng các màn chính ở 390 px. Các phép kiểm tra này nằm trong `tests/e2e/accessibility.spec.ts` và `resilience.spec.ts` nên chạy lại ở mọi release.
 - ESLint, TypeScript, production build: đạt.
 - `npm audit --omit=dev`: không báo lỗ hổng ngày 07/10/2026, sau khi nâng `next` 16.3.4 → **16.4.0** và `sharp` 0.35.4 → **0.35.5**. Trước khi nâng, cùng lệnh đó báo **3 lỗ hổng (1 critical, 2 high)** và **thoát mã 1**, tức CI trên `main` đang đỏ dù không ai đụng vào mã: advisory mới xuất hiện sau ngày 13/09. Lỗi critical là RCE trong `next/og` — ứng dụng này không dùng `next/og` hay `ImageResponse` (đã grep toàn bộ `src/`), nên đường khai thác không có trong mã, nhưng gói vẫn nằm trong cây phụ thuộc nên vẫn nâng. Còn lại `braces` chỉ là phụ thuộc của `eslint-config-next`, nằm trong devDependencies, không đi vào bản production và không nằm trong phạm vi lệnh CI chạy. Đây là kết quả advisory hiện có, không thay thế rà soát bảo mật toàn diện.

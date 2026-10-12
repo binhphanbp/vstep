@@ -3260,8 +3260,14 @@ details .passage {
    long passages and large question sets without widening a phone viewport. */
 .paper-grid {
   display: grid;
-  /* Three across at the most: five papers fall 3 + 2, not 4 + 1. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  /* Three across at the most: five papers fall 3 + 2, not 4 + 1. A card is
+     never narrower than 300 px, and never narrower than a third of the row
+     (less the two gaps, and a pixel so that rounding cannot lose the third
+     column), which is what keeps a wide window from fitting a fourth. */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, max(300px, calc((100% - 32px) / 3 - 1px))), 1fr)
+  );
   gap: 16px;
   margin-top: 22px;
 }
@@ -4772,4 +4778,85 @@ mark.grade-err sup {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.55;
+}
+
+/* A laptop browser leaves about 625 px of page on a 768-line screen and about
+   570 px on a 1080p one drawn at 150%: well under the 720 px this layout was
+   first fitted to. Below 680 px the chrome around a page thins - a slimmer top
+   bar, a side column that fits without scrolling, no decorative taglines - so
+   that what a page is for (a word card with its four ratings, a question and
+   its answers) is on the screen and not a scroll away. */
+@media (min-width: 801px) and (max-height: 680px) {
+  .sidebar {
+    padding-top: 14px;
+  }
+  .brand {
+    padding-bottom: 8px;
+    font-size: 30px;
+  }
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+  }
+  .brand small {
+    display: none;
+  }
+  .workspace-label {
+    padding-bottom: 6px;
+  }
+  .nav-item {
+    padding: 5px 14px;
+    margin: 1px 0;
+  }
+  .topbar {
+    height: 52px;
+  }
+  .page {
+    padding-top: 14px;
+    padding-bottom: 20px;
+  }
+  .page-heading {
+    margin-bottom: 14px;
+  }
+  /* The English taglines only; a date or a page's name stays. */
+  .page-heading .eyebrow[lang="en"] {
+    display: none;
+  }
+  .page-heading h1 {
+    line-height: 1.25;
+  }
+  .page-heading p {
+    margin-top: 4px;
+  }
+  .vocab-toolbar {
+    margin: 8px 0;
+  }
+  .review-buttons {
+    margin-top: 12px;
+  }
+  .flashcard h2 {
+    font-size: 32px;
+  }
+  .flashcard .example {
+    font-size: 17px;
+  }
+}
+/* And under 600 px, where a 1080p screen at 150% lands, the side column drops
+   its caption too. */
+@media (min-width: 801px) and (max-height: 600px) {
+  .workspace-label {
+    display: none;
+  }
+  .vocab-toolbar {
+    margin: 4px 0;
+  }
+}
+
+/* Chrome, Brave and Edge on Windows and Linux draw a scrollbar only on a page
+   that is long enough, 15 px wide, and the page used to jump that far sideways
+   (the top bar's right-hand side with it) between a short page and a long one.
+   Keeping the room for it makes the pages stand still. The exam room is a fixed
+   frame that never scrolls, so it keeps the whole width. */
+html:not(:has(body.exam-immersive)) {
+  scrollbar-gutter: stable;
 }

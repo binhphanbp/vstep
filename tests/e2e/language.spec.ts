@@ -92,6 +92,23 @@ test("a paper in progress and its review mark the questions as English", async (
   expect(items.marked).toBe(items.total);
 });
 
+test("the browser is told not to offer to translate the pages", async ({
+  page,
+}) => {
+  // The app teaches English and has its own Vietnamese where it is wanted. The
+  // long English passages can make a browser take a page for English and offer
+  // to translate it, which would rewrite the very text she is there to read.
+  for (const path of ["/", "/practice/reading-cafe", "/papers"]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("lang", "vi");
+    await expect(page.locator("html")).toHaveAttribute("translate", "no");
+    await expect(page.locator('meta[name="google"]')).toHaveAttribute(
+      "content",
+      "notranslate",
+    );
+  }
+});
+
 test("the English slogans on the page headings are marked as English", async ({
   page,
 }) => {

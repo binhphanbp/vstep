@@ -19,6 +19,56 @@ export function shieldDots(line: string) {
       )
   );
 }
+/**
+ * The most a single utterance is asked to say. Chrome's network voices (the
+ * "Google UK English" ones) stop an utterance after about fifteen seconds and
+ * send no `end` event, so a long sentence at the slowest speed could leave the
+ * player "playing" in silence. A hundred and forty characters is about twelve
+ * seconds at 0.8×.
+ */
+export const UTTERANCE_LIMIT = 140;
+const CLAUSE_BREAK = /[,;:]\s|\s[-–—]\s/g;
+/**
+ * One sentence as the pieces it is spoken in: whole when it is short enough,
+ * otherwise cut at the comma, semicolon, colon or dash nearest its middle (a
+ * space when it has none), again for any piece still too long. Punctuation
+ * stays with the words before it, so the voice still pauses there. The player
+ * counts sentences, not pieces: "câu 3/12" does not change.
+ */
+export function speechPieces(
+  sentence: string,
+  limit = UTTERANCE_LIMIT,
+): string[] {
+  const text = sentence.trim();
+  if (text.length <= limit) return text ? [text] : [];
+  const middle = text.length / 2;
+  let cut = -1;
+  let nearest = Infinity;
+  for (const found of text.matchAll(CLAUSE_BREAK)) {
+    // Just after the punctuation or the dash, before the space that follows.
+    const at = found.index + found[0].length - 1;
+    const distance = Math.abs(at - middle);
+    if (at >= 20 && text.length - at >= 20 && distance < nearest) {
+      nearest = distance;
+      cut = at;
+    }
+  }
+  if (cut < 0) {
+    for (let at = text.indexOf(" "); at >= 0; at = text.indexOf(" ", at + 1)) {
+      const distance = Math.abs(at - middle);
+      if (distance < nearest) {
+        nearest = distance;
+        cut = at;
+      }
+    }
+  }
+  // One long word and no break to cut at: say it as it is.
+  if (cut < 0) return [text];
+  return [
+    ...speechPieces(text.slice(0, cut), limit),
+    ...speechPieces(text.slice(cut), limit),
+  ];
+}
 /** Keep dialogue turns distinct without reading speaker labels aloud. */
 export function speechChunks(text: string) {
   const speakers: string[] = [];

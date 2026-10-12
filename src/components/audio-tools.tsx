@@ -18,8 +18,19 @@ import {
   getRecording,
   deleteRecording,
 } from "@/lib/recordings";
-import { speechChunks } from "@/lib/speech";
+import { speechChunks, speechPieces } from "@/lib/speech";
 let speechOwner: symbol | null = null;
+/**
+ * What has been handed to the browser to say and has not ended yet. Held here
+ * so nothing can collect it first: in Chrome an utterance that only the speech
+ * queue refers to can be garbage-collected mid-sentence, and its `end` event -
+ * the one thing that starts the next sentence - then never comes.
+ */
+const speaking = new Set<SpeechSynthesisUtterance>();
+function cancelSpeech() {
+  window.speechSynthesis?.cancel();
+  speaking.clear();
+}
 export function RecordingHistory({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
   // Each submitted session keeps its own copy on the device for ever. Without a
@@ -106,13 +117,18 @@ export function AudioPlayer({
   const owner = useRef(Symbol("audio-player"));
   const parts = useMemo(() => speechChunks(text), [text]);
   useEffect(() => {
+    // Chrome fills its voice list a moment after the speech object is first
+    // touched. Asked here, the list is complete by the time she presses play;
+    // asked there, the first play had none and used whichever voice the
+    // browser picked, a different one from every play after it.
+    window.speechSynthesis?.getVoices();
     const token = owner.current;
     const playback = run;
     return () => {
       playback.current++;
       if (speechOwner === token) {
         speechOwner = null;
-        window.speechSynthesis?.cancel();
+        cancelSpeech();
       }
     };
   }, []);
@@ -120,7 +136,7 @@ export function AudioPlayer({
     run.current++;
     if (speechOwner === owner.current) {
       speechOwner = null;
-      window.speechSynthesis?.cancel();
+      cancelSpeech();
     }
     setPlaying(false);
     setPaused(false);
@@ -132,7 +148,7 @@ export function AudioPlayer({
       return;
     }
     stop();
-    window.speechSynthesis.cancel();
+    cancelSpeech();
     speechOwner = owner.current;
     setError("");
     setFinished(false);
@@ -165,35 +181,48 @@ export function AudioPlayer({
       const part = parts[index];
       setAt(index);
       index++;
-      const utterance = new SpeechSynthesisUtterance(part.text);
       const voice = englishVoices[part.speaker % englishVoices.length];
-      utterance.lang = "en-GB";
-      if (voice) utterance.voice = voice;
-      utterance.rate = rate;
-      utterance.onend = next;
-      utterance.onerror = (e) => {
-        if (id !== run.current) return;
-        run.current++;
-        if (speechOwner === owner.current) speechOwner = null;
-        setPlaying(false);
-        setPaused(false);
-        if (e.error !== "interrupted" && e.error !== "canceled") {
+      // A long sentence goes out in pieces (see `UTTERANCE_LIMIT`); the
+      // sentence counts as heard when its last piece ends.
+      const pieces = speechPieces(part.text);
+      const say = (piece: number) => {
+        const utterance = new SpeechSynthesisUtterance(pieces[piece]);
+        utterance.lang = "en-GB";
+        if (voice) utterance.voice = voice;
+        utterance.rate = rate;
+        utterance.onend = () => {
+          speaking.delete(utterance);
+          if (id !== run.current) return;
+          if (piece + 1 < pieces.length) say(piece + 1);
+          else next();
+        };
+        utterance.onerror = (e) => {
+          speaking.delete(utterance);
+          if (id !== run.current) return;
+          run.current++;
+          if (speechOwner === owner.current) speechOwner = null;
+          setPlaying(false);
+          setPaused(false);
+          if (e.error !== "interrupted" && e.error !== "canceled") {
+            setError(
+              "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
+            );
+          }
+        };
+        speaking.add(utterance);
+        try {
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          run.current++;
+          if (speechOwner === owner.current) speechOwner = null;
+          setPlaying(false);
+          setPaused(false);
           setError(
             "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
           );
         }
       };
-      try {
-        window.speechSynthesis.speak(utterance);
-      } catch {
-        run.current++;
-        if (speechOwner === owner.current) speechOwner = null;
-        setPlaying(false);
-        setPaused(false);
-        setError(
-          "Không phát được giọng đọc. Kiểm tra giọng tiếng Anh trong cài đặt trình duyệt rồi thử lại.",
-        );
-      }
+      say(0);
     };
     next();
   }

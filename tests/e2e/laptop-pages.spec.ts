@@ -30,6 +30,35 @@ test("turning a word card over shows the four ways to rate it, without scrolling
     await expect(rate).toBeInViewport({ ratio: 1 });
 });
 
+test("on the page a 768-line laptop leaves, the card's four ratings and the whole side column still fit", async ({
+  page,
+}) => {
+  // 1366×768 less the browser's toolbar and the taskbar is about 625 px of
+  // page; a 1080p screen drawn at 150% leaves about 570. Both are well under
+  // the 720 above, and the daily word card is where it shows.
+  for (const [width, height] of [
+    [1366, 625],
+    [1280, 570],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await open(page, "/vocabulary");
+    await page.locator(".flashcard").click();
+    const rates = page.locator(".review-buttons button");
+    await expect(rates).toHaveCount(4);
+    for (const rate of await rates.all())
+      await expect(rate).toBeInViewport({ ratio: 1 });
+    // The side column ends with the profile and does not need a scrollbar of
+    // its own to get there.
+    await expect(
+      page.locator(".sidebar").getByRole("link", { name: /Cài đặt/ }),
+    ).toBeInViewport({ ratio: 1 });
+    const hidden = await page
+      .locator(".sidebar")
+      .evaluate((side) => side.scrollHeight - side.clientHeight);
+    expect(hidden, `${width}×${height}`).toBeLessThanOrEqual(0);
+  }
+});
+
 test("the notebook of mistakes shows the first mistake on the first screen", async ({
   page,
 }) => {
@@ -107,6 +136,14 @@ test("the paper bank puts five papers three and two across, not four and one", a
     );
   expect(columns).toHaveLength(5);
   expect(new Set(columns).size).toBe(3);
+  // A wide monitor has room for a fourth card and must not use it.
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const wide = await page
+    .locator(".paper-card")
+    .evaluateAll((cards) =>
+      cards.map((card) => Math.round(card.getBoundingClientRect().left)),
+    );
+  expect(new Set(wide).size).toBe(3);
 });
 
 test("the listening check on the mock exam page keeps its three buttons apart", async ({

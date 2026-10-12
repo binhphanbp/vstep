@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   other: {
+    // The app teaches English and carries its own Vietnamese where it is
+    // wanted. A browser that offers to translate a page it takes for English
+    // (the long passages tip its guess) would rewrite the very text she is
+    // there to read, so the offer is switched off (also `translate="no"`).
+    google: "notranslate",
     "may-release":
       process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? "local",
   },
@@ -40,7 +45,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="vi" className={`${font.variable} h-full antialiased`}>
+    <html
+      lang="vi"
+      translate="no"
+      className={`${font.variable} h-full antialiased`}
+    >
       <body>
         <StudyProvider>
           <Shell>{children}</Shell>

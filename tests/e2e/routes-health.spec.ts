@@ -61,6 +61,8 @@ async function expectNoSidewaysScroll(
   page: Page,
   width: number,
   height: number,
+  /** How far past the edge counts as scrolling; fractional scaling needs none. */
+  tolerance = 1,
 ) {
   await page.setViewportSize({ width, height });
   const wide: string[] = [];
@@ -68,9 +70,10 @@ async function expectNoSidewaysScroll(
     await page.goto(route, { waitUntil: "load" });
     await page.waitForTimeout(150);
     const sideways = await page.evaluate(
-      () =>
+      (slack) =>
         document.documentElement.scrollWidth >
-        document.documentElement.clientWidth + 1,
+        document.documentElement.clientWidth + slack,
+      tolerance,
     );
     if (sideways) wide.push(route);
   }
@@ -89,4 +92,68 @@ test("no page scrolls sideways at a laptop's width (1280 px)", async ({
 }) => {
   test.setTimeout(240_000);
   await expectNoSidewaysScroll(page, 1280, 720);
+});
+
+test("the pages are measured with real scrollbars, as Chrome, Brave and Edge draw them", async ({
+  page,
+}) => {
+  // Headless Chromium hides scrollbars unless told otherwise (see
+  // playwright.config.ts). If this reads 0 the width tests above and the
+  // layout tests elsewhere are measuring a window wider than Gùa's.
+  // A lesson is drawn after the page loads, so its scrollbar comes a moment
+  // later: wait for it rather than read the first frame.
+  await page.goto("/practice/reading-cafe");
+  await expect
+    .poll(() =>
+      page.evaluate(() => innerWidth - document.documentElement.clientWidth),
+    )
+    .toBeGreaterThanOrEqual(10);
+});
+
+test("the top bar stands still between a page with a scrollbar and one without", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  const edge = async (path: string) => {
+    await page.goto(path);
+    // The pages draw their content a moment after they load.
+    await expect(page.locator("main h1")).toBeVisible();
+    return page.evaluate(() => ({
+      right: Math.round(
+        document.querySelector(".topbar-right")!.getBoundingClientRect().right,
+      ),
+      scrolls:
+        document.documentElement.scrollHeight >
+        document.documentElement.clientHeight,
+    }));
+  };
+  const long = await edge("/guide");
+  const short = await edge("/notes");
+  // The two pages are what make this a test: one scrolls, the other does not.
+  expect(long.scrolls).toBe(true);
+  expect(short.scrolls).toBe(false);
+  expect(short.right).toBe(long.right);
+});
+
+test("no page scrolls sideways at the sizes laptops use: 1366 px, 125% and 150% scaling", async ({
+  browser,
+}) => {
+  test.setTimeout(300_000);
+  // 1366×768 at 100%, 1920×1080 at 125% and at 150%: what a browser leaves of
+  // the screen once its own toolbar and the taskbar are taken off. The fractional
+  // scales are where a pixel that does not divide shows up as a scrollbar.
+  for (const [width, height, scale] of [
+    [1366, 625, 1],
+    [1536, 716, 1.25],
+    [1280, 570, 1.5],
+  ]) {
+    const context = await browser.newContext({
+      baseURL: test.info().project.use.baseURL,
+      viewport: { width, height },
+      deviceScaleFactor: scale,
+    });
+    const page = await context.newPage();
+    await expectNoSidewaysScroll(page, width, height, 0);
+    await context.close();
+  }
 });

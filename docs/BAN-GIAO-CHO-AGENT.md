@@ -22,13 +22,14 @@ Mọi con số dưới đây là số đo thật tại thời điểm viết; s�
 6. **Bí mật:** khóa API chỉ ở biến môi trường phía máy chủ; không đưa vào trình duyệt, repo hay khung chat. Nếu chủ dự án đòi dán khóa vào chat, từ chối nhẹ nhàng và chỉ cách đặt trong _Edit environment_ của môi trường (xem mục 9).
 7. File báo lỗi (`Gửi báo lỗi` trong Cài đặt) **không bao giờ** chứa bài viết, bản ghi âm hay kết quả chấm.
 8. Mỗi thay đổi có kiểm thử; tài liệu và số liệu phải khớp (xem mục 4: `documents.test.ts`).
-9. Chủ dự án giao việc bằng câu ngắn ("làm chuẩn chỉnh đi", "mở và merge"). Hãy làm đủ chứ đừng hỏi lại từng bước; chỉ hỏi khi quyết định thật sự thuộc về họ.
+9. **Trình duyệt của Gùa là Chrome và Brave** (chủ dự án nói 12/10/2026: "không cần Safari"). Kiểm thử và sửa lỗi theo Chromium (Chrome, Brave, Edge cùng engine Blink); Safari/iOS ngoài phạm vi, đừng đưa vào việc chờ. CI vẫn chạy bốn ca Firefox và bốn ca WebKit như lưới an toàn rẻ, không ai phải quan tâm thêm.
+10. Chủ dự án giao việc bằng câu ngắn ("làm chuẩn chỉnh đi", "mở và merge"). Hãy làm đủ chứ đừng hỏi lại từng bước; chỉ hỏi khi quyết định thật sự thuộc về họ.
 
 ## 3. Trạng thái hiện tại
 
 - `main` = `73a6ea7` (PR #63). Production đã chạy bản này; _Validate Mây_ và _Smoke production_ đạt.
-- Nhánh `claude/loving-feynman-1smqzs` **hơn `main` các commit chưa merge** (sửa nút bài nghe bị chồng chữ ở Phòng thi thử, bản bàn giao này, và ba ca E2E quét toàn bộ trang `routes-health.spec.ts`). CI trên các commit này chưa chạy vì chưa có PR. **Việc đầu tiên nếu chủ dự án đồng ý: mở PR, chờ CI, merge.**
-- Số đo ở đầu nhánh hiện tại: **410 unit (Vitest), 204 E2E** (196 ca Chromium, bốn Firefox, bốn WebKit), build 107 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
+- Nhánh `claude/loving-feynman-1smqzs` **hơn `main` các commit chưa merge**: sửa nút bài nghe chồng chữ ở Phòng thi thử, bản bàn giao này, ba ca E2E quét toàn bộ trang, đợt kiểm tra sâu thứ năm (trợ năng đủ bộ luật, mã chấm tối thiểu 12 ký tự, bộ nhớ ngoại tuyến theo bản phát hành…) và đợt thứ sáu cho Chrome/Brave/Edge (thanh cuộn thật, màn thấp, dịch trang, giọng đọc; xem `docs/QUALITY.md`). CI xanh trên các commit đã đẩy; chưa có PR. **Việc đầu tiên nếu chủ dự án đồng ý ("mở và merge"): mở PR, chờ CI, merge.**
+- Số đo ở đầu nhánh hiện tại: **415 unit (Vitest), 210 E2E** (202 ca Chromium, bốn Firefox, bốn WebKit), build 107 route, axe 19 màn, ESLint/TypeScript sạch, `npm audit --omit=dev` 0 lỗ hổng. Quét 59 route thật bằng trình duyệt: không lỗi console/mạng.
 - **Tính năng AI hiện không dùng được trên trang live vì khóa Gemini đã hết hạn mức chi tiêu hằng tháng** (HTTP 429 từ Google). Chủ dự án nói **tạm bỏ qua AI** cho đến khi họ nâng hạn mức ở https://ai.studio/spend. Đừng tốn công vào AI trừ khi họ nâng hạn mức hoặc yêu cầu.
 
 ## 4. Môi trường và lệnh chạy
@@ -49,7 +50,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_test_placeholder npm run bui
 MAY_E2E_PRODUCTION=1 npx playwright test -c pw-local.config.ts [tệp] [-g "tên ca"]
 ```
 
-- `pw-local.config.ts` **không nằm trong repo** (đã loại bằng `.git/info/exclude`): nó chỉ trỏ Chromium có sẵn `/opt/pw-browsers/chromium` và cờ micro giả. Nếu thiếu, tạo lại: `defineConfig({...base, reporter:[["line"]], projects:[{name:"chromium", use:{...devices["Desktop Chrome"], launchOptions:{executablePath:"/opt/pw-browsers/chromium", args:["--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream"]}}}]})` với `base` lấy từ `playwright.config.ts`. **Không chạy `playwright install`.**
+- `pw-local.config.ts` **không nằm trong repo** (đã loại bằng `.git/info/exclude`): nó chỉ trỏ Chromium có sẵn `/opt/pw-browsers/chromium` và cờ micro giả. Nếu thiếu, tạo lại: `defineConfig({...base, reporter:[["line"]], projects:[{name:"chromium", use:{...devices["Desktop Chrome"], launchOptions:{executablePath:"/opt/pw-browsers/chromium", ignoreDefaultArgs:["--hide-scrollbars"], args:["--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream"]}}}]})` với `base` lấy từ `playwright.config.ts`. **Không chạy `playwright install`.**
 - Một tiến trình `next start` cũ còn giữ cổng 3100 làm Playwright hỏng. Giải phóng bằng `fuser -k 3100/tcp` (và 3101) **trước khi** build/test.
 - **Đừng dùng `pkill -f "next start"`** trong lệnh có chứa chính chuỗi đó (giết cả shell, exit 144). Đừng chạy nền bằng `&`; dùng chế độ chạy nền của công cụ.
 - Vitest **không có alias `@/`**: test import bằng đường dẫn tương đối (`../../src/...`).
@@ -110,7 +111,7 @@ Chạy `bash scripts/grading-eval/first-run.sh` (cần khóa; **tốn khoảng 1
 - Thứ tự điểm trên ELLIPSE (40 bài): Pearson 0,57–0,62; **QWK 0,31–0,42, không qua ngưỡng 0,45**; AI chấm thấp hơn người chấm của ELLIPSE khoảng 0,4–0,6 điểm trên thang 1–5 (ELLIPSE là bài học sinh Mỹ lớp 8–12, thang riêng, nên không phải VSTEP). Tỉ lệ câu trích sai 0,2% (đạt).
 - Độ ổn định (8 bài × 3 lần): lệch tối đa 0,5 điểm (đạt, nhưng mẫu nhỏ).
 - Phản ứng khi sửa bài: cắt ngắn → điểm giảm mạnh; xáo câu → tổ chức giảm; **thêm lỗi ngữ pháp → điểm Ngữ pháp chỉ giảm 0,125 (phản ứng yếu: danh sách lỗi đáng tin hơn con số)**; chèn lời dặn cho người chấm: chưa kết luận.
-- Gemini đọc được `audio/webm;codecs=opus` và `audio/mp4` (do Chromium ghi) và chép đúng. **Chưa thử AAC thật do Safari ghi** — xem mục 7.
+- Gemini đọc được `audio/webm;codecs=opus` và `audio/mp4` (do Chromium ghi) và chép đúng. AAC do Safari ghi **không còn cần thử** (Gùa dùng Chrome/Brave, nên Safari ngoài phạm vi từ 12/10/2026).
 - Kết luận: cổng điểm giữ đóng; điểm vẫn hiện kèm ghi chú. Chưa chạy `gemini-3.1-pro-preview` (đắt hơn, không khuyên chạy ngay).
 
 ## 7. Việc đang dở và gợi ý thứ tự
@@ -121,14 +122,14 @@ Chạy `bash scripts/grading-eval/first-run.sh` (cần khóa; **tốn khoảng 1
 
 **P1 — chờ chủ dự án nâng hạn mức Gemini (https://ai.studio/spend)**
 
-2. Thử AAC của Safari: `GEMINI_API_KEY=… npx tsx scripts/grading-eval/audio-probe.ts <file>`. Lệnh ffmpeg dựng MP4 AAC phân mảnh giống Safari nằm ở đầu `audio-probe.ts`; file Safari thật vẫn tốt hơn. Trong phiên này ffmpeg lấy từ `pip install imageio-ffmpeg` (xóa file `.whl` tải kèm, đừng commit).
+2. ~~Thử AAC của Safari~~ — **bỏ** (12/10/2026, Gùa dùng Chrome/Brave). Script `scripts/grading-eval/audio-probe.ts` vẫn nằm đó nếu sau này cần thử một định dạng âm thanh khác với Gemini (`GEMINI_API_KEY=… npx tsx scripts/grading-eval/audio-probe.ts <file>`; ffmpeg lấy từ `pip install imageio-ffmpeg`, xóa file `.whl` tải kèm, đừng commit).
 3. Nếu cần chạy lại bộ đo (model đổi/ngừng): `scripts/grading-eval/first-run.sh`; không đọc phần `holdout` trừ khi lấy con số cuối.
 
 **P2 — không cần AI, đáng làm**
 
-4. **Nghiệm thu thiết bị thật của Gùa** (micro, giọng đọc, Safari/iOS, màn hình tắt, bộ gõ Unikey/EVKey/macOS): `docs/UAT-DIEN-THOAI.md` có 20 mục chưa ai chạy.
+4. **Nghiệm thu thiết bị thật của Gùa** trên Chrome và Brave (micro, giọng đọc có sẵn trên máy, màn hình tắt, bộ gõ Unikey/EVKey/Telex của Windows): chưa ai chạy. `docs/UAT-DIEN-THOAI.md` có 20 mục nhưng dành cho điện thoại; phần máy tính chưa có danh sách riêng.
 5. **Đăng nhập + đồng bộ cloud bằng tài khoản thật trên URL production** và thử hai thiết bị (`docs/PRODUCTION-ROADMAP.md`, `RELEASE-RUNBOOK.md`).
-6. Rà UX/UI tiếp theo kiểu đã làm: chụp màn hình ở 1280×720, xem từng ảnh, sửa, thêm ca E2E đo được. Đợt gần nhất (đợt bốn) chỉ thấy một lỗi (nút bài nghe chồng chữ ở khung hẹp). Màn chưa xem kỹ trong đợt bốn: Kho đề, Sổ ghi chú, Hướng dẫn, trang bài học Viết/Nói đang làm dở.
+6. Rà UX/UI tiếp theo kiểu đã làm: chụp màn hình, xem từng ảnh, sửa, thêm ca E2E đo được. **Chụp ở chiều cao trang thật của laptop, không chỉ 720**: 1366×625 (màn 768 dòng) và 1280×570 (màn 1080p vẽ ở 150%), với thanh cuộn thật (đợt sáu). Đợt gần nhất (đợt bốn) chỉ thấy một lỗi (nút bài nghe chồng chữ ở khung hẹp). Màn chưa xem kỹ trong đợt bốn: Kho đề, Sổ ghi chú, Hướng dẫn, trang bài học Viết/Nói đang làm dở.
 7. Monitoring lỗi production (hiện chỉ có file báo lỗi do người dùng gửi), cập nhật dependency định kỳ, nội dung C1, ngân hàng đề độc lập, audio người thật cho các đề tự soạn.
 
 **Chưa làm và có lý do (đừng làm khi chưa có chỉ định)**
@@ -152,7 +153,11 @@ Chạy `bash scripts/grading-eval/first-run.sh` (cần khóa; **tốn khoảng 1
 - **Hồ sơ đọc nghiêm, trừ `grades`.** Một mục sai dạng ở bất kỳ phần nào do người học tự viết làm cả hồ sơ bị báo "không đọc được" (cố ý: bản gốc được giữ). Riêng `grades` (lần chấm AI, hỏi lại được) đọc khoan dung (`readableGrades`): đừng làm nó nghiêm lại.
 - **Mọi ngày hiển thị qua `dayLabel`/`whenLabel` (giờ Việt Nam).** Đừng gọi `toLocaleDateString("vi-VN")` trần.
 - **Trợ năng có ca kiểm đủ bộ luật** (`accessibility.spec.ts`, `accessibility-states.spec.ts`): mốc trang phải có tên riêng hoặc là `role="group"`, cấp tiêu đề chỉ nhảy một bậc, và chữ tiếng Anh của đề phải có `lang="en"` (`language.spec.ts`).
-- **Safari xóa dữ liệu trang** (localStorage, IndexedDB) sau bảy ngày dùng Safari không tương tác (chính sách chống theo dõi của WebKit từ 2020; ứng dụng thêm vào Màn hình chính có bộ đếm riêng). Chưa kiểm trên máy thật. Nếu Gùa dùng Safari: thêm vào Màn hình chính/Dock hoặc đăng nhập đồng bộ.
+- **Playwright giữ thanh cuộn thật** (`ignoreDefaultArgs: ["--hide-scrollbars"]` trong `playwright.config.ts`; nhớ thêm vào `pw-local.config.ts` của riêng bạn). Chromium không đầu giấu thanh cuộn, còn Chrome/Brave/Edge vẽ 15–17 px nên mọi phép đo bố cục từng đo trên cửa sổ rộng hơn của Gùa. Ca `routes-health.spec.ts` "measured with real scrollbars" giữ điều này.
+- **Màn thấp.** Laptop 768 dòng chỉ còn khoảng 625 px trang, màn 1080p ở 150% còn khoảng 570 px. Khối CSS cuối `globals.css` (dưới 680 px và 600 px chiều cao) mỏng bớt thanh trên, lề, khẩu hiệu tiếng Anh và cột bên để nút mức nhớ của thẻ từ và cả cột bên vừa màn; ca `laptop-pages.spec.ts` đo ở 1366×625 và 1280×570. Thêm thứ gì vào trang từ vựng thì đo lại hai cỡ này.
+- **`html { scrollbar-gutter: stable }`** (trừ phòng thi, khung cố định) để trang không giật 15 px giữa trang dài và trang ngắn; đừng xóa. **`<html translate="no">`** tắt lời mời dịch trang của trình duyệt (đề tiếng Anh dài làm nhiễu phép đoán ngôn ngữ); đừng xóa.
+- **Giọng đọc của Chrome** (`AudioPlayer`): hỏi `getVoices()` ngay khi hiện bộ phát (Chrome nạp danh sách chậm), giữ tham chiếu tới câu đang đọc (`speaking`), và đọc câu dài hơn 140 ký tự theo từng đoạn (`speechPieces`; giọng mạng của Chrome cắt cụt sau khoảng 15 giây mà không báo kết thúc). Đơn vị của bộ đếm và nút "Nghe lại câu này" vẫn là câu. Chưa nghe bằng giọng thật (máy thử không có giọng nào).
+- **Safari xóa dữ liệu trang** (localStorage, IndexedDB) sau bảy ngày dùng Safari không tương tác (chính sách chống theo dõi của WebKit từ 2020). **Ngoài phạm vi** từ 12/10/2026 (Gùa dùng Chrome/Brave); ghi lại để khỏi mất nếu sau này đổi trình duyệt.
 
 ## 9. Việc chỉ chủ dự án làm được
 

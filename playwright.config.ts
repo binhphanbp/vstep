@@ -20,6 +20,10 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         launchOptions: {
+          // Headless Chromium hides scrollbars; Chrome, Brave and Edge draw
+          // them (15 to 17 px). Keeping them means every layout check sees the
+          // width the page really has on Gùa's laptop.
+          ignoreDefaultArgs: ["--hide-scrollbars"],
           args: [
             "--use-fake-device-for-media-stream",
             "--use-fake-ui-for-media-stream",

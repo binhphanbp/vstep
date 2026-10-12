@@ -2,7 +2,7 @@
 
 **Ngày cập nhật báo cáo:** 07/10/2026
 
-**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **410 unit, 204 E2E**, build 107 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
+**Mốc nền tảng được đánh giá:** release Reading và Listening `6cdbbfe` ngày 13/09/2026. **Cập nhật 07/10/2026:** bản sáu đề nhập đã phát hành ở commit ứng dụng `ff8faef` (đề 131 sau đó được gỡ, còn năm đề) và đạt **415 unit, 210 E2E**, build 107 route, axe trên 19 màn. Năm đề 132–135 và Review 13/09 có đủ 375 đáp án Nghe/Đọc; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. CI của PR #38 và smoke production đúng SHA đều đạt; chi tiết và phạm vi còn mở ghi trong QUALITY.md và STATUS.md. Release `32422fa` ngày 14/09 là mốc trước đó.
 **Nhánh chính:** `main`  
 **Repository:** <https://github.com/binhphanbp/vstep>  
 **Bản HTTPS pilot:** <https://vstep-turtle.vercel.app>
@@ -10,7 +10,7 @@
 
 ## 1. Kết luận bàn giao
 
-Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 410 unit và 204 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa có nghiệm thu trên iOS hoặc Android thật.
+Mây hiện là một ứng dụng luyện VSTEP cá nhân có kế hoạch học theo ngày, thư viện luyện bốn kỹ năng, một buổi thi rút gọn, hai đề tự biên soạn và năm đề nhập từ dữ liệu chủ dự án cung cấp, từ vựng, ôn lỗi sai, lịch sử tiến bộ, ghi âm, sao lưu và đồng bộ Supabase thủ công. Reading và Listening của học liệu tự biên soạn có phản hồi theo dạng câu và độ chắc chắn; kho đề nhập hiển thị đáp án có sẵn trong nguồn sau khi nộp. Cả năm đề nhập đều có đáp án; đề 131 thiếu khóa đáp án và transcript nên đã được gỡ khỏi kho. Các đề nhập lưu đáp án, bài viết và trạng thái trong bản sao Mây; audio ghi âm vẫn lưu riêng. Giao diện đã được kiểm thử tự động ở viewport máy tính và điện thoại, dùng tone hồng pastel, tối ưu cho tiếng Việt và cá nhân hóa cho Gùa. Release `6cdbbfe` đã qua GitHub Actions và smoke HTTPS với 57 unit và 40 E2E trên Chromium, Firefox và WebKit; release `32422fa` đạt 81 unit và 44 E2E. Bản làm việc hiện tại đạt 415 unit và 210 E2E trên cùng ba engine sau khi hoàn tất kiểm thử. Chưa nghiệm thu trên máy thật của Gùa (Chrome hoặc Brave trên laptop); Safari/iOS ngoài phạm vi theo chủ dự án (12/10/2026).
 
 Sản phẩm đủ để Gùa pilot hằng ngày trên bản HTTPS hoặc local nhằm thu thập phản hồi thực tế. Chưa nên mô tả đây là hệ luyện thi VSTEP toàn diện đã được kiểm định hoặc đã nghiệm thu vận hành. Hai đề của Mây tự biên soạn dùng giọng tổng hợp; sáu đề nhập có MP3 gốc của bộ dữ liệu. Cả hai nguồn học liệu chưa được giáo viên của Mây thẩm định. Bài Viết hoặc Nói chưa có điểm từ giáo viên hoặc AI. Bản host chưa được kiểm thử đăng nhập và đồng bộ bằng tài khoản thật, micro hoặc thiết bị thật của người học.
 
@@ -215,7 +215,7 @@ Bản ghi âm được lưu riêng trong IndexedDB vì Blob không phù hợp đ
 
 ## 8. Kiểm thử và bằng chứng chất lượng
 
-Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 410/410 Vitest, build 107 route và audit production dependency đều đạt. Playwright có 204 ca trên bản production local: 196 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 196/196 (cập nhật 09/10/2026 sau khi dựng lại phòng thi; 11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
+Bản sáu đề ngày 07/10/2026: ESLint, TypeScript, 415/415 Vitest, build 107 route và audit production dependency đều đạt. Playwright có 210 ca trên bản production local: 202 Chromium, 4 Firefox, 4 WebKit. Sau khi thêm phòng thi mô phỏng và công cụ luyện đề, lượt Chromium đầy đủ đạt 196/196 (09/10/2026); lượt mới nhất (12/10/2026, có thanh cuộn thật) đạt 200 và bỏ qua 2 ca chấm AI vì máy thử có khóa, CI không có khóa nên chạy đủ 202 (11 ca cloud cần bản build có hai biến Supabase giả như CI đặt); Firefox và WebKit chưa chạy lại cho thay đổi này. Axe kiểm tra 19 màn, gồm kho đề và Review 13/09. Hai lượt CI của nhánh/PR #38 đạt; Vercel phục vụ SHA `ff8faef` và [smoke production](https://github.com/binhphanbp/vstep/actions/runs/37600634404) đạt cho chính deployment đó.
 
 Bảng dưới đây ghi bằng chứng lịch sử cho release `6cdbbfe` ngày 13/09/2026; số liệu của bản làm việc hiện tại ở đầu tài liệu và QUALITY.md:
 
@@ -236,7 +236,7 @@ Các kiểm thử đáng chú ý bao gồm: chẩn đoán Reading theo dạng c�
 
 Sau khi tắt prefetch ở menu cố định và chuyển schema client sang `zod/mini`, ba phép đo Lighthouse mobile trên production local cho thấy payload ban đầu giảm khoảng 516 xuống 376 KiB, JavaScript giảm 354 xuống 218 KiB và JavaScript chưa dùng giảm 169 xuống 26 KiB. Accessibility và Best Practices đạt 100; điểm Performance dao động 73–84 theo mô phỏng CPU. SEO 60 là chủ đích vì ứng dụng cá nhân đặt `noindex`.
 
-Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, Android/Chrome, micro thật, loa/tai nghe thật hoặc đánh giá chuyên môn của giáo viên.
+Kiểm thử tự động không thay thế nghiệm thu trên máy thật của Gùa (Chrome hoặc Brave trên laptop), micro thật, loa/tai nghe thật hoặc đánh giá chuyên môn của giáo viên. Safari/iOS ngoài phạm vi.
 
 ## 9. Những việc chưa làm và giới hạn hiện tại
 
@@ -244,7 +244,7 @@ Kiểm thử tự động không thay thế nghiệm thu trên iPhone/Safari, An
 | -------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hosting HTTPS pilot                    | Đã có                                   | `vstep-turtle.vercel.app`; 9 màn chính, 14 bài luyện, 404 và headers đã kiểm tra                                                                                                                                                            |
 | Đăng nhập/sync trên bản host           | Chưa nghiệm thu                         | Form cloud đã bật nhưng chưa dùng tài khoản thật trên URL production                                                                                                                                                                        |
-| Nghiệm thu thiết bị thật               | Chưa làm                                | Chưa xác nhận micro, giọng đọc, Safari/iOS và hành vi khi màn hình tắt                                                                                                                                                                      |
+| Nghiệm thu thiết bị thật               | Chưa làm                                | Chưa xác nhận micro, giọng đọc và hành vi khi màn hình tắt trên Chrome/Brave của Gùa; Safari/iOS ngoài phạm vi                                                                                                                                                                    |
 | Thẩm định học liệu bởi giáo viên VSTEP | Chưa làm                                | Không thể khẳng định độ khó hoặc khả năng dự báo bậc                                                                                                                                                                                        |
 | Ngân hàng đề độc lập                   | Có hai đề Mây và năm đề nhập            | Năm đề nhập có đáp án; nội dung cần thẩm định; dùng học cá nhân                                                                                                                                                                             |
 | Bản thu người nói cho Nghe             | Có MP3 ở năm đề nhập                    | Hai đề Mây vẫn dùng speech synthesis của thiết bị                                                                                                                                                                                           |
@@ -327,7 +327,7 @@ Môi trường host cần hỗ trợ Next.js/Node.js và HTTPS nếu dùng micro
 ### P0 Trước khi dùng như một sản phẩm production
 
 1. **Hoàn tất nghiệm thu bản HTTPS.** Vercel pilot, biến môi trường, headers, 404, font và smoke tự động đã kiểm tra. Còn đăng nhập và đồng bộ bằng tài khoản thật, micro và kiểm tra bundle không chứa secret ngoài publishable key.
-2. **Nghiệm thu trên thiết bị của Gùa.** Thử iPhone hoặc Safari hay Android hoặc Chrome thực tế, máy tính chính, tai nghe, micro, speech synthesis, reload giữa bài và màn hình tắt. Tiêu chí đạt là hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
+2. **Nghiệm thu trên thiết bị của Gùa.** Thử Chrome hoặc Brave trên máy tính chính, tai nghe, micro, giọng đọc, reload giữa bài và màn hình tắt. Tiêu chí đạt là hoàn thành một bài Nói, một bài Nghe, một mini exam và tải lại không mất dữ liệu.
 3. **Kiểm thử đồng bộ hai thiết bị.** Lưu từ thiết bị A, tải ở B, học thêm ở B, lưu lại và tải về A. Cố tình tạo conflict để xác nhận thông báo và quy trình backup dễ hiểu.
 4. **Chốt quy trình backup.** Quy định tần suất xuất JSON và tải audio; thực hiện một lần khôi phục từ đầu trên profile trình duyệt mới.
 

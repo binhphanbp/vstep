@@ -3,6 +3,11 @@ import { readFileSync } from "node:fs";
 import { freshState } from "../../src/lib/learning";
 import { lessons } from "../../src/lib/content";
 import { allLessons } from "../../src/lib/full-exam-content";
+import {
+  UTTERANCE_LIMIT,
+  speechChunks,
+  speechPieces,
+} from "../../src/lib/speech";
 /** Read the keys from the content so a change of option order cannot lie. */
 const question = (id: string) => {
   const found = lessons
@@ -1176,6 +1181,104 @@ test("a listening passage plays again from its first sentence once it has finish
   expect(once).toEqual([first[total - 2]]);
   await expect(page.locator(".audio-position")).toHaveText(
     `Câu ${total - 1}/${total}`,
+  );
+});
+
+test("the player copes with Chrome's speech quirks: voices that arrive late, and a sentence too long for one utterance", async ({
+  page,
+}) => {
+  // Chrome fills its voice list a moment after the speech object is first
+  // touched, and tells the page with `voiceschanged`. Its network voices also
+  // stop an utterance after about fifteen seconds without ever saying it has
+  // ended, which would leave the player "playing" in silence. This stands in
+  // for both: the voices come 150 ms after the first ask, and an utterance
+  // longer than the limit never ends.
+  await page.addInitScript((limit) => {
+    const spoken: { text: string; voice: string | null }[] = [];
+    (window as unknown as { __spoken: typeof spoken }).__spoken = spoken;
+    // A real utterance refuses a voice that is not one of the browser's own,
+    // and headless Chromium has none to offer, so the utterance is faked too.
+    class FakeUtterance {
+      text: string;
+      lang = "";
+      rate = 1;
+      voice: { name: string; lang: string } | null = null;
+      onend: ((event: Event) => void) | null = null;
+      onerror: ((event: Event) => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+      configurable: true,
+      value: FakeUtterance,
+    });
+    const voices = [
+      { name: "Test GB", lang: "en-GB" },
+      { name: "Test US", lang: "en-US" },
+    ];
+    let asked = false;
+    const synth = Object.assign(new EventTarget(), {
+      getVoices() {
+        if (!asked) {
+          asked = true;
+          setTimeout(
+            () => synth.dispatchEvent(new Event("voiceschanged")),
+            150,
+          );
+          return [];
+        }
+        return voices;
+      },
+      speak(utterance: FakeUtterance) {
+        spoken.push({
+          text: utterance.text,
+          voice: utterance.voice ? utterance.voice.name : null,
+        });
+        // A cut-off utterance is never reported as ended.
+        if (utterance.text.length > limit) return;
+        setTimeout(() => utterance.onend?.(new Event("end")), 5);
+      },
+      cancel() {},
+      pause() {},
+      resume() {},
+    });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: synth,
+    });
+  }, UTTERANCE_LIMIT);
+  const lesson = lessons.find((item) => item.id === "listening-course")!;
+  const sentences = speechChunks(lesson.text);
+  const expected = sentences.flatMap((part) => speechPieces(part.text));
+  // The lesson has sentences over the limit, or this proves nothing.
+  expect(expected.length).toBeGreaterThan(sentences.length);
+  await page.goto("/practice/listening-course");
+  await expect(page.locator(".audio-panel")).toBeVisible();
+  // She takes longer than that to reach the button.
+  await page.waitForTimeout(400);
+  const play = page.locator(".audio-controls button").first();
+  await play.click();
+  await expect(play).not.toContainText("Dừng");
+  const spoken = await page.evaluate(
+    () =>
+      (
+        window as unknown as {
+          __spoken: { text: string; voice: string | null }[];
+        }
+      ).__spoken,
+  );
+  // Every sentence said, long ones in pieces, in order, to the end.
+  expect(spoken.map((item) => item.text)).toEqual(expected);
+  expect(
+    Math.max(...spoken.map((item) => item.text.length)),
+  ).toBeLessThanOrEqual(UTTERANCE_LIMIT);
+  // Even the first play had its voices: the English one it likes best.
+  expect(new Set(spoken.map((item) => item.voice))).toEqual(
+    new Set(["Test GB"]),
+  );
+  await expect(page.locator(".audio-position")).toHaveText(
+    `Câu ${sentences.length}/${sentences.length}`,
   );
 });
 
