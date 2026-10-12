@@ -264,6 +264,10 @@ test("server serves security headers and a real 404 status", async ({
     start_url: "/",
     theme_color: "#fff8fb",
   });
+  // A study corner for one person: crawlers are told to keep out entirely.
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toMatch(/User-Agent: \*\s+Disallow: \/\s*$/i);
 });
 
 test("strict production CSP does not trigger an eval violation", async ({
